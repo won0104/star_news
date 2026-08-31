@@ -1,0 +1,88 @@
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+
+# Logs and runtime files
+*.log
+logs/
+*.pid
+*.pid.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# Node.js / frontend
+node_modules/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnpm-store/
+.next/
+.nuxt/
+.svelte-kit/
+.vite/
+.turbo/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Python / AI
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+htmlcov/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Java / Kotlin backend
+.gradle/
+build/
+target/
+out/
+*.class
+
+# Terraform / infrastructure
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfplan
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Temporary and generated files
+.cache/
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
