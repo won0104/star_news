@@ -1,0 +1,3948 @@
+[
+  {
+    "id": "event:aa7bca89c1ebe545",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:01",
+    "occurred_at": "2026-05-29T10:00:00Z",
+    "article_id": "article:synthetic:d31a1fcb8c1b7b00",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:weather-climate",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ebd86a7da3d77ebf",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:01",
+    "occurred_at": "2026-05-29T10:00:00Z",
+    "node_id": "topic:weather-climate",
+    "path": [
+      "topic:weather-climate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:901fc3b477e70d64",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:01",
+    "occurred_at": "2026-05-29T10:18:00Z",
+    "article_id": "article:synthetic:3643d432907de950",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4509b1c8f8898464",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:01",
+    "occurred_at": "2026-05-29T10:18:00Z",
+    "node_id": "topic:strait-of-hormuz",
+    "path": [
+      "topic:weather-climate",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c63dccdd5ac7ad63",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:01",
+    "occurred_at": "2026-05-29T10:36:00Z",
+    "article_id": "article:synthetic:fa5e3dd1ba151a50",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local",
+      "society"
+    ],
+    "node_ids": [
+      "category:local",
+      "category:society",
+      "place:daegu",
+      "topic:weather-climate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d986b6313bbe8fd2",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:01",
+    "occurred_at": "2026-05-29T10:36:00Z",
+    "node_id": "place:daegu",
+    "path": [
+      "topic:weather-climate",
+      "topic:strait-of-hormuz",
+      "place:daegu"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:8e2d49bd4ab63f3c",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:02",
+    "occurred_at": "2026-05-31T13:00:00Z",
+    "article_id": "article:synthetic:b2d90f4d2bbb49c5",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:5fb7c7754acc2708",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:02",
+    "occurred_at": "2026-05-31T13:00:00Z",
+    "node_id": "topic:smart-device",
+    "path": [
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c638052fd8fcdb51",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:02",
+    "occurred_at": "2026-05-31T13:18:00Z",
+    "article_id": "article:synthetic:914a5c828bf08be3",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence",
+      "topic:ai-chip"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:8d79b031500f3e58",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:02",
+    "occurred_at": "2026-05-31T13:18:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:smart-device",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:08e367fb3840c96e",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:02",
+    "occurred_at": "2026-05-31T13:36:00Z",
+    "article_id": "article:synthetic:10bcf88d946df205",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "economy"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:economy",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:13ad85664d5b964f",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:02",
+    "occurred_at": "2026-05-31T13:36:00Z",
+    "node_id": "topic:robotics",
+    "path": [
+      "topic:smart-device",
+      "topic:artificial-intelligence",
+      "topic:robotics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1027dd3929d63301",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:03",
+    "occurred_at": "2026-06-03T16:00:00Z",
+    "article_id": "article:synthetic:53a891745ea9ebf7",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d5343e79c58f4c69",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:03",
+    "occurred_at": "2026-06-03T16:00:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:37671220155ab690",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:03",
+    "occurred_at": "2026-06-03T16:18:00Z",
+    "article_id": "article:synthetic:45094b6fbb3b722e",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:9c74e1b4dc0d5ef0",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:03",
+    "occurred_at": "2026-06-03T16:18:00Z",
+    "node_id": "entity:national-assembly",
+    "path": [
+      "topic:artificial-intelligence",
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:8a92510d8609bc2c",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:03",
+    "occurred_at": "2026-06-03T16:36:00Z",
+    "article_id": "article:synthetic:2f943905f65fe426",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence",
+      "topic:ai-chip"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:cef83f8461418547",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:04",
+    "occurred_at": "2026-06-05T07:00:00Z",
+    "article_id": "article:synthetic:bfcd1b36026ef23d",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "entity:presidential-office"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:851c838cd51bf818",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:04",
+    "occurred_at": "2026-06-05T07:00:00Z",
+    "node_id": "entity:presidential-office",
+    "path": [
+      "entity:presidential-office"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:771d8c558e7e5529",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:04",
+    "occurred_at": "2026-06-05T07:18:00Z",
+    "article_id": "article:synthetic:7602c49ee2b597a0",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:labor"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:3f34758ae3c78b2b",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:04",
+    "occurred_at": "2026-06-05T07:18:00Z",
+    "node_id": "topic:labor",
+    "path": [
+      "entity:presidential-office",
+      "topic:labor"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:25908cda99a47a98",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:04",
+    "occurred_at": "2026-06-05T07:36:00Z",
+    "article_id": "article:synthetic:356950dd0560c84d",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:2926d3aec95b7215",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:04",
+    "occurred_at": "2026-06-05T07:36:00Z",
+    "node_id": "topic:trade-tariff",
+    "path": [
+      "entity:presidential-office",
+      "topic:labor",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:9bca1def15e96fcb",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:05",
+    "occurred_at": "2026-06-07T10:00:00Z",
+    "article_id": "article:synthetic:1b07e45aa22d3acf",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:tech_science",
+      "topic:semiconductor-industry",
+      "topic:hbm",
+      "entity:sk-hynix",
+      "entity:nvidia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:28f18ae878889b57",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:05",
+    "occurred_at": "2026-06-07T10:00:00Z",
+    "node_id": "topic:semiconductor-industry",
+    "path": [
+      "topic:semiconductor-industry"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:41f0cb6a1936f042",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:05",
+    "occurred_at": "2026-06-07T10:18:00Z",
+    "article_id": "article:synthetic:f3de991caa9a5b56",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:interest-rate",
+      "topic:financial-market"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:5f5b1ab3324c3406",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:05",
+    "occurred_at": "2026-06-07T10:18:00Z",
+    "node_id": "topic:interest-rate",
+    "path": [
+      "topic:semiconductor-industry",
+      "topic:interest-rate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:5b64c9b91fd1e915",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:05",
+    "occurred_at": "2026-06-07T10:36:00Z",
+    "article_id": "article:synthetic:96cf5c5f920be042",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0408715877219628",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:05",
+    "occurred_at": "2026-06-07T10:36:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:semiconductor-industry",
+      "topic:interest-rate",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:acdedfb5dd5f72ac",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:06",
+    "occurred_at": "2026-06-10T13:00:00Z",
+    "article_id": "article:synthetic:0ca13ea9a64f321f",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:239a1694de16fb4b",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:06",
+    "occurred_at": "2026-06-10T13:00:00Z",
+    "node_id": "topic:smart-device",
+    "path": [
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:240a27bd56ff712b",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:06",
+    "occurred_at": "2026-06-10T13:18:00Z",
+    "article_id": "article:synthetic:91e2a26634e5993a",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:united-states",
+      "entity:china"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:761c11baa27c7047",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:06",
+    "occurred_at": "2026-06-10T13:18:00Z",
+    "node_id": "entity:united-states",
+    "path": [
+      "topic:smart-device",
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:19e1169092aeb607",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:06",
+    "occurred_at": "2026-06-10T13:36:00Z",
+    "article_id": "article:synthetic:7ba780c043b94429",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:6b5734a834cf1ebe",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:06",
+    "occurred_at": "2026-06-10T13:36:00Z",
+    "node_id": "topic:strait-of-hormuz",
+    "path": [
+      "topic:smart-device",
+      "entity:united-states",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4aa9cd8727b809fe",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:07",
+    "occurred_at": "2026-06-12T16:00:00Z",
+    "article_id": "article:synthetic:53e5a4438dfc8cae",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:250f17746d79f647",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:07",
+    "occurred_at": "2026-06-12T16:00:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:62ba3dc4869ea4be",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:07",
+    "occurred_at": "2026-06-12T16:18:00Z",
+    "article_id": "article:synthetic:af51bea7a2ade1a2",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:22c8b63390a9eb2b",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:07",
+    "occurred_at": "2026-06-12T16:18:00Z",
+    "node_id": "topic:smart-device",
+    "path": [
+      "topic:logistics",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:49d2d67f98a18977",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:07",
+    "occurred_at": "2026-06-12T16:36:00Z",
+    "article_id": "article:synthetic:32baaff82fd0c99a",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:weather-climate",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:98e8e48b88efe297",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:07",
+    "occurred_at": "2026-06-12T16:36:00Z",
+    "node_id": "topic:weather-climate",
+    "path": [
+      "topic:logistics",
+      "topic:smart-device",
+      "topic:weather-climate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:f3ef977d59905768",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:08",
+    "occurred_at": "2026-06-15T07:00:00Z",
+    "article_id": "article:synthetic:1368d8e228486327",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "economy"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:economy",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:37e9267fbcc33a2b",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:08",
+    "occurred_at": "2026-06-15T07:00:00Z",
+    "node_id": "topic:robotics",
+    "path": [
+      "topic:robotics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:22a071128a7fd723",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:08",
+    "occurred_at": "2026-06-15T07:18:00Z",
+    "article_id": "article:synthetic:7ecb7696d336db3f",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "topic:judiciary",
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:b131961434bc57a1",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:08",
+    "occurred_at": "2026-06-15T07:18:00Z",
+    "node_id": "topic:judiciary",
+    "path": [
+      "topic:robotics",
+      "topic:judiciary"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:eabc42aa886c471d",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:08",
+    "occurred_at": "2026-06-15T07:36:00Z",
+    "article_id": "article:synthetic:ba302abbdef058b4",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1f5e9f62395f1d47",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:08",
+    "occurred_at": "2026-06-15T07:36:00Z",
+    "node_id": "topic:smart-device",
+    "path": [
+      "topic:robotics",
+      "topic:judiciary",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:e9decc4e72fe38b0",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:09",
+    "occurred_at": "2026-06-17T10:00:00Z",
+    "article_id": "article:synthetic:c58383d6ce80195c",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:tech_science",
+      "topic:semiconductor-industry",
+      "topic:hbm",
+      "entity:sk-hynix",
+      "entity:nvidia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1d947f6bf931dabd",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:09",
+    "occurred_at": "2026-06-17T10:00:00Z",
+    "node_id": "topic:semiconductor-industry",
+    "path": [
+      "topic:semiconductor-industry"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d7c31738d97178fe",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:09",
+    "occurred_at": "2026-06-17T10:18:00Z",
+    "article_id": "article:synthetic:b475b6c010bb7037",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:5391172e875b6cf7",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:09",
+    "occurred_at": "2026-06-17T10:18:00Z",
+    "node_id": "topic:strait-of-hormuz",
+    "path": [
+      "topic:semiconductor-industry",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a3fcd5a6cdc90b69",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:09",
+    "occurred_at": "2026-06-17T10:36:00Z",
+    "article_id": "article:synthetic:6f9134bcda98c4ed",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:3f57f458f9b09a55",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:09",
+    "occurred_at": "2026-06-17T10:36:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:semiconductor-industry",
+      "topic:strait-of-hormuz",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ebabfe2f178c42ce",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:10",
+    "occurred_at": "2026-06-20T13:00:00Z",
+    "article_id": "article:synthetic:07aca93138a9197b",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:9203024975499950",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:10",
+    "occurred_at": "2026-06-20T13:00:00Z",
+    "node_id": "entity:national-assembly",
+    "path": [
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:684b0cd95984623a",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:10",
+    "occurred_at": "2026-06-20T13:18:00Z",
+    "article_id": "article:synthetic:9ffcaa75137b994b",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:united-states",
+      "entity:china"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0e9c4a41a532d7df",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:10",
+    "occurred_at": "2026-06-20T13:18:00Z",
+    "node_id": "entity:united-states",
+    "path": [
+      "entity:national-assembly",
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:9a6fbfdf7d799605",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:10",
+    "occurred_at": "2026-06-20T13:36:00Z",
+    "article_id": "article:synthetic:25ed5776136260bd",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "economy"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:economy",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4822b150bddf189c",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:10",
+    "occurred_at": "2026-06-20T13:36:00Z",
+    "node_id": "topic:robotics",
+    "path": [
+      "entity:national-assembly",
+      "entity:united-states",
+      "topic:robotics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c67c00a19656a900",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:11",
+    "occurred_at": "2026-06-22T16:00:00Z",
+    "article_id": "article:synthetic:b04a8bfdceef24c6",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d059907fe0753a64",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:11",
+    "occurred_at": "2026-06-22T16:00:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:2a86b103049eb4b3",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:11",
+    "occurred_at": "2026-06-22T16:18:00Z",
+    "article_id": "article:synthetic:7a0c0fe46e6e0c8c",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:education",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:6f4a15d788218f9e",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:11",
+    "occurred_at": "2026-06-22T16:18:00Z",
+    "node_id": "topic:education",
+    "path": [
+      "topic:logistics",
+      "topic:education"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:e2fbdd2ada3b81ad",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:11",
+    "occurred_at": "2026-06-22T16:36:00Z",
+    "article_id": "article:synthetic:c3413cffc529d2fa",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:weather-climate",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7aa5bffc86f794ff",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:11",
+    "occurred_at": "2026-06-22T16:36:00Z",
+    "node_id": "topic:weather-climate",
+    "path": [
+      "topic:logistics",
+      "topic:education",
+      "topic:weather-climate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:bf1bb95e1f707eae",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:12",
+    "occurred_at": "2026-06-25T07:00:00Z",
+    "article_id": "article:synthetic:e40361f6b72220c5",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:interest-rate",
+      "topic:financial-market"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:aac2cbe53381e668",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:12",
+    "occurred_at": "2026-06-25T07:00:00Z",
+    "node_id": "topic:interest-rate",
+    "path": [
+      "topic:interest-rate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:19480e2b2f5a5874",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:12",
+    "occurred_at": "2026-06-25T07:18:00Z",
+    "article_id": "article:synthetic:0ba1c2094479444f",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:labor"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a3353d51335c0640",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:12",
+    "occurred_at": "2026-06-25T07:18:00Z",
+    "node_id": "topic:labor",
+    "path": [
+      "topic:interest-rate",
+      "topic:labor"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:19e0c2502059a0de",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:12",
+    "occurred_at": "2026-06-25T07:36:00Z",
+    "article_id": "article:synthetic:08fe7a4fdaebc066",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local",
+      "culture"
+    ],
+    "node_ids": [
+      "category:local",
+      "category:culture",
+      "place:daegu",
+      "topic:cultural-heritage"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0e802e9b53c8b364",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:12",
+    "occurred_at": "2026-06-25T07:36:00Z",
+    "node_id": "place:daegu",
+    "path": [
+      "topic:interest-rate",
+      "topic:labor",
+      "place:daegu"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7f244a8c229c297d",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:13",
+    "occurred_at": "2026-06-27T10:00:00Z",
+    "article_id": "article:synthetic:df12bb54557cd766",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence",
+      "topic:ai-chip"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:bb87666bb0b641d3",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:13",
+    "occurred_at": "2026-06-27T10:00:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:e40ea0f76f4a686a",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:13",
+    "occurred_at": "2026-06-27T10:18:00Z",
+    "article_id": "article:synthetic:fb2df254f80ddf8b",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:interest-rate",
+      "topic:financial-market"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:64645aa82e29ac02",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:13",
+    "occurred_at": "2026-06-27T10:18:00Z",
+    "node_id": "topic:interest-rate",
+    "path": [
+      "topic:artificial-intelligence",
+      "topic:interest-rate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:49fa39cf10853e2f",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:13",
+    "occurred_at": "2026-06-27T10:36:00Z",
+    "article_id": "article:synthetic:914cc2c66e6e39f0",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "topic:judiciary",
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1d62e13e21c3cf23",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:13",
+    "occurred_at": "2026-06-27T10:36:00Z",
+    "node_id": "topic:judiciary",
+    "path": [
+      "topic:artificial-intelligence",
+      "topic:interest-rate",
+      "topic:judiciary"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7e90ad009129c7cb",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:14",
+    "occurred_at": "2026-06-29T13:00:00Z",
+    "article_id": "article:synthetic:81bf5ddfb7ea5d90",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:education",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a3a093399845c798",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:14",
+    "occurred_at": "2026-06-29T13:00:00Z",
+    "node_id": "topic:education",
+    "path": [
+      "topic:education"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:610c4e736969eb42",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:14",
+    "occurred_at": "2026-06-29T13:18:00Z",
+    "article_id": "article:synthetic:72fc43f7abc10051",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:weather-climate",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1175f0515ced8b32",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:14",
+    "occurred_at": "2026-06-29T13:18:00Z",
+    "node_id": "topic:weather-climate",
+    "path": [
+      "topic:education",
+      "topic:weather-climate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:11b0f6e3462102b9",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:14",
+    "occurred_at": "2026-06-29T13:36:00Z",
+    "article_id": "article:synthetic:a18173e117c1c6c5",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:interest-rate",
+      "topic:financial-market"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a2e70bbf2cfa2bb5",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:14",
+    "occurred_at": "2026-06-29T13:36:00Z",
+    "node_id": "topic:interest-rate",
+    "path": [
+      "topic:education",
+      "topic:weather-climate",
+      "topic:interest-rate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:84b0960987fa3ee8",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:15",
+    "occurred_at": "2026-07-02T16:00:00Z",
+    "article_id": "article:synthetic:734290637598cd21",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:94be8eed69284428",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:15",
+    "occurred_at": "2026-07-02T16:00:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:39f18d1676b4ada3",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:15",
+    "occurred_at": "2026-07-02T16:18:00Z",
+    "article_id": "article:synthetic:04727851f5b4c309",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:ukraine",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4068ff1535796356",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:15",
+    "occurred_at": "2026-07-02T16:18:00Z",
+    "node_id": "entity:ukraine",
+    "path": [
+      "topic:artificial-intelligence",
+      "entity:ukraine"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:6534fe7ca8e6cc67",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:15",
+    "occurred_at": "2026-07-02T16:36:00Z",
+    "article_id": "article:synthetic:48c4e93863486820",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:tech_science",
+      "topic:semiconductor-industry",
+      "topic:hbm",
+      "entity:sk-hynix",
+      "entity:nvidia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4886e6f3d714460e",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:15",
+    "occurred_at": "2026-07-02T16:36:00Z",
+    "node_id": "topic:semiconductor-industry",
+    "path": [
+      "topic:artificial-intelligence",
+      "entity:ukraine",
+      "topic:semiconductor-industry"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c83e369c4736eb2a",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:16",
+    "occurred_at": "2026-07-04T07:00:00Z",
+    "article_id": "article:synthetic:ca40ed8e64ba6258",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:interest-rate",
+      "topic:financial-market"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ce563f0fbb65c5fd",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:16",
+    "occurred_at": "2026-07-04T07:00:00Z",
+    "node_id": "topic:interest-rate",
+    "path": [
+      "topic:interest-rate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:9983d88f249facc9",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:16",
+    "occurred_at": "2026-07-04T07:18:00Z",
+    "article_id": "article:synthetic:989d1ab6e97807f7",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:9663976655235143",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:16",
+    "occurred_at": "2026-07-04T07:18:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:interest-rate",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:83834171b16389a5",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:16",
+    "occurred_at": "2026-07-04T07:36:00Z",
+    "article_id": "article:synthetic:62c7b7a05fa0ec98",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:15ea1a1ddc5a68bf",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:16",
+    "occurred_at": "2026-07-04T07:36:00Z",
+    "node_id": "topic:smart-device",
+    "path": [
+      "topic:interest-rate",
+      "topic:logistics",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:033e53101dc0c5ec",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:17",
+    "occurred_at": "2026-07-07T10:00:00Z",
+    "article_id": "article:synthetic:f2864f061b72d897",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:tech_science",
+      "topic:semiconductor-industry",
+      "topic:hbm",
+      "entity:sk-hynix",
+      "entity:nvidia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:52d3cf8d2572a549",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:17",
+    "occurred_at": "2026-07-07T10:00:00Z",
+    "node_id": "topic:semiconductor-industry",
+    "path": [
+      "topic:semiconductor-industry"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0a13ea3ca5133d22",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:17",
+    "occurred_at": "2026-07-07T10:18:00Z",
+    "article_id": "article:synthetic:c3e180d65ac52b0d",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "economy"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:economy",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:057a9c4c44b7c42a",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:17",
+    "occurred_at": "2026-07-07T10:18:00Z",
+    "node_id": "topic:robotics",
+    "path": [
+      "topic:semiconductor-industry",
+      "topic:robotics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:cb23bf6717b6dca3",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:17",
+    "occurred_at": "2026-07-07T10:36:00Z",
+    "article_id": "article:synthetic:2cc319e3328d98cd",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:db4f53cc6fe73849",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:17",
+    "occurred_at": "2026-07-07T10:36:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:semiconductor-industry",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7c8973e22a9f3f98",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:18",
+    "occurred_at": "2026-07-09T13:00:00Z",
+    "article_id": "article:synthetic:846f2d11136530d5",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:ukraine",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:2cf29d51dcd1812e",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:18",
+    "occurred_at": "2026-07-09T13:00:00Z",
+    "node_id": "entity:ukraine",
+    "path": [
+      "entity:ukraine"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:66a55db34f4a1d99",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:18",
+    "occurred_at": "2026-07-09T13:18:00Z",
+    "article_id": "article:synthetic:c0fb57ff957a47cb",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:united-states",
+      "entity:china"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:880786c296f56a8f",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:18",
+    "occurred_at": "2026-07-09T13:18:00Z",
+    "node_id": "entity:united-states",
+    "path": [
+      "entity:ukraine",
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:60a2287a75e2f04e",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:18",
+    "occurred_at": "2026-07-09T13:36:00Z",
+    "article_id": "article:synthetic:b3c465bc7f625e6c",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "economy"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:economy",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:e536bc35b2c9f62a",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:18",
+    "occurred_at": "2026-07-09T13:36:00Z",
+    "node_id": "topic:robotics",
+    "path": [
+      "entity:ukraine",
+      "entity:united-states",
+      "topic:robotics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4ff3d4be6d11c024",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:19",
+    "occurred_at": "2026-07-12T16:00:00Z",
+    "article_id": "article:synthetic:3db0cf481b3ce68b",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d6852f5630ddc97e",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:19",
+    "occurred_at": "2026-07-12T16:00:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:da34bb85f8787d65",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:19",
+    "occurred_at": "2026-07-12T16:18:00Z",
+    "article_id": "article:synthetic:2cd4cce0ac9dff17",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:734b10bc2c8c6e04",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:19",
+    "occurred_at": "2026-07-12T16:18:00Z",
+    "node_id": "topic:trade-tariff",
+    "path": [
+      "topic:logistics",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4c146380f199f216",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:19",
+    "occurred_at": "2026-07-12T16:36:00Z",
+    "article_id": "article:synthetic:f31d9e324386a7bf",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence",
+      "topic:ai-chip"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:92f166d793be8281",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:19",
+    "occurred_at": "2026-07-12T16:36:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:logistics",
+      "topic:trade-tariff",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:666d2d330e74cf77",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:20",
+    "occurred_at": "2026-07-14T07:00:00Z",
+    "article_id": "article:synthetic:15f4b65050b8e300",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "node_ids": [
+      "category:local",
+      "place:busan",
+      "place:gyeongnam",
+      "topic:regional-transport"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:79601c1d53a6a84f",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:20",
+    "occurred_at": "2026-07-14T07:00:00Z",
+    "node_id": "place:busan",
+    "path": [
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:37eeae43419d5cd0",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:20",
+    "occurred_at": "2026-07-14T07:18:00Z",
+    "article_id": "article:synthetic:26384d8d3e112372",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a26360034be71618",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:20",
+    "occurred_at": "2026-07-14T07:18:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "place:busan",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ced371020b0d36c7",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:20",
+    "occurred_at": "2026-07-14T07:36:00Z",
+    "article_id": "article:synthetic:467f03737aab55c8",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0e9e197206d1fa43",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:20",
+    "occurred_at": "2026-07-14T07:36:00Z",
+    "node_id": "topic:trade-tariff",
+    "path": [
+      "place:busan",
+      "topic:artificial-intelligence",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:b19909cb21088ae1",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:21",
+    "occurred_at": "2026-07-17T10:00:00Z",
+    "article_id": "article:synthetic:28d8304503ce187a",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence",
+      "topic:ai-chip"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c85ad7c7b76df4d3",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:21",
+    "occurred_at": "2026-07-17T10:00:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ce0ea5311f651c42",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:21",
+    "occurred_at": "2026-07-17T10:18:00Z",
+    "article_id": "article:synthetic:9cd7344b1589b961",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:bf84b0765ffb75e7",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:21",
+    "occurred_at": "2026-07-17T10:18:00Z",
+    "node_id": "topic:strait-of-hormuz",
+    "path": [
+      "topic:artificial-intelligence",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:422e26cf86e4c9f2",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:21",
+    "occurred_at": "2026-07-17T10:36:00Z",
+    "article_id": "article:synthetic:ce4ab7e283b3bbfd",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:f6d3aaa56ab634e9",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:21",
+    "occurred_at": "2026-07-17T10:36:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:artificial-intelligence",
+      "topic:strait-of-hormuz",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7ed49e329293aaad",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:22",
+    "occurred_at": "2026-07-19T13:00:00Z",
+    "article_id": "article:synthetic:f035e85e119d4448",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:71166e7c01f9294e",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:22",
+    "occurred_at": "2026-07-19T13:00:00Z",
+    "node_id": "topic:smart-device",
+    "path": [
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:3923bfe59bc19081",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:22",
+    "occurred_at": "2026-07-19T13:18:00Z",
+    "article_id": "article:synthetic:c37248e9c297432c",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence",
+      "topic:ai-chip"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0b92341bcfa4ab29",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:22",
+    "occurred_at": "2026-07-19T13:18:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:smart-device",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:459d41d5bc253c4e",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:22",
+    "occurred_at": "2026-07-19T13:36:00Z",
+    "article_id": "article:synthetic:36af6a5ebeb2bd5c",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "entity:presidential-office"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:3e0cfe5b94d29a0f",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:22",
+    "occurred_at": "2026-07-19T13:36:00Z",
+    "node_id": "entity:presidential-office",
+    "path": [
+      "topic:smart-device",
+      "topic:artificial-intelligence",
+      "entity:presidential-office"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c7e0b6a28f645c72",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:23",
+    "occurred_at": "2026-07-22T16:00:00Z",
+    "article_id": "article:synthetic:91f6872c69e7dbaf",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:644ae93419a72cc2",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:23",
+    "occurred_at": "2026-07-22T16:00:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ce6de5f0a35d250e",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:23",
+    "occurred_at": "2026-07-22T16:18:00Z",
+    "article_id": "article:synthetic:53b8b6a6674c44c8",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:ukraine",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d06cb60050cb4833",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:23",
+    "occurred_at": "2026-07-22T16:18:00Z",
+    "node_id": "entity:ukraine",
+    "path": [
+      "topic:artificial-intelligence",
+      "entity:ukraine"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7bed59c3c8310714",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:23",
+    "occurred_at": "2026-07-22T16:36:00Z",
+    "article_id": "article:synthetic:c7052c3fb7482d58",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "node_ids": [
+      "category:culture",
+      "topic:film-drama",
+      "topic:creator"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:aff0e305de96720e",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:23",
+    "occurred_at": "2026-07-22T16:36:00Z",
+    "node_id": "topic:film-drama",
+    "path": [
+      "topic:artificial-intelligence",
+      "entity:ukraine",
+      "topic:film-drama"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:8b3bd0332f6d6bb4",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:24",
+    "occurred_at": "2026-07-24T07:00:00Z",
+    "article_id": "article:synthetic:02c0d62cafc43406",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:interest-rate",
+      "topic:financial-market"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a8412701086287a0",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:24",
+    "occurred_at": "2026-07-24T07:00:00Z",
+    "node_id": "topic:interest-rate",
+    "path": [
+      "topic:interest-rate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ae5d0b47cf136fd6",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:24",
+    "occurred_at": "2026-07-24T07:18:00Z",
+    "article_id": "article:synthetic:4b4e2e4bdc8cc04a",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a3c2d9585d98cd79",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:24",
+    "occurred_at": "2026-07-24T07:18:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:interest-rate",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:81ba7631ebdb0893",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:24",
+    "occurred_at": "2026-07-24T07:36:00Z",
+    "article_id": "article:synthetic:3e1fa55a85323e5d",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:education",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:6652d817c8b6ac2c",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:24",
+    "occurred_at": "2026-07-24T07:36:00Z",
+    "node_id": "topic:education",
+    "path": [
+      "topic:interest-rate",
+      "topic:logistics",
+      "topic:education"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7095a0a0c7282bbf",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:25",
+    "occurred_at": "2026-07-26T10:00:00Z",
+    "article_id": "article:synthetic:2c1f4bcd51dff3ef",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:weather-climate",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:bd7dcf8f38b5ad9f",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:25",
+    "occurred_at": "2026-07-26T10:00:00Z",
+    "node_id": "topic:weather-climate",
+    "path": [
+      "topic:weather-climate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ffae6ace6baab10c",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:25",
+    "occurred_at": "2026-07-26T10:18:00Z",
+    "article_id": "article:synthetic:aff96d43821f998c",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:881eee186cb30214",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:25",
+    "occurred_at": "2026-07-26T10:18:00Z",
+    "node_id": "topic:strait-of-hormuz",
+    "path": [
+      "topic:weather-climate",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ab84cd1bc30204f5",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:25",
+    "occurred_at": "2026-07-26T10:36:00Z",
+    "article_id": "article:synthetic:337dd7f8b2385131",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:2f9ec0842de35189",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:25",
+    "occurred_at": "2026-07-26T10:36:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:weather-climate",
+      "topic:strait-of-hormuz",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:3c4cf3ee899639ea",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:26",
+    "occurred_at": "2026-07-29T13:00:00Z",
+    "article_id": "article:synthetic:0a4326bc02afd646",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:160bebcb3cc8ec69",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:26",
+    "occurred_at": "2026-07-29T13:00:00Z",
+    "node_id": "topic:trade-tariff",
+    "path": [
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c935f0b994479a50",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:26",
+    "occurred_at": "2026-07-29T13:18:00Z",
+    "article_id": "article:synthetic:be39c2c6bcaf690f",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:united-states",
+      "entity:china"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:fc7f2c6ab9686f46",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:26",
+    "occurred_at": "2026-07-29T13:18:00Z",
+    "node_id": "entity:united-states",
+    "path": [
+      "topic:trade-tariff",
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:6cdb53966bc0ca0d",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:26",
+    "occurred_at": "2026-07-29T13:36:00Z",
+    "article_id": "article:synthetic:f0ec0479767301a6",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "economy"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:economy",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a3a211d4179cd439",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:26",
+    "occurred_at": "2026-07-29T13:36:00Z",
+    "node_id": "topic:robotics",
+    "path": [
+      "topic:trade-tariff",
+      "entity:united-states",
+      "topic:robotics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:bbb254891beab9bf",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:27",
+    "occurred_at": "2026-07-31T16:00:00Z",
+    "article_id": "article:synthetic:f16f3d4d3ccad359",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "topic:judiciary",
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1176f20ebca54b51",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:27",
+    "occurred_at": "2026-07-31T16:00:00Z",
+    "node_id": "topic:judiciary",
+    "path": [
+      "topic:judiciary"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:571692c2dba11e56",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:27",
+    "occurred_at": "2026-07-31T16:18:00Z",
+    "article_id": "article:synthetic:e23c505d95859625",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7ec799ad67828042",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:27",
+    "occurred_at": "2026-07-31T16:18:00Z",
+    "node_id": "topic:smart-device",
+    "path": [
+      "topic:judiciary",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:f22dfc8f5c028d5a",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:27",
+    "occurred_at": "2026-07-31T16:36:00Z",
+    "article_id": "article:synthetic:5632bf1e67f779c0",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:united-states",
+      "entity:china"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1f161adb2f222360",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:27",
+    "occurred_at": "2026-07-31T16:36:00Z",
+    "node_id": "entity:united-states",
+    "path": [
+      "topic:judiciary",
+      "topic:smart-device",
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0157afc9c70ebfc2",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:28",
+    "occurred_at": "2026-08-03T07:00:00Z",
+    "article_id": "article:synthetic:3ce4e5f043e7d760",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:interest-rate",
+      "topic:financial-market"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:01ea624fcf1059ca",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:28",
+    "occurred_at": "2026-08-03T07:00:00Z",
+    "node_id": "topic:interest-rate",
+    "path": [
+      "topic:interest-rate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:313abbaf93d59051",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:28",
+    "occurred_at": "2026-08-03T07:18:00Z",
+    "article_id": "article:synthetic:47857b5780a24ed1",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:labor"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:f856c6250f108744",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:28",
+    "occurred_at": "2026-08-03T07:18:00Z",
+    "node_id": "topic:labor",
+    "path": [
+      "topic:interest-rate",
+      "topic:labor"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1f23ae16e686de80",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:28",
+    "occurred_at": "2026-08-03T07:36:00Z",
+    "article_id": "article:synthetic:ff678c31116ee2cb",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local",
+      "culture"
+    ],
+    "node_ids": [
+      "category:local",
+      "category:culture",
+      "place:daegu",
+      "topic:cultural-heritage"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:22207921179f012c",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:28",
+    "occurred_at": "2026-08-03T07:36:00Z",
+    "node_id": "place:daegu",
+    "path": [
+      "topic:interest-rate",
+      "topic:labor",
+      "place:daegu"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:328fc69bc3785e41",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:29",
+    "occurred_at": "2026-08-05T10:00:00Z",
+    "article_id": "article:synthetic:a63be8fcac0ec9ac",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:united-states",
+      "entity:china"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4fd6827e0d62bc16",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:29",
+    "occurred_at": "2026-08-05T10:00:00Z",
+    "node_id": "entity:united-states",
+    "path": [
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:6cbcac47e20f9345",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:29",
+    "occurred_at": "2026-08-05T10:18:00Z",
+    "article_id": "article:synthetic:db62342c2f5a6905",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "node_ids": [
+      "category:culture",
+      "topic:creator"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c22bf427263a6a5a",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:29",
+    "occurred_at": "2026-08-05T10:18:00Z",
+    "node_id": "topic:creator",
+    "path": [
+      "entity:united-states",
+      "topic:creator"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:30fd9a34cbccd601",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:29",
+    "occurred_at": "2026-08-05T10:36:00Z",
+    "article_id": "article:synthetic:8b536495f3c324b8",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:japan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4224cb439e65514f",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:29",
+    "occurred_at": "2026-08-05T10:36:00Z",
+    "node_id": "entity:japan",
+    "path": [
+      "entity:united-states",
+      "topic:creator",
+      "entity:japan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:bcd1367825a170ba",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:30",
+    "occurred_at": "2026-08-08T13:00:00Z",
+    "article_id": "article:synthetic:ae4cbece0458cf24",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:acb671f94cede57e",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:30",
+    "occurred_at": "2026-08-08T13:00:00Z",
+    "node_id": "topic:trade-tariff",
+    "path": [
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d40a50308a5c5f28",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:30",
+    "occurred_at": "2026-08-08T13:18:00Z",
+    "article_id": "article:synthetic:13dd1215b1a2dd01",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:tech_science",
+      "topic:semiconductor-industry",
+      "topic:hbm",
+      "entity:sk-hynix",
+      "entity:nvidia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:8742b8160a30903c",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:30",
+    "occurred_at": "2026-08-08T13:18:00Z",
+    "node_id": "topic:semiconductor-industry",
+    "path": [
+      "topic:trade-tariff",
+      "topic:semiconductor-industry"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:e7d7313eb4cb4991",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:30",
+    "occurred_at": "2026-08-08T13:36:00Z",
+    "article_id": "article:synthetic:71871bac53d05ebf",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "node_ids": [
+      "category:culture",
+      "topic:cultural-heritage"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d0b83a0539625caa",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:30",
+    "occurred_at": "2026-08-08T13:36:00Z",
+    "node_id": "topic:cultural-heritage",
+    "path": [
+      "topic:trade-tariff",
+      "topic:semiconductor-industry",
+      "topic:cultural-heritage"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:881ce1ea745a7587",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:31",
+    "occurred_at": "2026-08-10T16:00:00Z",
+    "article_id": "article:synthetic:900add71d7a98b50",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:47d2e91a89adf7bf",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:31",
+    "occurred_at": "2026-08-10T16:00:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:9b55e1c898156a41",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:31",
+    "occurred_at": "2026-08-10T16:18:00Z",
+    "article_id": "article:synthetic:b2285c3acfa1755d",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1af5edb64822a609",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:31",
+    "occurred_at": "2026-08-10T16:18:00Z",
+    "node_id": "topic:trade-tariff",
+    "path": [
+      "topic:artificial-intelligence",
+      "topic:trade-tariff"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d9035da8803bc53c",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:31",
+    "occurred_at": "2026-08-10T16:36:00Z",
+    "article_id": "article:synthetic:bfaa3deee6f6ad18",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:27483280cc9a4525",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:31",
+    "occurred_at": "2026-08-10T16:36:00Z",
+    "node_id": "entity:national-assembly",
+    "path": [
+      "topic:artificial-intelligence",
+      "topic:trade-tariff",
+      "entity:national-assembly"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0337627f9eb6bca6",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:32",
+    "occurred_at": "2026-08-13T07:00:00Z",
+    "article_id": "article:synthetic:3102cd3be948dcf0",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:f018243f6ce4847f",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:32",
+    "occurred_at": "2026-08-13T07:00:00Z",
+    "node_id": "topic:strait-of-hormuz",
+    "path": [
+      "topic:strait-of-hormuz"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d4801e1607ea780a",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:32",
+    "occurred_at": "2026-08-13T07:18:00Z",
+    "article_id": "article:synthetic:4d2074f5a52edcfb",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0534a36fa5ca2dff",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:32",
+    "occurred_at": "2026-08-13T07:18:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "topic:strait-of-hormuz",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4a540e18bdd22c05",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:32",
+    "occurred_at": "2026-08-13T07:36:00Z",
+    "article_id": "article:synthetic:e87370c25026c1c8",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:ukraine",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c4c239bcf19e72c1",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:32",
+    "occurred_at": "2026-08-13T07:36:00Z",
+    "node_id": "entity:ukraine",
+    "path": [
+      "topic:strait-of-hormuz",
+      "topic:logistics",
+      "entity:ukraine"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:228175e113830e9c",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:33",
+    "occurred_at": "2026-08-15T10:00:00Z",
+    "article_id": "article:synthetic:fe8d438d4437a261",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local",
+      "economy"
+    ],
+    "node_ids": [
+      "category:local",
+      "category:economy",
+      "place:busan",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:46db81ee6d7076d1",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:33",
+    "occurred_at": "2026-08-15T10:00:00Z",
+    "node_id": "place:busan",
+    "path": [
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a220f1cefda5f4c2",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:33",
+    "occurred_at": "2026-08-15T10:18:00Z",
+    "article_id": "article:synthetic:2eb7e5212fdfcaea",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "economy"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:economy",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:444351e55ee49616",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:33",
+    "occurred_at": "2026-08-15T10:18:00Z",
+    "node_id": "topic:robotics",
+    "path": [
+      "place:busan",
+      "topic:robotics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1b5b22da1459f65d",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:33",
+    "occurred_at": "2026-08-15T10:36:00Z",
+    "article_id": "article:synthetic:21e3f0da5a70677c",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:local",
+      "topic:logistics",
+      "place:busan"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:65ca6cb0ce4d756f",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:33",
+    "occurred_at": "2026-08-15T10:36:00Z",
+    "node_id": "topic:logistics",
+    "path": [
+      "place:busan",
+      "topic:robotics",
+      "topic:logistics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:57910ccd4ced3f03",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:34",
+    "occurred_at": "2026-08-17T13:00:00Z",
+    "article_id": "article:synthetic:d6772afae96396bd",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:094f87d28b93ea86",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:34",
+    "occurred_at": "2026-08-17T13:00:00Z",
+    "node_id": "topic:smart-device",
+    "path": [
+      "topic:smart-device"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:51f4c09f8ce6b637",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:34",
+    "occurred_at": "2026-08-17T13:18:00Z",
+    "article_id": "article:synthetic:b8049c468e409eab",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:tech_science",
+      "topic:semiconductor-industry",
+      "topic:hbm",
+      "entity:sk-hynix",
+      "entity:nvidia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:5d50560b25b16627",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:34",
+    "occurred_at": "2026-08-17T13:18:00Z",
+    "node_id": "topic:semiconductor-industry",
+    "path": [
+      "topic:smart-device",
+      "topic:semiconductor-industry"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:7060f37c0bc16de6",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:34",
+    "occurred_at": "2026-08-17T13:36:00Z",
+    "article_id": "article:synthetic:3a720a3b9e378fa6",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "topic:health",
+      "topic:disaster-safety"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:e8a7aaea5730ecde",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:34",
+    "occurred_at": "2026-08-17T13:36:00Z",
+    "node_id": "topic:health",
+    "path": [
+      "topic:smart-device",
+      "topic:semiconductor-industry",
+      "topic:health"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:77994a5fbad4dbbf",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:35",
+    "occurred_at": "2026-08-20T16:00:00Z",
+    "article_id": "article:synthetic:281f0f6a7a392452",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:144120da0c399614",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:35",
+    "occurred_at": "2026-08-20T16:00:00Z",
+    "node_id": "topic:artificial-intelligence",
+    "path": [
+      "topic:artificial-intelligence"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:8b75884a4be3db57",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:35",
+    "occurred_at": "2026-08-20T16:18:00Z",
+    "article_id": "article:synthetic:e1c8322ef6878fab",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:ukraine",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:2102b629d1c33668",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:history:35",
+    "occurred_at": "2026-08-20T16:18:00Z",
+    "node_id": "entity:ukraine",
+    "path": [
+      "topic:artificial-intelligence",
+      "entity:ukraine"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1b657717b0ddd946",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:01",
+    "occurred_at": "2026-08-23T11:48:37.358183Z",
+    "article_id": "article:gnews:b65262f6795217671a48324aeca77ab1",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:tech_science",
+      "topic:real-estate",
+      "topic:semiconductor-industry",
+      "place:seoul"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:af8750ee87ab3878",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:01",
+    "occurred_at": "2026-08-23T11:48:37.358183Z",
+    "node_id": "topic:real-estate",
+    "path": [
+      "topic:real-estate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:8cf6b32430f37d32",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:01",
+    "occurred_at": "2026-08-23T11:59:37.358183Z",
+    "article_id": "article:gnews:0bb1330577fc805b439f829581bece7e",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:crypto"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:5fbfbc6e6a173cca",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:01",
+    "occurred_at": "2026-08-23T11:59:37.358183Z",
+    "node_id": "topic:crypto",
+    "path": [
+      "topic:real-estate",
+      "topic:crypto"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:bc7de7b421c4fb7b",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:01",
+    "occurred_at": "2026-08-23T12:10:37.358183Z",
+    "article_id": "article:gnews:bffaf255ed2b759e2e529663649984d5",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:crypto",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:2f957428d59fe1a4",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:01",
+    "occurred_at": "2026-08-23T12:21:37.358183Z",
+    "article_id": "article:gnews:44408f4c148a748ff5163fdd45bef221",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:real-estate",
+      "place:seoul"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:3d7e787e192f1d3b",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:02",
+    "occurred_at": "2026-08-23T12:32:37.358183Z",
+    "article_id": "article:gnews:55df6ecc90930d6d8cf545b4e026a87c",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:crypto",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:04d075de8bb30e74",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:02",
+    "occurred_at": "2026-08-23T12:32:37.358183Z",
+    "node_id": "topic:crypto",
+    "path": [
+      "topic:crypto"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:46e90d0aaed0f35b",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:02",
+    "occurred_at": "2026-08-23T12:43:37.358183Z",
+    "article_id": "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:crypto",
+      "entity:united-states",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1f367bd10357f7f3",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:02",
+    "occurred_at": "2026-08-23T12:54:37.358183Z",
+    "article_id": "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:economy",
+      "category:tech_science",
+      "entity:anthropic",
+      "topic:artificial-intelligence",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:c345fb8e3556a780",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:02",
+    "occurred_at": "2026-08-23T12:54:37.358183Z",
+    "node_id": "entity:anthropic",
+    "path": [
+      "topic:crypto",
+      "entity:anthropic"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:f291718c1bc65004",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:02",
+    "occurred_at": "2026-08-23T13:05:37.358183Z",
+    "article_id": "article:gnews:904df6040e02bce6c77dbf22306043ec",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "node_ids": [
+      "category:economy",
+      "topic:crypto",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:a3319f620b1c1a67",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:03",
+    "occurred_at": "2026-08-23T13:16:37.358183Z",
+    "article_id": "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "economy"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:economy",
+      "entity:sk-hynix",
+      "topic:artificial-intelligence",
+      "topic:semiconductor-industry",
+      "topic:financial-market"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ba78cc29352bad4b",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:03",
+    "occurred_at": "2026-08-23T13:16:37.358183Z",
+    "node_id": "entity:sk-hynix",
+    "path": [
+      "entity:sk-hynix"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:0c68e8237403aea8",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:03",
+    "occurred_at": "2026-08-23T13:27:37.358183Z",
+    "article_id": "article:gnews:03c978bfd9cb59c037599785dcd3a640",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:gaming",
+      "entity:russia"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:80fea93d61e292d0",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:03",
+    "occurred_at": "2026-08-23T13:27:37.358183Z",
+    "node_id": "topic:gaming",
+    "path": [
+      "entity:sk-hynix",
+      "topic:gaming"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:36729b114b58ced0",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:03",
+    "occurred_at": "2026-08-23T13:38:37.358183Z",
+    "article_id": "article:gnews:229194e1c14dff06bf5030302863f432",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:gpu"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ac66b08af0b4c68a",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:03",
+    "occurred_at": "2026-08-23T13:38:37.358183Z",
+    "node_id": "topic:gpu",
+    "path": [
+      "entity:sk-hynix",
+      "topic:gaming",
+      "topic:gpu"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:2b751808d339ed6a",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:03",
+    "occurred_at": "2026-08-23T13:49:37.358183Z",
+    "article_id": "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "entity:samsung-electronics",
+      "topic:semiconductor-industry",
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:3bdacecdf03c4943",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:03",
+    "occurred_at": "2026-08-23T13:49:37.358183Z",
+    "node_id": "entity:samsung-electronics",
+    "path": [
+      "entity:sk-hynix",
+      "topic:gaming",
+      "topic:gpu",
+      "entity:samsung-electronics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:f5cb1b357ebc2607",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:04",
+    "occurred_at": "2026-08-23T14:00:37.358183Z",
+    "article_id": "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "sports"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "category:sports",
+      "topic:robotics",
+      "entity:china",
+      "topic:football",
+      "topic:performance"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:52fbc5233b24a94d",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:04",
+    "occurred_at": "2026-08-23T14:00:37.358183Z",
+    "node_id": "topic:robotics",
+    "path": [
+      "topic:robotics"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:70af408514782d98",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:04",
+    "occurred_at": "2026-08-23T14:11:37.358183Z",
+    "article_id": "article:gnews:8f3d11d32d0aa46177ed28c4044fd01d",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "node_ids": [
+      "category:tech_science",
+      "topic:gaming"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d1da675e7d854bed",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:04",
+    "occurred_at": "2026-08-23T14:11:37.358183Z",
+    "node_id": "topic:gaming",
+    "path": [
+      "topic:robotics",
+      "topic:gaming"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4e31755175595240",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:04",
+    "occurred_at": "2026-08-23T14:22:37.358183Z",
+    "article_id": "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:united-states",
+      "topic:nuclear-security",
+      "entity:china"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:91c632c847439cd9",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:04",
+    "occurred_at": "2026-08-23T14:22:37.358183Z",
+    "node_id": "entity:united-states",
+    "path": [
+      "topic:robotics",
+      "topic:gaming",
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:642a5d874ca6ee47",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:04",
+    "occurred_at": "2026-08-23T14:33:37.358183Z",
+    "article_id": "article:gnews:96be339138bc2524586aa2ff62e48246",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world",
+      "politics"
+    ],
+    "node_ids": [
+      "category:world",
+      "category:politics",
+      "entity:donald-trump",
+      "entity:lee-jae-myung",
+      "entity:north-korea",
+      "entity:united-states",
+      "place:seoul"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:799fc3c2e3ddffe0",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:04",
+    "occurred_at": "2026-08-23T14:33:37.358183Z",
+    "node_id": "entity:donald-trump",
+    "path": [
+      "topic:robotics",
+      "topic:gaming",
+      "entity:united-states",
+      "entity:donald-trump"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:9daa5d0028f9a521",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:05",
+    "occurred_at": "2026-08-23T14:44:37.358183Z",
+    "article_id": "article:gnews:314c569bcc5308c5fa539130d2307607",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world",
+      "entity:donald-trump",
+      "entity:united-states"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:91af4771f6387fbd",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:05",
+    "occurred_at": "2026-08-23T14:44:37.358183Z",
+    "node_id": "entity:donald-trump",
+    "path": [
+      "entity:donald-trump"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:5e9326c7cd47c459",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:05",
+    "occurred_at": "2026-08-23T14:55:37.358183Z",
+    "article_id": "article:gnews:ee004729a94f556951b43fd97036580c",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "node_ids": [
+      "category:world"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:2934362263686867",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:05",
+    "occurred_at": "2026-08-23T14:55:37.358183Z",
+    "node_id": "category:world",
+    "path": [
+      "entity:donald-trump",
+      "category:world"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:5410f6fbca20ae21",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:05",
+    "occurred_at": "2026-08-23T15:06:37.358183Z",
+    "article_id": "article:gnews:5153283518678eba67628da85968b9cc",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "place:seoul",
+      "topic:labor"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:ab85a3b46c0ec41b",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:05",
+    "occurred_at": "2026-08-23T15:06:37.358183Z",
+    "node_id": "place:seoul",
+    "path": [
+      "entity:donald-trump",
+      "category:world",
+      "place:seoul"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:1f6223e95d8f123d",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:05",
+    "occurred_at": "2026-08-23T15:17:37.358183Z",
+    "article_id": "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society",
+      "entity:police",
+      "place:seoul",
+      "topic:judiciary"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:39ff4f0ecea86a9b",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:05",
+    "occurred_at": "2026-08-23T15:17:37.358183Z",
+    "node_id": "entity:police",
+    "path": [
+      "entity:donald-trump",
+      "category:world",
+      "place:seoul",
+      "entity:police"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:bdad362f61f14b47",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:06",
+    "occurred_at": "2026-08-23T15:28:37.358183Z",
+    "article_id": "article:gnews:5959fcf4d9d1d284693ea00b15703620",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "node_ids": [
+      "category:society"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:b23333cba417db0a",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:06",
+    "occurred_at": "2026-08-23T15:28:37.358183Z",
+    "node_id": "category:society",
+    "path": [
+      "category:society"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:094f7e91cb3c8d37",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:06",
+    "occurred_at": "2026-08-23T15:39:37.358183Z",
+    "article_id": "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics",
+      "economy"
+    ],
+    "node_ids": [
+      "category:politics",
+      "category:economy",
+      "entity:democratic-party",
+      "place:seoul"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:4dbf81e5dd1ab1d1",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:06",
+    "occurred_at": "2026-08-23T15:39:37.358183Z",
+    "node_id": "entity:democratic-party",
+    "path": [
+      "category:society",
+      "entity:democratic-party"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:afb9739cec971ed4",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:06",
+    "occurred_at": "2026-08-23T15:50:37.358183Z",
+    "article_id": "article:gnews:e8130e89f3ca62409100a87241cf2001",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "node_ids": [
+      "category:politics",
+      "entity:democratic-party",
+      "entity:people-power-party",
+      "entity:lee-jae-myung",
+      "entity:presidential-office",
+      "topic:judiciary"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:d3aecb803dcc4abc",
+    "type": "article_read",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:06",
+    "occurred_at": "2026-08-23T16:01:37.358183Z",
+    "article_id": "article:gnews:485cf50b904d508536cba42345061c2f",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "node_ids": [
+      "category:local",
+      "topic:housing-policy",
+      "place:gyeongnam",
+      "topic:disaster-safety",
+      "topic:weather-climate"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "event:3beb304fe5fc54a0",
+    "type": "node_open",
+    "user_id": "user:demo-experienced",
+    "session_id": "session:current:06",
+    "occurred_at": "2026-08-23T16:01:37.358183Z",
+    "node_id": "topic:housing-policy",
+    "path": [
+      "category:society",
+      "entity:democratic-party",
+      "topic:housing-policy"
+    ],
+    "synthetic": true
+  }
+]

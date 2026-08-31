@@ -1,0 +1,52 @@
+[
+  {
+    "id": "scenario:north-korea-security",
+    "name": "북한에서 핵안보로",
+    "path": [
+      "entity:north-korea",
+      "entity:defense-ministry",
+      "topic:nuclear-security",
+      "entity:united-states"
+    ],
+    "valid": true,
+    "all_steps_navigable": true
+  },
+  {
+    "id": "scenario:semiconductor-ai",
+    "name": "반도체 공급망에서 AI로",
+    "path": [
+      "topic:semiconductor-industry",
+      "topic:hbm",
+      "entity:nvidia",
+      "topic:gpu",
+      "topic:artificial-intelligence"
+    ],
+    "valid": true,
+    "all_steps_navigable": true
+  },
+  {
+    "id": "scenario:hormuz-trump",
+    "name": "호르무즈에서 미국 정치로",
+    "path": [
+      "entity:iran",
+      "topic:strait-of-hormuz",
+      "entity:united-states",
+      "entity:donald-trump"
+    ],
+    "valid": true,
+    "all_steps_navigable": true
+  },
+  {
+    "id": "scenario:personal-ai-map",
+    "name": "나의 기록 지도 AI 군집",
+    "path": [
+      "topic:artificial-intelligence",
+      "topic:ai-chip",
+      "topic:semiconductor-industry",
+      "entity:sk-hynix",
+      "topic:hbm"
+    ],
+    "valid": true,
+    "all_steps_navigable": true
+  }
+]

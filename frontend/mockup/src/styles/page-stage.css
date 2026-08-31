@@ -1,0 +1,244 @@
+/* 후속 화면 구현이 들어갈 경로별 본문 슬롯과 임시 상태를 정의합니다. */
+
+.page-stage {
+  width: min(100%, 1152px);
+  margin: 0 auto;
+}
+
+.page-tabs {
+  min-height: 30px;
+  display: flex;
+  align-items: flex-start;
+  gap: 34px;
+  margin-bottom: 19px;
+  overflow-x: auto;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  scrollbar-width: thin;
+}
+
+.page-tabs__item {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 30px;
+  white-space: nowrap;
+}
+
+button.page-tabs__item {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+a.page-tabs__item:hover {
+  color: #4d657e;
+}
+
+button.page-tabs__item:hover {
+  color: #4d657e;
+}
+
+.page-tabs__item.is-active {
+  color: #23292f;
+  font-weight: 700;
+}
+
+.page-tabs__item.is-active::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-accent);
+}
+
+.page-tabs__item--label {
+  color: #59616a;
+  font-weight: 700;
+}
+
+.page-tabs__item--label::after {
+  display: none;
+}
+
+.page-tabs--categories {
+  gap: 28px;
+}
+
+.page-stage__header {
+  margin-bottom: 22px;
+}
+
+.page-stage__eyebrow {
+  margin: 0 0 7px;
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.page-stage__header h1 {
+  margin: 0;
+  color: #252a30;
+  font-family: var(--font-display);
+  font-size: 21px;
+  line-height: 1.5;
+  outline: none;
+}
+
+.page-stage__header > p:last-child {
+  margin: 3px 0 0;
+  /* 작은 설명문은 Figma의 위계를 유지하면서 4.5:1 이상으로 보정합니다. */
+  color: #666f78;
+  font-size: 13px;
+}
+
+.page-stage__canvas {
+  position: relative;
+  min-height: min(630px, calc(100vh - 222px));
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-graph-border);
+  border-radius: var(--radius-canvas);
+  background-color: var(--color-graph-bg-mid);
+  background-image:
+    radial-gradient(circle, rgb(142 163 184 / 18%) 0 1px, transparent 1.25px),
+    linear-gradient(114deg, var(--color-graph-bg-start), var(--color-graph-bg-mid) 51%, var(--color-graph-bg-end));
+  background-position: 34px 34px, 0 0;
+  background-size: 56px 56px, 100% 100%;
+}
+
+.page-stage__canvas::after {
+  content: "";
+  position: absolute;
+  width: 60%;
+  height: 40%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(79 105 133 / 7%), transparent 68%);
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.page-stage__constellation {
+  position: absolute;
+  inset: 0;
+  opacity: 0.36;
+}
+
+.page-stage__constellation::before,
+.page-stage__constellation::after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #53616e, transparent);
+  transform-origin: left center;
+}
+
+.page-stage__constellation::before {
+  width: 260px;
+  top: 31%;
+  left: 21%;
+  transform: rotate(13deg);
+}
+
+.page-stage__constellation::after {
+  width: 330px;
+  right: 20%;
+  bottom: 27%;
+  transform: rotate(-17deg);
+}
+
+.page-stage__constellation span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #c4ced7;
+  box-shadow: 0 0 12px rgb(143 174 204 / 42%);
+}
+
+.page-stage__constellation span:nth-child(1) { top: 26%; left: 20%; }
+.page-stage__constellation span:nth-child(2) { top: 39%; left: 43%; }
+.page-stage__constellation span:nth-child(3) { top: 23%; right: 21%; }
+.page-stage__constellation span:nth-child(4) { bottom: 25%; left: 32%; }
+.page-stage__constellation span:nth-child(5) { right: 29%; bottom: 34%; }
+
+.page-stage__status {
+  position: relative;
+  z-index: 2;
+  min-width: 270px;
+  padding: 25px 28px;
+  border: 1px solid rgb(83 97 110 / 45%);
+  border-radius: var(--radius-panel);
+  color: var(--color-graph-text);
+  background: rgb(27 32 40 / 86%);
+  box-shadow: 0 16px 42px rgb(0 0 0 / 15%);
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.page-stage__status-dot {
+  width: 7px;
+  height: 7px;
+  display: block;
+  margin: 0 auto 13px;
+  border-radius: 50%;
+  background: var(--color-graph-node-selected);
+  box-shadow: 0 0 0 6px rgb(143 174 204 / 8%), 0 0 18px rgb(143 174 204 / 32%);
+}
+
+.page-stage__status strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+
+.page-stage__status p {
+  margin: 8px 0 0;
+  color: var(--color-graph-text-muted);
+  font-size: 12px;
+}
+
+.stage-link {
+  display: inline-block;
+  margin-top: 17px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgb(143 174 204 / 62%);
+  color: #c8d7e5;
+  font-size: 12px;
+}
+
+.stage-link:hover {
+  color: #fff;
+}
+
+.page-stage[data-screen="settings"] {
+  width: min(100%, 880px);
+}
+
+.page-stage[data-screen="settings"] .page-stage__canvas {
+  min-height: 560px;
+  border-color: var(--color-border);
+  background: rgb(251 251 250 / 65%);
+}
+
+.page-stage[data-screen="settings"] .page-stage__status {
+  border-color: var(--color-border);
+  color: var(--color-text-strong);
+  background: #fff;
+}
+
+.page-stage[data-screen="settings"] .page-stage__status p {
+  color: var(--color-text-muted);
+}
+
+@media (max-height: 760px) {
+  .page-stage__canvas {
+    min-height: 500px;
+  }
+}

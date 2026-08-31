@@ -1,0 +1,21 @@
+{
+  "id": "user:demo-experienced",
+  "display_name": "별빛 탐험가",
+  "profile_type": "experienced_demo_user",
+  "member_since": "2026-04-25T16:12:37.358183Z",
+  "interest_weights": {
+    "economy": 0.92,
+    "tech_science": 0.88,
+    "world": 0.67,
+    "society": 0.52,
+    "politics": 0.46,
+    "local": 0.35,
+    "culture": 0.28,
+    "sports": 0.0
+  },
+  "not_interested": [
+    "sports"
+  ],
+  "report_period_days": 90,
+  "synthetic": true
+}

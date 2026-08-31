@@ -1,0 +1,74 @@
+{
+  "target_eligible_current_articles_per_category": 24,
+  "real_gnews_total": 294,
+  "real_gnews_eligible": 262,
+  "real_gnews_by_primary_category": {
+    "tech_science": 31,
+    "sports": 18,
+    "culture": 24,
+    "world": 66,
+    "economy": 76,
+    "society": 36,
+    "politics": 24,
+    "local": 19
+  },
+  "real_gnews_multilabel_coverage": {
+    "tech_science": 46,
+    "sports": 21,
+    "culture": 26,
+    "world": 75,
+    "economy": 89,
+    "local": 32,
+    "society": 48,
+    "politics": 30
+  },
+  "eligible_real_gnews_multilabel_coverage": {
+    "tech_science": 43,
+    "sports": 18,
+    "culture": 22,
+    "world": 70,
+    "economy": 83,
+    "society": 40,
+    "politics": 27,
+    "local": 26
+  },
+  "classification_confidence": {
+    "medium": 54,
+    "high": 228,
+    "low": 12
+  },
+  "current_supplements_by_category": {
+    "politics": 0,
+    "economy": 1,
+    "society": 0,
+    "culture": 2,
+    "world": 0,
+    "local": 0,
+    "sports": 6,
+    "tech_science": 0
+  },
+  "eligible_current_by_category": {
+    "tech_science": 44,
+    "sports": 24,
+    "culture": 24,
+    "world": 70,
+    "economy": 84,
+    "society": 40,
+    "politics": 27,
+    "local": 26
+  },
+  "historical_personal_records_by_primary_category": {
+    "society": 12,
+    "world": 18,
+    "local": 5,
+    "tech_science": 28,
+    "politics": 8,
+    "economy": 30,
+    "culture": 3
+  },
+  "quality_flags": {
+    "placeholder_or_low_information_title": 21,
+    "duplicate_title": 28
+  },
+  "total_articles_in_integrated_dataset": 407
+}

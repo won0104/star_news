@@ -1,0 +1,16 @@
+# 기본적으로 모든 텍스트 파일을 LF로 통일
+* text=auto eol=lf
+
+# Windows 전용 스크립트는 CRLF 유지
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Checkpoint/cache byte hash는 줄바꿈 변환 대상이 아니다.
+*.safetensors -text
+
+# 사람이 선택한 portable training delta weight만 Git LFS로 운반한다.
+ArticleLocal-KG/model/params/training_deltas/**/*.safetensors filter=lfs diff=lfs merge=lfs -text
+
+# 외부 수집 raw CSV는 줄바꿈을 포함한 원본 byte를 보존
+ArticleLocal-KG/data/raw/ssafy/*.csv -text

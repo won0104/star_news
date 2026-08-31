@@ -1,0 +1,265 @@
+{
+  "schema_version": "1.0.0",
+  "screenshots": [
+    {
+      "id": "main",
+      "node_id": "24:2",
+      "name": "Desktop / 메인 첫 화면",
+      "file": "screenshots/main.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 93411,
+      "sha256": "91f9ec7d75f292dff54b782b7b257ed80447b7610e30a0d6d7dc35722e1696c4"
+    },
+    {
+      "id": "explore-01",
+      "node_id": "31:3",
+      "name": "Exploration / 01 / 북한 중심",
+      "file": "screenshots/explore-01.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 97601,
+      "sha256": "40ac18bd9e48fbd4ae35053151b690be0135017482cc08bdf8c2ba0876dc6066"
+    },
+    {
+      "id": "explore-02",
+      "node_id": "31:380",
+      "name": "Exploration / 02 / 국방부 중심",
+      "file": "screenshots/explore-02.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 105174,
+      "sha256": "3ec4f72d75bdf52c42e48e4c0e9c47f365ebd364e450f2b8e914f6f7cfbb7fa4"
+    },
+    {
+      "id": "explore-03-panel",
+      "node_id": "31:764",
+      "name": "Exploration / 03 / 기사 패널",
+      "file": "screenshots/explore-03-panel.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 129033,
+      "sha256": "41942ee40e38c1124cbbe625d08fa087f140bdc40ae7865aa6e541f42ffb66fd"
+    },
+    {
+      "id": "category-economy",
+      "node_id": "37:3",
+      "name": "Category / 경제 / 시작 화면",
+      "file": "screenshots/category-economy.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 85000,
+      "sha256": "dac1f04827a12606c34e031f32e9d95c09caaeb1fe3b4359be7b0bf56fa342b8"
+    },
+    {
+      "id": "search-empty",
+      "node_id": "38:2",
+      "name": "Search / 01 / 입력 전",
+      "file": "screenshots/search-empty.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 79275,
+      "sha256": "1aab69c65776596cf9b1cafa579033bcf5b0b34edd4050d0ca993e572b012273"
+    },
+    {
+      "id": "search-result",
+      "node_id": "38:338",
+      "name": "Search / 02 / 삼성전자 결과",
+      "file": "screenshots/search-result.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 84083,
+      "sha256": "5dbf678326276532544a84e029d4bcf40f368f28c30cd85ea5c6af9d2c3f9fc6"
+    },
+    {
+      "id": "my-record",
+      "node_id": "48:2",
+      "name": "My World / 01 / 나의 기록",
+      "file": "screenshots/my-record.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 107403,
+      "sha256": "a00c43a9c25e91cf60bbf9e4e16541a62c64526e9bdfd389738222bdd322425e"
+    },
+    {
+      "id": "my-report",
+      "node_id": "48:618",
+      "name": "My World / 02 / 나의 리포트",
+      "file": "screenshots/my-report.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 85595,
+      "sha256": "aab27ae7111e54849acd2a700ed953dec222638162b29c35b70b494f1565bae7"
+    },
+    {
+      "id": "my-record-economy",
+      "node_id": "57:678",
+      "name": "My World / 03 / 경제 군집 선택",
+      "file": "screenshots/my-record-economy.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 113460,
+      "sha256": "9fd53d9f17826c3785f4aa2f1b193574572a71e48086114c73c71d8c37383c79"
+    },
+    {
+      "id": "profile-menu",
+      "node_id": "69:15",
+      "name": "Profile / 01 / 메뉴 열림",
+      "file": "screenshots/profile-menu.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 119066,
+      "sha256": "b6607bfdea10d219cca4277e063416e5245dc4e21cd947ee7c5a4b1ea90ab86e"
+    },
+    {
+      "id": "settings-account",
+      "node_id": "73:2",
+      "name": "Overlay / Settings / Account",
+      "file": "screenshots/settings-account.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 90524,
+      "sha256": "6c8d6d3c3373f4265733f4a3814e27cee2202a88e321568fe25a34e082d1a821"
+    },
+    {
+      "id": "settings-dislikes",
+      "node_id": "73:19",
+      "name": "Overlay / Settings / Dislikes",
+      "file": "screenshots/settings-dislikes.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 108069,
+      "sha256": "25119fcdd90c0f3d6becdca9fec809b8d1288fedb4565263ef99e53f9fddf1db"
+    },
+    {
+      "id": "settings-display",
+      "node_id": "73:36",
+      "name": "Overlay / Settings / Display",
+      "file": "screenshots/settings-display.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 94353,
+      "sha256": "ce99c76170236346a05decf0864694a052347d7c90455583f49f6ca22c174dbf"
+    },
+    {
+      "id": "personal-map",
+      "node_id": "80:2",
+      "name": "Overlay / Personal Map / Overview",
+      "file": "screenshots/personal-map.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 189789,
+      "sha256": "137d90ac8225809cd46152da309be5a91727cd60784e8719a4715bad03838540"
+    },
+    {
+      "id": "personal-map-selected",
+      "node_id": "80:647",
+      "name": "Overlay / Personal Map / Economy selected",
+      "file": "screenshots/personal-map-selected.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 223699,
+      "sha256": "575f5a99a774f0a3c20208082e4cbcb0daae2550adcb8534e0bc67ced3acd50f"
+    },
+    {
+      "id": "motion-category-pre",
+      "node_id": "45:2",
+      "name": "Motion Spec / Category / 00 Pre",
+      "file": "screenshots/motion-category-pre.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 74337,
+      "sha256": "d30db6b37c13be54fff2492dc6fc3581e3d8bbc2cbf3b5a2447eb42eea45cb3b"
+    },
+    {
+      "id": "motion-category-post",
+      "node_id": "45:326",
+      "name": "Motion Spec / Category / 01 Priority bloom",
+      "file": "screenshots/motion-category-post.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 83164,
+      "sha256": "7537cbd8751d8ae15469cc2dc6b77d920954c696cda2849928180793bb4b1008"
+    },
+    {
+      "id": "motion-search-pre",
+      "node_id": "45:652",
+      "name": "Motion Spec / Search / 00 Pre",
+      "file": "screenshots/motion-search-pre.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 76655,
+      "sha256": "5f6ba3f8c3727f44c484da87ac6d5d0fd6a231ad3e96e672ba5bf38787771d4d"
+    },
+    {
+      "id": "motion-search-post",
+      "node_id": "45:984",
+      "name": "Motion Spec / Search / 01 Near results bloom",
+      "file": "screenshots/motion-search-post.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 82791,
+      "sha256": "9387671c0bfe2fcb4c5b268871812dc3de027729a169c2e01eb04df6904ebe7a"
+    },
+    {
+      "id": "motion-explore-pre",
+      "node_id": "45:1318",
+      "name": "Motion Spec / Explore / 00 Focus arrives",
+      "file": "screenshots/motion-explore-pre.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 80556,
+      "sha256": "563e6efb8b5c348d94559a7e5aa31d2aacdc9c35755d15300aa0c6108e9d7ebc"
+    },
+    {
+      "id": "motion-explore-post",
+      "node_id": "45:1756",
+      "name": "Motion Spec / Explore / 01 Relations bloom",
+      "file": "screenshots/motion-explore-post.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 95630,
+      "sha256": "616e9b05ba170323ee83fda8957046dfd261435181d149f2e3794c95326578a0"
+    },
+    {
+      "id": "motion-record-pre",
+      "node_id": "57:2",
+      "name": "Motion Spec / My World / Record / 00 Pre",
+      "file": "screenshots/motion-record-pre.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 39800,
+      "sha256": "1248562780be0d2f93982e7dae1c8a2e735e870858083163fb5deec2c9a0ddf9"
+    },
+    {
+      "id": "motion-record-post",
+      "node_id": "57:339",
+      "name": "Motion Spec / My World / Record / 01 Cluster bloom",
+      "file": "screenshots/motion-record-post.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 104516,
+      "sha256": "a9e63a6368490e90e51e36e6c90e032830ae34dbea77e8f6596c3e5c38e80a2f"
+    },
+    {
+      "id": "motion-report-pre",
+      "node_id": "57:1052",
+      "name": "Motion Spec / My World / Report / 00 Pre",
+      "file": "screenshots/motion-report-pre.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 78881,
+      "sha256": "c5a193da57000a93ea5e259be2e614506c22f8e6634714d84d9a941c46b52dfb"
+    },
+    {
+      "id": "motion-report-post",
+      "node_id": "57:1240",
+      "name": "Motion Spec / My World / Report / 01 Data growth",
+      "file": "screenshots/motion-report-post.png",
+      "width": 1440,
+      "height": 900,
+      "size_bytes": 86068,
+      "sha256": "0e9ac2f1229556b0b749ff1b3b43dbb82304b3477653e8ae94d627d655199248"
+    }
+  ]
+}

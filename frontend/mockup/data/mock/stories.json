@@ -1,0 +1,4254 @@
+[
+  {
+    "id": "story:53912fafd980f704",
+    "title": "독립영화 기획전, 지역 극장서 잇따라 개막",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:synthetic:2f973cc3beff3ee9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T11:21:37.358183Z"
+  },
+  {
+    "id": "story:8ff1ed0b0b9da23e",
+    "title": "HBM 공급망, AI 반도체 투자와 맞물려 확대",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:synthetic:1fd756f0af696bc4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T10:55:37.358183Z"
+  },
+  {
+    "id": "story:e6f0393a6cba4785",
+    "title": "국립미술관, 디지털 아카이브 전시 공개",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:synthetic:8bd4116494f4f611"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T10:44:37.358183Z"
+  },
+  {
+    "id": "story:b64c3e2922a265aa",
+    "title": "여자배구 대표팀, 국제대회 대비 전술 훈련",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:synthetic:befe890ba6664609"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T08:21:37.358183Z"
+  },
+  {
+    "id": "story:1b031340c95d02e1",
+    "title": "프로야구 순위 경쟁 치열…불펜 운용 변수",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:synthetic:81e83d1acd9d8095"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T07:44:37.358183Z"
+  },
+  {
+    "id": "story:692229697ffdd5a4",
+    "title": "K리그, 여름 이적시장 이후 판도 변화",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:synthetic:93a1d7f7072d41fa"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T07:07:37.358183Z"
+  },
+  {
+    "id": "story:bca5c16ac41887ac",
+    "title": "배드민턴 대표팀, 세계대회 앞두고 컨디션 점검",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:synthetic:9470c5dfed9849a0"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T06:30:37.358183Z"
+  },
+  {
+    "id": "story:a1b00205b45ab488",
+    "title": "육상 유망주, 개인 최고기록 잇따라 경신",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:synthetic:2af8717e031d914b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T05:53:37.358183Z"
+  },
+  {
+    "id": "story:8a84954d661d7e3c",
+    "title": "축구대표팀, 새 전술 실험 본격화",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:synthetic:1863eafb6bdde246"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 1,
+    "latest_published_at": "2026-08-23T05:16:37.358183Z"
+  },
+  {
+    "id": "story:ab6980bd076a01cc",
+    "title": "\"아직도 키 크고 있습니다\" 리틀 김연경에 리틀 양효진도 있다…U17 대표팀 높이 책임진 최민주 [MD인천]",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:f8668003a78bc8516945add1394998ef"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T04:02:40Z"
+  },
+  {
+    "id": "story:105d2e682d12b8ff",
+    "title": "SK하이닉스, '성과급 60%' 자사주로…노조 찬반투표 ‘촉각’",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T04:00:16Z"
+  },
+  {
+    "id": "story:79747033fa1513fe",
+    "title": "‘현대가 더비는 역시’ 전북현대, 울산 1-0 격파",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee"
+    ],
+    "source_count": 1,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T03:57:08Z"
+  },
+  {
+    "id": "story:9830bb61419e3058",
+    "title": "중국 첫 핵추진 항공모함 '004형' 윤곽…J",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T03:27:33Z"
+  },
+  {
+    "id": "story:5f865b7fd4380c3c",
+    "title": "8월 서울 집값 강북권이 끌어올렸다…경기는 '반도체 벨트' 여전한 강세",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:b65262f6795217671a48324aeca77ab1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T03:27:21Z"
+  },
+  {
+    "id": "story:dc30202dc8e7edc5",
+    "title": "‘트럼프 측근’ 플라이츠 “트럼프, 김정은보다 이재명 대통령 먼저 만나야”",
+    "primary_category_id": "world",
+    "category_ids": [
+      "politics",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:96be339138bc2524586aa2ff62e48246"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T03:22:00Z"
+  },
+  {
+    "id": "story:8dd82565a532697e",
+    "title": "극한호우 7일째 거제·통영 691명 미귀가…대피생활 장기화 조짐",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:485cf50b904d508536cba42345061c2f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T03:02:49Z"
+  },
+  {
+    "id": "story:12568af2ec542167",
+    "title": "[배드민턴] 안세영, 세계선수권 정상 탈환 눈앞… 일본 야마구치와 결승 격돌",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T03:00:58Z"
+  },
+  {
+    "id": "story:66766238f9e69767",
+    "title": "\"'직장 내 괴롭힘' 문제의식 매년 약해져…3년 연속 D등급\"",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:5153283518678eba67628da85968b9cc"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T03:00:02Z"
+  },
+  {
+    "id": "story:6320bbccd7379f49",
+    "title": "비 그치니 폭염주의보…서울시 종합지원상황실 재가동",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T02:50:21Z"
+  },
+  {
+    "id": "story:4b250eb2093f6706",
+    "title": "‘전장연 집회 강제해산’ 경찰 밀친 활동가 2심 무죄로 뒤집혀…법원 “경찰 해산 명령 위법”",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T02:39:00Z"
+  },
+  {
+    "id": "story:3ae629f0f656c76e",
+    "title": "김민석 \"부득이한 비거주 1주택 사유 폭넓게 인정…사각 없애야\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "economy",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T02:31:43Z"
+  },
+  {
+    "id": "story:93967c736d759b6f",
+    "title": "김수현, ‘손하트→엄지척’ 애교 4종 세트…필리핀·인도네시아 복귀 발판됐다",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:eca09e4060901d83707e615cc5b5b3f7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T02:11:00Z"
+  },
+  {
+    "id": "story:59e91cabadbce85e",
+    "title": "장동혁 \"대통령 입맛대로 대법관 임명?‥사법부, '재판재개'로 맞서야\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:e8130e89f3ca62409100a87241cf2001"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T02:01:05Z"
+  },
+  {
+    "id": "story:5ccf4afe7b02c0f7",
+    "title": "[속보]“국민의힘 현직 의원 4명, 尹 체포 방해해”…누구?",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T01:59:06Z"
+  },
+  {
+    "id": "story:fe2bfd49d1d53284",
+    "title": "김해시, 거제 수해지역 방역 인력·장비 지원",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:6b21d77536fb57fe71469b15a245a2bd"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T01:47:57Z"
+  },
+  {
+    "id": "story:5a3bc30b1a530718",
+    "title": "홍준표, 한동훈 ‘노웅래 무죄’ 반발에 “위법증거 까보자? 무식하고 무지”",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T01:30:00Z"
+  },
+  {
+    "id": "story:38e6ca4595d3937c",
+    "title": "조희대, 헌법의 기본 ‘국민주권’ 모르는 무자격자…제청권 파동 풀려면",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T01:23:00Z"
+  },
+  {
+    "id": "story:82c912009202149f",
+    "title": "수원 광교 주민들 떨게 한 70㎝ ‘나일왕도마뱀’, 수색 11일 만에 잡혔다",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:bcb21e7669bc4bde6137bccffbf99892"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-23T01:19:00Z"
+  },
+  {
+    "id": "story:9a3b43426df5a24c",
+    "title": "512GB 스팀 머신이 유럽에서 1108,00유로에 다시 판매됩니다.",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:03c978bfd9cb59c037599785dcd3a640"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:41:13Z"
+  },
+  {
+    "id": "story:3de7ee0937777687",
+    "title": "‘셔틀콕 여왕이 돌아왔다!’ 안세영, 세계선수권 3년 만에 금메달 도전…야마구치와 결승전 맞대결",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:31:08Z"
+  },
+  {
+    "id": "story:50369b530029c771",
+    "title": "유재석, 고1된 아들 지호 군 폭풍성장 근황 공개(놀면 뭐하니)",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:7d3c092ba967705417995f3a8b09554d",
+      "article:gnews:6194ef39be1db27f16adaa56e3920b4b"
+    ],
+    "source_count": 2,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:16:09Z"
+  },
+  {
+    "id": "story:d203daa049545425",
+    "title": "여배우가 하윤경 국밥집서 대낮부터 냉장탕소주 포착 전참시",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:14:00Z"
+  },
+  {
+    "id": "story:d45a3df1a73669e0",
+    "title": "그레이스케일, 비트코인 50% 조정 뒤 바닥 가능성 거론",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:0bb1330577fc805b439f829581bece7e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:08:44Z"
+  },
+  {
+    "id": "story:d5acedc12ed78cc5",
+    "title": "트럼프가 띄운 자동차경주 개막…美 심장부서 시속 300㎞ 질주",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:314c569bcc5308c5fa539130d2307607"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:07:30Z"
+  },
+  {
+    "id": "story:c9664b5031f52d02",
+    "title": "연합뉴스 한민족센터",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:87c97e1bf3e31595ec3370a87388038b",
+      "article:gnews:72b216fc88fe91cb3b3bfec7d70b4961"
+    ],
+    "source_count": 1,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:07:30Z"
+  },
+  {
+    "id": "story:95d908e454ce8a09",
+    "title": "도경완, 급성 골수염 수술…\"가짜 손톱 하고 산다\"",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:458dd433803768f5092a630543059bee"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:04:53Z"
+  },
+  {
+    "id": "story:cc598314d5db4fe4",
+    "title": "[자정 시세브리핑] 암호화폐 시장 혼조세… 비트코인 77,012달러, 이더리움 2,413달러",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:bffaf255ed2b759e2e529663649984d5"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:04:39Z"
+  },
+  {
+    "id": "story:6573665da007014e",
+    "title": "'12㎏ 감량' 다영, 군살 없는 몸매 공개…\"크롭톱도 완벽 소화\"",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:7945b4b767162bf626c1b088fdbc886b"
+    ],
+    "source_count": 2,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:02:48Z"
+  },
+  {
+    "id": "story:347e04bdb8c67f93",
+    "title": "세금 부담에 강남·서초 아파트값 2주째 마이너스…서울 외곽은 더 올라",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:44408f4c148a748ff5163fdd45bef221"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:00:17Z"
+  },
+  {
+    "id": "story:2f8e0c40dbbef24c",
+    "title": "[오늘의 운세] 2026년 8월 23일 일요일(음력 7월 11일/일진: 기사(己巳)띠별·생년월일 운세)",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:fff2fe44dd2fa2a4b892bb856ec44ab7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:00:00Z"
+  },
+  {
+    "id": "story:6206b144e2cd9999",
+    "title": "8월 29일(음력 7월 11일~7월 17일·띠별/생년월일 운세)",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:c453c31d2747304d9d76d1f93853733b",
+      "article:gnews:039becf03c42907082466cb828c88733"
+    ],
+    "source_count": 1,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T15:00:00Z"
+  },
+  {
+    "id": "story:4e8c55bb9e6eecd9",
+    "title": "8개 알트코인, 수익·언락 지표로 갈렸다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:55df6ecc90930d6d8cf545b4e026a87c"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T14:59:12Z"
+  },
+  {
+    "id": "story:f87f68fba07e378b",
+    "title": "김지찬 3안타·최형우 3타점, 삼성라이온즈 연패탈출…원정강자 김재윤 27세이브 달성",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:503fe86bfab8a1322906da364d2285b9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T14:55:55Z"
+  },
+  {
+    "id": "story:2098fc6dc3d4f152",
+    "title": "'217cm' 최홍만, 리센느 만나니 거인 그 자체…넘사벽 키 차이 (전참시)",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T14:37:00Z"
+  },
+  {
+    "id": "story:09cb5888fbf4f528",
+    "title": "사람과 지역의 가치를 생각합니다.",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "local",
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:d1c44244f5494015299e65962842d521"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T14:15:29Z"
+  },
+  {
+    "id": "story:65acecb600d83045",
+    "title": "‘우지원 딸’ 우서윤, 미스코리아 진 됐다",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:0c2123dca50ce4ff4557d1fcf9a30d9c"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T14:06:19Z"
+  },
+  {
+    "id": "story:98e75f1768bf4bcb",
+    "title": "“마운자로 효과 폭발”… 51kg 감량한 여성, ‘두 가지’ 끊었다는데?",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:5959fcf4d9d1d284693ea00b15703620"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T14:01:00Z"
+  },
+  {
+    "id": "story:24a77afe67512332",
+    "title": "게임서 알게 된 남학생 따라 논산→무주…실종 여중생 2시간 만에 발견",
+    "primary_category_id": "society",
+    "category_ids": [
+      "local",
+      "society",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T14:00:00Z"
+  },
+  {
+    "id": "story:0e0c29b41bed0a69",
+    "title": "[AI상보] '최형우 3타점+김재윤 27세이브' 삼성, NC 꺾고 선두 KT 1경기 차 추격",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:685fb017162df9bc4dda479afa95ecb0"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T13:52:00Z"
+  },
+  {
+    "id": "story:14018e7193bb338d",
+    "title": "'정승원 1골·2도움' 서울, 안양 원정서 최다 골 폭격",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:de2d693577772b76c7e03172714a3e7a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T13:46:00Z"
+  },
+  {
+    "id": "story:9363ab4fcd48349f",
+    "title": "이휘향, 14세 박신혜 뺨만 30대 때려 \"늘 미안해\"('김주하의 데이앤나잇')",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:edb02fd56beca599bbb314f8c3e492ba"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T13:37:00Z"
+  },
+  {
+    "id": "story:c6e5180fff225c7c",
+    "title": "지예은, ♥바타 비하인드→MZ 연애 특강?… 탁재훈에 “회춘시켜드릴게요” (미우새)",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:79442fbda18f50784fcdecc1ac584633"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T13:26:18Z"
+  },
+  {
+    "id": "story:a0d2ee324a6109e1",
+    "title": "2억2077만달러 ETF 유입, 이더리움 2500달러 시험",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T13:11:23Z"
+  },
+  {
+    "id": "story:0b43291dfaf7a4d8",
+    "title": "앤트로픽, 기업가치 2조달러 IPO 추진…역대 최대 상장 노린다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T13:03:06Z"
+  },
+  {
+    "id": "story:f4cc6d1c80535f24",
+    "title": "이강인 역대급 대반전, 홍명보호 승선 못 할 수도 있었다...\"스페인 귀화 제안 받아\" 맹활약에 과거 재조명",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:4cdebf24f439425bd88824839bb50d46"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T13:02:50Z"
+  },
+  {
+    "id": "story:b8f181a057379d7d",
+    "title": "[프로축구] 전북, 울산 꺾고 '현대가 더비' 올 시즌 3전 전승",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T13:00:00Z"
+  },
+  {
+    "id": "story:c7e0d29ec4cf2417",
+    "title": "이 대통령, 명진 스님 입적 애도…“불교계 큰 어른 떠나보내”",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "culture",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:b2af68b27241640022294217192e9527"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:59:00Z"
+  },
+  {
+    "id": "story:69080b6b22f6607a",
+    "title": "106개국 1만1000명 대구 집결…마스터즈육상 막 올랐다",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "local",
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:58:51Z"
+  },
+  {
+    "id": "story:c33ffc979b47aae9",
+    "title": "선선한 ‘처서 매직’ 없다…낮 최고 35도 무더위 속 소나기",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:330e9c849e7d143e5e0904c3e0625b13"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:58:00Z"
+  },
+  {
+    "id": "story:a0a88a2ade2a9206",
+    "title": "타는 냄새와 녹은 커넥터를 통해 ZOTAC GeForce RTX 5090 SOLID 그래픽 카드에 손상이 있음을 알 수 있었습니다.",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:229194e1c14dff06bf5030302863f432"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:57:13Z"
+  },
+  {
+    "id": "story:26576e96e7109aef",
+    "title": "광교 도심 출몰 70㎝ ‘나일왕도마뱀’ 11일 만에 잡혔다",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:57:00Z"
+  },
+  {
+    "id": "story:e5b90c48f289c454",
+    "title": "MB 정권 비판하던 명진스님 입적…서귀포서 해양사고",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:57:00Z"
+  },
+  {
+    "id": "story:f296d6cbe8b35a32",
+    "title": "리플달러 권한 위임 개정안, 검증인 절차 남았다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:904df6040e02bce6c77dbf22306043ec"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:54:43Z"
+  },
+  {
+    "id": "story:a9fe4343c4f7d587",
+    "title": "수백년간 쌓인 ‘불의 고리’ 에너지 20%만 방출…“페루에 8.8 대지진 올 수도”",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:ee004729a94f556951b43fd97036580c"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:54:31Z"
+  },
+  {
+    "id": "story:9cd526609a1632ab",
+    "title": "이 대통령, 28일 민주당 의원 전원 청와대 초청 오찬",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:9894040b091176a7244b2bffa44c297e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:51:00Z"
+  },
+  {
+    "id": "story:efaf61e77a88c91d",
+    "title": "반등 절실한 K리그1 전북, 울산 1-0 격파…모따 5개월만에 골맛(종합)",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:50:47Z"
+  },
+  {
+    "id": "story:f2c2ffed915ec9cb",
+    "title": "GIST-삼성-MIT, Ru에 탄소원자 5개 첨가로 반도체 배선 \"저항 혁명\"",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:40:44Z"
+  },
+  {
+    "id": "story:c41d5142f999a3c5",
+    "title": "경찰 \"제주 실종 여성 시신 발견 안 돼‥명백한 오보\"",
+    "primary_category_id": "society",
+    "category_ids": [
+      "local",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:35:47Z"
+  },
+  {
+    "id": "story:219d10b4ccc4095c",
+    "title": "[기고]미국은 ‘군사적 우세’와 ‘해양통제권’ 사이 마지막 간극을 메울 수 있나?…김태준의 美·이란戰 중계<80>",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:34:48Z"
+  },
+  {
+    "id": "story:5e1d0f96db840e8d",
+    "title": "코픽스 두 달 새 0.28%P 뛰었다…5억 주담대 이자 연 140만원↑",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:ca4dac9eba9596145c3ba088a5c73c1f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:32:05Z"
+  },
+  {
+    "id": "story:6d6a39345ffad394",
+    "title": "KBS 뉴스",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:e1359331eea5332ee814681535a59fec"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:29:00Z"
+  },
+  {
+    "id": "story:2de2602b45bd0568",
+    "title": "KBS 뉴스",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:53e4a0db0a1c1131f2ff13de3c122146",
+      "article:gnews:c9648da2f15ea1a7a19ab9afbe3f0995",
+      "article:gnews:ba5c4378900e3996a60de44c69d1ad08",
+      "article:gnews:9f7478346a4b6dae3b59695263c7a809"
+    ],
+    "source_count": 1,
+    "article_count": 4,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:24:00Z"
+  },
+  {
+    "id": "story:1c70a9f42e505f85",
+    "title": "휴머노이드 2천 대 격돌…베이징서 로봇 올림픽 개막",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "sports",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:23:12Z"
+  },
+  {
+    "id": "story:ffdeae7fcfffdd72",
+    "title": "ARC Raiders 개발진은 다섯 번째 탐험과 일시적인 시스템 동결을 발표했습니다.",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:8f3d11d32d0aa46177ed28c4044fd01d"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:22:34Z"
+  },
+  {
+    "id": "story:82949a992e93be4e",
+    "title": "KBS 뉴스",
+    "primary_category_id": "world",
+    "category_ids": [
+      "politics",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:1adbe0d993c168d890bf01bf0edc4a11",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c"
+    ],
+    "source_count": 1,
+    "article_count": 3,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:22:00Z"
+  },
+  {
+    "id": "story:e9593b925d530478",
+    "title": "오리엔탈 나이트 드림즈",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:5e51a95f751266ff051a664d12c999f9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:20:00Z"
+  },
+  {
+    "id": "story:3bb2ba8e0e07943c",
+    "title": "'스마트 경쟁, 미래로' 中 세계로봇운동회, 1천대 로봇 개막공연",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:19:00Z"
+  },
+  {
+    "id": "story:57304e66a5d30c99",
+    "title": "KBS 뉴스",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:14:00Z"
+  },
+  {
+    "id": "story:8bd63317cc42be91",
+    "title": "이리화, 주말 조정에도 암호화폐 강세 전망 제시",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:8c61ac06e058cc350373792de694d547"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:12:23Z"
+  },
+  {
+    "id": "story:e4e5b414d34e9e8b",
+    "title": "KBS 뉴스",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:399eb654bb08dfcde50cf8f2bfeb3a3b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:11:00Z"
+  },
+  {
+    "id": "story:0efeee47a2db0646",
+    "title": "이강인 ‘대활약’→AT·마드리드는 계속 한숨···월드컵 우승한 간판 FW와 갈등 심화 “아틀레티코 CEO 발언에 에이전트 분노”",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:799e841c79c6d2c6a1177dfc76567378"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:10:38Z"
+  },
+  {
+    "id": "story:e94fd796dc002a6e",
+    "title": "KBS 뉴스",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:3f0ed4f1ac09b3832f6f47f7adc520c7",
+      "article:gnews:08cecc30c67e31747c096ac40587048d",
+      "article:gnews:978642cd142a67b7ecb9da1058bd3e3f",
+      "article:gnews:496cb1ecce94b276a6b85fb8d88529d4",
+      "article:gnews:3af74742c14f8142aead678565e89ae9"
+    ],
+    "source_count": 1,
+    "article_count": 5,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:06:00Z"
+  },
+  {
+    "id": "story:a29f3dffa31537e7",
+    "title": "북극항로 시범 운항 닻 올렸다…한국 컨테이너선 첫 출항",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:058bcce5ee11659f3a97fbf610d3a169"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:05:00Z"
+  },
+  {
+    "id": "story:af7499c59c9f5475",
+    "title": "\"너무 화가 나\" 박위 분노케 한 '발'...실체 휠체어 승하차 교육 영상 보니",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:3e5a952857e13474269ead7a65090214"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:02:26Z"
+  },
+  {
+    "id": "story:df8daa5991f20ea4",
+    "title": "연차를 왜 써요?…휴가 몰빵하던 직장인들 돌변한 이유",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:cf2bd83a48bdb4ba43787fd2752338a3"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T12:00:02Z"
+  },
+  {
+    "id": "story:26b4830b0e557f61",
+    "title": "비트코인 3~4개월 박스권 전망 제기됐다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:5e309f5f033424d1a658fe7ced06cfee"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:58:44Z"
+  },
+  {
+    "id": "story:aede1911dd6db50f",
+    "title": "로또 1238회 1등 23명에 11억9700만원씩...경기 광주서 수동 5명 대박",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:b4eabf2a21c1307ce0e25bc63217af3e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:57:36Z"
+  },
+  {
+    "id": "story:162b31c2137e6718",
+    "title": "[뉴스] 월드 거래소 오픈 임박! 4차 신 선출을 위한 세력 간 총력전",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:a69f378034cb5ba054f8c829eb1f4195"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:55:26Z"
+  },
+  {
+    "id": "story:09c1e2add50f3c77",
+    "title": "XRP 몇 분 만에 37% 급락, 24시간 청산 13억5000만달러(약 1조8711억원)",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:43084dbf48d60fbf2e42b844a22b2b8e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:42:51Z"
+  },
+  {
+    "id": "story:0017d31c8114d85f",
+    "title": "[기자수첩] AI가 소환한 X세대의 청춘…SNS에서 다시 만난 1990년대",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:30:48Z"
+  },
+  {
+    "id": "story:20d5c997f5aa7946",
+    "title": "\"암 치료 가능?\" 주가 폭등…'맞춤형 암 백신' 3상 성공",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:55433fbbb031474834116bfde6b2bb40"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:28:00Z"
+  },
+  {
+    "id": "story:cfd3b3bf1628794e",
+    "title": "하단 유동성 쌓인 암호화폐, 변동성 복귀론",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:2c4b3234ce5b5fc77365ce60620b67b9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:26:58Z"
+  },
+  {
+    "id": "story:f5e1b6d4ba9c0c1a",
+    "title": "“1400원 깨지자 달러 쟁였다”...5대 은행 달러예금 ‘급증’",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636"
+    ],
+    "source_count": 1,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:22:00Z"
+  },
+  {
+    "id": "story:602e8b250a153263",
+    "title": "역대급 110조원 주주환원에도…삼성전자 주가는 왜 하락했나",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:1ffe40148b7375ec97a7349db69a4dd1",
+      "article:gnews:1c6490e7fb6c2ce440c6bc99c5bbf9d2"
+    ],
+    "source_count": 1,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:20:00Z"
+  },
+  {
+    "id": "story:64aa836c0d627708",
+    "title": "봉은사 전 주지 명진스님 입적…불교계 안팎 향해 소신 목소리(종합2보)",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:409295aa4bb6e3d092b9dfa923f72aba"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:10:31Z"
+  },
+  {
+    "id": "story:4df4ee8e35567681",
+    "title": "\"월요일 국장 또 폭등?\"…삼성전자·SK하이닉스, 美금리·엔비디아에 주가 향방은?",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:10:12Z"
+  },
+  {
+    "id": "story:da2f0b23d9936e15",
+    "title": "이란 협상파 \"전쟁 끝내고 경제 회복할 때\"…강경파에 대립각",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:b34dfe31082716a724c030a70070a1c0"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:06:38Z"
+  },
+  {
+    "id": "story:6135673361f2bdf3",
+    "title": "암호화폐 시장, 24시간 동안 레버리지 포지션 10억726만달러 청산",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:bc37bf74ca98ad0203f0821ad13ff3df"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:01:08Z"
+  },
+  {
+    "id": "story:c68ecd2d5a85bf30",
+    "title": "[날씨] 전국 무더위 속 곳곳 소나기…수도권·강원 새벽까지 비",
+    "primary_category_id": "society",
+    "category_ids": [
+      "local",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:00:01Z"
+  },
+  {
+    "id": "story:8f29a36a2b2a8e5c",
+    "title": "머스크 8조 베팅하나…위성-스마트폰 연결 시대 온다",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T11:00:00Z"
+  },
+  {
+    "id": "story:ba6c79cc573b3dc2",
+    "title": "'한국 배경'으로 주목받은 '모던 워페어 4', 베타 테스트 돌입",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:a4ed3c28ee7fab3c03560da87a8a4350"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:55:51Z"
+  },
+  {
+    "id": "story:46c90aeba9e040ec",
+    "title": "WMAC 2026 최다 참가자 뛰는 10K, 대구스타디움·육상진흥센터 인근 도로 통제",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local",
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:98421699cc95d743ca1e10e3972038d9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:54:32Z"
+  },
+  {
+    "id": "story:de67bf58b65e16be",
+    "title": "베타 버전 Call of Duty 모던 워페어 4에서 새로운 DLSS 버전 310.7.128이 발견되었습니다.",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:09e8673af34733b72a8fbd9e4739cadc"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:54:19Z"
+  },
+  {
+    "id": "story:d86a9e5b13f442d0",
+    "title": "정청래 ‘파김치 먹방’, 대통령 파면 암시?…원본 영상 추적해보니",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:53:00Z"
+  },
+  {
+    "id": "story:a4b4c0c9413ec0ad",
+    "title": "트럼프 “호르무즈는 미국 영토…시간도 많은데 이란 폭격할까”",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:50:00Z"
+  },
+  {
+    "id": "story:64e38f3832f68f8e",
+    "title": "9.5억달러 스테이블코인, 엑스알피레저가 스텔라 앞섰다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:07ff1011d69fc3e8aecd343de4b6b5c2"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:48:05Z"
+  },
+  {
+    "id": "story:72dc5299d779915e",
+    "title": "‘장미란씨 실종’ 담당 경찰관 긴급체포…다른 실종사건도 허위종결",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:3404c5f17eba2d52155408841ab03613"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:44:00Z"
+  },
+  {
+    "id": "story:ebcffb08ffd94f8a",
+    "title": "캐나다 총리 \"달러에는 달러로\"...미 관세에 1대1 맞대응 경고",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:43:00Z"
+  },
+  {
+    "id": "story:898d7c83f1e1fd77",
+    "title": "공포·탐욕지수 71, 탐욕 구간 유지했다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:2921c8894b4056395ed950ce244c5793"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:42:46Z"
+  },
+  {
+    "id": "story:ae6ae9413f6d83e2",
+    "title": "국힘, 이진숙 아닌 조경태·권영진 징계에 조선일보 “비장횡사”",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:40:09Z"
+  },
+  {
+    "id": "story:a2771380cb53ed02",
+    "title": "이름도 모른 채 매장…세우타 사태 사망자 장례 시작",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:d10ab797e49037441ed91303d57fba0c"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:36:21Z"
+  },
+  {
+    "id": "story:802036557799d2b0",
+    "title": "2조달러 앤트로픽 IPO 추진…스페이스X 넘는 자금 블랙홀 될까",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:30:55Z"
+  },
+  {
+    "id": "story:13eb6bf341b98df3",
+    "title": "17~23% 반등 비트코인, 강세장 판단 엇갈렸다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:a7836be86e013b74541c4ef7352aac97"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:30:00Z"
+  },
+  {
+    "id": "story:8f7daccb25794e36",
+    "title": "‘♥정석원’ 백지영이 만든 ‘사랑꾼’ 남편? 무뚝뚝 과거 극복하고 “사랑해” 애교 폭발",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:27:00Z"
+  },
+  {
+    "id": "story:49e84005ea956de0",
+    "title": "'N% 성과급' 릴레이 후폭풍…현대차 전면파업·삼전닉스 내홍",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:3623da0a251eea4165460d97fcfb8189"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:21:52Z"
+  },
+  {
+    "id": "story:0a1e626822309125",
+    "title": "파주시 농업기술센터, 40년 만에 ‘북파주 이전’ 가시화...1000억 투입",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:fb9601964e2a675acfcf5a69c930b64e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:20:39Z"
+  },
+  {
+    "id": "story:b376e54ab05fe2e3",
+    "title": "제주 여성 실종사건 허위종결한 경찰관 긴급체포",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:09:00Z"
+  },
+  {
+    "id": "story:e8cae03302f19cec",
+    "title": "이러다 곧 결혼하겠네…'바타♥' 지예은, 방송서 또 남친 자랑→'꿀' 뚝뚝 ('미우새')",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:4083d32a26002939671d745d6fe643db"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:01:00Z"
+  },
+  {
+    "id": "story:d7b1309e1555f4d2",
+    "title": "前 헌재 헌법연구부장 \"대법관 제청에 대통령 의중 고려 의무 없어 … 재제청 요구도 불가\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:6235894dd7219d2dd57a9ed37ab1dff7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:00:00Z"
+  },
+  {
+    "id": "story:a08243fd8e7f0e05",
+    "title": "“멈춰달라” 애원에도…콜라색 소변 보고 근육 녹은 병사 [사건 속으로]",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:08a0d8438357a310662e7c80737d0954"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T10:00:00Z"
+  },
+  {
+    "id": "story:02bdb595e29a2b8a",
+    "title": "1008만달러 미실현 손실, BTC 롱·ZEC 숏 엇갈렸다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:397d9033b46c83831d810c0adf5be163"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:59:42Z"
+  },
+  {
+    "id": "story:0adbe89eca0f95f1",
+    "title": "\"소말리아 해적, 예멘 앞바다 유조선 납치...4월 이후 6번째\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:79e86fbba1533b2a1c2ba213bc18f49f",
+      "article:gnews:515ab82322fce3d558dfdcbdc600f95b",
+      "article:gnews:19b2461b5c280f4f5effee593f7728ef"
+    ],
+    "source_count": 3,
+    "article_count": 3,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:54:00Z"
+  },
+  {
+    "id": "story:50ef3e5463cc5e60",
+    "title": "0% 가상자산 배분 논쟁, 기관 위험관리로 번졌다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:52:40Z"
+  },
+  {
+    "id": "story:dcdc59b7dbe5c69b",
+    "title": "특수부대 출신 교사가 떴다…현실판 ‘참교육’",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:4a5b7af84015d41a036ead5632f48920"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:45:00Z"
+  },
+  {
+    "id": "story:c593094ddc4eb348",
+    "title": "“다시 청소해달라” 항의하자 오물 투척",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:a58eb231183d0307a58ddeb83702100f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:36:00Z"
+  },
+  {
+    "id": "story:a9b052599cf31b2c",
+    "title": "346만달러 손실, 바이낸스 BTC 숏 정리됐다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:4b61087b460a326be391a31b2fb931d1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:33:57Z"
+  },
+  {
+    "id": "story:3f48d35ac94c72e3",
+    "title": "\"앤트로픽, 기업가치 2조 달러 IPO 추진\"...성공하면 스페이스X 제친다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:31:00Z"
+  },
+  {
+    "id": "story:4b39c3fbe4356a3c",
+    "title": "비트코인 ETF 19억달러 순유입, 10월 급락 뒤 최대",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:28:22Z"
+  },
+  {
+    "id": "story:420099d14c1854a3",
+    "title": "“수억씩 ‘뚝뚝’”강남권 아파트 실거래가·호가 급락",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:ea160542989659d81337b655dfd162e6"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:28:15Z"
+  },
+  {
+    "id": "story:5f4206beaea924ba",
+    "title": "양현종 77구에 교체한 KIA 이범호 감독 \"왠지 신경 쓰였다\"",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:c98995dd99146e12dcc4e3260f37d300"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:23:09Z"
+  },
+  {
+    "id": "story:d056ca9bc63e6f08",
+    "title": "비트코인 거래소 흐름 지표에 레버리지 재개 신호",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:1a1623e9755abd4f6c049b7ba607d3b4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:16:07Z"
+  },
+  {
+    "id": "story:9200f90a3889f26f",
+    "title": "트랙 밖 대구 매력 속으로…세계마스터즈 참가자 달성 관광",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local",
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:13:00Z"
+  },
+  {
+    "id": "story:5feeed20cc057f12",
+    "title": "오세훈 “용산공원 1㎝도 양보 못 해”…김영배 “자기 정치만”",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "economy",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:01:00Z"
+  },
+  {
+    "id": "story:14280573c85d7689",
+    "title": "젊고, 증상 없어 안심하면 ‘큰일’ 20∼30대 당뇨병 주의 [건강+]",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:85cbe1be638882c79c9a9df9bbccf059"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T09:00:00Z"
+  },
+  {
+    "id": "story:0bb30520239d4885",
+    "title": "與 \"한동훈, 노웅래 조작기소\"…韓 \"돈봉투 녹음 같이 들어보자\"(종합)",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:55:58Z"
+  },
+  {
+    "id": "story:6e94200d60e6b0c1",
+    "title": "취임 후 열달간 현장시찰은 단 8회…다카이치, 휴일 절반 '집콕'",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:81652f74477d1390342eb6ad5f1e2c72"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:47:34Z"
+  },
+  {
+    "id": "story:f58a48aec67cc6c6",
+    "title": "[현장] 복면 알몸남 또 출몰 연대 산책로, 가로등 옆은 칠흑 같은 어둠 [세상&]",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a"
+    ],
+    "source_count": 1,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:46:44Z"
+  },
+  {
+    "id": "story:6b36a4068a0e50a9",
+    "title": "SK하이닉스 2만 원대에 매수…전원주, 현재 계좌 상태는?",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:42:00Z"
+  },
+  {
+    "id": "story:c1b57c3470b7b488",
+    "title": "김경문 감독, 한화 '대역전승'에 \"팬들 응원 덕분…올 시즌 타선 안 좋아, 더 나은 경기로 보답해야\"",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:150513d007f4ee3776fe3a874f5c4e7a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:31:00Z"
+  },
+  {
+    "id": "story:8a0023c9994e92d9",
+    "title": "오세훈, 용산공원에 주택공급 반대...대체부지 제안",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:28:00Z"
+  },
+  {
+    "id": "story:0add6af4831a2b23",
+    "title": "금·비트코인만 오르고 달러는 약세…베센트의 역설",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:5a77a571102e26769ef3a0e644b6aad8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:27:07Z"
+  },
+  {
+    "id": "story:8f3ae1982386c3bd",
+    "title": "저축은행 주담대 금리도 '줄인상'…한투·SBI·OK 등 오름세",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:e7c5d571acbee86129773c5c0002f98e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:17:05Z"
+  },
+  {
+    "id": "story:d10cda4e7a088a9b",
+    "title": "테슬라, 중국서 3백만대 대규모 리콜…“사고 때 탈출 쉽도록”",
+    "primary_category_id": "world",
+    "category_ids": [
+      "society",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:13:52Z"
+  },
+  {
+    "id": "story:87e9519d71ae6a0d",
+    "title": "러 폭격에 이틀째 우크라 사상자 속출…민간인 사망 70%↑",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:43db88f1d43d33d105c473ad711c1217"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:12:40Z"
+  },
+  {
+    "id": "story:d44bf69546015ddc",
+    "title": "美·캐나다 무역전쟁 터졌다…50% 관세 폭탄에 맞대응 예고",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:cb7cfa15c07f5233a1e6608f3efdf677"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:11:58Z"
+  },
+  {
+    "id": "story:6063a8bd69089cc8",
+    "title": "[프로야구] 대전 덮친 갑작스러운 폭우...한화-LG 경기 우천취소",
+    "primary_category_id": "sports",
+    "category_ids": [
+      "sports"
+    ],
+    "article_ids": [
+      "article:gnews:bd7ac661954c200e477b803d59e209b8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:10:00Z"
+  },
+  {
+    "id": "story:dc4e7dbd45a50601",
+    "title": "XRP 13.81% 반등, ETF 유입과 청산 수치 엇갈렸다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:07:23Z"
+  },
+  {
+    "id": "story:92f64572e76005a9",
+    "title": "초고가 주택 稅 부담에 강남 집값 ‘뚝’ [김경민의 부동산NOW]",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:a6ebaed300572b519ce366d4628410cc"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:03:00Z"
+  },
+  {
+    "id": "story:e239ff28270de65f",
+    "title": "파이프 부러지고도 '퍽퍽'…살해하려 했는데 '집유'",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:3260f046db9f3df61e5f34fdcd60deaf"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T08:03:00Z"
+  },
+  {
+    "id": "story:14e8beab6cb22dd3",
+    "title": "제주 실종여성 가족에 “신음소리 들려달라” 연락한 10대 남성 검거",
+    "primary_category_id": "society",
+    "category_ids": [
+      "local",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:58:00Z"
+  },
+  {
+    "id": "story:4395e5b264403ce5",
+    "title": "무화과 끝에 있는 작은 구멍, 알고 나면 더 맛있다",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:c9caec66cd36b77a674065667c6c04a4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:55:00Z"
+  },
+  {
+    "id": "story:3a1c078fe9998b3a",
+    "title": "북한, 일 최대 방위비 편성 추진에 “침략전쟁 준비…철저히 반격”",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:43:00Z"
+  },
+  {
+    "id": "story:30c763e2fe361ecc",
+    "title": "앤트로픽, '2조달러 몸값' IPO 추진…스페이스X 기록 넘나",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:38:38Z"
+  },
+  {
+    "id": "story:942a717f40c7bb56",
+    "title": "與김영배, 오세훈과 오찬회동…용산공원 주택공급 두고 평행선(종합)",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "local",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:34:04Z"
+  },
+  {
+    "id": "story:33c6ade49f849e00",
+    "title": "330억위안 조달 추진, 양쯔메모리 모회사 과창판 접수",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:7cabeed7729f458e4a111bec70d1f999"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:23:46Z"
+  },
+  {
+    "id": "story:96349f1f1619f2e8",
+    "title": "김영배 \"吳, 1cm도 양보 못한다며 자기 정치\"‥오세훈 \"재개발·재건축 협력 공감대\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "economy",
+      "local",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:21:18Z"
+  },
+  {
+    "id": "story:67b42b68034a3131",
+    "title": "문자로 “오늘까지만” 퇴사 통보한 인턴…마지막에 사장에게 한 말 [당신생각은]",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:b4a8efb7e58606ac2a4b9af5c5319b6a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:20:35Z"
+  },
+  {
+    "id": "story:eb6298de3e24bb45",
+    "title": "수영장 천장서 콘크리트 '뚝'…불안 휩싸인 이용객들",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:2f280fef0bca86ebea4f6e5ddf7964d6"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:09:00Z"
+  },
+  {
+    "id": "story:4c278b93e4e7a63c",
+    "title": "봉은사 주지 지낸 명진스님 입적···제주서 프리다이빙 사고",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture",
+      "local",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:f1e90a04ccf06298c0ce9244c01c4405"
+    ],
+    "source_count": 2,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:04:00Z"
+  },
+  {
+    "id": "story:88ff2b21bd334d83",
+    "title": "KBS 뉴스",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T07:03:26Z"
+  },
+  {
+    "id": "story:3b4585941bbfcc03",
+    "title": "이 대통령, 노웅래 무죄에 “선배님께 사죄…정치검찰 패악질로 읍참마속”",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:faaaf3451c5646370391ee86987a1a19"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:53:00Z"
+  },
+  {
+    "id": "story:e09a4e6d6efb9a6a",
+    "title": "日정부 예산요구 사상 첫 130조엔 돌파 전망…4년연속 최대",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:0b742aea1dd9476b6cd1d06a1dab6189"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:52:44Z"
+  },
+  {
+    "id": "story:8eb1528bfd11408f",
+    "title": "한동훈 “노웅래에 사과한 이 대통령, 자기 사건 공소취소 빌드업 중”",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:51:00Z"
+  },
+  {
+    "id": "story:3e26ed36b5b9a08b",
+    "title": "[토큰분석] 스탠다드차타드 “비트코인 10만달러 전망, 이젠 낮을 수도”… 12만6000달러 재도전 열리나",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:79cc6c9ed3d584952eaf2633b1e7408d"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:50:48Z"
+  },
+  {
+    "id": "story:05449e16ca8c1f97",
+    "title": "테슬라, 중국서 3백만 대 리콜...\"매립형 손잡이 문제\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:993c83041cde14b5b4c0241559e091e3"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:46:00Z"
+  },
+  {
+    "id": "story:7f384ac96db2f442",
+    "title": "2020년 엔비디아 인턴 입사 후 ‘승승장구’…젠슨 황 동행녀의 정체",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:42:20Z"
+  },
+  {
+    "id": "story:50b1d6e1105b0ea9",
+    "title": "박완수 경남지사 \"특별재난지역 추가 선포되도록 최선\"",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:472b5c44f99041831df77fab1e8afc47"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:36:52Z"
+  },
+  {
+    "id": "story:f6e76fe15db9879d",
+    "title": "與김영배, 吳와 회동…\"吳 '용산공원 1cm도 안된다'며 자기정치\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "local",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:6d73e99f707f285a49378b02f51389f4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:33:35Z"
+  },
+  {
+    "id": "story:afb84c81aa54c18e",
+    "title": "국민의힘, 정부 '미래대응기금' 신설에 \"국민 혈세 마음대로 쓰겠다는 선언\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:ba21f6667c16b20bc37dc22636b5bd0b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:32:00Z"
+  },
+  {
+    "id": "story:e64908343618008e",
+    "title": "익명 'Ox 알파' 등장…코딩 성능·100조 토큰 무상 제공에 '발칵'",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:1512f6aee2c79d970f04f9a79e664798"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:18:55Z"
+  },
+  {
+    "id": "story:330aebe83ca8a131",
+    "title": "일본처럼 될 줄 알았는데…'20년 만의 호황'에도 주가 '뚝' 백화점株 줍줍기회?[주末머니]",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:11:00Z"
+  },
+  {
+    "id": "story:b3cb882559c129d4",
+    "title": "봉은사 주지 지낸 명진스님 입적…서귀포서 해양사고(종합)",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture"
+    ],
+    "article_ids": [
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:10:12Z"
+  },
+  {
+    "id": "story:7d5588ccd5ba6cf9",
+    "title": "[속보] 명진스님 제주서 프리다이빙하다 숨져…향년 75세",
+    "primary_category_id": "culture",
+    "category_ids": [
+      "culture",
+      "local",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:07:00Z"
+  },
+  {
+    "id": "story:ada07b0a89a7c303",
+    "title": "제트팩 캣과 D.Mon의 아버지, 김현승 아티스트",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:bbfbd8991e0e8ca0d4786d07d305486e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:02:55Z"
+  },
+  {
+    "id": "story:de3dd0f9b1d7dd30",
+    "title": "“백화점엔 샤넬, 시내엔 고층 아파트”…러 밀착 속 달라진 北 풍경",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:479d383a768201e85b24517c325677f9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:02:41Z"
+  },
+  {
+    "id": "story:7c3dda0805dc80f3",
+    "title": "금 대신 샀더니…한 달 만에 30% 넘게 오르자 개미들 들썩",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:5934033f0e068ef48fce2bf98a308ac3"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:00:02Z"
+  },
+  {
+    "id": "story:86fc065f9ac100aa",
+    "title": "[르포]\"알바 대신 가족까지\" … 자영업자들, 울며 겨자먹기로 '버티기 영업'",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:cc09d1a62b7a8a3ee9b5241ee73388b3"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T06:00:00Z"
+  },
+  {
+    "id": "story:a9c3af1bf6d4ace5",
+    "title": "비트코인 현물 ETF 유입세 약 49% 축소...하루 3억745만 달러 유치",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:57:15Z"
+  },
+  {
+    "id": "story:6489e73c7be9493c",
+    "title": "고객 집 거실에 '오물' 뿌린 청소업체 직원, 왜...법적 다툼까지",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:8902ed31a2f78570f92935f91c4deb8d"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:56:12Z"
+  },
+  {
+    "id": "story:24e3f41e9e86b0ce",
+    "title": "[알트 현물 ETF] XRP·SOL 등 4종 순유입...BNB는 순유출",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:6f06917ac66a1b54f498cf9f1afa14bc"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:53:06Z"
+  },
+  {
+    "id": "story:dcb37334e2988dcd",
+    "title": "\"3초만 보여주면 척척\"…보고 바로 익히는 로봇 나왔다",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:0144dd891f775ee7aab09ced708828c4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:46:48Z"
+  },
+  {
+    "id": "story:ccead427c97142c1",
+    "title": "드론 강국 부상한 북한…러 파병 북한군 8500명, 드론병 포함",
+    "primary_category_id": "world",
+    "category_ids": [
+      "tech_science",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:45:28Z"
+  },
+  {
+    "id": "story:671beb30cde689f4",
+    "title": "[크립토 인앤아웃] 비트코인서 4719만 달러 빠져...XRP·솔라나엔 대규모 유입",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:9f3e67816f0a69623083d7957b866a62"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:30:46Z"
+  },
+  {
+    "id": "story:20b08e65349ddb46",
+    "title": "\"75개국 이민비자 발급 중단은 위법\" 연방지방법원, 트럼프 조치에 제동",
+    "primary_category_id": "world",
+    "category_ids": [
+      "society",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:24:58Z"
+  },
+  {
+    "id": "story:40eb96b2cbb79d32",
+    "title": "캐나다, 미국과 무역협상 결렬에 '동일 관세로 맞대응'",
+    "primary_category_id": "world",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:20:09Z"
+  },
+  {
+    "id": "story:2a5cc41ced35225d",
+    "title": "리플 65% 반등, 바이낸스코인 시총 앞섰다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:96561487203602b0cfbcfaa45af07e16"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:18:00Z"
+  },
+  {
+    "id": "story:e377e724832e6aef",
+    "title": "솔라나 90달러 하회, 24시간 상승폭 0.5%로 줄었다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:2e5152ce36aac73be040ecc023ab3687"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:15:49Z"
+  },
+  {
+    "id": "story:26cd16be66da6146",
+    "title": "\"50% 트럼프 관세\" 현실화‥미·캐나다 무역협상 결렬",
+    "primary_category_id": "world",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:12:41Z"
+  },
+  {
+    "id": "story:1c7122bdccfb8f27",
+    "title": "엔캐리 청산 공포 확산…韓증시 폭락 재현될까",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:04:02Z"
+  },
+  {
+    "id": "story:3ca5c26fc95b6a48",
+    "title": "“전 연인들과 성관계 했어?… 죽이겠다” 과거 추궁에 장모 협박까지 한 30대…",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:753e765fb28edcdb07cd3bec370ba34a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:02:54Z"
+  },
+  {
+    "id": "story:7506fa6efde87357",
+    "title": "오세훈 시장 항소심서 무죄 주장에…민주당,“변명 뒤 숨지 말고 서울시민에 사죄하라”",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "local",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:02:00Z"
+  },
+  {
+    "id": "story:22e5d29dc9473c84",
+    "title": "블랙록 ETHA에만 1억5083만 달러...이더리움 현물 ETF 5거래일 연속 자금몰이",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:01:17Z"
+  },
+  {
+    "id": "story:9c0578353f409112",
+    "title": "엔비디아 또 '사상 최대' 실적 예상…'수혜주'는 따로 있다는데[주末머니]",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346"
+    ],
+    "source_count": 1,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T05:00:40Z"
+  },
+  {
+    "id": "story:ac376399c3bcbcfd",
+    "title": "한동훈 \"이 대통령 노웅래 신파 역할극‥공소취소 빌드업 속셈\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:58:36Z"
+  },
+  {
+    "id": "story:3667d38ef1fe988d",
+    "title": "이더리움 '글램스테르담' 업글 임박...이후 업글 '헤고타' 논의도 활발",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:f1982b5149c11aa528d296d56cf397c7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:58:07Z"
+  },
+  {
+    "id": "story:26fa8ca18623e9b6",
+    "title": "플리토, 쓰면 쓸수록 똑똑해지는 '자가발전 AI 통역 비서' 고도화",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:2921ad097fcbe216a0a265b5e6af0fa6"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:47:13Z"
+  },
+  {
+    "id": "story:da87d9aa4a10ce97",
+    "title": "카르다노 다익스트라, 2026년 4분기 코드 목표",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:0961a8455f2b197ee7337bb4e356b597"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:43:08Z"
+  },
+  {
+    "id": "story:dd9fa1be77b6f6fc",
+    "title": "[월가 유동성 레이더] 선물은 하락 베팅 우세…미국 현물은 프리미엄 회복",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:b6d29a3495bacce390bfa2ec57b3c1d4"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:41:17Z"
+  },
+  {
+    "id": "story:4ce302d3ac5e7583",
+    "title": "[기자수첩]\"순천대가 받을 줄 알았다\"…민형배 시장, 중재가 '감(感)'이었나",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:4eb6b005fb39c7dcbca7ab7a440ff7d7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:31:31Z"
+  },
+  {
+    "id": "story:870438fe576bf9e2",
+    "title": "국민의힘, 李 대통령 향해 \"부패청산 외칠 자격 있나‥내로남불\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:28:22Z"
+  },
+  {
+    "id": "story:b9f9ea322ab19ebf",
+    "title": "“평양이 이렇게 달라졌다고?”…샤넬·오메가 등 명품 매장 즐비한 북한 근황",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:25:29Z"
+  },
+  {
+    "id": "story:baf34ea243b2a4d9",
+    "title": "아이폰도 이제 별거 없네… 갤럭시 신제품 폭격에 스마트폰 지각 ‘흔들’",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:b65cc746817634826543a591c3e25072"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:24:10Z"
+  },
+  {
+    "id": "story:7482de88bd425dae",
+    "title": "스텔라루멘 22% 상승 보도, 실물자산 일정 남았다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:6be8f4939e6fb6934ade0ca592337815"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:19:31Z"
+  },
+  {
+    "id": "story:dea914ebe8fc1b14",
+    "title": "비트코인 8만달러 베팅, 폴리마켓서 81%",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:1acb86e0a9eb97d3015e99366951ed3a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:13:49Z"
+  },
+  {
+    "id": "story:38b47ad4a64c765d",
+    "title": "미국, 캐나다산 제품에 50% 관세 부과 강행...최종 협상 결렬",
+    "primary_category_id": "world",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:13:00Z"
+  },
+  {
+    "id": "story:a42ae9718a0b329f",
+    "title": "복구도 못 끝냈는데…쑥대밭 된 하와이 또 초비상 걸렸다",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:7bf7cb29c3f6ca73540b875088272fdb"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:08:10Z"
+  },
+  {
+    "id": "story:a80f5de108b90613",
+    "title": "비트코인 25% 반등에도 AI 챗봇은 신중론",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T04:07:35Z"
+  },
+  {
+    "id": "story:87ef5ed2779ed544",
+    "title": "미 연방법원, ‘75개국 이민 비자 중단’ 제동…백악관 침묵",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:59:00Z"
+  },
+  {
+    "id": "story:76a1d0ce6443eb41",
+    "title": "SOL 투표 23일 시작, 소각·발행 구조 논의",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:22a183b19239d23f9ea1e30b9f18144b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:53:15Z"
+  },
+  {
+    "id": "story:08de128a4dcf0bee",
+    "title": "항소심서 무죄 주장 오세훈 향해, 민주 “시민에 사과하는 게 먼저”",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "local",
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:42:00Z"
+  },
+  {
+    "id": "story:5d1504a9271064de",
+    "title": "“큰손들 AI 메모리株 떠난다”…‘150조 승부수’ 삼성·하이닉스 괜찮을까 [머니+]",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:31:31Z"
+  },
+  {
+    "id": "story:4ec1102bc22a93c6",
+    "title": "트럼프 토큰 24시간 35%대 상승, 멜라니아도 동반",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:cda61035be78996ea191058b9df7b192"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:26:38Z"
+  },
+  {
+    "id": "story:6593a07ae98815c6",
+    "title": "노상 방뇨 범칙금에 화내 투신소동…영장 신청",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:248c152798fd663d4ba5e6d6dbb8e5c8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:19:23Z"
+  },
+  {
+    "id": "story:e266c9b74a960c7e",
+    "title": "KBS 뉴스",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:fe998c7f86dcbda431687f481b06bbf8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:09:00Z"
+  },
+  {
+    "id": "story:da5ea8cb31aec426",
+    "title": "'오버워치 데이' 부산 상륙...선승진 넥슨 슈터본부장 \"이용자와 특별한 관계 더 발전\"",
+    "primary_category_id": "local",
+    "category_ids": [
+      "local"
+    ],
+    "article_ids": [
+      "article:gnews:40846910aadc8d6a0d01719e8cc21042"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:08:33Z"
+  },
+  {
+    "id": "story:970862c8abe12437",
+    "title": "與 \"'1심 유죄' 오세훈, 무죄 프레임 골몰…변명말고 사과해야\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:06:03Z"
+  },
+  {
+    "id": "story:a15741d6592819e6",
+    "title": "\"허리케인 겨우 넘겼는데\"…하와이에 또 열대성 폭풍 접근",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:e9c2943de596a6c30064672508f8ce9b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T03:00:43Z"
+  },
+  {
+    "id": "story:47756afc404113da",
+    "title": "태풍 사우델, 오키나와 경로 남쪽으로 조정...한반도 영향은?",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:2d8415dcb2b2ae04819e71e82943bcd8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:49:00Z"
+  },
+  {
+    "id": "story:4d6cd82c98f4a4f6",
+    "title": "9X 공대공미사일 103기 판매 잠정 승인",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:b2eea49274ca2d24ed9c9b33d3f9a43b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:46:42Z"
+  },
+  {
+    "id": "story:7a415489a6a9831f",
+    "title": "장줘얼 \"약세장 종료 90%\"…ETH 상대강세 거론",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:b143cf979664e8e031530cb28f17aeed"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:42:21Z"
+  },
+  {
+    "id": "story:8cc51559cf376103",
+    "title": "미·일 엔화 개입에...'엔 캐리 트레이드' 청산 우려",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:42:00Z"
+  },
+  {
+    "id": "story:2a890a937770e661",
+    "title": "전 연인들과 성관계 여부 추궁…아내 인정하자 30대가 한 짓",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:532dee518114007e47fa20d15be9fdda"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:41:03Z"
+  },
+  {
+    "id": "story:c19d95d5562bc385",
+    "title": "삼전닉스 턱밑까지 쫓아온 中 YMTC…6.8조 실탄 마련 나선다",
+    "primary_category_id": "world",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:ec61cff06188bc589ac2f9b9e37d0d7a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:40:40Z"
+  },
+  {
+    "id": "story:97fcd30af079e861",
+    "title": "“우크라, AI 드론으로 모스크바 공항 타격 검토···민간 피해 우려에 중단”",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:39:00Z"
+  },
+  {
+    "id": "story:384c8ce5b07546ab",
+    "title": "현대차 10년 만에 전면 파업…올해누적 매출 차질 2조3000억 원 넘어",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:ec62f8d5935d7b426dee1ce2040551ea"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:39:00Z"
+  },
+  {
+    "id": "story:88a4a91f2c5a4333",
+    "title": "기름값 잡은 최고가격제, 다음 시험대는 '손실보전'···4.2조원 충분할까",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:492c8967c1cc3f85972d38b21c5a72bc"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:38:18Z"
+  },
+  {
+    "id": "story:c8c102f875a00994",
+    "title": "“유학비 부담 확 줄어 좋아요”…삼전닉스 주주환원 300조원의 ‘나비효과’",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:746c3e632e848cb9945a4a2f36290baa"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:37:57Z"
+  },
+  {
+    "id": "story:b19d1c51d3ee9e6a",
+    "title": "민주당, '여론조사 대납' 무죄 주장 오세훈에 \"무죄 프레임에만 골몰‥민생 뒷전\"",
+    "primary_category_id": "politics",
+    "category_ids": [
+      "politics"
+    ],
+    "article_ids": [
+      "article:gnews:3414d3453e63542668689c939e764d9f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:35:00Z"
+  },
+  {
+    "id": "story:464a8aa20ff7895d",
+    "title": "장기금리 급등…금융시장·세계 경제에 울린 ‘경고’",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:d59833ebe122838f12db07e35af9e087"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:33:00Z"
+  },
+  {
+    "id": "story:dc3b5c9a363910e6",
+    "title": "트럼프 또 “호르무즈 해협은 미국 영토” 주장",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:1bdab162faaefab812f794058dac7e14"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:32:00Z"
+  },
+  {
+    "id": "story:f59f3833020e08c4",
+    "title": "\"러 파병 북한군 현재 8500명… 드론 운용병 400명 포함\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:30:40Z"
+  },
+  {
+    "id": "story:be46d3104203bfcf",
+    "title": "돈보단 '같은 삼성전자'라는 존중…강남 거리에 퍼진 DX의 설움 [ER현장]",
+    "primary_category_id": "society",
+    "category_ids": [
+      "society"
+    ],
+    "article_ids": [
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:30:00Z"
+  },
+  {
+    "id": "story:0428069a0d7ed306",
+    "title": "\"반발 거셀 줄 몰랐나\"…국토부, 고시원 욕조 허용 9일 만에 재검토[부동산AtoZ]",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:1c3fa7ab2c32d2cae9e5d278a0431dee"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:18:35Z"
+  },
+  {
+    "id": "story:08ce0461150f5600",
+    "title": "8·13 대책 주택 3협회 ‘환영’ 이면…현장 애로 ‘여전’",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:d6ebe8dbb19e7db59c6c77b8815e09ca",
+      "article:gnews:e05185232572a595b1f65e0220358997"
+    ],
+    "source_count": 1,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:14:51Z"
+  },
+  {
+    "id": "story:98ceff6143372e67",
+    "title": "트럼프 북미 대화 추진에 미 민주당 공세‥\"김정은에 굴복하고 동맹 소외\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "politics",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:11:00Z"
+  },
+  {
+    "id": "story:2778872154b2bb85",
+    "title": "“비트코인보다 SK하이닉스” 해외 거래소에서 1등…한국서 다 떠난다 [크립토360]",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:11:00Z"
+  },
+  {
+    "id": "story:0f053f6eff6dabfc",
+    "title": "반도체 반등에 서학개미도 움직였다…삼전·닉스 ETF 1185억 순매수",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:07:50Z"
+  },
+  {
+    "id": "story:3b8e1529e7fbb655",
+    "title": "\"우크라, 모스크바 공항 겨냥 AI드론떼 작전 마련했다가 중단\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "tech_science",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:90c9bcdbae61b246111061cce35398d8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:04:50Z"
+  },
+  {
+    "id": "story:55913b1c6e2f33bf",
+    "title": "“AI 빚 내가 보증설께”…엔비디아 통큰 약속에 서학개미 DRAM에 1천억 베팅",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T02:03:59Z"
+  },
+  {
+    "id": "story:327ea11ee0548270",
+    "title": "우크라이나 정보국 \"러 파병 북한군 현재 8,500명‥드론부대 포함\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:57:14Z"
+  },
+  {
+    "id": "story:080eaad3c60241f3",
+    "title": "오픈AI, 'GPT-5.6 솔'까지 가격 일시 인하...코덱스 사용자 2천만 돌파",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:635d7a964c664c9f353a8cb6cf6b1c77"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:57:00Z"
+  },
+  {
+    "id": "story:8ef5955a02c2a1c0",
+    "title": "엔비디아, 국내 NPU 스타트업 리벨리온과 인수 협상 중",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:56:13Z"
+  },
+  {
+    "id": "story:3366224c5635ea36",
+    "title": "카카오 인적분할 결단...\"호재\" vs \"악재\"",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:55:40Z"
+  },
+  {
+    "id": "story:11bc61fff76cebb2",
+    "title": "비트코인 8만 달러 육박…스트래티지 주가 6% 상승",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:55:23Z"
+  },
+  {
+    "id": "story:5346d39358acf28f",
+    "title": "“같은 금인줄 알고 샀는데 수익률이 다르다고?”…골드뱅킹·골드바 뭐가 더 남을까",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:8aa579afe9c0929dcd0b3264a2d92234"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:51:22Z"
+  },
+  {
+    "id": "story:4362154caf2e6688",
+    "title": "中, 메모리 19.6조 상장 실탄…삼성 시안·SK 우시 정면충돌",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:45:41Z"
+  },
+  {
+    "id": "story:e395f7d5d7886e44",
+    "title": "엘니뇨에 통행 줄인 파나마운하…美 '안방 경제' 직격탄",
+    "primary_category_id": "world",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:cb98edd7bed99213216a6324551de624"
+    ],
+    "source_count": 2,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:42:44Z"
+  },
+  {
+    "id": "story:788339ebcdfb9d1d",
+    "title": "'비전 프로' 대신 AI·스마트 안경에 올인…애플, 200명 구조조정",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:34:58Z"
+  },
+  {
+    "id": "story:02b23da52287303d",
+    "title": "쪼개기 그만…인적분할에도 주가 내렸다",
+    "primary_category_id": "economy",
+    "category_ids": [
+      "economy"
+    ],
+    "article_ids": [
+      "article:gnews:65b7a95e97bc7b7f45f96ddc6689b4d9"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:30:01Z"
+  },
+  {
+    "id": "story:5899000cf691b419",
+    "title": "트럼프 \"호르무즈는 현재 미국 영토‥이란, 합의 절실히 원해\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f"
+    ],
+    "source_count": 2,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:28:49Z"
+  },
+  {
+    "id": "story:5e27983c18b8e6cb",
+    "title": "북한, 일본 역대 최대규모 방위비 편성 추진에 \"침략전쟁 준비\" 비난",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2"
+    ],
+    "source_count": 2,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:24:01Z"
+  },
+  {
+    "id": "story:0388891472a20483",
+    "title": "日 국립공원 의문의 ‘식빵 테러’…도대체 누가 가져다놨을까",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:23:29Z"
+  },
+  {
+    "id": "story:889b5335001d5a24",
+    "title": "\"러 파병 북한군 현재 8천500명…정찰·공격용 드론부대 포함\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:784266b540749466f5ea706bb1b48ae1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:18:20Z"
+  },
+  {
+    "id": "story:b3ed01e8ae8a74c4",
+    "title": "비전' 공개...'오퍼스 4.8'에 도전 < 산업일반 < AI산업 < 기사본문",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "economy",
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:08:55Z"
+  },
+  {
+    "id": "story:c50402377d3fe683",
+    "title": "\"5일 썼는데 배터리가 80%?\"…10만원대 가성비 '레드미 워치6'[잇:써봐]",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:8ae70950400d19c35d801e464df306d7"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:00:06Z"
+  },
+  {
+    "id": "story:47c5ec1cb729456f",
+    "title": "극심한 스트레스로 바다에 투신까지…한계 다다른 초대형 항공모함",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:5625b46442e00708660866d917b8e2bf"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T01:00:00Z"
+  },
+  {
+    "id": "story:d9a78e46f09448a5",
+    "title": "AI 모델 ‘클로드’ 개발한 앤트로픽도 자체 칩 만든다···구글 출신 반도체 전문가 영입",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T00:53:00Z"
+  },
+  {
+    "id": "story:042cf36a51bb75f1",
+    "title": "아야네오, 게임보이 어드밴스 닮은 안드로이드 휴대용 게임기 출시",
+    "primary_category_id": "tech_science",
+    "category_ids": [
+      "tech_science"
+    ],
+    "article_ids": [
+      "article:gnews:2be078526dc618e5953c670836003d6f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T00:49:00Z"
+  },
+  {
+    "id": "story:6a7cca40d57395d5",
+    "title": "北, 日 8조9000억엔 방위비에 반발… “위험천만한 전쟁예산”",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T00:39:30Z"
+  },
+  {
+    "id": "story:91cf3c91be5dc4c3",
+    "title": "통항량이 늘었다는 뉴스의 함정",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:15e53fe10ad9d75bf29e0312062cf35d"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-22T00:00:00Z"
+  },
+  {
+    "id": "story:bf29057cfb623d24",
+    "title": "팔레스타인 10대, 이스라엘 정착민 총에 숨져...\"정착촌 확대 멈춰라\" 비판",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:a7bf374fb4b06bc50371c4c64bf4240d"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T23:42:00Z"
+  },
+  {
+    "id": "story:09010ae357c374a8",
+    "title": "“5500억원에 지급하겠다”…아동개인정보 위반 소송, 미국과 합의한 이 회사",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:10bf833e05e358539fa0992412513557"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T23:17:37Z"
+  },
+  {
+    "id": "story:6cf5563b9be8857c",
+    "title": "北, 日 10조엔 방위비 추진에 \"침략전쟁 준비\" 비난",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T22:42:50Z"
+  },
+  {
+    "id": "story:cc060bf32f95d772",
+    "title": "\"덕분에 42억 초호화 결혼식 참여했죠\"…SNS로 눈도장 찍는 美 취준생[세계는Z금]",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:a8ada98680597be8d08313335b7e9771"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T22:33:00Z"
+  },
+  {
+    "id": "story:42cba8d94063987f",
+    "title": "미 해군 영웅 도리스 밀러의 수난 [김태훈의 의미 또는 재미]",
+    "primary_category_id": "world",
+    "category_ids": [
+      "culture",
+      "society",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T21:00:00Z"
+  },
+  {
+    "id": "story:cb6ca252c42f24ec",
+    "title": "트럼프 '백악관 연회장' 공사 당분간 허용…美대법원장 임시명령(종합)",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T20:44:25Z"
+  },
+  {
+    "id": "story:cb349b8dea485a11",
+    "title": "트럼프, 다진 쇠고기 초과 관세 면제...물가 '눈치'",
+    "primary_category_id": "world",
+    "category_ids": [
+      "economy",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T20:38:00Z"
+  },
+  {
+    "id": "story:b01a50026e9232d6",
+    "title": "美선거 앞 물가 민심에…트럼프, 다진소고기 초과관세 면제(종합)",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T20:15:41Z"
+  },
+  {
+    "id": "story:b83f36bd2bbe08da",
+    "title": "\"만지면 행운\"…파리 명물 '달리다 흉상' 성추행 논란에 '거울 갑옷' 입혔다",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T20:01:00Z"
+  },
+  {
+    "id": "story:a5b90124a0b3cb7f",
+    "title": "美, 유엔 미납 분담금 1조원 납부 추진…\"전체 20%도 안돼\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:d5f7e0fd911b6c24a05d1d75a048935f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T19:26:33Z"
+  },
+  {
+    "id": "story:d3698ba5c9b5f2a2",
+    "title": "중동·이슬람 8개국 \"이스라엘 서안 정착촌 확대 중단하라\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:1b0f89cf9a6181fda02bc901f08e7c4e",
+      "article:gnews:765da21f05b462ffae1ae009180f3b85"
+    ],
+    "source_count": 2,
+    "article_count": 2,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T17:57:00Z"
+  },
+  {
+    "id": "story:86fc882e1a0f5112",
+    "title": "튀르키예, 네타냐후 체포 영장…인터폴 적색수배 요청",
+    "primary_category_id": "world",
+    "category_ids": [
+      "society",
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T17:55:22Z"
+  },
+  {
+    "id": "story:cbaaa8769713bbd3",
+    "title": "미군 \"5월 이후 호르무즈 통과 지원한 석유 6억6천만 배럴\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:ebe399eadddbf202e54da31ab274f900"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T16:55:15Z"
+  },
+  {
+    "id": "story:e5ca92bb06eff70b",
+    "title": "이란·오만 외무장관 대화 재개…호르무즈 항행 문제 논의",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T16:51:37Z"
+  },
+  {
+    "id": "story:dc44b097c95f81b9",
+    "title": "트럼프 대통령 \"이란 지도부 제거로 합의 도출 어려워져\"",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T16:20:49Z"
+  },
+  {
+    "id": "story:c2f003356453140e",
+    "title": "일본 330m 최고층 빌딩인데…초대형 지진 때도 가장 안전한 대피소",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:15a02c08acaada076587d158c102659a"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T16:04:00Z"
+  },
+  {
+    "id": "story:27e4d60432fda345",
+    "title": "“키이우도 턱밑”…러, 北 탄도미사일 50발 보유·운용부대 배치",
+    "primary_category_id": "world",
+    "category_ids": [
+      "world"
+    ],
+    "article_ids": [
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1"
+    ],
+    "source_count": 1,
+    "article_count": 1,
+    "synthetic_article_count": 0,
+    "latest_published_at": "2026-08-21T16:00:00Z"
+  }
+]

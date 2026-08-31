@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle id="Selected node / Local glow" cx="34" cy="34" r="34" fill="url(#paint0_radial_0_18)"/>
+<defs>
+<radialGradient id="paint0_radial_0_18" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(34 34) scale(68)">
+<stop stop-color="#A7C4E1" stop-opacity="0.17"/>
+<stop offset="0.42" stop-color="#7599BC" stop-opacity="0.055"/>
+<stop offset="1" stop-color="#7599BC" stop-opacity="0"/>
+</radialGradient>
+</defs>
+</svg>
