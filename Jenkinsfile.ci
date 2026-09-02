@@ -1,0 +1,95 @@
+// GitLab Connection은 Jenkins Job 설정에서 지정합니다.
+// Manage Jenkins -> Configure System -> GitLab 또는
+// Job -> Build Triggers -> Build when a change is pushed to GitLab
+pipeline {
+    agent any
+
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    def sourceBranch = env.gitlabSourceBranch?.trim()
+                    def targetBranch = env.gitlabTargetBranch?.trim()
+                    def isMergeRequest = sourceBranch && targetBranch
+                    def checkoutBranch = isMergeRequest ? sourceBranch : (env.gitlabBranch?.trim() ?: 'dev')
+
+                    def extensions = [
+                        [$class: 'CloneOption', noTags: false, shallow: false, depth: 0, honorRefspec: true]
+                    ]
+
+                    if (isMergeRequest) {
+                        extensions.add(0, [
+                            $class: 'PreBuildMerge',
+                            options: [
+                                mergeRemote: 'origin',
+                                mergeTarget: targetBranch,
+                                mergeStrategy: 'DEFAULT',
+                                fastForwardMode: 'FF'
+                            ]
+                        ])
+                        echo "MR CI: checkout origin/${checkoutBranch}, merge origin/${targetBranch} in workspace"
+                    } else {
+                        echo "Fallback CI: checkout origin/${checkoutBranch}"
+                    }
+
+                    echo "gitlabSourceBranch=${env.gitlabSourceBranch ?: 'N/A'}"
+                    echo "gitlabTargetBranch=${env.gitlabTargetBranch ?: 'N/A'}"
+                    echo "gitlabBranch=${env.gitlabBranch ?: 'N/A'}"
+                    echo "gitlabActionType=${env.gitlabActionType ?: 'N/A'}"
+
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "origin/${checkoutBranch}"]],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: extensions,
+                        userRemoteConfigs: [[
+                            credentialsId: 'gitlab-deploy-token',
+                            url: 'https://lab.ssafy.com/s15-bigdata-recom-sub1/S15P21E206.git',
+                            refspec: '+refs/heads/*:refs/remotes/origin/*'
+                        ]]
+                    ])
+                }
+
+                sh 'git log -1 --oneline'
+            }
+        }
+
+        stage('CI') {
+            steps {
+                script {
+                    def isGitLabTriggered = [
+                        env.gitlabActionType,
+                        env.gitlabSourceBranch,
+                        env.gitlabTargetBranch,
+                        env.gitlabBranch
+                    ].any { it?.trim() }
+
+                    if (isGitLabTriggered) {
+                        gitlabCommitStatus(name: 'ci') {
+                            sh 'sudo /usr/local/sbin/ci-s15p21e206'
+                        }
+                    } else {
+                        echo 'Manual build: skipping gitlabCommitStatus'
+                        sh 'sudo /usr/local/sbin/ci-s15p21e206'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI success'
+        }
+
+        failure {
+            echo 'CI failed'
+        }
+    }
+}
