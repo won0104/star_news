@@ -1,0 +1,4548 @@
+[
+  {
+    "id": "category:politics",
+    "label": "정치",
+    "type": "category",
+    "category_id": "politics",
+    "aliases": [
+      "정치"
+    ],
+    "article_ids": [
+      "article:gnews:b2af68b27241640022294217192e9527",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615",
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:6235894dd7219d2dd57a9ed37ab1dff7",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce",
+      "article:gnews:faaaf3451c5646370391ee86987a1a19",
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:ba21f6667c16b20bc37dc22636b5bd0b",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830",
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62",
+      "article:gnews:3414d3453e63542668689c939e764d9f",
+      "article:synthetic:45094b6fbb3b722e",
+      "article:synthetic:bfcd1b36026ef23d",
+      "article:synthetic:7ecb7696d336db3f",
+      "article:synthetic:07aca93138a9197b",
+      "article:synthetic:914cc2c66e6e39f0",
+      "article:synthetic:36af6a5ebeb2bd5c",
+      "article:synthetic:f16f3d4d3ccad359",
+      "article:synthetic:bfaa3deee6f6ad18"
+    ],
+    "current_article_ids": [
+      "article:gnews:b2af68b27241640022294217192e9527",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615",
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:6235894dd7219d2dd57a9ed37ab1dff7",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce",
+      "article:gnews:faaaf3451c5646370391ee86987a1a19",
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:ba21f6667c16b20bc37dc22636b5bd0b",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830",
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62",
+      "article:gnews:3414d3453e63542668689c939e764d9f"
+    ],
+    "read_count": 11,
+    "layout": {
+      "personal_map": {
+        "x": 0.27,
+        "y": 0.24
+      }
+    },
+    "synthetic": false,
+    "trend_score": 30,
+    "personal_score": 25.8
+  },
+  {
+    "id": "category:economy",
+    "label": "경제",
+    "type": "category",
+    "category_id": "economy",
+    "aliases": [
+      "경제"
+    ],
+    "article_ids": [
+      "article:gnews:44408f4c148a748ff5163fdd45bef221",
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+      "article:gnews:1ffe40148b7375ec97a7349db69a4dd1",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:cb7cfa15c07f5233a1e6608f3efdf677",
+      "article:gnews:a6ebaed300572b519ce366d4628410cc",
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:ca4dac9eba9596145c3ba088a5c73c1f",
+      "article:gnews:55433fbbb031474834116bfde6b2bb40",
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636",
+      "article:gnews:1c6490e7fb6c2ce440c6bc99c5bbf9d2",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1",
+      "article:gnews:3623da0a251eea4165460d97fcfb8189",
+      "article:gnews:ea160542989659d81337b655dfd162e6",
+      "article:gnews:5a77a571102e26769ef3a0e644b6aad8",
+      "article:gnews:e7c5d571acbee86129773c5c0002f98e",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2",
+      "article:gnews:5934033f0e068ef48fce2bf98a308ac3",
+      "article:gnews:cc09d1a62b7a8a3ee9b5241ee73388b3",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47",
+      "article:gnews:fe998c7f86dcbda431687f481b06bbf8",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:ec61cff06188bc589ac2f9b9e37d0d7a",
+      "article:gnews:ec62f8d5935d7b426dee1ce2040551ea",
+      "article:gnews:492c8967c1cc3f85972d38b21c5a72bc",
+      "article:gnews:746c3e632e848cb9945a4a2f36290baa",
+      "article:gnews:d59833ebe122838f12db07e35af9e087",
+      "article:gnews:1c3fa7ab2c32d2cae9e5d278a0431dee",
+      "article:gnews:d6ebe8dbb19e7db59c6c77b8815e09ca",
+      "article:gnews:e05185232572a595b1f65e0220358997",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1",
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57",
+      "article:gnews:8aa579afe9c0929dcd0b3264a2d92234",
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e",
+      "article:gnews:65b7a95e97bc7b7f45f96ddc6689b4d9",
+      "article:gnews:0bb1330577fc805b439f829581bece7e",
+      "article:gnews:bffaf255ed2b759e2e529663649984d5",
+      "article:gnews:55df6ecc90930d6d8cf545b4e026a87c",
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+      "article:gnews:904df6040e02bce6c77dbf22306043ec",
+      "article:gnews:8c61ac06e058cc350373792de694d547",
+      "article:gnews:5e309f5f033424d1a658fe7ced06cfee",
+      "article:gnews:43084dbf48d60fbf2e42b844a22b2b8e",
+      "article:gnews:2c4b3234ce5b5fc77365ce60620b67b9",
+      "article:gnews:bc37bf74ca98ad0203f0821ad13ff3df",
+      "article:gnews:07ff1011d69fc3e8aecd343de4b6b5c2",
+      "article:gnews:2921c8894b4056395ed950ce244c5793",
+      "article:gnews:a7836be86e013b74541c4ef7352aac97",
+      "article:gnews:397d9033b46c83831d810c0adf5be163",
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4",
+      "article:gnews:4b61087b460a326be391a31b2fb931d1",
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea",
+      "article:gnews:1a1623e9755abd4f6c049b7ba607d3b4",
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1",
+      "article:gnews:7cabeed7729f458e4a111bec70d1f999",
+      "article:gnews:79cc6c9ed3d584952eaf2633b1e7408d",
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9",
+      "article:gnews:6f06917ac66a1b54f498cf9f1afa14bc",
+      "article:gnews:9f3e67816f0a69623083d7957b866a62",
+      "article:gnews:96561487203602b0cfbcfaa45af07e16",
+      "article:gnews:2e5152ce36aac73be040ecc023ab3687",
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:f1982b5149c11aa528d296d56cf397c7",
+      "article:gnews:6be8f4939e6fb6934ade0ca592337815",
+      "article:gnews:1acb86e0a9eb97d3015e99366951ed3a",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:22a183b19239d23f9ea1e30b9f18144b",
+      "article:gnews:b143cf979664e8e031530cb28f17aeed",
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1",
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c",
+      "article:synthetic:1fd756f0af696bc4",
+      "article:synthetic:10bcf88d946df205",
+      "article:synthetic:356950dd0560c84d",
+      "article:synthetic:1b07e45aa22d3acf",
+      "article:synthetic:f3de991caa9a5b56",
+      "article:synthetic:96cf5c5f920be042",
+      "article:synthetic:53e5a4438dfc8cae",
+      "article:synthetic:1368d8e228486327",
+      "article:synthetic:c58383d6ce80195c",
+      "article:synthetic:6f9134bcda98c4ed",
+      "article:synthetic:25ed5776136260bd",
+      "article:synthetic:b04a8bfdceef24c6",
+      "article:synthetic:e40361f6b72220c5",
+      "article:synthetic:fb2df254f80ddf8b",
+      "article:synthetic:a18173e117c1c6c5",
+      "article:synthetic:48c4e93863486820",
+      "article:synthetic:ca40ed8e64ba6258",
+      "article:synthetic:989d1ab6e97807f7",
+      "article:synthetic:f2864f061b72d897",
+      "article:synthetic:c3e180d65ac52b0d",
+      "article:synthetic:2cc319e3328d98cd",
+      "article:synthetic:b3c465bc7f625e6c",
+      "article:synthetic:3db0cf481b3ce68b",
+      "article:synthetic:2cd4cce0ac9dff17",
+      "article:synthetic:467f03737aab55c8",
+      "article:synthetic:ce4ab7e283b3bbfd",
+      "article:synthetic:02c0d62cafc43406",
+      "article:synthetic:4b4e2e4bdc8cc04a",
+      "article:synthetic:0a4326bc02afd646",
+      "article:synthetic:f0ec0479767301a6",
+      "article:synthetic:3ce4e5f043e7d760",
+      "article:synthetic:ae4cbece0458cf24",
+      "article:synthetic:13dd1215b1a2dd01",
+      "article:synthetic:b2285c3acfa1755d",
+      "article:synthetic:4d2074f5a52edcfb",
+      "article:synthetic:fe8d438d4437a261",
+      "article:synthetic:2eb7e5212fdfcaea",
+      "article:synthetic:21e3f0da5a70677c",
+      "article:synthetic:b8049c468e409eab"
+    ],
+    "current_article_ids": [
+      "article:gnews:44408f4c148a748ff5163fdd45bef221",
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+      "article:gnews:1ffe40148b7375ec97a7349db69a4dd1",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:cb7cfa15c07f5233a1e6608f3efdf677",
+      "article:gnews:a6ebaed300572b519ce366d4628410cc",
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:ca4dac9eba9596145c3ba088a5c73c1f",
+      "article:gnews:55433fbbb031474834116bfde6b2bb40",
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636",
+      "article:gnews:1c6490e7fb6c2ce440c6bc99c5bbf9d2",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1",
+      "article:gnews:3623da0a251eea4165460d97fcfb8189",
+      "article:gnews:ea160542989659d81337b655dfd162e6",
+      "article:gnews:5a77a571102e26769ef3a0e644b6aad8",
+      "article:gnews:e7c5d571acbee86129773c5c0002f98e",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2",
+      "article:gnews:5934033f0e068ef48fce2bf98a308ac3",
+      "article:gnews:cc09d1a62b7a8a3ee9b5241ee73388b3",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47",
+      "article:gnews:fe998c7f86dcbda431687f481b06bbf8",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:ec61cff06188bc589ac2f9b9e37d0d7a",
+      "article:gnews:ec62f8d5935d7b426dee1ce2040551ea",
+      "article:gnews:492c8967c1cc3f85972d38b21c5a72bc",
+      "article:gnews:746c3e632e848cb9945a4a2f36290baa",
+      "article:gnews:d59833ebe122838f12db07e35af9e087",
+      "article:gnews:1c3fa7ab2c32d2cae9e5d278a0431dee",
+      "article:gnews:d6ebe8dbb19e7db59c6c77b8815e09ca",
+      "article:gnews:e05185232572a595b1f65e0220358997",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1",
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57",
+      "article:gnews:8aa579afe9c0929dcd0b3264a2d92234",
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e",
+      "article:gnews:65b7a95e97bc7b7f45f96ddc6689b4d9",
+      "article:gnews:0bb1330577fc805b439f829581bece7e",
+      "article:gnews:bffaf255ed2b759e2e529663649984d5",
+      "article:gnews:55df6ecc90930d6d8cf545b4e026a87c",
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+      "article:gnews:904df6040e02bce6c77dbf22306043ec",
+      "article:gnews:8c61ac06e058cc350373792de694d547",
+      "article:gnews:5e309f5f033424d1a658fe7ced06cfee",
+      "article:gnews:43084dbf48d60fbf2e42b844a22b2b8e",
+      "article:gnews:2c4b3234ce5b5fc77365ce60620b67b9",
+      "article:gnews:bc37bf74ca98ad0203f0821ad13ff3df",
+      "article:gnews:07ff1011d69fc3e8aecd343de4b6b5c2",
+      "article:gnews:2921c8894b4056395ed950ce244c5793",
+      "article:gnews:a7836be86e013b74541c4ef7352aac97",
+      "article:gnews:397d9033b46c83831d810c0adf5be163",
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4",
+      "article:gnews:4b61087b460a326be391a31b2fb931d1",
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea",
+      "article:gnews:1a1623e9755abd4f6c049b7ba607d3b4",
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1",
+      "article:gnews:7cabeed7729f458e4a111bec70d1f999",
+      "article:gnews:79cc6c9ed3d584952eaf2633b1e7408d",
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9",
+      "article:gnews:6f06917ac66a1b54f498cf9f1afa14bc",
+      "article:gnews:9f3e67816f0a69623083d7957b866a62",
+      "article:gnews:96561487203602b0cfbcfaa45af07e16",
+      "article:gnews:2e5152ce36aac73be040ecc023ab3687",
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:f1982b5149c11aa528d296d56cf397c7",
+      "article:gnews:6be8f4939e6fb6934ade0ca592337815",
+      "article:gnews:1acb86e0a9eb97d3015e99366951ed3a",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:22a183b19239d23f9ea1e30b9f18144b",
+      "article:gnews:b143cf979664e8e031530cb28f17aeed",
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1",
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c",
+      "article:synthetic:1fd756f0af696bc4"
+    ],
+    "read_count": 48,
+    "layout": {
+      "personal_map": {
+        "x": 0.48,
+        "y": 0.24
+      }
+    },
+    "synthetic": false,
+    "trend_score": 90,
+    "personal_score": 118.8
+  },
+  {
+    "id": "category:society",
+    "label": "사회",
+    "type": "category",
+    "category_id": "society",
+    "aliases": [
+      "사회"
+    ],
+    "article_ids": [
+      "article:gnews:72b216fc88fe91cb3b3bfec7d70b4961",
+      "article:gnews:5959fcf4d9d1d284693ea00b15703620",
+      "article:gnews:330e9c849e7d143e5e0904c3e0625b13",
+      "article:gnews:5153283518678eba67628da85968b9cc",
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60",
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:53e4a0db0a1c1131f2ff13de3c122146",
+      "article:gnews:5e51a95f751266ff051a664d12c999f9",
+      "article:gnews:3e5a952857e13474269ead7a65090214",
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:85cbe1be638882c79c9a9df9bbccf059",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:87c97e1bf3e31595ec3370a87388038b",
+      "article:gnews:d10ab797e49037441ed91303d57fba0c",
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a",
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78",
+      "article:gnews:08a0d8438357a310662e7c80737d0954",
+      "article:gnews:4a5b7af84015d41a036ead5632f48920",
+      "article:gnews:a58eb231183d0307a58ddeb83702100f",
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a",
+      "article:gnews:3260f046db9f3df61e5f34fdcd60deaf",
+      "article:gnews:9f7478346a4b6dae3b59695263c7a809",
+      "article:gnews:b4a8efb7e58606ac2a4b9af5c5319b6a",
+      "article:gnews:2f280fef0bca86ebea4f6e5ddf7964d6",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:f1e90a04ccf06298c0ce9244c01c4405",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:8902ed31a2f78570f92935f91c4deb8d",
+      "article:gnews:753e765fb28edcdb07cd3bec370ba34a",
+      "article:gnews:248c152798fd663d4ba5e6d6dbb8e5c8",
+      "article:gnews:2d8415dcb2b2ae04819e71e82943bcd8",
+      "article:gnews:532dee518114007e47fa20d15be9fdda",
+      "article:gnews:c9648da2f15ea1a7a19ab9afbe3f0995",
+      "article:gnews:cf2bd83a48bdb4ba43787fd2752338a3",
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5",
+      "article:gnews:ba5c4378900e3996a60de44c69d1ad08",
+      "article:gnews:ec62f8d5935d7b426dee1ce2040551ea",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13",
+      "article:synthetic:d31a1fcb8c1b7b00",
+      "article:synthetic:fa5e3dd1ba151a50",
+      "article:synthetic:7602c49ee2b597a0",
+      "article:synthetic:32baaff82fd0c99a",
+      "article:synthetic:7a0c0fe46e6e0c8c",
+      "article:synthetic:c3413cffc529d2fa",
+      "article:synthetic:0ba1c2094479444f",
+      "article:synthetic:81bf5ddfb7ea5d90",
+      "article:synthetic:72fc43f7abc10051",
+      "article:synthetic:3e1fa55a85323e5d",
+      "article:synthetic:2c1f4bcd51dff3ef",
+      "article:synthetic:47857b5780a24ed1",
+      "article:synthetic:3a720a3b9e378fa6"
+    ],
+    "current_article_ids": [
+      "article:gnews:72b216fc88fe91cb3b3bfec7d70b4961",
+      "article:gnews:5959fcf4d9d1d284693ea00b15703620",
+      "article:gnews:330e9c849e7d143e5e0904c3e0625b13",
+      "article:gnews:5153283518678eba67628da85968b9cc",
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60",
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:53e4a0db0a1c1131f2ff13de3c122146",
+      "article:gnews:5e51a95f751266ff051a664d12c999f9",
+      "article:gnews:3e5a952857e13474269ead7a65090214",
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:85cbe1be638882c79c9a9df9bbccf059",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:87c97e1bf3e31595ec3370a87388038b",
+      "article:gnews:d10ab797e49037441ed91303d57fba0c",
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a",
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78",
+      "article:gnews:08a0d8438357a310662e7c80737d0954",
+      "article:gnews:4a5b7af84015d41a036ead5632f48920",
+      "article:gnews:a58eb231183d0307a58ddeb83702100f",
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a",
+      "article:gnews:3260f046db9f3df61e5f34fdcd60deaf",
+      "article:gnews:9f7478346a4b6dae3b59695263c7a809",
+      "article:gnews:b4a8efb7e58606ac2a4b9af5c5319b6a",
+      "article:gnews:2f280fef0bca86ebea4f6e5ddf7964d6",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:f1e90a04ccf06298c0ce9244c01c4405",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:8902ed31a2f78570f92935f91c4deb8d",
+      "article:gnews:753e765fb28edcdb07cd3bec370ba34a",
+      "article:gnews:248c152798fd663d4ba5e6d6dbb8e5c8",
+      "article:gnews:2d8415dcb2b2ae04819e71e82943bcd8",
+      "article:gnews:532dee518114007e47fa20d15be9fdda",
+      "article:gnews:c9648da2f15ea1a7a19ab9afbe3f0995",
+      "article:gnews:cf2bd83a48bdb4ba43787fd2752338a3",
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5",
+      "article:gnews:ba5c4378900e3996a60de44c69d1ad08",
+      "article:gnews:ec62f8d5935d7b426dee1ce2040551ea",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "read_count": 16,
+    "layout": {
+      "personal_map": {
+        "x": 0.68,
+        "y": 0.3
+      }
+    },
+    "synthetic": false,
+    "trend_score": 48,
+    "personal_score": 44.16
+  },
+  {
+    "id": "category:culture",
+    "label": "문화",
+    "type": "category",
+    "category_id": "culture",
+    "aliases": [
+      "문화"
+    ],
+    "article_ids": [
+      "article:gnews:6194ef39be1db27f16adaa56e3920b4b",
+      "article:gnews:0c2123dca50ce4ff4557d1fcf9a30d9c",
+      "article:gnews:edb02fd56beca599bbb314f8c3e492ba",
+      "article:gnews:79442fbda18f50784fcdecc1ac584633",
+      "article:gnews:b2af68b27241640022294217192e9527",
+      "article:gnews:eca09e4060901d83707e615cc5b5b3f7",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:e1359331eea5332ee814681535a59fec",
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:4083d32a26002939671d745d6fe643db",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:409295aa4bb6e3d092b9dfa923f72aba",
+      "article:gnews:c9caec66cd36b77a674065667c6c04a4",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:f1e90a04ccf06298c0ce9244c01c4405",
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:7d3c092ba967705417995f3a8b09554d",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:gnews:458dd433803768f5092a630543059bee",
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:7945b4b767162bf626c1b088fdbc886b",
+      "article:gnews:fff2fe44dd2fa2a4b892bb856ec44ab7",
+      "article:gnews:c453c31d2747304d9d76d1f93853733b",
+      "article:gnews:039becf03c42907082466cb828c88733",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e",
+      "article:synthetic:2f973cc3beff3ee9",
+      "article:synthetic:8bd4116494f4f611",
+      "article:synthetic:08fe7a4fdaebc066",
+      "article:synthetic:c7052c3fb7482d58",
+      "article:synthetic:ff678c31116ee2cb",
+      "article:synthetic:db62342c2f5a6905",
+      "article:synthetic:71871bac53d05ebf"
+    ],
+    "current_article_ids": [
+      "article:gnews:6194ef39be1db27f16adaa56e3920b4b",
+      "article:gnews:0c2123dca50ce4ff4557d1fcf9a30d9c",
+      "article:gnews:edb02fd56beca599bbb314f8c3e492ba",
+      "article:gnews:79442fbda18f50784fcdecc1ac584633",
+      "article:gnews:b2af68b27241640022294217192e9527",
+      "article:gnews:eca09e4060901d83707e615cc5b5b3f7",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:e1359331eea5332ee814681535a59fec",
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:4083d32a26002939671d745d6fe643db",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:409295aa4bb6e3d092b9dfa923f72aba",
+      "article:gnews:c9caec66cd36b77a674065667c6c04a4",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:f1e90a04ccf06298c0ce9244c01c4405",
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:7d3c092ba967705417995f3a8b09554d",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:gnews:458dd433803768f5092a630543059bee",
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:7945b4b767162bf626c1b088fdbc886b",
+      "article:gnews:fff2fe44dd2fa2a4b892bb856ec44ab7",
+      "article:gnews:c453c31d2747304d9d76d1f93853733b",
+      "article:gnews:039becf03c42907082466cb828c88733",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e",
+      "article:synthetic:2f973cc3beff3ee9",
+      "article:synthetic:8bd4116494f4f611"
+    ],
+    "read_count": 5,
+    "layout": {
+      "personal_map": {
+        "x": 0.8,
+        "y": 0.52
+      }
+    },
+    "synthetic": false,
+    "trend_score": 28,
+    "personal_score": 19.04
+  },
+  {
+    "id": "category:world",
+    "label": "국제",
+    "type": "category",
+    "category_id": "world",
+    "aliases": [
+      "국제"
+    ],
+    "article_ids": [
+      "article:gnews:314c569bcc5308c5fa539130d2307607",
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:19b2461b5c280f4f5effee593f7728ef",
+      "article:gnews:43db88f1d43d33d105c473ad711c1217",
+      "article:gnews:cb7cfa15c07f5233a1e6608f3efdf677",
+      "article:gnews:ee004729a94f556951b43fd97036580c",
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61",
+      "article:gnews:1adbe0d993c168d890bf01bf0edc4a11",
+      "article:gnews:b34dfe31082716a724c030a70070a1c0",
+      "article:gnews:d10ab797e49037441ed91303d57fba0c",
+      "article:gnews:79e86fbba1533b2a1c2ba213bc18f49f",
+      "article:gnews:515ab82322fce3d558dfdcbdc600f95b",
+      "article:gnews:81652f74477d1390342eb6ad5f1e2c72",
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:0b742aea1dd9476b6cd1d06a1dab6189",
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a",
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:7bf7cb29c3f6ca73540b875088272fdb",
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:e9c2943de596a6c30064672508f8ce9b",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:15e53fe10ad9d75bf29e0312062cf35d",
+      "article:gnews:a7bf374fb4b06bc50371c4c64bf4240d",
+      "article:gnews:10bf833e05e358539fa0992412513557",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:a8ada98680597be8d08313335b7e9771",
+      "article:gnews:cb98edd7bed99213216a6324551de624",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a",
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221",
+      "article:gnews:d5f7e0fd911b6c24a05d1d75a048935f",
+      "article:gnews:1b0f89cf9a6181fda02bc901f08e7c4e",
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507",
+      "article:gnews:765da21f05b462ffae1ae009180f3b85",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f",
+      "article:gnews:15a02c08acaada076587d158c102659a",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:b2eea49274ca2d24ed9c9b33d3f9a43b",
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5",
+      "article:gnews:993c83041cde14b5b4c0241559e091e3",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:ec61cff06188bc589ac2f9b9e37d0d7a",
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e",
+      "article:gnews:b6d29a3495bacce390bfa2ec57b3c1d4",
+      "article:gnews:cda61035be78996ea191058b9df7b192",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1",
+      "article:synthetic:3643d432907de950",
+      "article:synthetic:91e2a26634e5993a",
+      "article:synthetic:7ba780c043b94429",
+      "article:synthetic:b475b6c010bb7037",
+      "article:synthetic:9ffcaa75137b994b",
+      "article:synthetic:04727851f5b4c309",
+      "article:synthetic:846f2d11136530d5",
+      "article:synthetic:c0fb57ff957a47cb",
+      "article:synthetic:9cd7344b1589b961",
+      "article:synthetic:53b8b6a6674c44c8",
+      "article:synthetic:aff96d43821f998c",
+      "article:synthetic:be39c2c6bcaf690f",
+      "article:synthetic:5632bf1e67f779c0",
+      "article:synthetic:a63be8fcac0ec9ac",
+      "article:synthetic:8b536495f3c324b8",
+      "article:synthetic:3102cd3be948dcf0",
+      "article:synthetic:e87370c25026c1c8",
+      "article:synthetic:e1c8322ef6878fab"
+    ],
+    "current_article_ids": [
+      "article:gnews:314c569bcc5308c5fa539130d2307607",
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:19b2461b5c280f4f5effee593f7728ef",
+      "article:gnews:43db88f1d43d33d105c473ad711c1217",
+      "article:gnews:cb7cfa15c07f5233a1e6608f3efdf677",
+      "article:gnews:ee004729a94f556951b43fd97036580c",
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61",
+      "article:gnews:1adbe0d993c168d890bf01bf0edc4a11",
+      "article:gnews:b34dfe31082716a724c030a70070a1c0",
+      "article:gnews:d10ab797e49037441ed91303d57fba0c",
+      "article:gnews:79e86fbba1533b2a1c2ba213bc18f49f",
+      "article:gnews:515ab82322fce3d558dfdcbdc600f95b",
+      "article:gnews:81652f74477d1390342eb6ad5f1e2c72",
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:0b742aea1dd9476b6cd1d06a1dab6189",
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a",
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:7bf7cb29c3f6ca73540b875088272fdb",
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:e9c2943de596a6c30064672508f8ce9b",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:15e53fe10ad9d75bf29e0312062cf35d",
+      "article:gnews:a7bf374fb4b06bc50371c4c64bf4240d",
+      "article:gnews:10bf833e05e358539fa0992412513557",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:a8ada98680597be8d08313335b7e9771",
+      "article:gnews:cb98edd7bed99213216a6324551de624",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a",
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221",
+      "article:gnews:d5f7e0fd911b6c24a05d1d75a048935f",
+      "article:gnews:1b0f89cf9a6181fda02bc901f08e7c4e",
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507",
+      "article:gnews:765da21f05b462ffae1ae009180f3b85",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f",
+      "article:gnews:15a02c08acaada076587d158c102659a",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:b2eea49274ca2d24ed9c9b33d3f9a43b",
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5",
+      "article:gnews:993c83041cde14b5b4c0241559e091e3",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:ec61cff06188bc589ac2f9b9e37d0d7a",
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e",
+      "article:gnews:b6d29a3495bacce390bfa2ec57b3c1d4",
+      "article:gnews:cda61035be78996ea191058b9df7b192",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1"
+    ],
+    "read_count": 22,
+    "layout": {
+      "personal_map": {
+        "x": 0.66,
+        "y": 0.72
+      }
+    },
+    "synthetic": false,
+    "trend_score": 75,
+    "personal_score": 80.25
+  },
+  {
+    "id": "category:local",
+    "label": "지역",
+    "type": "category",
+    "category_id": "local",
+    "aliases": [
+      "지역"
+    ],
+    "article_ids": [
+      "article:gnews:d1c44244f5494015299e65962842d521",
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60",
+      "article:gnews:6b21d77536fb57fe71469b15a245a2bd",
+      "article:gnews:bcb21e7669bc4bde6137bccffbf99892",
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5",
+      "article:gnews:3f0ed4f1ac09b3832f6f47f7adc520c7",
+      "article:gnews:058bcce5ee11659f3a97fbf610d3a169",
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:b4eabf2a21c1307ce0e25bc63217af3e",
+      "article:gnews:fb9601964e2a675acfcf5a69c930b64e",
+      "article:gnews:08cecc30c67e31747c096ac40587048d",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:472b5c44f99041831df77fab1e8afc47",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:978642cd142a67b7ecb9da1058bd3e3f",
+      "article:gnews:4eb6b005fb39c7dcbca7ab7a440ff7d7",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:496cb1ecce94b276a6b85fb8d88529d4",
+      "article:gnews:3af74742c14f8142aead678565e89ae9",
+      "article:gnews:bbfbd8991e0e8ca0d4786d07d305486e",
+      "article:gnews:40846910aadc8d6a0d01719e8cc21042",
+      "article:synthetic:fa5e3dd1ba151a50",
+      "article:synthetic:96cf5c5f920be042",
+      "article:synthetic:53e5a4438dfc8cae",
+      "article:synthetic:6f9134bcda98c4ed",
+      "article:synthetic:b04a8bfdceef24c6",
+      "article:synthetic:08fe7a4fdaebc066",
+      "article:synthetic:989d1ab6e97807f7",
+      "article:synthetic:2cc319e3328d98cd",
+      "article:synthetic:3db0cf481b3ce68b",
+      "article:synthetic:15f4b65050b8e300",
+      "article:synthetic:ce4ab7e283b3bbfd",
+      "article:synthetic:4b4e2e4bdc8cc04a",
+      "article:synthetic:ff678c31116ee2cb",
+      "article:synthetic:4d2074f5a52edcfb",
+      "article:synthetic:fe8d438d4437a261",
+      "article:synthetic:21e3f0da5a70677c"
+    ],
+    "current_article_ids": [
+      "article:gnews:d1c44244f5494015299e65962842d521",
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60",
+      "article:gnews:6b21d77536fb57fe71469b15a245a2bd",
+      "article:gnews:bcb21e7669bc4bde6137bccffbf99892",
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5",
+      "article:gnews:3f0ed4f1ac09b3832f6f47f7adc520c7",
+      "article:gnews:058bcce5ee11659f3a97fbf610d3a169",
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:b4eabf2a21c1307ce0e25bc63217af3e",
+      "article:gnews:fb9601964e2a675acfcf5a69c930b64e",
+      "article:gnews:08cecc30c67e31747c096ac40587048d",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:472b5c44f99041831df77fab1e8afc47",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:978642cd142a67b7ecb9da1058bd3e3f",
+      "article:gnews:4eb6b005fb39c7dcbca7ab7a440ff7d7",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:496cb1ecce94b276a6b85fb8d88529d4",
+      "article:gnews:3af74742c14f8142aead678565e89ae9",
+      "article:gnews:bbfbd8991e0e8ca0d4786d07d305486e",
+      "article:gnews:40846910aadc8d6a0d01719e8cc21042"
+    ],
+    "read_count": 17,
+    "layout": {
+      "personal_map": {
+        "x": 0.45,
+        "y": 0.75
+      }
+    },
+    "synthetic": false,
+    "trend_score": 32,
+    "personal_score": 24.0
+  },
+  {
+    "id": "category:sports",
+    "label": "스포츠",
+    "type": "category",
+    "category_id": "sports",
+    "aliases": [
+      "스포츠"
+    ],
+    "article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1",
+      "article:gnews:503fe86bfab8a1322906da364d2285b9",
+      "article:gnews:d1c44244f5494015299e65962842d521",
+      "article:gnews:685fb017162df9bc4dda479afa95ecb0",
+      "article:gnews:de2d693577772b76c7e03172714a3e7a",
+      "article:gnews:4cdebf24f439425bd88824839bb50d46",
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742",
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:f8668003a78bc8516945add1394998ef",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8",
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461",
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:799e841c79c6d2c6a1177dfc76567378",
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:c98995dd99146e12dcc4e3260f37d300",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:150513d007f4ee3776fe3a874f5c4e7a",
+      "article:gnews:bd7ac661954c200e477b803d59e209b8",
+      "article:synthetic:befe890ba6664609",
+      "article:synthetic:81e83d1acd9d8095",
+      "article:synthetic:93a1d7f7072d41fa",
+      "article:synthetic:9470c5dfed9849a0",
+      "article:synthetic:2af8717e031d914b",
+      "article:synthetic:1863eafb6bdde246"
+    ],
+    "current_article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1",
+      "article:gnews:503fe86bfab8a1322906da364d2285b9",
+      "article:gnews:d1c44244f5494015299e65962842d521",
+      "article:gnews:685fb017162df9bc4dda479afa95ecb0",
+      "article:gnews:de2d693577772b76c7e03172714a3e7a",
+      "article:gnews:4cdebf24f439425bd88824839bb50d46",
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742",
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:f8668003a78bc8516945add1394998ef",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8",
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461",
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:799e841c79c6d2c6a1177dfc76567378",
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:c98995dd99146e12dcc4e3260f37d300",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:150513d007f4ee3776fe3a874f5c4e7a",
+      "article:gnews:bd7ac661954c200e477b803d59e209b8",
+      "article:synthetic:befe890ba6664609",
+      "article:synthetic:81e83d1acd9d8095",
+      "article:synthetic:93a1d7f7072d41fa",
+      "article:synthetic:9470c5dfed9849a0",
+      "article:synthetic:2af8717e031d914b",
+      "article:synthetic:1863eafb6bdde246"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.22,
+        "y": 0.66
+      }
+    },
+    "synthetic": false,
+    "trend_score": 27,
+    "personal_score": 10.8
+  },
+  {
+    "id": "category:tech_science",
+    "label": "IT·과학",
+    "type": "category",
+    "category_id": "tech_science",
+    "aliases": [
+      "IT·과학"
+    ],
+    "article_ids": [
+      "article:gnews:03c978bfd9cb59c037599785dcd3a640",
+      "article:gnews:229194e1c14dff06bf5030302863f432",
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:8f3d11d32d0aa46177ed28c4044fd01d",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:a69f378034cb5ba054f8c829eb1f4195",
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:09e8673af34733b72a8fbd9e4739cadc",
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:a4ed3c28ee7fab3c03560da87a8a4350",
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:b65cc746817634826543a591c3e25072",
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1",
+      "article:gnews:399eb654bb08dfcde50cf8f2bfeb3a3b",
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529",
+      "article:gnews:1512f6aee2c79d970f04f9a79e664798",
+      "article:gnews:0144dd891f775ee7aab09ced708828c4",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:2921ad097fcbe216a0a265b5e6af0fa6",
+      "article:gnews:0961a8455f2b197ee7337bb4e356b597",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:gnews:635d7a964c664c9f353a8cb6cf6b1c77",
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355",
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b",
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c",
+      "article:gnews:8ae70950400d19c35d801e464df306d7",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68",
+      "article:gnews:2be078526dc618e5953c670836003d6f",
+      "article:synthetic:1fd756f0af696bc4",
+      "article:synthetic:b2d90f4d2bbb49c5",
+      "article:synthetic:914a5c828bf08be3",
+      "article:synthetic:10bcf88d946df205",
+      "article:synthetic:53a891745ea9ebf7",
+      "article:synthetic:2f943905f65fe426",
+      "article:synthetic:1b07e45aa22d3acf",
+      "article:synthetic:0ca13ea9a64f321f",
+      "article:synthetic:af51bea7a2ade1a2",
+      "article:synthetic:1368d8e228486327",
+      "article:synthetic:ba302abbdef058b4",
+      "article:synthetic:c58383d6ce80195c",
+      "article:synthetic:25ed5776136260bd",
+      "article:synthetic:df12bb54557cd766",
+      "article:synthetic:734290637598cd21",
+      "article:synthetic:48c4e93863486820",
+      "article:synthetic:62c7b7a05fa0ec98",
+      "article:synthetic:f2864f061b72d897",
+      "article:synthetic:c3e180d65ac52b0d",
+      "article:synthetic:b3c465bc7f625e6c",
+      "article:synthetic:f31d9e324386a7bf",
+      "article:synthetic:26384d8d3e112372",
+      "article:synthetic:28d8304503ce187a",
+      "article:synthetic:f035e85e119d4448",
+      "article:synthetic:c37248e9c297432c",
+      "article:synthetic:91f6872c69e7dbaf",
+      "article:synthetic:337dd7f8b2385131",
+      "article:synthetic:f0ec0479767301a6",
+      "article:synthetic:e23c505d95859625",
+      "article:synthetic:13dd1215b1a2dd01",
+      "article:synthetic:900add71d7a98b50",
+      "article:synthetic:2eb7e5212fdfcaea",
+      "article:synthetic:d6772afae96396bd",
+      "article:synthetic:b8049c468e409eab",
+      "article:synthetic:281f0f6a7a392452"
+    ],
+    "current_article_ids": [
+      "article:gnews:03c978bfd9cb59c037599785dcd3a640",
+      "article:gnews:229194e1c14dff06bf5030302863f432",
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:8f3d11d32d0aa46177ed28c4044fd01d",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:a69f378034cb5ba054f8c829eb1f4195",
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:09e8673af34733b72a8fbd9e4739cadc",
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:a4ed3c28ee7fab3c03560da87a8a4350",
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:b65cc746817634826543a591c3e25072",
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1",
+      "article:gnews:399eb654bb08dfcde50cf8f2bfeb3a3b",
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529",
+      "article:gnews:1512f6aee2c79d970f04f9a79e664798",
+      "article:gnews:0144dd891f775ee7aab09ced708828c4",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:2921ad097fcbe216a0a265b5e6af0fa6",
+      "article:gnews:0961a8455f2b197ee7337bb4e356b597",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:gnews:635d7a964c664c9f353a8cb6cf6b1c77",
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355",
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b",
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c",
+      "article:gnews:8ae70950400d19c35d801e464df306d7",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68",
+      "article:gnews:2be078526dc618e5953c670836003d6f",
+      "article:synthetic:1fd756f0af696bc4"
+    ],
+    "read_count": 42,
+    "layout": {
+      "personal_map": {
+        "x": 0.18,
+        "y": 0.43
+      }
+    },
+    "synthetic": false,
+    "trend_score": 47,
+    "personal_score": 60.16
+  },
+  {
+    "id": "entity:lee-jae-myung",
+    "label": "이재명",
+    "type": "person",
+    "category_id": "politics",
+    "aliases": [
+      "이재명",
+      "이 대통령"
+    ],
+    "article_ids": [
+      "article:gnews:b2af68b27241640022294217192e9527",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc",
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce",
+      "article:gnews:faaaf3451c5646370391ee86987a1a19",
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05",
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830",
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0"
+    ],
+    "current_article_ids": [
+      "article:gnews:b2af68b27241640022294217192e9527",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc",
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce",
+      "article:gnews:faaaf3451c5646370391ee86987a1a19",
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05",
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830",
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0"
+    ],
+    "read_count": 2,
+    "layout": {
+      "personal_map": {
+        "x": 0.2277,
+        "y": 0.2246
+      }
+    },
+    "synthetic": false,
+    "trend_score": 10,
+    "personal_score": 8.6
+  },
+  {
+    "id": "entity:presidential-office",
+    "label": "대통령실",
+    "type": "organization",
+    "category_id": "politics",
+    "aliases": [
+      "대통령실",
+      "청와대"
+    ],
+    "article_ids": [
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce",
+      "article:synthetic:bfcd1b36026ef23d",
+      "article:synthetic:36af6a5ebeb2bd5c"
+    ],
+    "current_article_ids": [
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce"
+    ],
+    "read_count": 3,
+    "layout": {
+      "personal_map": {
+        "x": 0.2076,
+        "y": 0.2488
+      }
+    },
+    "synthetic": false,
+    "trend_score": 3,
+    "personal_score": 2.58
+  },
+  {
+    "id": "entity:national-assembly",
+    "label": "국회",
+    "type": "organization",
+    "category_id": "politics",
+    "aliases": [
+      "국회",
+      "국회의원"
+    ],
+    "article_ids": [
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:ba21f6667c16b20bc37dc22636b5bd0b",
+      "article:synthetic:45094b6fbb3b722e",
+      "article:synthetic:7ecb7696d336db3f",
+      "article:synthetic:07aca93138a9197b",
+      "article:synthetic:914cc2c66e6e39f0",
+      "article:synthetic:f16f3d4d3ccad359",
+      "article:synthetic:bfaa3deee6f6ad18"
+    ],
+    "current_article_ids": [
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:ba21f6667c16b20bc37dc22636b5bd0b"
+    ],
+    "read_count": 6,
+    "layout": {
+      "personal_map": {
+        "x": 0.291,
+        "y": 0.3182
+      }
+    },
+    "synthetic": false,
+    "trend_score": 5,
+    "personal_score": 4.3
+  },
+  {
+    "id": "entity:democratic-party",
+    "label": "더불어민주당",
+    "type": "organization",
+    "category_id": "politics",
+    "aliases": [
+      "민주당",
+      "더불어민주당",
+      "여당"
+    ],
+    "article_ids": [
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce",
+      "article:gnews:faaaf3451c5646370391ee86987a1a19",
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62",
+      "article:gnews:3414d3453e63542668689c939e764d9f"
+    ],
+    "current_article_ids": [
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615",
+      "article:gnews:9894040b091176a7244b2bffa44c297e",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:847bb6668f804bd0e5629c310f5e70ce",
+      "article:gnews:faaaf3451c5646370391ee86987a1a19",
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62",
+      "article:gnews:3414d3453e63542668689c939e764d9f"
+    ],
+    "read_count": 2,
+    "layout": {
+      "personal_map": {
+        "x": 0.181,
+        "y": 0.1966
+      }
+    },
+    "synthetic": false,
+    "trend_score": 21,
+    "personal_score": 18.06
+  },
+  {
+    "id": "entity:people-power-party",
+    "label": "국민의힘",
+    "type": "organization",
+    "category_id": "politics",
+    "aliases": [
+      "국민의힘",
+      "국힘",
+      "야당"
+    ],
+    "article_ids": [
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:ba21f6667c16b20bc37dc22636b5bd0b",
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0"
+    ],
+    "current_article_ids": [
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:ba21f6667c16b20bc37dc22636b5bd0b",
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.3569,
+        "y": 0.3183
+      }
+    },
+    "synthetic": false,
+    "trend_score": 8,
+    "personal_score": 6.88
+  },
+  {
+    "id": "entity:han-dong-hoon",
+    "label": "한동훈",
+    "type": "person",
+    "category_id": "politics",
+    "aliases": [
+      "한동훈"
+    ],
+    "article_ids": [
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05",
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830"
+    ],
+    "current_article_ids": [
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:a583b6a7d9c9c8e45869f9da00562d05",
+      "article:gnews:938ab48195f559c9f9dce0cc49dfb830"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.3143,
+        "y": 0.2322
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 3.44
+  },
+  {
+    "id": "entity:oh-se-hoon",
+    "label": "오세훈",
+    "type": "person",
+    "category_id": "politics",
+    "aliases": [
+      "오세훈"
+    ],
+    "article_ids": [
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62",
+      "article:gnews:3414d3453e63542668689c939e764d9f"
+    ],
+    "current_article_ids": [
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62",
+      "article:gnews:3414d3453e63542668689c939e764d9f"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.3222,
+        "y": 0.2752
+      }
+    },
+    "synthetic": false,
+    "trend_score": 10,
+    "personal_score": 8.6
+  },
+  {
+    "id": "topic:judiciary",
+    "label": "사법부",
+    "type": "topic",
+    "category_id": "politics",
+    "aliases": [
+      "사법부",
+      "대법관",
+      "헌법",
+      "재판"
+    ],
+    "article_ids": [
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545",
+      "article:gnews:6235894dd7219d2dd57a9ed37ab1dff7",
+      "article:gnews:753e765fb28edcdb07cd3bec370ba34a",
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0",
+      "article:gnews:532dee518114007e47fa20d15be9fdda",
+      "article:synthetic:7ecb7696d336db3f",
+      "article:synthetic:914cc2c66e6e39f0",
+      "article:synthetic:f16f3d4d3ccad359"
+    ],
+    "current_article_ids": [
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+      "article:gnews:e8130e89f3ca62409100a87241cf2001",
+      "article:gnews:64a2b4871316cf8f2b35af03ec729545",
+      "article:gnews:6235894dd7219d2dd57a9ed37ab1dff7",
+      "article:gnews:753e765fb28edcdb07cd3bec370ba34a",
+      "article:gnews:c9191e06dc60a27bf673e9f9987e10f0",
+      "article:gnews:532dee518114007e47fa20d15be9fdda"
+    ],
+    "read_count": 5,
+    "layout": {
+      "personal_map": {
+        "x": 0.2345,
+        "y": 0.3128
+      }
+    },
+    "synthetic": false,
+    "trend_score": 7,
+    "personal_score": 6.02
+  },
+  {
+    "id": "topic:semiconductor-industry",
+    "label": "반도체 산업",
+    "type": "industry",
+    "category_id": "economy",
+    "aliases": [
+      "반도체",
+      "dram",
+      "hbm"
+    ],
+    "article_ids": [
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68",
+      "article:synthetic:1fd756f0af696bc4",
+      "article:synthetic:1b07e45aa22d3acf",
+      "article:synthetic:c58383d6ce80195c",
+      "article:synthetic:48c4e93863486820",
+      "article:synthetic:f2864f061b72d897",
+      "article:synthetic:13dd1215b1a2dd01",
+      "article:synthetic:b8049c468e409eab"
+    ],
+    "current_article_ids": [
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68",
+      "article:synthetic:1fd756f0af696bc4"
+    ],
+    "read_count": 9,
+    "layout": {
+      "personal_map": {
+        "x": 0.5211,
+        "y": 0.2217
+      }
+    },
+    "synthetic": false,
+    "trend_score": 10,
+    "personal_score": 13.2
+  },
+  {
+    "id": "entity:samsung-electronics",
+    "label": "삼성전자",
+    "type": "organization",
+    "category_id": "economy",
+    "aliases": [
+      "삼성전자"
+    ],
+    "article_ids": [
+      "article:gnews:1ffe40148b7375ec97a7349db69a4dd1",
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+      "article:gnews:1c6490e7fb6c2ce440c6bc99c5bbf9d2",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:b65cc746817634826543a591c3e25072",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "current_article_ids": [
+      "article:gnews:1ffe40148b7375ec97a7349db69a4dd1",
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+      "article:gnews:1c6490e7fb6c2ce440c6bc99c5bbf9d2",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:b65cc746817634826543a591c3e25072",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.4605,
+        "y": 0.1801
+      }
+    },
+    "synthetic": false,
+    "trend_score": 8,
+    "personal_score": 10.56
+  },
+  {
+    "id": "entity:sk-hynix",
+    "label": "SK하이닉스",
+    "type": "organization",
+    "category_id": "economy",
+    "aliases": [
+      "sk하이닉스",
+      "하이닉스"
+    ],
+    "article_ids": [
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1",
+      "article:synthetic:1fd756f0af696bc4",
+      "article:synthetic:1b07e45aa22d3acf",
+      "article:synthetic:c58383d6ce80195c",
+      "article:synthetic:48c4e93863486820",
+      "article:synthetic:f2864f061b72d897",
+      "article:synthetic:13dd1215b1a2dd01",
+      "article:synthetic:b8049c468e409eab"
+    ],
+    "current_article_ids": [
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1",
+      "article:synthetic:1fd756f0af696bc4"
+    ],
+    "read_count": 7,
+    "layout": {
+      "personal_map": {
+        "x": 0.4072,
+        "y": 0.2045
+      }
+    },
+    "synthetic": false,
+    "trend_score": 7,
+    "personal_score": 9.24
+  },
+  {
+    "id": "topic:hbm",
+    "label": "HBM",
+    "type": "technology",
+    "category_id": "economy",
+    "aliases": [
+      "hbm",
+      "고대역폭메모리"
+    ],
+    "article_ids": [
+      "article:synthetic:1fd756f0af696bc4",
+      "article:synthetic:1b07e45aa22d3acf",
+      "article:synthetic:c58383d6ce80195c",
+      "article:synthetic:48c4e93863486820",
+      "article:synthetic:f2864f061b72d897",
+      "article:synthetic:13dd1215b1a2dd01",
+      "article:synthetic:b8049c468e409eab"
+    ],
+    "current_article_ids": [
+      "article:synthetic:1fd756f0af696bc4"
+    ],
+    "read_count": 6,
+    "layout": {
+      "personal_map": {
+        "x": 0.4511,
+        "y": 0.3347
+      }
+    },
+    "synthetic": false,
+    "trend_score": 1,
+    "personal_score": 1.32
+  },
+  {
+    "id": "topic:real-estate",
+    "label": "부동산",
+    "type": "topic",
+    "category_id": "economy",
+    "aliases": [
+      "부동산",
+      "아파트",
+      "집값",
+      "주택공급",
+      "재건축"
+    ],
+    "article_ids": [
+      "article:gnews:44408f4c148a748ff5163fdd45bef221",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:a6ebaed300572b519ce366d4628410cc",
+      "article:gnews:a58eb231183d0307a58ddeb83702100f",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:248c152798fd663d4ba5e6d6dbb8e5c8",
+      "article:gnews:ea160542989659d81337b655dfd162e6",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:1c3fa7ab2c32d2cae9e5d278a0431dee"
+    ],
+    "current_article_ids": [
+      "article:gnews:44408f4c148a748ff5163fdd45bef221",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:a6ebaed300572b519ce366d4628410cc",
+      "article:gnews:a58eb231183d0307a58ddeb83702100f",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:248c152798fd663d4ba5e6d6dbb8e5c8",
+      "article:gnews:ea160542989659d81337b655dfd162e6",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:1c3fa7ab2c32d2cae9e5d278a0431dee"
+    ],
+    "read_count": 2,
+    "layout": {
+      "personal_map": {
+        "x": 0.5925,
+        "y": 0.2078
+      }
+    },
+    "synthetic": false,
+    "trend_score": 13,
+    "personal_score": 17.16
+  },
+  {
+    "id": "topic:interest-rate",
+    "label": "기준금리",
+    "type": "topic",
+    "category_id": "economy",
+    "aliases": [
+      "기준금리",
+      "금리"
+    ],
+    "article_ids": [
+      "article:gnews:ca4dac9eba9596145c3ba088a5c73c1f",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:e7c5d571acbee86129773c5c0002f98e",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d59833ebe122838f12db07e35af9e087",
+      "article:synthetic:f3de991caa9a5b56",
+      "article:synthetic:e40361f6b72220c5",
+      "article:synthetic:fb2df254f80ddf8b",
+      "article:synthetic:a18173e117c1c6c5",
+      "article:synthetic:ca40ed8e64ba6258",
+      "article:synthetic:02c0d62cafc43406",
+      "article:synthetic:3ce4e5f043e7d760"
+    ],
+    "current_article_ids": [
+      "article:gnews:ca4dac9eba9596145c3ba088a5c73c1f",
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:e7c5d571acbee86129773c5c0002f98e",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d59833ebe122838f12db07e35af9e087"
+    ],
+    "read_count": 7,
+    "layout": {
+      "personal_map": {
+        "x": 0.4367,
+        "y": 0.2276
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 7.92
+  },
+  {
+    "id": "topic:trade-tariff",
+    "label": "관세·무역",
+    "type": "topic",
+    "category_id": "economy",
+    "aliases": [
+      "관세",
+      "무역",
+      "수출",
+      "수입"
+    ],
+    "article_ids": [
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:cb7cfa15c07f5233a1e6608f3efdf677",
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:synthetic:356950dd0560c84d",
+      "article:synthetic:2cd4cce0ac9dff17",
+      "article:synthetic:467f03737aab55c8",
+      "article:synthetic:0a4326bc02afd646",
+      "article:synthetic:ae4cbece0458cf24",
+      "article:synthetic:b2285c3acfa1755d"
+    ],
+    "current_article_ids": [
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:cb7cfa15c07f5233a1e6608f3efdf677",
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b"
+    ],
+    "read_count": 6,
+    "layout": {
+      "personal_map": {
+        "x": 0.5371,
+        "y": 0.2666
+      }
+    },
+    "synthetic": false,
+    "trend_score": 7,
+    "personal_score": 9.24
+  },
+  {
+    "id": "topic:financial-market",
+    "label": "금융시장",
+    "type": "topic",
+    "category_id": "economy",
+    "aliases": [
+      "금융",
+      "증시",
+      "주가",
+      "은행"
+    ],
+    "article_ids": [
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:1ffe40148b7375ec97a7349db69a4dd1",
+      "article:gnews:55433fbbb031474834116bfde6b2bb40",
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636",
+      "article:gnews:1c6490e7fb6c2ce440c6bc99c5bbf9d2",
+      "article:gnews:e7c5d571acbee86129773c5c0002f98e",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d59833ebe122838f12db07e35af9e087",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1",
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57",
+      "article:gnews:8aa579afe9c0929dcd0b3264a2d92234",
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e",
+      "article:gnews:65b7a95e97bc7b7f45f96ddc6689b4d9",
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:synthetic:f3de991caa9a5b56",
+      "article:synthetic:e40361f6b72220c5",
+      "article:synthetic:fb2df254f80ddf8b",
+      "article:synthetic:a18173e117c1c6c5",
+      "article:synthetic:ca40ed8e64ba6258",
+      "article:synthetic:02c0d62cafc43406",
+      "article:synthetic:3ce4e5f043e7d760"
+    ],
+    "current_article_ids": [
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:1ffe40148b7375ec97a7349db69a4dd1",
+      "article:gnews:55433fbbb031474834116bfde6b2bb40",
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636",
+      "article:gnews:1c6490e7fb6c2ce440c6bc99c5bbf9d2",
+      "article:gnews:e7c5d571acbee86129773c5c0002f98e",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d59833ebe122838f12db07e35af9e087",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1",
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57",
+      "article:gnews:8aa579afe9c0929dcd0b3264a2d92234",
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e",
+      "article:gnews:65b7a95e97bc7b7f45f96ddc6689b4d9",
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59"
+    ],
+    "read_count": 8,
+    "layout": {
+      "personal_map": {
+        "x": 0.403,
+        "y": 0.215
+      }
+    },
+    "synthetic": false,
+    "trend_score": 23,
+    "personal_score": 30.36
+  },
+  {
+    "id": "topic:crypto",
+    "label": "가상자산",
+    "type": "topic",
+    "category_id": "economy",
+    "aliases": [
+      "가상자산",
+      "암호화폐",
+      "비트코인",
+      "이더리움",
+      "xrp",
+      "솔라나"
+    ],
+    "article_ids": [
+      "article:gnews:5a77a571102e26769ef3a0e644b6aad8",
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57",
+      "article:gnews:0bb1330577fc805b439f829581bece7e",
+      "article:gnews:bffaf255ed2b759e2e529663649984d5",
+      "article:gnews:55df6ecc90930d6d8cf545b4e026a87c",
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+      "article:gnews:904df6040e02bce6c77dbf22306043ec",
+      "article:gnews:8c61ac06e058cc350373792de694d547",
+      "article:gnews:5e309f5f033424d1a658fe7ced06cfee",
+      "article:gnews:43084dbf48d60fbf2e42b844a22b2b8e",
+      "article:gnews:2c4b3234ce5b5fc77365ce60620b67b9",
+      "article:gnews:bc37bf74ca98ad0203f0821ad13ff3df",
+      "article:gnews:07ff1011d69fc3e8aecd343de4b6b5c2",
+      "article:gnews:2921c8894b4056395ed950ce244c5793",
+      "article:gnews:a7836be86e013b74541c4ef7352aac97",
+      "article:gnews:397d9033b46c83831d810c0adf5be163",
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4",
+      "article:gnews:4b61087b460a326be391a31b2fb931d1",
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea",
+      "article:gnews:1a1623e9755abd4f6c049b7ba607d3b4",
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1",
+      "article:gnews:79cc6c9ed3d584952eaf2633b1e7408d",
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9",
+      "article:gnews:6f06917ac66a1b54f498cf9f1afa14bc",
+      "article:gnews:9f3e67816f0a69623083d7957b866a62",
+      "article:gnews:96561487203602b0cfbcfaa45af07e16",
+      "article:gnews:2e5152ce36aac73be040ecc023ab3687",
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7",
+      "article:gnews:f1982b5149c11aa528d296d56cf397c7",
+      "article:gnews:6be8f4939e6fb6934ade0ca592337815",
+      "article:gnews:1acb86e0a9eb97d3015e99366951ed3a",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:22a183b19239d23f9ea1e30b9f18144b",
+      "article:gnews:b143cf979664e8e031530cb28f17aeed",
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1"
+    ],
+    "current_article_ids": [
+      "article:gnews:5a77a571102e26769ef3a0e644b6aad8",
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57",
+      "article:gnews:0bb1330577fc805b439f829581bece7e",
+      "article:gnews:bffaf255ed2b759e2e529663649984d5",
+      "article:gnews:55df6ecc90930d6d8cf545b4e026a87c",
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+      "article:gnews:904df6040e02bce6c77dbf22306043ec",
+      "article:gnews:8c61ac06e058cc350373792de694d547",
+      "article:gnews:5e309f5f033424d1a658fe7ced06cfee",
+      "article:gnews:43084dbf48d60fbf2e42b844a22b2b8e",
+      "article:gnews:2c4b3234ce5b5fc77365ce60620b67b9",
+      "article:gnews:bc37bf74ca98ad0203f0821ad13ff3df",
+      "article:gnews:07ff1011d69fc3e8aecd343de4b6b5c2",
+      "article:gnews:2921c8894b4056395ed950ce244c5793",
+      "article:gnews:a7836be86e013b74541c4ef7352aac97",
+      "article:gnews:397d9033b46c83831d810c0adf5be163",
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4",
+      "article:gnews:4b61087b460a326be391a31b2fb931d1",
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea",
+      "article:gnews:1a1623e9755abd4f6c049b7ba607d3b4",
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1",
+      "article:gnews:79cc6c9ed3d584952eaf2633b1e7408d",
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9",
+      "article:gnews:6f06917ac66a1b54f498cf9f1afa14bc",
+      "article:gnews:9f3e67816f0a69623083d7957b866a62",
+      "article:gnews:96561487203602b0cfbcfaa45af07e16",
+      "article:gnews:2e5152ce36aac73be040ecc023ab3687",
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7",
+      "article:gnews:f1982b5149c11aa528d296d56cf397c7",
+      "article:gnews:6be8f4939e6fb6934ade0ca592337815",
+      "article:gnews:1acb86e0a9eb97d3015e99366951ed3a",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:22a183b19239d23f9ea1e30b9f18144b",
+      "article:gnews:b143cf979664e8e031530cb28f17aeed",
+      "article:gnews:b7d78dcd01cc76ba45ef812d6114fcd1"
+    ],
+    "read_count": 5,
+    "layout": {
+      "personal_map": {
+        "x": 0.3812,
+        "y": 0.2469
+      }
+    },
+    "synthetic": false,
+    "trend_score": 35,
+    "personal_score": 46.2
+  },
+  {
+    "id": "topic:logistics",
+    "label": "물류",
+    "type": "industry",
+    "category_id": "economy",
+    "aliases": [
+      "물류",
+      "운하",
+      "항로",
+      "컨테이너선"
+    ],
+    "article_ids": [
+      "article:gnews:53e4a0db0a1c1131f2ff13de3c122146",
+      "article:gnews:058bcce5ee11659f3a97fbf610d3a169",
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:cb98edd7bed99213216a6324551de624",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:978642cd142a67b7ecb9da1058bd3e3f",
+      "article:synthetic:10bcf88d946df205",
+      "article:synthetic:96cf5c5f920be042",
+      "article:synthetic:53e5a4438dfc8cae",
+      "article:synthetic:1368d8e228486327",
+      "article:synthetic:6f9134bcda98c4ed",
+      "article:synthetic:25ed5776136260bd",
+      "article:synthetic:b04a8bfdceef24c6",
+      "article:synthetic:989d1ab6e97807f7",
+      "article:synthetic:c3e180d65ac52b0d",
+      "article:synthetic:2cc319e3328d98cd",
+      "article:synthetic:b3c465bc7f625e6c",
+      "article:synthetic:3db0cf481b3ce68b",
+      "article:synthetic:ce4ab7e283b3bbfd",
+      "article:synthetic:4b4e2e4bdc8cc04a",
+      "article:synthetic:f0ec0479767301a6",
+      "article:synthetic:4d2074f5a52edcfb",
+      "article:synthetic:fe8d438d4437a261",
+      "article:synthetic:2eb7e5212fdfcaea",
+      "article:synthetic:21e3f0da5a70677c"
+    ],
+    "current_article_ids": [
+      "article:gnews:53e4a0db0a1c1131f2ff13de3c122146",
+      "article:gnews:058bcce5ee11659f3a97fbf610d3a169",
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:cb98edd7bed99213216a6324551de624",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:978642cd142a67b7ecb9da1058bd3e3f"
+    ],
+    "read_count": 19,
+    "layout": {
+      "personal_map": {
+        "x": 0.4251,
+        "y": 0.1367
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 7.92
+  },
+  {
+    "id": "entity:police",
+    "label": "경찰",
+    "type": "organization",
+    "category_id": "society",
+    "aliases": [
+      "경찰",
+      "수사",
+      "체포"
+    ],
+    "article_ids": [
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78",
+      "article:gnews:4a5b7af84015d41a036ead5632f48920",
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:248c152798fd663d4ba5e6d6dbb8e5c8",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "current_article_ids": [
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+      "article:gnews:c6d18d00aec60a2e1f159088e216a268",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78",
+      "article:gnews:4a5b7af84015d41a036ead5632f48920",
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:248c152798fd663d4ba5e6d6dbb8e5c8",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.635,
+        "y": 0.3
+      }
+    },
+    "synthetic": false,
+    "trend_score": 15,
+    "personal_score": 13.8
+  },
+  {
+    "id": "topic:missing-person",
+    "label": "실종 사건",
+    "type": "event",
+    "category_id": "society",
+    "aliases": [
+      "실종"
+    ],
+    "article_ids": [
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78"
+    ],
+    "current_article_ids": [
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.7196,
+        "y": 0.349
+      }
+    },
+    "synthetic": false,
+    "trend_score": 5,
+    "personal_score": 4.6
+  },
+  {
+    "id": "topic:disaster-safety",
+    "label": "재난 안전",
+    "type": "topic",
+    "category_id": "society",
+    "aliases": [
+      "재난",
+      "사고",
+      "대피",
+      "안전"
+    ],
+    "article_ids": [
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:3e5a952857e13474269ead7a65090214",
+      "article:gnews:15a02c08acaada076587d158c102659a",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:472b5c44f99041831df77fab1e8afc47",
+      "article:gnews:f1e90a04ccf06298c0ce9244c01c4405",
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:c9648da2f15ea1a7a19ab9afbe3f0995",
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636",
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5",
+      "article:gnews:ba5c4378900e3996a60de44c69d1ad08",
+      "article:gnews:993c83041cde14b5b4c0241559e091e3",
+      "article:synthetic:d31a1fcb8c1b7b00",
+      "article:synthetic:32baaff82fd0c99a",
+      "article:synthetic:7a0c0fe46e6e0c8c",
+      "article:synthetic:c3413cffc529d2fa",
+      "article:synthetic:81bf5ddfb7ea5d90",
+      "article:synthetic:72fc43f7abc10051",
+      "article:synthetic:3e1fa55a85323e5d",
+      "article:synthetic:2c1f4bcd51dff3ef",
+      "article:synthetic:3a720a3b9e378fa6"
+    ],
+    "current_article_ids": [
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:3e5a952857e13474269ead7a65090214",
+      "article:gnews:15a02c08acaada076587d158c102659a",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:472b5c44f99041831df77fab1e8afc47",
+      "article:gnews:f1e90a04ccf06298c0ce9244c01c4405",
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:c9648da2f15ea1a7a19ab9afbe3f0995",
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636",
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5",
+      "article:gnews:ba5c4378900e3996a60de44c69d1ad08",
+      "article:gnews:993c83041cde14b5b4c0241559e091e3"
+    ],
+    "read_count": 10,
+    "layout": {
+      "personal_map": {
+        "x": 0.709,
+        "y": 0.2244
+      }
+    },
+    "synthetic": false,
+    "trend_score": 15,
+    "personal_score": 13.8
+  },
+  {
+    "id": "topic:weather-climate",
+    "label": "기후·날씨",
+    "type": "topic",
+    "category_id": "society",
+    "aliases": [
+      "날씨",
+      "폭염",
+      "호우",
+      "태풍",
+      "무더위",
+      "소나기"
+    ],
+    "article_ids": [
+      "article:gnews:330e9c849e7d143e5e0904c3e0625b13",
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60",
+      "article:gnews:6b21d77536fb57fe71469b15a245a2bd",
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:9f7478346a4b6dae3b59695263c7a809",
+      "article:gnews:472b5c44f99041831df77fab1e8afc47",
+      "article:gnews:2d8415dcb2b2ae04819e71e82943bcd8",
+      "article:gnews:3af74742c14f8142aead678565e89ae9",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:synthetic:d31a1fcb8c1b7b00",
+      "article:synthetic:fa5e3dd1ba151a50",
+      "article:synthetic:32baaff82fd0c99a",
+      "article:synthetic:c3413cffc529d2fa",
+      "article:synthetic:72fc43f7abc10051",
+      "article:synthetic:2c1f4bcd51dff3ef"
+    ],
+    "current_article_ids": [
+      "article:gnews:330e9c849e7d143e5e0904c3e0625b13",
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60",
+      "article:gnews:6b21d77536fb57fe71469b15a245a2bd",
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:9f7478346a4b6dae3b59695263c7a809",
+      "article:gnews:472b5c44f99041831df77fab1e8afc47",
+      "article:gnews:2d8415dcb2b2ae04819e71e82943bcd8",
+      "article:gnews:3af74742c14f8142aead678565e89ae9",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af"
+    ],
+    "read_count": 7,
+    "layout": {
+      "personal_map": {
+        "x": 0.6053,
+        "y": 0.3649
+      }
+    },
+    "synthetic": false,
+    "trend_score": 10,
+    "personal_score": 9.2
+  },
+  {
+    "id": "topic:labor",
+    "label": "노동",
+    "type": "topic",
+    "category_id": "society",
+    "aliases": [
+      "노동",
+      "직장",
+      "근로"
+    ],
+    "article_ids": [
+      "article:gnews:5153283518678eba67628da85968b9cc",
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:2f280fef0bca86ebea4f6e5ddf7964d6",
+      "article:gnews:cf2bd83a48bdb4ba43787fd2752338a3",
+      "article:synthetic:7602c49ee2b597a0",
+      "article:synthetic:0ba1c2094479444f",
+      "article:synthetic:47857b5780a24ed1"
+    ],
+    "current_article_ids": [
+      "article:gnews:5153283518678eba67628da85968b9cc",
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:2f280fef0bca86ebea4f6e5ddf7964d6",
+      "article:gnews:cf2bd83a48bdb4ba43787fd2752338a3"
+    ],
+    "read_count": 4,
+    "layout": {
+      "personal_map": {
+        "x": 0.5904,
+        "y": 0.3752
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 5.52
+  },
+  {
+    "id": "topic:health",
+    "label": "보건·건강",
+    "type": "topic",
+    "category_id": "society",
+    "aliases": [
+      "건강",
+      "병원",
+      "당뇨",
+      "질병"
+    ],
+    "article_ids": [
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:85cbe1be638882c79c9a9df9bbccf059",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:synthetic:3a720a3b9e378fa6"
+    ],
+    "current_article_ids": [
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:85cbe1be638882c79c9a9df9bbccf059",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.7238,
+        "y": 0.2899
+      }
+    },
+    "synthetic": false,
+    "trend_score": 3,
+    "personal_score": 2.76
+  },
+  {
+    "id": "topic:education",
+    "label": "교육",
+    "type": "topic",
+    "category_id": "society",
+    "aliases": [
+      "교육",
+      "학교",
+      "교사"
+    ],
+    "article_ids": [
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5",
+      "article:gnews:3e5a952857e13474269ead7a65090214",
+      "article:gnews:4a5b7af84015d41a036ead5632f48920",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13",
+      "article:synthetic:7a0c0fe46e6e0c8c",
+      "article:synthetic:81bf5ddfb7ea5d90",
+      "article:synthetic:3e1fa55a85323e5d"
+    ],
+    "current_article_ids": [
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5",
+      "article:gnews:3e5a952857e13474269ead7a65090214",
+      "article:gnews:4a5b7af84015d41a036ead5632f48920",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "read_count": 3,
+    "layout": {
+      "personal_map": {
+        "x": 0.743,
+        "y": 0.2978
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 3.68
+  },
+  {
+    "id": "topic:housing-policy",
+    "label": "주거 정책",
+    "type": "policy",
+    "category_id": "society",
+    "aliases": [
+      "주거",
+      "주택공급",
+      "대피생활"
+    ],
+    "article_ids": [
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b"
+    ],
+    "current_article_ids": [
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:9615d5e92e109787d35ae872b8f8a012",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:9a1f75308d1440312b6c9e784ec48d4b"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.7129,
+        "y": 0.226
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 3.68
+  },
+  {
+    "id": "topic:broadcast-entertainment",
+    "label": "방송·예능",
+    "type": "topic",
+    "category_id": "culture",
+    "aliases": [
+      "방송",
+      "예능",
+      "미우새",
+      "놀면 뭐하니"
+    ],
+    "article_ids": [
+      "article:gnews:6194ef39be1db27f16adaa56e3920b4b",
+      "article:gnews:edb02fd56beca599bbb314f8c3e492ba",
+      "article:gnews:79442fbda18f50784fcdecc1ac584633",
+      "article:gnews:eca09e4060901d83707e615cc5b5b3f7",
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:4083d32a26002939671d745d6fe643db",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:7d3c092ba967705417995f3a8b09554d",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:gnews:458dd433803768f5092a630543059bee",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e"
+    ],
+    "current_article_ids": [
+      "article:gnews:6194ef39be1db27f16adaa56e3920b4b",
+      "article:gnews:edb02fd56beca599bbb314f8c3e492ba",
+      "article:gnews:79442fbda18f50784fcdecc1ac584633",
+      "article:gnews:eca09e4060901d83707e615cc5b5b3f7",
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:4083d32a26002939671d745d6fe643db",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:7d3c092ba967705417995f3a8b09554d",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:gnews:458dd433803768f5092a630543059bee",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.7614,
+        "y": 0.4968
+      }
+    },
+    "synthetic": false,
+    "trend_score": 11,
+    "personal_score": 7.48
+  },
+  {
+    "id": "topic:film-drama",
+    "label": "영화·드라마",
+    "type": "topic",
+    "category_id": "culture",
+    "aliases": [
+      "영화",
+      "드라마",
+      "배우"
+    ],
+    "article_ids": [
+      "article:gnews:edb02fd56beca599bbb314f8c3e492ba",
+      "article:gnews:79442fbda18f50784fcdecc1ac584633",
+      "article:gnews:eca09e4060901d83707e615cc5b5b3f7",
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:4083d32a26002939671d745d6fe643db",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:4a5b7af84015d41a036ead5632f48920",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:synthetic:2f973cc3beff3ee9",
+      "article:synthetic:c7052c3fb7482d58"
+    ],
+    "current_article_ids": [
+      "article:gnews:edb02fd56beca599bbb314f8c3e492ba",
+      "article:gnews:79442fbda18f50784fcdecc1ac584633",
+      "article:gnews:eca09e4060901d83707e615cc5b5b3f7",
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:4083d32a26002939671d745d6fe643db",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:4a5b7af84015d41a036ead5632f48920",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:synthetic:2f973cc3beff3ee9"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.7837,
+        "y": 0.4591
+      }
+    },
+    "synthetic": false,
+    "trend_score": 10,
+    "personal_score": 6.8
+  },
+  {
+    "id": "topic:music",
+    "label": "음악",
+    "type": "topic",
+    "category_id": "culture",
+    "aliases": [
+      "음악",
+      "가수",
+      "콘서트",
+      "k-pop"
+    ],
+    "article_ids": [
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221",
+      "article:gnews:399eb654bb08dfcde50cf8f2bfeb3a3b"
+    ],
+    "current_article_ids": [
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221",
+      "article:gnews:399eb654bb08dfcde50cf8f2bfeb3a3b"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.7887,
+        "y": 0.4398
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 2.72
+  },
+  {
+    "id": "topic:performance",
+    "label": "공연",
+    "type": "topic",
+    "category_id": "culture",
+    "aliases": [
+      "공연",
+      "무대",
+      "연극"
+    ],
+    "article_ids": [
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b"
+    ],
+    "current_article_ids": [
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.8811,
+        "y": 0.4632
+      }
+    },
+    "synthetic": false,
+    "trend_score": 3,
+    "personal_score": 2.04
+  },
+  {
+    "id": "topic:exhibition",
+    "label": "전시·미술",
+    "type": "topic",
+    "category_id": "culture",
+    "aliases": [
+      "전시",
+      "미술",
+      "미술관"
+    ],
+    "article_ids": [
+      "article:synthetic:8bd4116494f4f611"
+    ],
+    "current_article_ids": [
+      "article:synthetic:8bd4116494f4f611"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.6958,
+        "y": 0.5731
+      }
+    },
+    "synthetic": false,
+    "trend_score": 1,
+    "personal_score": 0.68
+  },
+  {
+    "id": "topic:publishing",
+    "label": "출판",
+    "type": "topic",
+    "category_id": "culture",
+    "aliases": [
+      "출판",
+      "책",
+      "작가"
+    ],
+    "article_ids": [
+      "article:gnews:f8668003a78bc8516945add1394998ef",
+      "article:gnews:bcb21e7669bc4bde6137bccffbf99892",
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:fb9601964e2a675acfcf5a69c930b64e",
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d6ebe8dbb19e7db59c6c77b8815e09ca",
+      "article:gnews:e05185232572a595b1f65e0220358997",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "current_article_ids": [
+      "article:gnews:f8668003a78bc8516945add1394998ef",
+      "article:gnews:bcb21e7669bc4bde6137bccffbf99892",
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:fb9601964e2a675acfcf5a69c930b64e",
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d6ebe8dbb19e7db59c6c77b8815e09ca",
+      "article:gnews:e05185232572a595b1f65e0220358997",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.7583,
+        "y": 0.5369
+      }
+    },
+    "synthetic": false,
+    "trend_score": 13,
+    "personal_score": 8.84
+  },
+  {
+    "id": "topic:creator",
+    "label": "크리에이터",
+    "type": "topic",
+    "category_id": "culture",
+    "aliases": [
+      "크리에이터",
+      "유튜브",
+      "sns"
+    ],
+    "article_ids": [
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:a8ada98680597be8d08313335b7e9771",
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc",
+      "article:gnews:458dd433803768f5092a630543059bee",
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:7945b4b767162bf626c1b088fdbc886b",
+      "article:synthetic:c7052c3fb7482d58",
+      "article:synthetic:db62342c2f5a6905"
+    ],
+    "current_article_ids": [
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:a8ada98680597be8d08313335b7e9771",
+      "article:gnews:3ae683ee21059ced13a63abce5f4babc",
+      "article:gnews:458dd433803768f5092a630543059bee",
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:7945b4b767162bf626c1b088fdbc886b"
+    ],
+    "read_count": 2,
+    "layout": {
+      "personal_map": {
+        "x": 0.7848,
+        "y": 0.5811
+      }
+    },
+    "synthetic": false,
+    "trend_score": 9,
+    "personal_score": 6.12
+  },
+  {
+    "id": "topic:cultural-heritage",
+    "label": "문화유산",
+    "type": "topic",
+    "category_id": "culture",
+    "aliases": [
+      "문화유산",
+      "유산",
+      "박물관"
+    ],
+    "article_ids": [
+      "article:synthetic:8bd4116494f4f611",
+      "article:synthetic:08fe7a4fdaebc066",
+      "article:synthetic:ff678c31116ee2cb",
+      "article:synthetic:71871bac53d05ebf"
+    ],
+    "current_article_ids": [
+      "article:synthetic:8bd4116494f4f611"
+    ],
+    "read_count": 3,
+    "layout": {
+      "personal_map": {
+        "x": 0.7804,
+        "y": 0.4414
+      }
+    },
+    "synthetic": false,
+    "trend_score": 1,
+    "personal_score": 0.68
+  },
+  {
+    "id": "entity:donald-trump",
+    "label": "도널드 트럼프",
+    "type": "person",
+    "category_id": "world",
+    "aliases": [
+      "트럼프"
+    ],
+    "article_ids": [
+      "article:gnews:314c569bcc5308c5fa539130d2307607",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a",
+      "article:gnews:d5f7e0fd911b6c24a05d1d75a048935f",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f",
+      "article:gnews:cda61035be78996ea191058b9df7b192"
+    ],
+    "current_article_ids": [
+      "article:gnews:314c569bcc5308c5fa539130d2307607",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a",
+      "article:gnews:d5f7e0fd911b6c24a05d1d75a048935f",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f",
+      "article:gnews:cda61035be78996ea191058b9df7b192"
+    ],
+    "read_count": 2,
+    "layout": {
+      "personal_map": {
+        "x": 0.7048,
+        "y": 0.7247
+      }
+    },
+    "synthetic": false,
+    "trend_score": 18,
+    "personal_score": 19.26
+  },
+  {
+    "id": "entity:united-states",
+    "label": "미국",
+    "type": "country",
+    "category_id": "world",
+    "aliases": [
+      "미국",
+      "미군",
+      "미 해군",
+      "연방법원",
+      "백악관"
+    ],
+    "article_ids": [
+      "article:gnews:314c569bcc5308c5fa539130d2307607",
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61",
+      "article:gnews:1adbe0d993c168d890bf01bf0edc4a11",
+      "article:gnews:b34dfe31082716a724c030a70070a1c0",
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a",
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:e9c2943de596a6c30064672508f8ce9b",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:15e53fe10ad9d75bf29e0312062cf35d",
+      "article:gnews:10bf833e05e358539fa0992412513557",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a",
+      "article:gnews:d5f7e0fd911b6c24a05d1d75a048935f",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f",
+      "article:gnews:b2eea49274ca2d24ed9c9b33d3f9a43b",
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+      "article:gnews:993c83041cde14b5b4c0241559e091e3",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d59833ebe122838f12db07e35af9e087",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529",
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea",
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1",
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9",
+      "article:gnews:0144dd891f775ee7aab09ced708828c4",
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7",
+      "article:gnews:b6d29a3495bacce390bfa2ec57b3c1d4",
+      "article:gnews:cda61035be78996ea191058b9df7b192",
+      "article:synthetic:91e2a26634e5993a",
+      "article:synthetic:9ffcaa75137b994b",
+      "article:synthetic:c0fb57ff957a47cb",
+      "article:synthetic:be39c2c6bcaf690f",
+      "article:synthetic:5632bf1e67f779c0",
+      "article:synthetic:a63be8fcac0ec9ac"
+    ],
+    "current_article_ids": [
+      "article:gnews:314c569bcc5308c5fa539130d2307607",
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61",
+      "article:gnews:1adbe0d993c168d890bf01bf0edc4a11",
+      "article:gnews:b34dfe31082716a724c030a70070a1c0",
+      "article:gnews:156a6a875e8ca03309faf44bddfa498a",
+      "article:gnews:87ddd8d71cd0e0a0f71594d23ad81856",
+      "article:gnews:c4e7e3f0ccf06c59d297049136e3852e",
+      "article:gnews:1371bcb4134af8afaaae1ae3325dedf6",
+      "article:gnews:a9b648a633eb86e506535c96a42e93c1",
+      "article:gnews:e9c2943de596a6c30064672508f8ce9b",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:15e53fe10ad9d75bf29e0312062cf35d",
+      "article:gnews:10bf833e05e358539fa0992412513557",
+      "article:gnews:b679e59c372429979f91a61fd69e1a9c",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee",
+      "article:gnews:d9cd6f11c56330ea8d035d4886358d14",
+      "article:gnews:cac556ce175a97355a4553c6ad0f655a",
+      "article:gnews:d5f7e0fd911b6c24a05d1d75a048935f",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f",
+      "article:gnews:b2eea49274ca2d24ed9c9b33d3f9a43b",
+      "article:gnews:d8ad70fe6af2d20c62fd6570fb4cd2f3",
+      "article:gnews:993c83041cde14b5b4c0241559e091e3",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d59833ebe122838f12db07e35af9e087",
+      "article:gnews:ecf9f9c191264eced9f89524ad12b12d",
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529",
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea",
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1",
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9",
+      "article:gnews:0144dd891f775ee7aab09ced708828c4",
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7",
+      "article:gnews:b6d29a3495bacce390bfa2ec57b3c1d4",
+      "article:gnews:cda61035be78996ea191058b9df7b192"
+    ],
+    "read_count": 11,
+    "layout": {
+      "personal_map": {
+        "x": 0.5971,
+        "y": 0.7167
+      }
+    },
+    "synthetic": false,
+    "trend_score": 47,
+    "personal_score": 50.29
+  },
+  {
+    "id": "entity:north-korea",
+    "label": "북한",
+    "type": "country",
+    "category_id": "world",
+    "aliases": [
+      "북한",
+      "북한군",
+      "김정은",
+      "평양"
+    ],
+    "article_ids": [
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:cb98edd7bed99213216a6324551de624",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1"
+    ],
+    "current_article_ids": [
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:5ab00a6f2c63d18fdcc66abd336d7696",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:cb98edd7bed99213216a6324551de624",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.6572,
+        "y": 0.639
+      }
+    },
+    "synthetic": false,
+    "trend_score": 16,
+    "personal_score": 17.12
+  },
+  {
+    "id": "entity:china",
+    "label": "중국",
+    "type": "country",
+    "category_id": "world",
+    "aliases": [
+      "중국",
+      "베이징"
+    ],
+    "article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1",
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8",
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b",
+      "article:gnews:c9648da2f15ea1a7a19ab9afbe3f0995",
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5",
+      "article:gnews:ba5c4378900e3996a60de44c69d1ad08",
+      "article:gnews:993c83041cde14b5b4c0241559e091e3",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e",
+      "article:gnews:8c61ac06e058cc350373792de694d547",
+      "article:gnews:7cabeed7729f458e4a111bec70d1f999",
+      "article:synthetic:91e2a26634e5993a",
+      "article:synthetic:9ffcaa75137b994b",
+      "article:synthetic:c0fb57ff957a47cb",
+      "article:synthetic:be39c2c6bcaf690f",
+      "article:synthetic:5632bf1e67f779c0",
+      "article:synthetic:a63be8fcac0ec9ac"
+    ],
+    "current_article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1",
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8",
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b",
+      "article:gnews:c9648da2f15ea1a7a19ab9afbe3f0995",
+      "article:gnews:866a0f201980a30b038e61fa7b525ec5",
+      "article:gnews:ba5c4378900e3996a60de44c69d1ad08",
+      "article:gnews:993c83041cde14b5b4c0241559e091e3",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:e03e569e7f9f387deaa1a809ef64136e",
+      "article:gnews:8c61ac06e058cc350373792de694d547",
+      "article:gnews:7cabeed7729f458e4a111bec70d1f999"
+    ],
+    "read_count": 8,
+    "layout": {
+      "personal_map": {
+        "x": 0.5632,
+        "y": 0.6994
+      }
+    },
+    "synthetic": false,
+    "trend_score": 16,
+    "personal_score": 17.12
+  },
+  {
+    "id": "entity:japan",
+    "label": "일본",
+    "type": "country",
+    "category_id": "world",
+    "aliases": [
+      "일본",
+      "도쿄",
+      "오키나와"
+    ],
+    "article_ids": [
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8",
+      "article:gnews:81652f74477d1390342eb6ad5f1e2c72",
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:0b742aea1dd9476b6cd1d06a1dab6189",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:15a02c08acaada076587d158c102659a",
+      "article:gnews:2d8415dcb2b2ae04819e71e82943bcd8",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d59833ebe122838f12db07e35af9e087",
+      "article:synthetic:8b536495f3c324b8"
+    ],
+    "current_article_ids": [
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8",
+      "article:gnews:81652f74477d1390342eb6ad5f1e2c72",
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:0b742aea1dd9476b6cd1d06a1dab6189",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:15a02c08acaada076587d158c102659a",
+      "article:gnews:2d8415dcb2b2ae04819e71e82943bcd8",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2",
+      "article:gnews:cdb6a6579dc5a0414f698b0b3b1f56ae",
+      "article:gnews:5b7483597d0ec03a89e6f387180a5bb8",
+      "article:gnews:d59833ebe122838f12db07e35af9e087"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.6337,
+        "y": 0.834
+      }
+    },
+    "synthetic": false,
+    "trend_score": 16,
+    "personal_score": 17.12
+  },
+  {
+    "id": "entity:iran",
+    "label": "이란",
+    "type": "country",
+    "category_id": "world",
+    "aliases": [
+      "이란"
+    ],
+    "article_ids": [
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61",
+      "article:gnews:b34dfe31082716a724c030a70070a1c0",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:15e53fe10ad9d75bf29e0312062cf35d",
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f"
+    ],
+    "current_article_ids": [
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61",
+      "article:gnews:b34dfe31082716a724c030a70070a1c0",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:15e53fe10ad9d75bf29e0312062cf35d",
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.6317,
+        "y": 0.755
+      }
+    },
+    "synthetic": false,
+    "trend_score": 10,
+    "personal_score": 10.7
+  },
+  {
+    "id": "entity:israel",
+    "label": "이스라엘",
+    "type": "country",
+    "category_id": "world",
+    "aliases": [
+      "이스라엘",
+      "네타냐후"
+    ],
+    "article_ids": [
+      "article:gnews:a7bf374fb4b06bc50371c4c64bf4240d",
+      "article:gnews:1b0f89cf9a6181fda02bc901f08e7c4e",
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37",
+      "article:gnews:765da21f05b462ffae1ae009180f3b85",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f"
+    ],
+    "current_article_ids": [
+      "article:gnews:a7bf374fb4b06bc50371c4c64bf4240d",
+      "article:gnews:1b0f89cf9a6181fda02bc901f08e7c4e",
+      "article:gnews:db5066810fcea96d9eba7c8689ebdc37",
+      "article:gnews:765da21f05b462ffae1ae009180f3b85",
+      "article:gnews:d3bc94cb9f7885a7bda88a9596a6260f"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.6846,
+        "y": 0.778
+      }
+    },
+    "synthetic": false,
+    "trend_score": 5,
+    "personal_score": 5.35
+  },
+  {
+    "id": "entity:ukraine",
+    "label": "우크라이나",
+    "type": "country",
+    "category_id": "world",
+    "aliases": [
+      "우크라이나",
+      "우크라",
+      "키이우"
+    ],
+    "article_ids": [
+      "article:gnews:43db88f1d43d33d105c473ad711c1217",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1",
+      "article:synthetic:04727851f5b4c309",
+      "article:synthetic:846f2d11136530d5",
+      "article:synthetic:53b8b6a6674c44c8",
+      "article:synthetic:e87370c25026c1c8",
+      "article:synthetic:e1c8322ef6878fab"
+    ],
+    "current_article_ids": [
+      "article:gnews:43db88f1d43d33d105c473ad711c1217",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1"
+    ],
+    "read_count": 5,
+    "layout": {
+      "personal_map": {
+        "x": 0.6008,
+        "y": 0.7752
+      }
+    },
+    "synthetic": false,
+    "trend_score": 9,
+    "personal_score": 9.63
+  },
+  {
+    "id": "entity:russia",
+    "label": "러시아",
+    "type": "country",
+    "category_id": "world",
+    "aliases": [
+      "러시아",
+      "러 ",
+      "모스크바"
+    ],
+    "article_ids": [
+      "article:gnews:03c978bfd9cb59c037599785dcd3a640",
+      "article:gnews:b2af68b27241640022294217192e9527",
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:09e8673af34733b72a8fbd9e4739cadc",
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:4083d32a26002939671d745d6fe643db",
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:43db88f1d43d33d105c473ad711c1217",
+      "article:gnews:bd7ac661954c200e477b803d59e209b8",
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:10bf833e05e358539fa0992412513557",
+      "article:gnews:cb98edd7bed99213216a6324551de624",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78",
+      "article:gnews:08a0d8438357a310662e7c80737d0954",
+      "article:gnews:3260f046db9f3df61e5f34fdcd60deaf",
+      "article:gnews:4eb6b005fb39c7dcbca7ab7a440ff7d7",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:cf2bd83a48bdb4ba43787fd2752338a3",
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636",
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1",
+      "article:gnews:5a77a571102e26769ef3a0e644b6aad8",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:gnews:492c8967c1cc3f85972d38b21c5a72bc",
+      "article:gnews:746c3e632e848cb9945a4a2f36290baa",
+      "article:gnews:d6ebe8dbb19e7db59c6c77b8815e09ca",
+      "article:gnews:e05185232572a595b1f65e0220358997",
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57",
+      "article:gnews:bffaf255ed2b759e2e529663649984d5",
+      "article:gnews:55df6ecc90930d6d8cf545b4e026a87c",
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+      "article:gnews:904df6040e02bce6c77dbf22306043ec",
+      "article:gnews:5e309f5f033424d1a658fe7ced06cfee",
+      "article:gnews:43084dbf48d60fbf2e42b844a22b2b8e",
+      "article:gnews:bc37bf74ca98ad0203f0821ad13ff3df",
+      "article:gnews:07ff1011d69fc3e8aecd343de4b6b5c2",
+      "article:gnews:a7836be86e013b74541c4ef7352aac97",
+      "article:gnews:397d9033b46c83831d810c0adf5be163",
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4",
+      "article:gnews:4b61087b460a326be391a31b2fb931d1",
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea",
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1",
+      "article:gnews:7cabeed7729f458e4a111bec70d1f999",
+      "article:gnews:79cc6c9ed3d584952eaf2633b1e7408d",
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9",
+      "article:gnews:6f06917ac66a1b54f498cf9f1afa14bc",
+      "article:gnews:9f3e67816f0a69623083d7957b866a62",
+      "article:gnews:96561487203602b0cfbcfaa45af07e16",
+      "article:gnews:2e5152ce36aac73be040ecc023ab3687",
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:1acb86e0a9eb97d3015e99366951ed3a",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1",
+      "article:gnews:7d3c092ba967705417995f3a8b09554d",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e",
+      "article:synthetic:04727851f5b4c309",
+      "article:synthetic:846f2d11136530d5",
+      "article:synthetic:53b8b6a6674c44c8",
+      "article:synthetic:e87370c25026c1c8",
+      "article:synthetic:e1c8322ef6878fab"
+    ],
+    "current_article_ids": [
+      "article:gnews:03c978bfd9cb59c037599785dcd3a640",
+      "article:gnews:b2af68b27241640022294217192e9527",
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:09e8673af34733b72a8fbd9e4739cadc",
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:9ca33401ca7cf9ed178325f577b099d2",
+      "article:gnews:3ae1f34d44b4cfba168486c91dde77f4",
+      "article:gnews:4083d32a26002939671d745d6fe643db",
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:43db88f1d43d33d105c473ad711c1217",
+      "article:gnews:bd7ac661954c200e477b803d59e209b8",
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:e9d97c6552bd4594cd05baf4c84679b4",
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103",
+      "article:gnews:5625b46442e00708660866d917b8e2bf",
+      "article:gnews:10bf833e05e358539fa0992412513557",
+      "article:gnews:cb98edd7bed99213216a6324551de624",
+      "article:gnews:c0801a25732fe7a7c5d1ea6c3cbb865c",
+      "article:gnews:95ddadea9e00258d2cb29746508ac8ee",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78",
+      "article:gnews:08a0d8438357a310662e7c80737d0954",
+      "article:gnews:3260f046db9f3df61e5f34fdcd60deaf",
+      "article:gnews:4eb6b005fb39c7dcbca7ab7a440ff7d7",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:cf2bd83a48bdb4ba43787fd2752338a3",
+      "article:gnews:bb4fbdf7cc4c559c9054c2327f9c356e",
+      "article:gnews:805e9df29f1c054aebb22e37f1244636",
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1",
+      "article:gnews:5a77a571102e26769ef3a0e644b6aad8",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:479d383a768201e85b24517c325677f9",
+      "article:gnews:fb0f5bf445cb84fb0f6de0b3432830e6",
+      "article:gnews:b8f8411c948e2d23bcc824e344beba8b",
+      "article:gnews:492c8967c1cc3f85972d38b21c5a72bc",
+      "article:gnews:746c3e632e848cb9945a4a2f36290baa",
+      "article:gnews:d6ebe8dbb19e7db59c6c77b8815e09ca",
+      "article:gnews:e05185232572a595b1f65e0220358997",
+      "article:gnews:0d10d4aec2d710ec4764f2b92c3dab57",
+      "article:gnews:bffaf255ed2b759e2e529663649984d5",
+      "article:gnews:55df6ecc90930d6d8cf545b4e026a87c",
+      "article:gnews:b700b05a1cdf8247398db3c4530d15e3",
+      "article:gnews:904df6040e02bce6c77dbf22306043ec",
+      "article:gnews:5e309f5f033424d1a658fe7ced06cfee",
+      "article:gnews:43084dbf48d60fbf2e42b844a22b2b8e",
+      "article:gnews:bc37bf74ca98ad0203f0821ad13ff3df",
+      "article:gnews:07ff1011d69fc3e8aecd343de4b6b5c2",
+      "article:gnews:a7836be86e013b74541c4ef7352aac97",
+      "article:gnews:397d9033b46c83831d810c0adf5be163",
+      "article:gnews:5243ea29a6e2a9ce261565043bf713f4",
+      "article:gnews:4b61087b460a326be391a31b2fb931d1",
+      "article:gnews:07eadabdb0ba3b6563845b7f6cd2d7ea",
+      "article:gnews:38d413baa8f26c7d77a4ae0139b676f1",
+      "article:gnews:7cabeed7729f458e4a111bec70d1f999",
+      "article:gnews:79cc6c9ed3d584952eaf2633b1e7408d",
+      "article:gnews:7f1d930731fd484b8be026cba52ebcf9",
+      "article:gnews:6f06917ac66a1b54f498cf9f1afa14bc",
+      "article:gnews:9f3e67816f0a69623083d7957b866a62",
+      "article:gnews:96561487203602b0cfbcfaa45af07e16",
+      "article:gnews:2e5152ce36aac73be040ecc023ab3687",
+      "article:gnews:575a5286b2c7e02998cb93abd550e3e7",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:1acb86e0a9eb97d3015e99366951ed3a",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:75659ea28d118f32288f4f33ae1abf13",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1",
+      "article:gnews:7d3c092ba967705417995f3a8b09554d",
+      "article:gnews:fb18e5cb5292fcca30b4ca7036a826af",
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e"
+    ],
+    "read_count": 11,
+    "layout": {
+      "personal_map": {
+        "x": 0.7572,
+        "y": 0.7011
+      }
+    },
+    "synthetic": false,
+    "trend_score": 79,
+    "personal_score": 84.53
+  },
+  {
+    "id": "topic:strait-of-hormuz",
+    "label": "호르무즈 해협",
+    "type": "place",
+    "category_id": "world",
+    "aliases": [
+      "호르무즈"
+    ],
+    "article_ids": [
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507",
+      "article:synthetic:3643d432907de950",
+      "article:synthetic:7ba780c043b94429",
+      "article:synthetic:b475b6c010bb7037",
+      "article:synthetic:9cd7344b1589b961",
+      "article:synthetic:aff96d43821f998c",
+      "article:synthetic:3102cd3be948dcf0"
+    ],
+    "current_article_ids": [
+      "article:gnews:2778e2870ca3ecc6e6f82aad07ecd90f",
+      "article:gnews:51da7b14abbc28ceccadd06348fa9c61",
+      "article:gnews:1bdab162faaefab812f794058dac7e14",
+      "article:gnews:3ea7c963730b622ff73614d8607cecd2",
+      "article:gnews:28b04acfad8718cc32ceb53688472d1f",
+      "article:gnews:ebe399eadddbf202e54da31ab274f900",
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507"
+    ],
+    "read_count": 6,
+    "layout": {
+      "personal_map": {
+        "x": 0.7761,
+        "y": 0.7057
+      }
+    },
+    "synthetic": false,
+    "trend_score": 7,
+    "personal_score": 7.49
+  },
+  {
+    "id": "topic:nuclear-security",
+    "label": "핵안보",
+    "type": "topic",
+    "category_id": "world",
+    "aliases": [
+      "핵추진",
+      "핵무기",
+      "핵안보",
+      "탄도미사일"
+    ],
+    "article_ids": [
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1"
+    ],
+    "current_article_ids": [
+      "article:gnews:7c8d4e1a9f42aa4e83da4506dae1163e",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.703,
+        "y": 0.7068
+      }
+    },
+    "synthetic": false,
+    "trend_score": 2,
+    "personal_score": 2.14
+  },
+  {
+    "id": "entity:defense-ministry",
+    "label": "국방부",
+    "type": "organization",
+    "category_id": "world",
+    "aliases": [
+      "국방부",
+      "방위비",
+      "미사일"
+    ],
+    "article_ids": [
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:b2eea49274ca2d24ed9c9b33d3f9a43b"
+    ],
+    "current_article_ids": [
+      "article:gnews:f96033fb305099f22d19e35e2e258e5e",
+      "article:gnews:dc49b96241bee809f242017b98b8d265",
+      "article:gnews:1ca215ce4aabbfab0585cb13f7f72f9e",
+      "article:gnews:2c1846d24c6d8b4b2b0a7fb9c0c93db8",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:a54cbe0929108a2376ebdad2a091eef1",
+      "article:gnews:b2eea49274ca2d24ed9c9b33d3f9a43b"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.6763,
+        "y": 0.6591
+      }
+    },
+    "synthetic": false,
+    "trend_score": 7,
+    "personal_score": 7.49
+  },
+  {
+    "id": "place:seoul",
+    "label": "서울",
+    "type": "place",
+    "category_id": "local",
+    "aliases": [
+      "서울",
+      "용산"
+    ],
+    "article_ids": [
+      "article:gnews:44408f4c148a748ff5163fdd45bef221",
+      "article:gnews:0c2123dca50ce4ff4557d1fcf9a30d9c",
+      "article:gnews:685fb017162df9bc4dda479afa95ecb0",
+      "article:gnews:de2d693577772b76c7e03172714a3e7a",
+      "article:gnews:79442fbda18f50784fcdecc1ac584633",
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:5153283518678eba67628da85968b9cc",
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60",
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461",
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:c98995dd99146e12dcc4e3260f37d300",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:bd7ac661954c200e477b803d59e209b8",
+      "article:gnews:b34dfe31082716a724c030a70070a1c0",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221",
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507",
+      "article:gnews:409295aa4bb6e3d092b9dfa923f72aba",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62",
+      "article:gnews:3414d3453e63542668689c939e764d9f",
+      "article:gnews:ea160542989659d81337b655dfd162e6",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:cc09d1a62b7a8a3ee9b5241ee73388b3",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1",
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e"
+    ],
+    "current_article_ids": [
+      "article:gnews:44408f4c148a748ff5163fdd45bef221",
+      "article:gnews:0c2123dca50ce4ff4557d1fcf9a30d9c",
+      "article:gnews:685fb017162df9bc4dda479afa95ecb0",
+      "article:gnews:de2d693577772b76c7e03172714a3e7a",
+      "article:gnews:79442fbda18f50784fcdecc1ac584633",
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:b65262f6795217671a48324aeca77ab1",
+      "article:gnews:96be339138bc2524586aa2ff62e48246",
+      "article:gnews:5153283518678eba67628da85968b9cc",
+      "article:gnews:80a315ce7c991dc1c264c16cdd7dcc60",
+      "article:gnews:71bd0615a60c34270d57117fb54ddfe8",
+      "article:gnews:97b54539aa6ea4645de21c0a481151a7",
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461",
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:c98995dd99146e12dcc4e3260f37d300",
+      "article:gnews:dd1efe89b40a2f73686b4ca01508e023",
+      "article:gnews:8d47cbb4c1c148b1507d8a7c356ba0cd",
+      "article:gnews:bd7ac661954c200e477b803d59e209b8",
+      "article:gnews:b34dfe31082716a724c030a70070a1c0",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:6e916736cd7c1acc54b0ab7e6fe100d2",
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221",
+      "article:gnews:b4db1a36da2a70b54df87386f26e3507",
+      "article:gnews:409295aa4bb6e3d092b9dfa923f72aba",
+      "article:gnews:bbb61b9e37da9c7c737a2c359d5cd2ec",
+      "article:gnews:b73c6160c672699a8bd9e26f0307f556",
+      "article:gnews:fb8c1954137dc4f1c214346110845c4a",
+      "article:gnews:4825b67c8f9ab1bcec18dfbf98a19a0d",
+      "article:gnews:6d73e99f707f285a49378b02f51389f4",
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f",
+      "article:gnews:c3176a25c6467f433f7d60441bb53ba4",
+      "article:gnews:b0af1e4c0de136b32e81f58645f7d38b",
+      "article:gnews:00eb7be73bd983c51864caf32dd58b62",
+      "article:gnews:3414d3453e63542668689c939e764d9f",
+      "article:gnews:ea160542989659d81337b655dfd162e6",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:cc09d1a62b7a8a3ee9b5241ee73388b3",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1",
+      "article:gnews:6bb8ae5ce2517f0b78165c9bed061aea",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e"
+    ],
+    "read_count": 6,
+    "layout": {
+      "personal_map": {
+        "x": 0.4873,
+        "y": 0.7752
+      }
+    },
+    "synthetic": false,
+    "trend_score": 43,
+    "personal_score": 32.25
+  },
+  {
+    "id": "place:jeju",
+    "label": "제주",
+    "type": "place",
+    "category_id": "local",
+    "aliases": [
+      "제주",
+      "서귀포"
+    ],
+    "article_ids": [
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:e1359331eea5332ee814681535a59fec",
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:409295aa4bb6e3d092b9dfa923f72aba",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78",
+      "article:gnews:9f7478346a4b6dae3b59695263c7a809",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e"
+    ],
+    "current_article_ids": [
+      "article:gnews:77224c2fdc14ab8cb57ca0f573fb3b34",
+      "article:gnews:e1359331eea5332ee814681535a59fec",
+      "article:gnews:3404c5f17eba2d52155408841ab03613",
+      "article:gnews:0ae7f856cbb650bee5b050912816e5eb",
+      "article:gnews:7943c049fcdea1cf12169a3dc176e86d",
+      "article:gnews:409295aa4bb6e3d092b9dfa923f72aba",
+      "article:gnews:39aef1d1793b9c27bb1dfd5355bf8b78",
+      "article:gnews:9f7478346a4b6dae3b59695263c7a809",
+      "article:gnews:5a2dbddea9dc5222886b5ac71984aba2",
+      "article:gnews:8a175e55826e11f9b5c8cae69d626c0f",
+      "article:gnews:ee57c326d15172a7d7e036de8c83f18b",
+      "article:gnews:d9b5c13b25e2aa90d81ee9816fabfa4e"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.4244,
+        "y": 0.6924
+      }
+    },
+    "synthetic": false,
+    "trend_score": 12,
+    "personal_score": 9.0
+  },
+  {
+    "id": "place:busan",
+    "label": "부산",
+    "type": "place",
+    "category_id": "local",
+    "aliases": [
+      "부산",
+      "부산항"
+    ],
+    "article_ids": [
+      "article:gnews:058bcce5ee11659f3a97fbf610d3a169",
+      "article:gnews:978642cd142a67b7ecb9da1058bd3e3f",
+      "article:gnews:bbfbd8991e0e8ca0d4786d07d305486e",
+      "article:gnews:40846910aadc8d6a0d01719e8cc21042",
+      "article:synthetic:96cf5c5f920be042",
+      "article:synthetic:53e5a4438dfc8cae",
+      "article:synthetic:6f9134bcda98c4ed",
+      "article:synthetic:b04a8bfdceef24c6",
+      "article:synthetic:989d1ab6e97807f7",
+      "article:synthetic:2cc319e3328d98cd",
+      "article:synthetic:3db0cf481b3ce68b",
+      "article:synthetic:15f4b65050b8e300",
+      "article:synthetic:ce4ab7e283b3bbfd",
+      "article:synthetic:4b4e2e4bdc8cc04a",
+      "article:synthetic:4d2074f5a52edcfb",
+      "article:synthetic:fe8d438d4437a261",
+      "article:synthetic:21e3f0da5a70677c"
+    ],
+    "current_article_ids": [
+      "article:gnews:058bcce5ee11659f3a97fbf610d3a169",
+      "article:gnews:978642cd142a67b7ecb9da1058bd3e3f",
+      "article:gnews:bbfbd8991e0e8ca0d4786d07d305486e",
+      "article:gnews:40846910aadc8d6a0d01719e8cc21042"
+    ],
+    "read_count": 13,
+    "layout": {
+      "personal_map": {
+        "x": 0.4184,
+        "y": 0.6754
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 3.0
+  },
+  {
+    "id": "place:daegu",
+    "label": "대구",
+    "type": "place",
+    "category_id": "local",
+    "aliases": [
+      "대구"
+    ],
+    "article_ids": [
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615",
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:synthetic:fa5e3dd1ba151a50",
+      "article:synthetic:08fe7a4fdaebc066",
+      "article:synthetic:ff678c31116ee2cb"
+    ],
+    "current_article_ids": [
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:f318fc80307ea53b81adb3f6cc475615",
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b"
+    ],
+    "read_count": 3,
+    "layout": {
+      "personal_map": {
+        "x": 0.4586,
+        "y": 0.8486
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 3.0
+  },
+  {
+    "id": "place:gyeongnam",
+    "label": "경남",
+    "type": "place",
+    "category_id": "local",
+    "aliases": [
+      "경남",
+      "거제",
+      "통영",
+      "김해"
+    ],
+    "article_ids": [
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:6b21d77536fb57fe71469b15a245a2bd",
+      "article:gnews:3f0ed4f1ac09b3832f6f47f7adc520c7",
+      "article:gnews:472b5c44f99041831df77fab1e8afc47",
+      "article:gnews:3af74742c14f8142aead678565e89ae9",
+      "article:synthetic:15f4b65050b8e300"
+    ],
+    "current_article_ids": [
+      "article:gnews:485cf50b904d508536cba42345061c2f",
+      "article:gnews:6b21d77536fb57fe71469b15a245a2bd",
+      "article:gnews:3f0ed4f1ac09b3832f6f47f7adc520c7",
+      "article:gnews:472b5c44f99041831df77fab1e8afc47",
+      "article:gnews:3af74742c14f8142aead678565e89ae9"
+    ],
+    "read_count": 2,
+    "layout": {
+      "personal_map": {
+        "x": 0.547,
+        "y": 0.6846
+      }
+    },
+    "synthetic": false,
+    "trend_score": 5,
+    "personal_score": 3.75
+  },
+  {
+    "id": "place:gyeonggi",
+    "label": "경기",
+    "type": "place",
+    "category_id": "local",
+    "aliases": [
+      "경기도",
+      "수원",
+      "광교",
+      "파주"
+    ],
+    "article_ids": [
+      "article:gnews:bcb21e7669bc4bde6137bccffbf99892",
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5",
+      "article:gnews:fb9601964e2a675acfcf5a69c930b64e",
+      "article:gnews:3260f046db9f3df61e5f34fdcd60deaf"
+    ],
+    "current_article_ids": [
+      "article:gnews:bcb21e7669bc4bde6137bccffbf99892",
+      "article:gnews:4d2b1a39507b8de62c2dd1b9cd71bde5",
+      "article:gnews:fb9601964e2a675acfcf5a69c930b64e",
+      "article:gnews:3260f046db9f3df61e5f34fdcd60deaf"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.4531,
+        "y": 0.7051
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 3.0
+  },
+  {
+    "id": "place:jeonnam",
+    "label": "전남",
+    "type": "place",
+    "category_id": "local",
+    "aliases": [
+      "전남",
+      "순천"
+    ],
+    "article_ids": [
+      "article:gnews:4eb6b005fb39c7dcbca7ab7a440ff7d7"
+    ],
+    "current_article_ids": [
+      "article:gnews:4eb6b005fb39c7dcbca7ab7a440ff7d7"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.5003,
+        "y": 0.7879
+      }
+    },
+    "synthetic": false,
+    "trend_score": 1,
+    "personal_score": 0.75
+  },
+  {
+    "id": "place:gangwon",
+    "label": "강원",
+    "type": "place",
+    "category_id": "local",
+    "aliases": [
+      "강원",
+      "강릉"
+    ],
+    "article_ids": [
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:08a0d8438357a310662e7c80737d0954",
+      "article:gnews:08cecc30c67e31747c096ac40587048d",
+      "article:gnews:496cb1ecce94b276a6b85fb8d88529d4"
+    ],
+    "current_article_ids": [
+      "article:gnews:1244b2dc2647d5710e3aaa23b862a4bf",
+      "article:gnews:08a0d8438357a310662e7c80737d0954",
+      "article:gnews:08cecc30c67e31747c096ac40587048d",
+      "article:gnews:496cb1ecce94b276a6b85fb8d88529d4"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.3969,
+        "y": 0.8111
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 3.0
+  },
+  {
+    "id": "topic:regional-transport",
+    "label": "지역 교통",
+    "type": "topic",
+    "category_id": "local",
+    "aliases": [
+      "지역 교통",
+      "도시철도",
+      "버스",
+      "도로 통제"
+    ],
+    "article_ids": [
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:synthetic:15f4b65050b8e300"
+    ],
+    "current_article_ids": [
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.4362,
+        "y": 0.848
+      }
+    },
+    "synthetic": false,
+    "trend_score": 2,
+    "personal_score": 1.5
+  },
+  {
+    "id": "topic:regional-economy",
+    "label": "지역 경제",
+    "type": "topic",
+    "category_id": "local",
+    "aliases": [
+      "지역 경제",
+      "지역 상권",
+      "관광"
+    ],
+    "article_ids": [
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103",
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2"
+    ],
+    "current_article_ids": [
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:gnews:14eca07fc8331d9515aeaf783a8f8103",
+      "article:gnews:e41b45364c60a6ccef2f2b779f0aa221",
+      "article:gnews:5a9f53617a7955138ba7878b844d8aa2"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.336,
+        "y": 0.7763
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 3.0
+  },
+  {
+    "id": "entity:an-se-young",
+    "label": "안세영",
+    "type": "person",
+    "category_id": "sports",
+    "aliases": [
+      "안세영"
+    ],
+    "article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1",
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8"
+    ],
+    "current_article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1",
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.2404,
+        "y": 0.6199
+      }
+    },
+    "synthetic": false,
+    "trend_score": 2,
+    "personal_score": 0.8
+  },
+  {
+    "id": "entity:lee-kang-in",
+    "label": "이강인",
+    "type": "person",
+    "category_id": "sports",
+    "aliases": [
+      "이강인"
+    ],
+    "article_ids": [
+      "article:gnews:4cdebf24f439425bd88824839bb50d46",
+      "article:gnews:799e841c79c6d2c6a1177dfc76567378"
+    ],
+    "current_article_ids": [
+      "article:gnews:4cdebf24f439425bd88824839bb50d46",
+      "article:gnews:799e841c79c6d2c6a1177dfc76567378"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.2496,
+        "y": 0.7156
+      }
+    },
+    "synthetic": false,
+    "trend_score": 2,
+    "personal_score": 0.8
+  },
+  {
+    "id": "topic:professional-baseball",
+    "label": "프로야구",
+    "type": "sport",
+    "category_id": "sports",
+    "aliases": [
+      "프로야구",
+      "야구",
+      "삼성라이온즈",
+      "한화-lg",
+      "kia"
+    ],
+    "article_ids": [
+      "article:gnews:503fe86bfab8a1322906da364d2285b9",
+      "article:gnews:d1c44244f5494015299e65962842d521",
+      "article:gnews:c98995dd99146e12dcc4e3260f37d300",
+      "article:gnews:150513d007f4ee3776fe3a874f5c4e7a",
+      "article:gnews:bd7ac661954c200e477b803d59e209b8",
+      "article:synthetic:81e83d1acd9d8095"
+    ],
+    "current_article_ids": [
+      "article:gnews:503fe86bfab8a1322906da364d2285b9",
+      "article:gnews:d1c44244f5494015299e65962842d521",
+      "article:gnews:c98995dd99146e12dcc4e3260f37d300",
+      "article:gnews:150513d007f4ee3776fe3a874f5c4e7a",
+      "article:gnews:bd7ac661954c200e477b803d59e209b8",
+      "article:synthetic:81e83d1acd9d8095"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.3,
+        "y": 0.6473
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 2.4
+  },
+  {
+    "id": "topic:k-league",
+    "label": "K리그",
+    "type": "sport",
+    "category_id": "sports",
+    "aliases": [
+      "k리그",
+      "프로축구",
+      "현대가 더비",
+      "전북현대"
+    ],
+    "article_ids": [
+      "article:gnews:de2d693577772b76c7e03172714a3e7a",
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461",
+      "article:synthetic:93a1d7f7072d41fa"
+    ],
+    "current_article_ids": [
+      "article:gnews:de2d693577772b76c7e03172714a3e7a",
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461",
+      "article:synthetic:93a1d7f7072d41fa"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.3168,
+        "y": 0.6394
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 2.4
+  },
+  {
+    "id": "topic:badminton",
+    "label": "배드민턴",
+    "type": "sport",
+    "category_id": "sports",
+    "aliases": [
+      "배드민턴",
+      "셔틀콕"
+    ],
+    "article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1",
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8",
+      "article:synthetic:9470c5dfed9849a0"
+    ],
+    "current_article_ids": [
+      "article:gnews:32480dff8a430c22725bf4ae31f867a1",
+      "article:gnews:aa6569e3f793ec3bc993ade3a6b80db8",
+      "article:synthetic:9470c5dfed9849a0"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.1917,
+        "y": 0.7735
+      }
+    },
+    "synthetic": false,
+    "trend_score": 3,
+    "personal_score": 1.2
+  },
+  {
+    "id": "topic:football",
+    "label": "축구",
+    "type": "sport",
+    "category_id": "sports",
+    "aliases": [
+      "축구",
+      "월드컵",
+      "아틀레티코"
+    ],
+    "article_ids": [
+      "article:gnews:de2d693577772b76c7e03172714a3e7a",
+      "article:gnews:4cdebf24f439425bd88824839bb50d46",
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461",
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:799e841c79c6d2c6a1177dfc76567378",
+      "article:synthetic:1863eafb6bdde246"
+    ],
+    "current_article_ids": [
+      "article:gnews:de2d693577772b76c7e03172714a3e7a",
+      "article:gnews:4cdebf24f439425bd88824839bb50d46",
+      "article:gnews:bb684aa8fa58450fb559a24a4e293742",
+      "article:gnews:92a6587c98da407fe7738c93e265cbf4",
+      "article:gnews:534b38a28fb482e7830dfa6acb616fee",
+      "article:gnews:f3510e68a9be5c0a6a2dfdcbff90d461",
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:799e841c79c6d2c6a1177dfc76567378",
+      "article:synthetic:1863eafb6bdde246"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.1836,
+        "y": 0.6865
+      }
+    },
+    "synthetic": false,
+    "trend_score": 10,
+    "personal_score": 4.0
+  },
+  {
+    "id": "topic:volleyball",
+    "label": "배구",
+    "type": "sport",
+    "category_id": "sports",
+    "aliases": [
+      "배구",
+      "김연경",
+      "양효진"
+    ],
+    "article_ids": [
+      "article:gnews:f8668003a78bc8516945add1394998ef",
+      "article:synthetic:befe890ba6664609"
+    ],
+    "current_article_ids": [
+      "article:gnews:f8668003a78bc8516945add1394998ef",
+      "article:synthetic:befe890ba6664609"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.2818,
+        "y": 0.672
+      }
+    },
+    "synthetic": false,
+    "trend_score": 2,
+    "personal_score": 0.8
+  },
+  {
+    "id": "topic:athletics",
+    "label": "육상",
+    "type": "sport",
+    "category_id": "sports",
+    "aliases": [
+      "육상",
+      "마스터즈",
+      "10k"
+    ],
+    "article_ids": [
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:synthetic:2af8717e031d914b"
+    ],
+    "current_article_ids": [
+      "article:gnews:f0b818d036844c3f6b97b376cbd62729",
+      "article:gnews:98421699cc95d743ca1e10e3972038d9",
+      "article:gnews:dc8dd3c16753a4908b1515180a50472b",
+      "article:synthetic:2af8717e031d914b"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.1759,
+        "y": 0.7279
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 1.6
+  },
+  {
+    "id": "topic:artificial-intelligence",
+    "label": "인공지능",
+    "type": "technology",
+    "category_id": "tech_science",
+    "aliases": [
+      "인공지능",
+      "ai ",
+      "ai·",
+      "ai 모델"
+    ],
+    "article_ids": [
+      "article:gnews:685fb017162df9bc4dda479afa95ecb0",
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47",
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1",
+      "article:gnews:65b7a95e97bc7b7f45f96ddc6689b4d9",
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529",
+      "article:gnews:1512f6aee2c79d970f04f9a79e664798",
+      "article:gnews:0144dd891f775ee7aab09ced708828c4",
+      "article:gnews:2921ad097fcbe216a0a265b5e6af0fa6",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:gnews:635d7a964c664c9f353a8cb6cf6b1c77",
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355",
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b",
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68",
+      "article:gnews:2be078526dc618e5953c670836003d6f",
+      "article:synthetic:914a5c828bf08be3",
+      "article:synthetic:53a891745ea9ebf7",
+      "article:synthetic:2f943905f65fe426",
+      "article:synthetic:df12bb54557cd766",
+      "article:synthetic:734290637598cd21",
+      "article:synthetic:f31d9e324386a7bf",
+      "article:synthetic:26384d8d3e112372",
+      "article:synthetic:28d8304503ce187a",
+      "article:synthetic:c37248e9c297432c",
+      "article:synthetic:91f6872c69e7dbaf",
+      "article:synthetic:337dd7f8b2385131",
+      "article:synthetic:900add71d7a98b50",
+      "article:synthetic:281f0f6a7a392452"
+    ],
+    "current_article_ids": [
+      "article:gnews:685fb017162df9bc4dda479afa95ecb0",
+      "article:gnews:80ac5853570925c1e4b7f36b03a6bdd3",
+      "article:gnews:3febcb2e177ee70bbcc745c6dd8d9c4f",
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:1e33d72c0a29b857f1e956f44bc4a4c6",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:fc7acf107ef8ca7827252ef141429e47",
+      "article:gnews:4a43dac1f77bed9a5a8f2956bb785da1",
+      "article:gnews:65b7a95e97bc7b7f45f96ddc6689b4d9",
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529",
+      "article:gnews:1512f6aee2c79d970f04f9a79e664798",
+      "article:gnews:0144dd891f775ee7aab09ced708828c4",
+      "article:gnews:2921ad097fcbe216a0a265b5e6af0fa6",
+      "article:gnews:84a7a5ec36a955322bfd09263aed6bf9",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:gnews:635d7a964c664c9f353a8cb6cf6b1c77",
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355",
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b",
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68",
+      "article:gnews:2be078526dc618e5953c670836003d6f"
+    ],
+    "read_count": 15,
+    "layout": {
+      "personal_map": {
+        "x": 0.2077,
+        "y": 0.3945
+      }
+    },
+    "synthetic": false,
+    "trend_score": 24,
+    "personal_score": 30.72
+  },
+  {
+    "id": "entity:openai",
+    "label": "OpenAI",
+    "type": "organization",
+    "category_id": "tech_science",
+    "aliases": [
+      "오픈ai",
+      "openai",
+      "gpt",
+      "코덱스"
+    ],
+    "article_ids": [
+      "article:gnews:635d7a964c664c9f353a8cb6cf6b1c77"
+    ],
+    "current_article_ids": [
+      "article:gnews:635d7a964c664c9f353a8cb6cf6b1c77"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.1745,
+        "y": 0.4928
+      }
+    },
+    "synthetic": false,
+    "trend_score": 1,
+    "personal_score": 1.28
+  },
+  {
+    "id": "entity:nvidia",
+    "label": "NVIDIA",
+    "type": "organization",
+    "category_id": "tech_science",
+    "aliases": [
+      "엔비디아",
+      "nvidia"
+    ],
+    "article_ids": [
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355",
+      "article:synthetic:1fd756f0af696bc4",
+      "article:synthetic:1b07e45aa22d3acf",
+      "article:synthetic:c58383d6ce80195c",
+      "article:synthetic:48c4e93863486820",
+      "article:synthetic:f2864f061b72d897",
+      "article:synthetic:13dd1215b1a2dd01",
+      "article:synthetic:b8049c468e409eab"
+    ],
+    "current_article_ids": [
+      "article:gnews:20b633bd58a3bb41de8c3994bf06f8e7",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:2ea9c1ecf48d73fdd9c2b4250fffe428",
+      "article:gnews:5409546af796c3c0f6d25d78474f4346",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59",
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355",
+      "article:synthetic:1fd756f0af696bc4"
+    ],
+    "read_count": 6,
+    "layout": {
+      "personal_map": {
+        "x": 0.2363,
+        "y": 0.4883
+      }
+    },
+    "synthetic": false,
+    "trend_score": 7,
+    "personal_score": 8.96
+  },
+  {
+    "id": "entity:anthropic",
+    "label": "Anthropic",
+    "type": "organization",
+    "category_id": "tech_science",
+    "aliases": [
+      "앤트로픽",
+      "클로드"
+    ],
+    "article_ids": [
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68"
+    ],
+    "current_article_ids": [
+      "article:gnews:33f8c474777a8aaec6b8e75d6a05a5e8",
+      "article:gnews:5cfda0e7aef6773223d45ddc8eae9d25",
+      "article:gnews:6b9201281b814d130b0b3b9372ef52b1",
+      "article:gnews:a9a534892236855c9f61cf03dc09ec37",
+      "article:gnews:a25bba9b9d6e53a774608ba9e8131d5c",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.2354,
+        "y": 0.5121
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 7.68
+  },
+  {
+    "id": "entity:apple",
+    "label": "Apple",
+    "type": "organization",
+    "category_id": "tech_science",
+    "aliases": [
+      "애플",
+      "비전 프로"
+    ],
+    "article_ids": [
+      "article:gnews:b65cc746817634826543a591c3e25072",
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b"
+    ],
+    "current_article_ids": [
+      "article:gnews:b65cc746817634826543a591c3e25072",
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.2103,
+        "y": 0.317
+      }
+    },
+    "synthetic": false,
+    "trend_score": 2,
+    "personal_score": 2.56
+  },
+  {
+    "id": "topic:robotics",
+    "label": "로봇",
+    "type": "technology",
+    "category_id": "tech_science",
+    "aliases": [
+      "로봇",
+      "휴머노이드"
+    ],
+    "article_ids": [
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:399eb654bb08dfcde50cf8f2bfeb3a3b",
+      "article:gnews:0144dd891f775ee7aab09ced708828c4",
+      "article:synthetic:10bcf88d946df205",
+      "article:synthetic:1368d8e228486327",
+      "article:synthetic:25ed5776136260bd",
+      "article:synthetic:c3e180d65ac52b0d",
+      "article:synthetic:b3c465bc7f625e6c",
+      "article:synthetic:f0ec0479767301a6",
+      "article:synthetic:2eb7e5212fdfcaea"
+    ],
+    "current_article_ids": [
+      "article:gnews:165bf059c5dcc3882d572e7f20ef1aee",
+      "article:gnews:bd19516e0a7309e0f8bcb3261753cb79",
+      "article:gnews:edd6e21992256866a4755a2ccf7a8a9b",
+      "article:gnews:1bd9d4cbb1fa415d9a6877043757521b",
+      "article:gnews:399eb654bb08dfcde50cf8f2bfeb3a3b",
+      "article:gnews:0144dd891f775ee7aab09ced708828c4"
+    ],
+    "read_count": 8,
+    "layout": {
+      "personal_map": {
+        "x": 0.1445,
+        "y": 0.4577
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 7.68
+  },
+  {
+    "id": "topic:drones",
+    "label": "드론",
+    "type": "technology",
+    "category_id": "tech_science",
+    "aliases": [
+      "드론"
+    ],
+    "article_ids": [
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1"
+    ],
+    "current_article_ids": [
+      "article:gnews:7f2d15a87a61aa141a4982ae58d8d16c",
+      "article:gnews:862bc59d3b302ef213cb8452deb475e6",
+      "article:gnews:37f62a986f7de6927f8ef9e0240b0577",
+      "article:gnews:90c9bcdbae61b246111061cce35398d8",
+      "article:gnews:ae5db0a5615ed5e396c70d3df5ebcddf",
+      "article:gnews:784266b540749466f5ea706bb1b48ae1"
+    ],
+    "read_count": 0,
+    "layout": {
+      "personal_map": {
+        "x": 0.2152,
+        "y": 0.3778
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 7.68
+  },
+  {
+    "id": "topic:ai-chip",
+    "label": "AI 반도체",
+    "type": "technology",
+    "category_id": "tech_science",
+    "aliases": [
+      "npu",
+      "ai 칩",
+      "자체 칩"
+    ],
+    "article_ids": [
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68",
+      "article:synthetic:914a5c828bf08be3",
+      "article:synthetic:2f943905f65fe426",
+      "article:synthetic:df12bb54557cd766",
+      "article:synthetic:f31d9e324386a7bf",
+      "article:synthetic:28d8304503ce187a",
+      "article:synthetic:c37248e9c297432c"
+    ],
+    "current_article_ids": [
+      "article:gnews:9c5568dfd59457ae6d2acbe49c3c6355",
+      "article:gnews:e4650da103c84a0349cd6d40c88c7d68"
+    ],
+    "read_count": 6,
+    "layout": {
+      "personal_map": {
+        "x": 0.2321,
+        "y": 0.368
+      }
+    },
+    "synthetic": false,
+    "trend_score": 2,
+    "personal_score": 2.56
+  },
+  {
+    "id": "topic:smart-device",
+    "label": "스마트 기기",
+    "type": "technology",
+    "category_id": "tech_science",
+    "aliases": [
+      "스마트폰",
+      "스마트 안경",
+      "스마트워치",
+      "레드미 워치"
+    ],
+    "article_ids": [
+      "article:gnews:b65cc746817634826543a591c3e25072",
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529",
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b",
+      "article:gnews:8ae70950400d19c35d801e464df306d7",
+      "article:synthetic:b2d90f4d2bbb49c5",
+      "article:synthetic:0ca13ea9a64f321f",
+      "article:synthetic:af51bea7a2ade1a2",
+      "article:synthetic:ba302abbdef058b4",
+      "article:synthetic:62c7b7a05fa0ec98",
+      "article:synthetic:f035e85e119d4448",
+      "article:synthetic:e23c505d95859625",
+      "article:synthetic:d6772afae96396bd"
+    ],
+    "current_article_ids": [
+      "article:gnews:b65cc746817634826543a591c3e25072",
+      "article:gnews:6ba01f29da4517913a3cc82a56bd0529",
+      "article:gnews:4855108c0c0e35e052b57b8029e38d3b",
+      "article:gnews:8ae70950400d19c35d801e464df306d7"
+    ],
+    "read_count": 8,
+    "layout": {
+      "personal_map": {
+        "x": 0.2218,
+        "y": 0.3403
+      }
+    },
+    "synthetic": false,
+    "trend_score": 4,
+    "personal_score": 5.12
+  },
+  {
+    "id": "topic:gaming",
+    "label": "게임",
+    "type": "topic",
+    "category_id": "tech_science",
+    "aliases": [
+      "게임",
+      "스팀",
+      "call of duty",
+      "arc raiders"
+    ],
+    "article_ids": [
+      "article:gnews:03c978bfd9cb59c037599785dcd3a640",
+      "article:gnews:8f3d11d32d0aa46177ed28c4044fd01d",
+      "article:gnews:09e8673af34733b72a8fbd9e4739cadc",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:40846910aadc8d6a0d01719e8cc21042",
+      "article:gnews:2be078526dc618e5953c670836003d6f"
+    ],
+    "current_article_ids": [
+      "article:gnews:03c978bfd9cb59c037599785dcd3a640",
+      "article:gnews:8f3d11d32d0aa46177ed28c4044fd01d",
+      "article:gnews:09e8673af34733b72a8fbd9e4739cadc",
+      "article:gnews:07bfc1195e999d6beceb35fe7add7905",
+      "article:gnews:40846910aadc8d6a0d01719e8cc21042",
+      "article:gnews:2be078526dc618e5953c670836003d6f"
+    ],
+    "read_count": 2,
+    "layout": {
+      "personal_map": {
+        "x": 0.1597,
+        "y": 0.5452
+      }
+    },
+    "synthetic": false,
+    "trend_score": 6,
+    "personal_score": 7.68
+  },
+  {
+    "id": "topic:gpu",
+    "label": "GPU",
+    "type": "technology",
+    "category_id": "tech_science",
+    "aliases": [
+      "gpu",
+      "그래픽 카드",
+      "rtx"
+    ],
+    "article_ids": [
+      "article:gnews:229194e1c14dff06bf5030302863f432",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59"
+    ],
+    "current_article_ids": [
+      "article:gnews:229194e1c14dff06bf5030302863f432",
+      "article:gnews:c4fa816b5cbd869ede7a9658a89ecc59"
+    ],
+    "read_count": 1,
+    "layout": {
+      "personal_map": {
+        "x": 0.1722,
+        "y": 0.3857
+      }
+    },
+    "synthetic": false,
+    "trend_score": 2,
+    "personal_score": 2.56
+  }
+]

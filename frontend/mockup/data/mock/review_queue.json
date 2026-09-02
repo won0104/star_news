@@ -1,0 +1,309 @@
+[
+  {
+    "article_id": "article:gnews:72b216fc88fe91cb3b3bfec7d70b4961",
+    "title": "연합뉴스 한민족센터",
+    "primary_category_id": "society",
+    "primary_category_name": "사회",
+    "category_ids": [
+      "society"
+    ],
+    "category_names": [
+      "사회"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 0,
+      "margin": 0,
+      "matched_terms": {
+        "society": []
+      },
+      "gnews_bucket_observed_only": "general",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:53e4a0db0a1c1131f2ff13de3c122146",
+    "title": "KBS 뉴스",
+    "primary_category_id": "society",
+    "primary_category_name": "사회",
+    "category_ids": [
+      "society"
+    ],
+    "category_names": [
+      "사회"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 1,
+      "margin": 1,
+      "matched_terms": {
+        "society": [
+          "기후"
+        ]
+      },
+      "gnews_bucket_observed_only": "general",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:5e51a95f751266ff051a664d12c999f9",
+    "title": "오리엔탈 나이트 드림즈",
+    "primary_category_id": "society",
+    "primary_category_name": "사회",
+    "category_ids": [
+      "society"
+    ],
+    "category_names": [
+      "사회"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 0,
+      "margin": 0,
+      "matched_terms": {
+        "society": []
+      },
+      "gnews_bucket_observed_only": "general",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:87c97e1bf3e31595ec3370a87388038b",
+    "title": "연합뉴스 한민족센터",
+    "primary_category_id": "society",
+    "primary_category_name": "사회",
+    "category_ids": [
+      "society"
+    ],
+    "category_names": [
+      "사회"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 0,
+      "margin": 0,
+      "matched_terms": {
+        "society": []
+      },
+      "gnews_bucket_observed_only": "world",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:1adbe0d993c168d890bf01bf0edc4a11",
+    "title": "KBS 뉴스",
+    "primary_category_id": "world",
+    "primary_category_name": "국제",
+    "category_ids": [
+      "world"
+    ],
+    "category_names": [
+      "국제"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 2,
+      "margin": 1,
+      "matched_terms": {
+        "world": [
+          "미국"
+        ]
+      },
+      "gnews_bucket_observed_only": "world",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:08cecc30c67e31747c096ac40587048d",
+    "title": "KBS 뉴스",
+    "primary_category_id": "local",
+    "primary_category_name": "지역",
+    "category_ids": [
+      "local"
+    ],
+    "category_names": [
+      "지역"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 3,
+      "margin": 3,
+      "matched_terms": {
+        "local": [
+          "강원",
+          "지역"
+        ]
+      },
+      "gnews_bucket_observed_only": "nation",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:978642cd142a67b7ecb9da1058bd3e3f",
+    "title": "KBS 뉴스",
+    "primary_category_id": "local",
+    "primary_category_name": "지역",
+    "category_ids": [
+      "local"
+    ],
+    "category_names": [
+      "지역"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 2,
+      "margin": 2,
+      "matched_terms": {
+        "local": [
+          "부산"
+        ]
+      },
+      "gnews_bucket_observed_only": "nation",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:496cb1ecce94b276a6b85fb8d88529d4",
+    "title": "KBS 뉴스",
+    "primary_category_id": "local",
+    "primary_category_name": "지역",
+    "category_ids": [
+      "local"
+    ],
+    "category_names": [
+      "지역"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 2,
+      "margin": 2,
+      "matched_terms": {
+        "local": [
+          "강원"
+        ]
+      },
+      "gnews_bucket_observed_only": "nation",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:c9648da2f15ea1a7a19ab9afbe3f0995",
+    "title": "KBS 뉴스",
+    "primary_category_id": "society",
+    "primary_category_name": "사회",
+    "category_ids": [
+      "society"
+    ],
+    "category_names": [
+      "사회"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 2,
+      "margin": 0,
+      "matched_terms": {
+        "society": [
+          "사고"
+        ]
+      },
+      "gnews_bucket_observed_only": "business",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:ba5c4378900e3996a60de44c69d1ad08",
+    "title": "KBS 뉴스",
+    "primary_category_id": "society",
+    "primary_category_name": "사회",
+    "category_ids": [
+      "society"
+    ],
+    "category_names": [
+      "사회"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 2,
+      "margin": 0,
+      "matched_terms": {
+        "society": [
+          "사고"
+        ]
+      },
+      "gnews_bucket_observed_only": "business",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:fe998c7f86dcbda431687f481b06bbf8",
+    "title": "KBS 뉴스",
+    "primary_category_id": "economy",
+    "primary_category_name": "경제",
+    "category_ids": [
+      "economy"
+    ],
+    "category_names": [
+      "경제"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 2,
+      "margin": 2,
+      "matched_terms": {
+        "economy": [
+          "기름값"
+        ]
+      },
+      "gnews_bucket_observed_only": "business",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  },
+  {
+    "article_id": "article:gnews:399eb654bb08dfcde50cf8f2bfeb3a3b",
+    "title": "KBS 뉴스",
+    "primary_category_id": "tech_science",
+    "primary_category_name": "IT·과학",
+    "category_ids": [
+      "tech_science"
+    ],
+    "category_names": [
+      "IT·과학"
+    ],
+    "classification": {
+      "method": "service_taxonomy_keyword_multilabel",
+      "confidence": "low",
+      "score": 3,
+      "margin": 3,
+      "matched_terms": {
+        "tech_science": [
+          "로봇"
+        ]
+      },
+      "gnews_bucket_observed_only": "technology",
+      "gnews_bucket_used_for_classification": false,
+      "provisional": true
+    }
+  }
+]

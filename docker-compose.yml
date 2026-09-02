@@ -1,0 +1,24 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    image: frontend:dev
+    container_name: frontend
+    ports:
+      - "127.0.0.1:3000:80"
+
+  backend-spring:
+    build:
+      context: ./backend/spring
+    image: backend-spring:dev
+    container_name: backend-spring
+    ports:
+      - "127.0.0.1:8081:8080"
+
+  backend-fastapi:
+    build:
+      context: ./backend/fastapi
+    image: backend-fastapi:dev
+    container_name: backend-fastapi
+    ports:
+      - "127.0.0.1:8000:8000"

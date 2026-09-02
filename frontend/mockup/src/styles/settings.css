@@ -1,0 +1,569 @@
+/* 프로필 설정 바로가기에서 여는 856×580 저장형 설정 오버레이입니다. */
+
+body.has-settings-overlay {
+  overflow: hidden;
+}
+
+.settings-overlay {
+  position: fixed;
+  z-index: 300;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  animation: settings-backdrop-in var(--motion-panel) ease both;
+}
+
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgb(23 33 43 / 18%);
+  cursor: default;
+}
+
+.settings-dialog {
+  --dialog-scale: 1;
+  position: relative;
+  z-index: 1;
+  width: 856px;
+  height: 580px;
+  display: grid;
+  grid-template-columns: 208px 648px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(15 23 33 / 18%);
+  animation: settings-dialog-in var(--motion-panel) var(--ease-starlight) both;
+}
+
+.settings-nav {
+  position: relative;
+  min-width: 0;
+  padding: 25px 16px;
+  border-right: 1px solid #e1e6eb;
+  background: #f7f9fb;
+}
+
+.settings-nav h1 {
+  margin: 0 8px 24px;
+  color: #222c36;
+  font-size: 20px;
+}
+
+.settings-nav nav {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-nav__item {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 7px;
+  color: #596572;
+  font-size: 14px;
+}
+
+.settings-nav__item:hover {
+  background: #eff4f8;
+}
+
+.settings-nav__item.is-active {
+  color: #29435c;
+  background: #eaf1f7;
+  font-weight: 500;
+}
+
+.settings-nav__item.is-active::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: #6389af;
+}
+
+.settings-nav__return {
+  position: absolute;
+  right: 24px;
+  bottom: 29px;
+  left: 24px;
+  color: #606d79;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.settings-nav__return:hover {
+  color: #3d5870;
+}
+
+.settings-content {
+  position: relative;
+  min-width: 0;
+  padding: 40px 32px 37px;
+  background: #fff;
+}
+
+.settings-content > header h2 {
+  margin: 0;
+  color: #222c36;
+  font-size: 23px;
+  line-height: 1.4;
+}
+
+.settings-content > header p {
+  margin: 3px 0 0;
+  color: #65717d;
+  font-size: 13px;
+}
+
+.settings-dialog__close {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: #667380;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.settings-dialog__close:hover {
+  background: #f3f6f8;
+}
+
+.settings-content__body {
+  width: 544px;
+  height: 425px;
+  margin-top: 38px;
+}
+
+.settings-form {
+  position: relative;
+  height: 100%;
+}
+
+.settings-field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: #64717e;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.settings-field input,
+.settings-dislikes__add-row input {
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #d8e0e8;
+  border-radius: 8px;
+  color: #313b46;
+  background: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.settings-field input:focus,
+.settings-dislikes__add-row input:focus {
+  border-color: #7296b8;
+  box-shadow: 0 0 0 3px rgb(94 132 171 / 12%);
+}
+
+.settings-field input:disabled {
+  color: #7b8793;
+  background: #f7f9fb;
+}
+
+.settings-form__help {
+  margin: 0;
+  color: #687580;
+  font-size: 12px;
+}
+
+.settings-form__error {
+  min-height: 18px;
+  margin: 8px 0 0;
+  color: #a14f4f;
+  font-size: 12px;
+}
+
+.settings-save {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 114px;
+  height: 38px;
+  border-radius: 7px;
+  color: #fff;
+  background: #4f759b;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.settings-save:hover {
+  background: #456a8f;
+}
+
+/* 관심 없음 관리 */
+
+.settings-form--dislikes {
+  margin-top: -2px;
+}
+
+.settings-dislikes__add-label {
+  display: block;
+  margin-bottom: 11px;
+  color: #465361;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.settings-dislikes__add-row {
+  display: grid;
+  grid-template-columns: 420px 112px;
+  gap: 12px;
+}
+
+.settings-dislikes__add-row input {
+  height: 42px;
+  font-size: 13px;
+}
+
+.settings-dislikes__add-row button,
+.settings-dislike-item button {
+  border: 1px solid #d8e0e8;
+  border-radius: 7px;
+  color: #43505d;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.settings-dislikes__add-row button:hover,
+.settings-dislike-item button:hover {
+  border-color: #b9c8d6;
+  background: #f6f9fb;
+}
+
+.settings-form--dislikes .settings-form__error {
+  height: 17px;
+  margin: 5px 0 0;
+}
+
+.settings-dislikes__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0 12px;
+  color: #465361;
+  font-size: 13px;
+}
+
+.settings-dislikes__heading span {
+  color: #7d8995;
+  font-size: 12px;
+}
+
+.settings-dislikes__list {
+  max-height: 141px;
+  display: grid;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.settings-dislike-item {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 15px;
+  border: 1px solid #e1e6eb;
+  border-radius: 9px;
+  background: #fafbfc;
+}
+
+.settings-dislike-item div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.settings-dislike-item strong {
+  overflow: hidden;
+  color: #303a45;
+  font-size: 15px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-dislike-item span {
+  overflow: hidden;
+  color: #7b8793;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-dislike-item button {
+  width: 128px;
+  height: 36px;
+  flex: 0 0 auto;
+}
+
+.settings-dislikes__empty {
+  margin: 19px 0;
+  color: #7b8793;
+  font-size: 13px;
+}
+
+.settings-info-box {
+  position: absolute;
+  right: 0;
+  bottom: 75px;
+  left: 0;
+  min-height: 68px;
+  padding: 14px 18px;
+  border-radius: 9px;
+  color: #607180;
+  background: #f3f7fa;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+/* 화면 설정 */
+
+.settings-form--display {
+  margin-top: -1px;
+}
+
+.settings-choice-row {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  align-items: center;
+  margin: 0 0 35px;
+  padding: 0;
+  border: 0;
+}
+
+.settings-choice-row legend {
+  display: contents;
+  color: #3b4652;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.settings-segmented {
+  height: 38px;
+  display: grid;
+  grid-template-columns: repeat(var(--segment-count), minmax(0, 1fr));
+  padding: 3px;
+  border-radius: 8px;
+  background: #f1f4f7;
+}
+
+.settings-segmented label {
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.settings-segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settings-segmented span {
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  color: #788591;
+  font-size: 13px;
+}
+
+.settings-segmented input:checked + span {
+  color: #30465a;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(26 33 43 / 8%);
+  font-weight: 500;
+}
+
+.settings-segmented input:focus-visible + span {
+  outline: 2px solid #6389af;
+  outline-offset: 1px;
+}
+
+.settings-toggle-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.settings-toggle-row > span {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-toggle-row strong {
+  color: #3b4652;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.settings-toggle-row small {
+  color: #7b8793;
+  font-size: 12px;
+}
+
+.settings-toggle-row input {
+  position: absolute;
+  right: 0;
+  opacity: 0;
+}
+
+.settings-toggle-row i {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  margin-right: 12px;
+  border-radius: 13px;
+  background: #cad5df;
+  transition: background-color var(--motion-fast) ease;
+}
+
+.settings-toggle-row i::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(26 33 43 / 18%);
+  transition: transform var(--motion-fast) ease;
+}
+
+.settings-toggle-row input:checked + i {
+  background: #6389af;
+}
+
+.settings-toggle-row input:checked + i::after {
+  transform: translateX(20px);
+}
+
+.settings-toggle-row input:focus-visible + i {
+  outline: 2px solid #6389af;
+  outline-offset: 3px;
+}
+
+/* 저장한 화면 환경 */
+
+html[data-font-size="large"] {
+  font-size: 18px;
+  text-size-adjust: 112.5%;
+}
+
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+html[data-effective-theme="dark"] {
+  color-scheme: dark;
+  --color-app-bg: #111820;
+  --color-sidebar-bg: #141c24;
+  --color-header-bg: #151e27;
+  --color-surface: #18212a;
+  --color-border: #2d3944;
+  --color-text-strong: #edf2f6;
+  --color-text: #c0c9d1;
+  --color-text-muted: #82909c;
+}
+
+html[data-effective-theme="dark"] .app-header {
+  background: rgb(21 30 39 / 96%);
+}
+
+html[data-effective-theme="dark"] .brand span,
+html[data-effective-theme="dark"] .sidebar__eyebrow,
+html[data-effective-theme="dark"] .sidebar__section-title,
+html[data-effective-theme="dark"] .sidebar__recent-link {
+  color: #8997a3;
+}
+
+html[data-effective-theme="dark"] .sidebar__primary-link:hover,
+html[data-effective-theme="dark"] .sidebar__primary-link[aria-current="page"],
+html[data-effective-theme="dark"] .sidebar__category-link:hover,
+html[data-effective-theme="dark"] .sidebar__category-link[aria-current="page"] {
+  color: #edf2f6;
+  background: rgb(98 135 178 / 10%);
+}
+
+html[data-effective-theme="dark"] .profile-menu,
+html[data-effective-theme="dark"] .report-card {
+  border-color: #34414d;
+  color: #dce4ea;
+  background: #18212a;
+}
+
+html[data-effective-theme="dark"] .profile-menu a {
+  color: #dce4ea;
+}
+
+html[data-effective-theme="dark"] .profile-menu a:hover,
+html[data-effective-theme="dark"] .profile-menu a:focus-visible,
+html[data-effective-theme="dark"] .profile-menu button:hover,
+html[data-effective-theme="dark"] .profile-menu button:focus-visible {
+  background: #22303b;
+}
+
+html[data-effective-theme="dark"] .page-stage__header h1,
+html[data-effective-theme="dark"] .report-card header h2,
+html[data-effective-theme="dark"] .category-bar strong,
+html[data-effective-theme="dark"] .source-legend strong,
+html[data-effective-theme="dark"] .terrain-point text {
+  color: #e6edf2;
+  fill: #dce4ea;
+}
+
+@keyframes settings-backdrop-in {
+  from { opacity: 0; }
+}
+
+@keyframes settings-dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(calc(var(--dialog-scale) * 0.99)); }
+  to { opacity: 1; transform: scale(var(--dialog-scale)); }
+}
+
+@media (max-height: 680px) {
+  .settings-dialog {
+    --dialog-scale: 0.9;
+  }
+}

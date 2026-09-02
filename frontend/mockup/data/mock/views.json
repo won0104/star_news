@@ -1,0 +1,832 @@
+{
+  "home": {
+    "trend_window": "최근 24시간",
+    "updated_at": "2026-08-23T16:12:37.358183Z",
+    "trend_period_order": [
+      "today",
+      "week",
+      "month",
+      "quarter"
+    ],
+    "trend_statistics_provenance": {
+      "kind": "deterministic_mock",
+      "synthetic": true,
+      "basis": "current_article_ids",
+      "description": "현재 수집량을 기준으로 기간 부피와 직전 기간 비교값을 재현 가능하게 산출한 목업 통계"
+    },
+    "trend_periods": {
+      "today": {
+        "id": "today",
+        "label": "오늘",
+        "title": "오늘 주요 흐름",
+        "window_days": 1,
+        "window_label": "오늘",
+        "comparison_label": "전일 대비",
+        "starts_at": "2026-08-22T16:12:37.358183Z",
+        "ends_at": "2026-08-23T16:12:37.358183Z",
+        "comparison_starts_at": "2026-08-21T16:12:37.358183Z",
+        "comparison_ends_at": "2026-08-22T16:12:37.358183Z",
+        "updated_at": "2026-08-23T16:12:37.358183Z",
+        "seed_nodes": [
+          {
+            "node_id": "entity:russia",
+            "x": 0.13,
+            "y": 0.18,
+            "article_count": 79,
+            "previous_article_count": 80,
+            "change_rate": -1
+          },
+          {
+            "node_id": "entity:united-states",
+            "x": 0.67,
+            "y": 0.22,
+            "article_count": 47,
+            "previous_article_count": 32,
+            "change_rate": 47
+          },
+          {
+            "node_id": "place:seoul",
+            "x": 0.38,
+            "y": 0.42,
+            "article_count": 43,
+            "previous_article_count": 45,
+            "change_rate": -4
+          },
+          {
+            "node_id": "topic:crypto",
+            "x": 0.82,
+            "y": 0.53,
+            "article_count": 35,
+            "previous_article_count": 24,
+            "change_rate": 46
+          },
+          {
+            "node_id": "topic:artificial-intelligence",
+            "x": 0.2,
+            "y": 0.68,
+            "article_count": 24,
+            "previous_article_count": 18,
+            "change_rate": 33
+          },
+          {
+            "node_id": "topic:financial-market",
+            "x": 0.57,
+            "y": 0.76,
+            "article_count": 23,
+            "previous_article_count": 22,
+            "change_rate": 5
+          },
+          {
+            "node_id": "entity:democratic-party",
+            "x": 0.88,
+            "y": 0.78,
+            "article_count": 21,
+            "previous_article_count": 20,
+            "change_rate": 5
+          },
+          {
+            "node_id": "entity:police",
+            "x": 0.44,
+            "y": 0.15,
+            "article_count": 15,
+            "previous_article_count": 11,
+            "change_rate": 36
+          }
+        ],
+        "rising_node_ids": [
+          "entity:united-states",
+          "topic:crypto",
+          "entity:police"
+        ]
+      },
+      "week": {
+        "id": "week",
+        "label": "1주",
+        "title": "이번 주 주요 흐름",
+        "window_days": 7,
+        "window_label": "최근 1주",
+        "comparison_label": "직전 1주 대비",
+        "starts_at": "2026-08-16T16:12:37.358183Z",
+        "ends_at": "2026-08-23T16:12:37.358183Z",
+        "comparison_starts_at": "2026-08-09T16:12:37.358183Z",
+        "comparison_ends_at": "2026-08-16T16:12:37.358183Z",
+        "updated_at": "2026-08-23T16:12:37.358183Z",
+        "seed_nodes": [
+          {
+            "node_id": "entity:russia",
+            "x": 0.38,
+            "y": 0.42,
+            "article_count": 158,
+            "previous_article_count": 144,
+            "change_rate": 10
+          },
+          {
+            "node_id": "entity:united-states",
+            "x": 0.82,
+            "y": 0.53,
+            "article_count": 120,
+            "previous_article_count": 88,
+            "change_rate": 36
+          },
+          {
+            "node_id": "place:seoul",
+            "x": 0.2,
+            "y": 0.68,
+            "article_count": 90,
+            "previous_article_count": 76,
+            "change_rate": 18
+          },
+          {
+            "node_id": "topic:crypto",
+            "x": 0.57,
+            "y": 0.76,
+            "article_count": 81,
+            "previous_article_count": 81,
+            "change_rate": 0
+          },
+          {
+            "node_id": "topic:financial-market",
+            "x": 0.88,
+            "y": 0.78,
+            "article_count": 57,
+            "previous_article_count": 45,
+            "change_rate": 27
+          },
+          {
+            "node_id": "topic:disaster-safety",
+            "x": 0.44,
+            "y": 0.15,
+            "article_count": 43,
+            "previous_article_count": 31,
+            "change_rate": 39
+          },
+          {
+            "node_id": "topic:artificial-intelligence",
+            "x": 0.13,
+            "y": 0.18,
+            "article_count": 46,
+            "previous_article_count": 37,
+            "change_rate": 24
+          },
+          {
+            "node_id": "entity:democratic-party",
+            "x": 0.67,
+            "y": 0.22,
+            "article_count": 41,
+            "previous_article_count": 30,
+            "change_rate": 37
+          }
+        ],
+        "rising_node_ids": [
+          "topic:disaster-safety",
+          "entity:democratic-party",
+          "entity:united-states"
+        ]
+      },
+      "month": {
+        "id": "month",
+        "label": "1개월",
+        "title": "한 달간 주요 흐름",
+        "window_days": 30,
+        "window_label": "최근 1개월",
+        "comparison_label": "직전 1개월 대비",
+        "starts_at": "2026-07-24T16:12:37.358183Z",
+        "ends_at": "2026-08-23T16:12:37.358183Z",
+        "comparison_starts_at": "2026-06-24T16:12:37.358183Z",
+        "comparison_ends_at": "2026-07-24T16:12:37.358183Z",
+        "updated_at": "2026-08-23T16:12:37.358183Z",
+        "seed_nodes": [
+          {
+            "node_id": "entity:russia",
+            "x": 0.2,
+            "y": 0.68,
+            "article_count": 399,
+            "previous_article_count": 421,
+            "change_rate": -5
+          },
+          {
+            "node_id": "entity:united-states",
+            "x": 0.57,
+            "y": 0.76,
+            "article_count": 259,
+            "previous_article_count": 215,
+            "change_rate": 20
+          },
+          {
+            "node_id": "place:seoul",
+            "x": 0.88,
+            "y": 0.78,
+            "article_count": 271,
+            "previous_article_count": 249,
+            "change_rate": 9
+          },
+          {
+            "node_id": "topic:crypto",
+            "x": 0.44,
+            "y": 0.15,
+            "article_count": 190,
+            "previous_article_count": 133,
+            "change_rate": 43
+          },
+          {
+            "node_id": "topic:financial-market",
+            "x": 0.13,
+            "y": 0.18,
+            "article_count": 157,
+            "previous_article_count": 116,
+            "change_rate": 35
+          },
+          {
+            "node_id": "topic:artificial-intelligence",
+            "x": 0.67,
+            "y": 0.22,
+            "article_count": 121,
+            "previous_article_count": 95,
+            "change_rate": 27
+          },
+          {
+            "node_id": "entity:democratic-party",
+            "x": 0.38,
+            "y": 0.42,
+            "article_count": 101,
+            "previous_article_count": 75,
+            "change_rate": 35
+          },
+          {
+            "node_id": "topic:disaster-safety",
+            "x": 0.82,
+            "y": 0.53,
+            "article_count": 77,
+            "previous_article_count": 60,
+            "change_rate": 28
+          }
+        ],
+        "rising_node_ids": [
+          "topic:crypto",
+          "topic:financial-market",
+          "entity:democratic-party"
+        ]
+      },
+      "quarter": {
+        "id": "quarter",
+        "label": "3개월",
+        "title": "세 달간 주요 흐름",
+        "window_days": 90,
+        "window_label": "최근 3개월",
+        "comparison_label": "직전 3개월 대비",
+        "starts_at": "2026-05-25T16:12:37.358183Z",
+        "ends_at": "2026-08-23T16:12:37.358183Z",
+        "comparison_starts_at": "2026-02-24T16:12:37.358183Z",
+        "comparison_ends_at": "2026-05-25T16:12:37.358183Z",
+        "updated_at": "2026-08-23T16:12:37.358183Z",
+        "seed_nodes": [
+          {
+            "node_id": "entity:russia",
+            "x": 0.88,
+            "y": 0.78,
+            "article_count": 1029,
+            "previous_article_count": 1089,
+            "change_rate": -6
+          },
+          {
+            "node_id": "entity:united-states",
+            "x": 0.44,
+            "y": 0.15,
+            "article_count": 426,
+            "previous_article_count": 290,
+            "change_rate": 47
+          },
+          {
+            "node_id": "place:seoul",
+            "x": 0.13,
+            "y": 0.18,
+            "article_count": 392,
+            "previous_article_count": 301,
+            "change_rate": 30
+          },
+          {
+            "node_id": "topic:artificial-intelligence",
+            "x": 0.67,
+            "y": 0.22,
+            "article_count": 287,
+            "previous_article_count": 194,
+            "change_rate": 48
+          },
+          {
+            "node_id": "topic:crypto",
+            "x": 0.38,
+            "y": 0.42,
+            "article_count": 355,
+            "previous_article_count": 330,
+            "change_rate": 8
+          },
+          {
+            "node_id": "topic:financial-market",
+            "x": 0.82,
+            "y": 0.53,
+            "article_count": 303,
+            "previous_article_count": 250,
+            "change_rate": 21
+          },
+          {
+            "node_id": "entity:democratic-party",
+            "x": 0.2,
+            "y": 0.68,
+            "article_count": 218,
+            "previous_article_count": 173,
+            "change_rate": 26
+          },
+          {
+            "node_id": "topic:disaster-safety",
+            "x": 0.57,
+            "y": 0.76,
+            "article_count": 164,
+            "previous_article_count": 125,
+            "change_rate": 31
+          }
+        ],
+        "rising_node_ids": [
+          "topic:artificial-intelligence",
+          "entity:united-states",
+          "topic:disaster-safety"
+        ]
+      }
+    },
+    "today_trends": [
+      {
+        "node_id": "entity:russia",
+        "x": 0.13,
+        "y": 0.18
+      },
+      {
+        "node_id": "entity:united-states",
+        "x": 0.67,
+        "y": 0.22
+      },
+      {
+        "node_id": "place:seoul",
+        "x": 0.38,
+        "y": 0.42
+      },
+      {
+        "node_id": "topic:crypto",
+        "x": 0.82,
+        "y": 0.53
+      },
+      {
+        "node_id": "topic:artificial-intelligence",
+        "x": 0.2,
+        "y": 0.68
+      },
+      {
+        "node_id": "topic:financial-market",
+        "x": 0.57,
+        "y": 0.76
+      },
+      {
+        "node_id": "entity:democratic-party",
+        "x": 0.88,
+        "y": 0.78
+      },
+      {
+        "node_id": "entity:police",
+        "x": 0.44,
+        "y": 0.15
+      }
+    ],
+    "for_you": [
+      {
+        "node_id": "entity:russia",
+        "x": 0.13,
+        "y": 0.18
+      },
+      {
+        "node_id": "entity:united-states",
+        "x": 0.67,
+        "y": 0.22
+      },
+      {
+        "node_id": "topic:crypto",
+        "x": 0.38,
+        "y": 0.42
+      },
+      {
+        "node_id": "place:seoul",
+        "x": 0.82,
+        "y": 0.53
+      },
+      {
+        "node_id": "topic:artificial-intelligence",
+        "x": 0.2,
+        "y": 0.68
+      },
+      {
+        "node_id": "topic:financial-market",
+        "x": 0.57,
+        "y": 0.76
+      },
+      {
+        "node_id": "entity:democratic-party",
+        "x": 0.88,
+        "y": 0.78
+      },
+      {
+        "node_id": "entity:police",
+        "x": 0.44,
+        "y": 0.15
+      }
+    ]
+  },
+  "categories": {
+    "politics": {
+      "title": "정치 분야별 탐색",
+      "seed_nodes": [
+        {
+          "node_id": "entity:democratic-party",
+          "x": 0.12,
+          "y": 0.21
+        },
+        {
+          "node_id": "entity:oh-se-hoon",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "node_id": "entity:lee-jae-myung",
+          "x": 0.71,
+          "y": 0.23
+        },
+        {
+          "node_id": "entity:people-power-party",
+          "x": 0.25,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:judiciary",
+          "x": 0.59,
+          "y": 0.48
+        },
+        {
+          "node_id": "entity:national-assembly",
+          "x": 0.84,
+          "y": 0.62
+        },
+        {
+          "node_id": "entity:han-dong-hoon",
+          "x": 0.43,
+          "y": 0.75
+        },
+        {
+          "node_id": "entity:presidential-office",
+          "x": 0.13,
+          "y": 0.76
+        }
+      ]
+    },
+    "economy": {
+      "title": "경제 분야별 탐색",
+      "seed_nodes": [
+        {
+          "node_id": "topic:crypto",
+          "x": 0.12,
+          "y": 0.21
+        },
+        {
+          "node_id": "topic:financial-market",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "node_id": "topic:real-estate",
+          "x": 0.71,
+          "y": 0.23
+        },
+        {
+          "node_id": "topic:semiconductor-industry",
+          "x": 0.25,
+          "y": 0.48
+        },
+        {
+          "node_id": "entity:samsung-electronics",
+          "x": 0.59,
+          "y": 0.48
+        },
+        {
+          "node_id": "entity:sk-hynix",
+          "x": 0.84,
+          "y": 0.62
+        },
+        {
+          "node_id": "topic:trade-tariff",
+          "x": 0.43,
+          "y": 0.75
+        },
+        {
+          "node_id": "topic:interest-rate",
+          "x": 0.13,
+          "y": 0.76
+        }
+      ]
+    },
+    "society": {
+      "title": "사회 분야별 탐색",
+      "seed_nodes": [
+        {
+          "node_id": "entity:police",
+          "x": 0.12,
+          "y": 0.21
+        },
+        {
+          "node_id": "topic:disaster-safety",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "node_id": "topic:weather-climate",
+          "x": 0.71,
+          "y": 0.23
+        },
+        {
+          "node_id": "topic:labor",
+          "x": 0.25,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:missing-person",
+          "x": 0.59,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:education",
+          "x": 0.84,
+          "y": 0.62
+        },
+        {
+          "node_id": "topic:housing-policy",
+          "x": 0.43,
+          "y": 0.75
+        },
+        {
+          "node_id": "topic:health",
+          "x": 0.13,
+          "y": 0.76
+        }
+      ]
+    },
+    "culture": {
+      "title": "문화 분야별 탐색",
+      "seed_nodes": [
+        {
+          "node_id": "topic:publishing",
+          "x": 0.12,
+          "y": 0.21
+        },
+        {
+          "node_id": "topic:broadcast-entertainment",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "node_id": "topic:film-drama",
+          "x": 0.71,
+          "y": 0.23
+        },
+        {
+          "node_id": "topic:creator",
+          "x": 0.25,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:music",
+          "x": 0.59,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:performance",
+          "x": 0.84,
+          "y": 0.62
+        },
+        {
+          "node_id": "topic:cultural-heritage",
+          "x": 0.43,
+          "y": 0.75
+        },
+        {
+          "node_id": "topic:exhibition",
+          "x": 0.13,
+          "y": 0.76
+        }
+      ]
+    },
+    "world": {
+      "title": "국제 분야별 탐색",
+      "seed_nodes": [
+        {
+          "node_id": "entity:russia",
+          "x": 0.12,
+          "y": 0.21
+        },
+        {
+          "node_id": "entity:united-states",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "node_id": "entity:donald-trump",
+          "x": 0.71,
+          "y": 0.23
+        },
+        {
+          "node_id": "entity:north-korea",
+          "x": 0.25,
+          "y": 0.48
+        },
+        {
+          "node_id": "entity:japan",
+          "x": 0.59,
+          "y": 0.48
+        },
+        {
+          "node_id": "entity:china",
+          "x": 0.84,
+          "y": 0.62
+        },
+        {
+          "node_id": "entity:iran",
+          "x": 0.43,
+          "y": 0.75
+        },
+        {
+          "node_id": "entity:ukraine",
+          "x": 0.13,
+          "y": 0.76
+        }
+      ]
+    },
+    "local": {
+      "title": "지역 분야별 탐색",
+      "seed_nodes": [
+        {
+          "node_id": "place:seoul",
+          "x": 0.12,
+          "y": 0.21
+        },
+        {
+          "node_id": "place:jeju",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "node_id": "place:gyeongnam",
+          "x": 0.71,
+          "y": 0.23
+        },
+        {
+          "node_id": "place:gangwon",
+          "x": 0.25,
+          "y": 0.48
+        },
+        {
+          "node_id": "place:gyeonggi",
+          "x": 0.59,
+          "y": 0.48
+        },
+        {
+          "node_id": "place:daegu",
+          "x": 0.84,
+          "y": 0.62
+        },
+        {
+          "node_id": "place:busan",
+          "x": 0.43,
+          "y": 0.75
+        },
+        {
+          "node_id": "topic:regional-economy",
+          "x": 0.13,
+          "y": 0.76
+        }
+      ]
+    },
+    "sports": {
+      "title": "스포츠 분야별 탐색",
+      "seed_nodes": [
+        {
+          "node_id": "topic:football",
+          "x": 0.12,
+          "y": 0.21
+        },
+        {
+          "node_id": "topic:k-league",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "node_id": "topic:professional-baseball",
+          "x": 0.71,
+          "y": 0.23
+        },
+        {
+          "node_id": "topic:athletics",
+          "x": 0.25,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:badminton",
+          "x": 0.59,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:volleyball",
+          "x": 0.84,
+          "y": 0.62
+        },
+        {
+          "node_id": "entity:an-se-young",
+          "x": 0.43,
+          "y": 0.75
+        },
+        {
+          "node_id": "entity:lee-kang-in",
+          "x": 0.13,
+          "y": 0.76
+        }
+      ]
+    },
+    "tech_science": {
+      "title": "IT·과학 분야별 탐색",
+      "seed_nodes": [
+        {
+          "node_id": "topic:artificial-intelligence",
+          "x": 0.12,
+          "y": 0.21
+        },
+        {
+          "node_id": "entity:nvidia",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "node_id": "entity:anthropic",
+          "x": 0.71,
+          "y": 0.23
+        },
+        {
+          "node_id": "topic:gaming",
+          "x": 0.25,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:drones",
+          "x": 0.59,
+          "y": 0.48
+        },
+        {
+          "node_id": "topic:robotics",
+          "x": 0.84,
+          "y": 0.62
+        },
+        {
+          "node_id": "topic:smart-device",
+          "x": 0.43,
+          "y": 0.75
+        },
+        {
+          "node_id": "topic:ai-chip",
+          "x": 0.13,
+          "y": 0.76
+        }
+      ]
+    }
+  },
+  "search": {
+    "placeholder": "기업, 인물, 정책, 주제를 검색하세요",
+    "suggested_node_ids": [
+      "entity:russia",
+      "entity:united-states",
+      "place:seoul",
+      "topic:crypto",
+      "topic:artificial-intelligence",
+      "topic:financial-market",
+      "entity:democratic-party",
+      "entity:donald-trump",
+      "entity:north-korea",
+      "entity:japan",
+      "entity:china",
+      "entity:police",
+      "topic:disaster-safety",
+      "topic:real-estate",
+      "topic:publishing",
+      "place:jeju",
+      "topic:broadcast-entertainment",
+      "topic:weather-climate",
+      "topic:semiconductor-industry",
+      "topic:film-drama"
+    ],
+    "article_search_fields": [
+      "title",
+      "description",
+      "source.name"
+    ]
+  }
+}

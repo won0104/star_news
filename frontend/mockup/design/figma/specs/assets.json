@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0.0",
+  "source": {
+    "file_key": "N9IgiAcOTCRQQ1yigy4YXQ",
+    "temporary_urls_persisted": false
+  },
+  "runtime_assets": [
+    {
+      "source_constant": "imgSidebarHomeIcon",
+      "file": "assets/sidebar-home.svg",
+      "format": "svg",
+      "size_bytes": 592,
+      "sha256": "742c5f16cc4c8ca153c09c02afadda695a8a299493f9827d5be933d40056a04b",
+      "usage": "공통 사이드바 홈"
+    },
+    {
+      "source_constant": "imgSidebarGalaxyIcon",
+      "file": "assets/sidebar-galaxy.svg",
+      "format": "svg",
+      "size_bytes": 944,
+      "sha256": "cecfdf13bd2186bd5f866017ef365b9ff0464e29332184f06508d05bbf609d76",
+      "usage": "공통 사이드바 나의 뉴스 세계"
+    },
+    {
+      "source_constant": "imgSidebarRecentClock1",
+      "file": "assets/recent-clock.svg",
+      "format": "svg",
+      "size_bytes": 574,
+      "sha256": "8e3f765b07e4e4cd17de28d70ebd7eaed85221dc3eaa2212a54fb811b8d14a54",
+      "usage": "최근 탐색 항목"
+    },
+    {
+      "source_constant": "imgHeaderProfile",
+      "file": "assets/profile.svg",
+      "format": "svg",
+      "size_bytes": 660,
+      "sha256": "7dd3b21c7c32ddcb79046eba6f56782b239196b07b75de047f2fb37758044d07",
+      "usage": "공통 헤더 프로필"
+    },
+    {
+      "source_constant": "imgSelectedNodeLocalGlow",
+      "file": "assets/node-selected-glow.svg",
+      "format": "svg",
+      "size_bytes": 612,
+      "sha256": "381d4cb0ed7d94cf4b3b16a499a16057ddc52f110c31bb942431d92e41fdcceb",
+      "usage": "선택 노드 광원"
+    },
+    {
+      "source_constant": "imgSelectedNodeOrbit1",
+      "file": "assets/node-selected-orbit-inner.svg",
+      "format": "svg",
+      "size_bytes": 773,
+      "sha256": "24100dd549840b482feabcaede6d662b98b3e1b6e8b0a98c4102ab9f2ca8b5b6",
+      "usage": "선택 노드 안쪽 궤도"
+    },
+    {
+      "source_constant": "imgSelectedNodeOrbit2",
+      "file": "assets/node-selected-orbit-outer.png",
+      "format": "png",
+      "size_bytes": 6096,
+      "sha256": "6fd9dc2c573929f60435da424fcc24cc003a9bd6aa1864ef4a7a778a730e9717",
+      "usage": "선택 노드 바깥쪽 궤도"
+    },
+    {
+      "source_constant": "imgStar",
+      "file": "assets/seed-star.svg",
+      "format": "svg",
+      "size_bytes": 224,
+      "sha256": "963d57a94b60d5dae31d5ce5acacb9634c071089fba8d50626f6235445ef1906",
+      "usage": "홈·카테고리 seed 노드"
+    },
+    {
+      "source_constant": "imgSelectedRing",
+      "file": "assets/node-selected-ring.svg",
+      "format": "svg",
+      "size_bytes": 287,
+      "sha256": "15be2a1634c09cd61500a0793c27f879cdeee856711100abf58e2e75dc729cea",
+      "usage": "선택 seed 노드 링"
+    },
+    {
+      "source_constant": "imgSelectedStar",
+      "file": "assets/node-selected-star.svg",
+      "format": "svg",
+      "size_bytes": 1020,
+      "sha256": "2984ad0e1d22c0408a7c525ae606afb9b524f494f3c4ce89041a71bbfe68a182",
+      "usage": "선택 seed 노드 중심점"
+    },
+    {
+      "source_constant": "imgExplorationBackgroundMicroDotGrid",
+      "file": "assets/background-micro-grid.svg",
+      "format": "svg",
+      "size_bytes": 27243,
+      "sha256": "d5b184f3951a3d738fa2b4378c33458fd98b6844cb0947cd2e7b1cf858540355",
+      "usage": "그래프 창 미세 점 배경"
+    },
+    {
+      "source_constant": "imgNodeStar",
+      "file": "assets/node-star.svg",
+      "format": "svg",
+      "size_bytes": 229,
+      "sha256": "667f44fb685d45cb0bbed1806ea6361d54ccfc9d8637a7067b0e4e8baf14e056",
+      "usage": "탐색·검색 그래프 노드"
+    },
+    {
+      "source_constant": "imgFocusRing",
+      "file": "assets/node-focus-ring.svg",
+      "format": "svg",
+      "size_bytes": 210,
+      "sha256": "d8bea65447ac0e2daf6f5896a3da574b2c514bb813063ca6b8c1258f55a67303",
+      "usage": "탐색 그래프 비활성 링 상태"
+    },
+    {
+      "source_constant": "imgFocusRing1",
+      "file": "assets/node-focus-ring-large.svg",
+      "format": "svg",
+      "size_bytes": 284,
+      "sha256": "7c0b7e53ae420296dd4aab1cd75b86da19b78d11c5c300ef39646c04f8c7eb0d",
+      "usage": "탐색 그래프 중심 선택 링"
+    },
+    {
+      "source_constant": "imgFocusRing2",
+      "file": "assets/node-focus-ring-variant.svg",
+      "format": "svg",
+      "size_bytes": 198,
+      "sha256": "24313eebc5f6e6f971a9004926b0644a51270d539a115f6af72ef68a2ae4c987",
+      "usage": "탐색 그래프 보조 링 상태"
+    },
+    {
+      "source_constant": "imgArticlePanelClose",
+      "file": "assets/article-panel-close.svg",
+      "format": "svg",
+      "size_bytes": 553,
+      "sha256": "f8bb0a447e26bcd77112f2d2213903d59b5cd3bd0c7d822a1cd7b2fa397eee40",
+      "usage": "패널 닫힘 상태의 원본 아이콘 참고"
+    },
+    {
+      "source_constant": "imgCloseIconX",
+      "file": "assets/close.svg",
+      "format": "svg",
+      "size_bytes": 306,
+      "sha256": "2824129cf7fa71d16e69e882dc7b4f7f5eb25983b7fab8a698f211525964081b",
+      "usage": "기사 패널 닫기"
+    },
+    {
+      "source_constant": "imgSearchFieldIcon",
+      "file": "assets/search.svg",
+      "format": "svg",
+      "size_bytes": 514,
+      "sha256": "f66a383d7055721aa02f38c0c814660378e7788f71a5e1691f2f4dab31d03f3e",
+      "usage": "찾아보기 입력창"
+    },
+    {
+      "source_constant": "imgMyWorldSelectedClusterGlow",
+      "file": "assets/cluster-selected-glow.svg",
+      "format": "svg",
+      "size_bytes": 683,
+      "sha256": "1a6f389e99b742c8a311a7b0d7dcfa772f120db565da0754eef67a1a74cc6b0e",
+      "usage": "선택한 개인 기록 군집 광원"
+    },
+    {
+      "source_constant": "imgMyWorldSelectedClusterOrbit",
+      "file": "assets/cluster-selected-orbit.svg",
+      "format": "svg",
+      "size_bytes": 594,
+      "sha256": "57eca8110970b754737e58e803bafba5e91089a8f1a49d9ba6904f7d05a18346",
+      "usage": "선택한 개인 기록 군집 궤도"
+    },
+    {
+      "source_constant": "imgSettingsReducedMotionToggleOff",
+      "file": "assets/reduced-motion-toggle-off.svg",
+      "format": "svg",
+      "size_bytes": 336,
+      "sha256": "17114063e93b4cd61dfd8b01a22a03b761cd2c1160b3700fa43f2a82cbd8e953",
+      "usage": "화면 설정 모션 줄이기 토글"
+    },
+    {
+      "source_constant": "imgPersonalMapSelectedRing",
+      "file": "assets/personal-map-selected-ring.svg",
+      "format": "svg",
+      "size_bytes": 299,
+      "sha256": "3ff67bde65ef0bccfda0128bfd38bd232f0fcbf7e3c79f9c71a9fb24f158a66d",
+      "usage": "개인 기록 지도 선택 노드 링"
+    }
+  ],
+  "dynamic_figma_geometry_not_imported": [
+    "GraphEdgesAnchored 및 개별 Line: data/mock/edges.json으로 SVG 선을 생성",
+    "PersonalMapFullEdges 및 NodeRing/NodeDot: data/mock 노드·엣지와 layout.personal_map으로 생성",
+    "TerrainPoint 계열: data/mock/user_report.json의 좌표로 생성",
+    "Figma에 적힌 키워드·기사·그래프 좌표: 목업 데이터가 아니므로 사용하지 않음"
+  ],
+  "notes": [
+    "focus-ring.svg와 focus-ring-variant.svg는 Figma의 opacity 0 상태를 보존한 빈 SVG다.",
+    "실제 선택 링은 node-focus-ring-large.svg를 사용한다.",
+    "expand personal map 아이콘은 단순 선 8개로 구성되어 별도 이미지 에셋이 없다."
+  ]
+}

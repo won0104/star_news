@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "source_note": "Figma에는 네이티브 keyframe 데이터가 없고 pre/post 상태 프레임만 있다. duration은 프레임 이름과 합의된 모션 명세를 기준으로 구현한다.",
+  "defaults": {
+    "easing": "cubic-bezier(0.22, 0.8, 0.28, 1)",
+    "reduced_motion_fallback_ms": 0
+  },
+  "motions": [
+    {
+      "id": "seed_bloom",
+      "duration_ms": 320,
+      "properties": [
+        "opacity",
+        "transform: scale"
+      ],
+      "stagger_ms": 55,
+      "applies_to": [
+        "home",
+        "category"
+      ],
+      "from": {
+        "opacity": 0,
+        "scale": 0.72
+      },
+      "to": {
+        "opacity": 1,
+        "scale": 1
+      }
+    },
+    {
+      "id": "search_results_bloom",
+      "duration_ms": 320,
+      "properties": [
+        "opacity",
+        "transform: scale"
+      ],
+      "stagger_ms": 45,
+      "anchor": "query",
+      "from": {
+        "opacity": 0,
+        "scale": 0.72
+      },
+      "to": {
+        "opacity": 1,
+        "scale": 1
+      }
+    },
+    {
+      "id": "exploration_focus_arrival",
+      "duration_ms": 320,
+      "properties": [
+        "transform: translate",
+        "transform: scale",
+        "opacity"
+      ],
+      "sequence": [
+        "selected node moves to center",
+        "previous path node dims",
+        "new edges draw",
+        "neighbor nodes bloom"
+      ]
+    },
+    {
+      "id": "record_cluster_bloom",
+      "duration_ms": 320,
+      "properties": [
+        "opacity",
+        "transform: scale"
+      ],
+      "stagger_ms": 45,
+      "from": {
+        "opacity": 0,
+        "scale": 0.72
+      },
+      "to": {
+        "opacity": 1,
+        "scale": 1
+      }
+    },
+    {
+      "id": "report_data_growth",
+      "duration_ms": 340,
+      "properties": [
+        "bar height",
+        "line stroke-dashoffset",
+        "point opacity",
+        "point scale"
+      ],
+      "stagger_ms": 35
+    },
+    {
+      "id": "panel_open",
+      "duration_ms": 220,
+      "properties": [
+        "transform: translateX",
+        "opacity"
+      ]
+    },
+    {
+      "id": "overlay_open",
+      "duration_ms": 220,
+      "properties": [
+        "opacity",
+        "transform: scale"
+      ],
+      "from": {
+        "opacity": 0,
+        "scale": 0.98
+      },
+      "to": {
+        "opacity": 1,
+        "scale": 1
+      }
+    }
+  ],
+  "accessibility": {
+    "honor_prefers_reduced_motion": true,
+    "display_setting_overrides_session": true
+  }
+}

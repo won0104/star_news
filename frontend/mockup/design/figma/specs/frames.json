@@ -1,0 +1,242 @@
+{
+  "schema_version": "1.0.0",
+  "figma": {
+    "file_key": "N9IgiAcOTCRQQ1yigy4YXQ",
+    "page_id": "0:1",
+    "page_name": "별빛 뉴스",
+    "reference_viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "data_contract": {
+    "source_of_truth": "data/mock/mock_dataset.json",
+    "figma_placeholder_content_must_not_be_used": true
+  },
+  "screens": [
+    {
+      "id": "home",
+      "node_id": "24:2",
+      "screenshot": "screenshots/main.png",
+      "data": [
+        "views.home",
+        "nodes"
+      ],
+      "states": [
+        "today_trends",
+        "for_you"
+      ]
+    },
+    {
+      "id": "exploration",
+      "node_ids": [
+        "31:3",
+        "31:380",
+        "31:764"
+      ],
+      "screenshots": [
+        "screenshots/explore-01.png",
+        "screenshots/explore-02.png",
+        "screenshots/explore-03-panel.png"
+      ],
+      "data": [
+        "navigation",
+        "nodes",
+        "edges",
+        "articles"
+      ],
+      "states": [
+        "node_selected",
+        "next_node_selected",
+        "article_panel_open"
+      ]
+    },
+    {
+      "id": "category",
+      "node_id": "37:3",
+      "screenshot": "screenshots/category-economy.png",
+      "data": [
+        "views.categories",
+        "nodes"
+      ],
+      "variants": [
+        "politics",
+        "economy",
+        "society",
+        "culture",
+        "world",
+        "local",
+        "sports",
+        "tech_science"
+      ]
+    },
+    {
+      "id": "search",
+      "node_ids": [
+        "38:2",
+        "38:338"
+      ],
+      "screenshots": [
+        "screenshots/search-empty.png",
+        "screenshots/search-result.png"
+      ],
+      "data": [
+        "views.search",
+        "nodes",
+        "articles"
+      ],
+      "states": [
+        "empty",
+        "results"
+      ]
+    },
+    {
+      "id": "my_world_record",
+      "node_ids": [
+        "48:2",
+        "57:678"
+      ],
+      "screenshots": [
+        "screenshots/my-record.png",
+        "screenshots/my-record-economy.png"
+      ],
+      "data": [
+        "nodes",
+        "edges",
+        "user_events",
+        "articles"
+      ],
+      "states": [
+        "all",
+        "cluster_filtered"
+      ]
+    },
+    {
+      "id": "my_world_report",
+      "node_id": "48:618",
+      "screenshot": "screenshots/my-report.png",
+      "data": [
+        "user_report"
+      ]
+    },
+    {
+      "id": "profile_menu",
+      "node_id": "69:15",
+      "screenshot": "screenshots/profile-menu.png",
+      "data": [
+        "user"
+      ]
+    },
+    {
+      "id": "settings",
+      "node_ids": [
+        "73:2",
+        "73:19",
+        "73:36"
+      ],
+      "screenshots": [
+        "screenshots/settings-account.png",
+        "screenshots/settings-dislikes.png",
+        "screenshots/settings-display.png"
+      ],
+      "states": [
+        "account",
+        "not_interested",
+        "display"
+      ]
+    },
+    {
+      "id": "personal_map",
+      "node_ids": [
+        "80:2",
+        "80:647"
+      ],
+      "screenshots": [
+        "screenshots/personal-map.png",
+        "screenshots/personal-map-selected.png"
+      ],
+      "data": [
+        "nodes",
+        "edges",
+        "user_events",
+        "articles"
+      ],
+      "states": [
+        "overview",
+        "node_or_cluster_selected"
+      ]
+    }
+  ],
+  "motion_reference_pairs": [
+    {
+      "id": "category_entry",
+      "from": "45:2",
+      "to": "45:326",
+      "screenshots": [
+        "screenshots/motion-category-pre.png",
+        "screenshots/motion-category-post.png"
+      ]
+    },
+    {
+      "id": "search_results",
+      "from": "45:652",
+      "to": "45:984",
+      "screenshots": [
+        "screenshots/motion-search-pre.png",
+        "screenshots/motion-search-post.png"
+      ]
+    },
+    {
+      "id": "exploration_focus",
+      "from": "45:1318",
+      "to": "45:1756",
+      "screenshots": [
+        "screenshots/motion-explore-pre.png",
+        "screenshots/motion-explore-post.png"
+      ]
+    },
+    {
+      "id": "record_clusters",
+      "from": "57:2",
+      "to": "57:339",
+      "screenshots": [
+        "screenshots/motion-record-pre.png",
+        "screenshots/motion-record-post.png"
+      ]
+    },
+    {
+      "id": "report_charts",
+      "from": "57:1052",
+      "to": "57:1240",
+      "screenshots": [
+        "screenshots/motion-report-pre.png",
+        "screenshots/motion-report-post.png"
+      ]
+    }
+  ],
+  "reference_only": [
+    {
+      "node_id": "12:2",
+      "reason": "초기 초안"
+    },
+    {
+      "node_id": "22:2",
+      "reason": "디자인 방향 비교 보드"
+    },
+    {
+      "node_id": "70:31",
+      "reason": "프로필 메뉴 단독 오버레이 중복"
+    },
+    {
+      "node_id": "73:121",
+      "reason": "설정 미리보기 중복"
+    },
+    {
+      "node_ids": [
+        "80:1376",
+        "80:2364"
+      ],
+      "reason": "개인 지도 미리보기 중복"
+    }
+  ]
+}
