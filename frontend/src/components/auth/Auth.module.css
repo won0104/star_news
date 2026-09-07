@@ -1,0 +1,293 @@
+/* ---- Page frame ------------------------------------------------------------ */
+/* <PhotoBackdrop> owns the photo and the scrolling; this just lays out the content. */
+.page {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-sans);
+}
+
+.inner {
+  min-height: 100vh;
+  padding: 96px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--nav-ink-active);
+}
+
+.tagline {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+/* ---- Card ------------------------------------------------------------------ */
+/* A real sheet of paper pinned to the wall — same clip and texture as the desk photo. */
+.cardWrap {
+  position: relative;
+  width: 420px;
+  max-width: 100%;
+  margin-top: 56px;
+}
+
+.clip {
+  position: absolute;
+  left: 50%;
+  top: -40px;
+  width: 68px;
+  height: auto;
+  transform: translateX(-50%) rotate(-2deg);
+  filter: drop-shadow(0 10px 10px rgba(30, 22, 12, 0.35));
+  pointer-events: none;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  padding: 40px;
+  border: 0.7px solid var(--auth-card-border);
+  border-radius: 10px;
+  background-color: #fbf6ea;
+  box-shadow: var(--auth-card-shadow);
+}
+
+/* Real paper photo (base texture + a faint grain pass), not a CSS gradient. */
+.paperTexture {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: url('/assets/home/paper-overlay.png'), url('/assets/home/paper-tile.png');
+  background-size: 440px 440px, 380px 380px;
+  background-repeat: repeat, repeat;
+  background-blend-mode: multiply, normal;
+  opacity: 0.92;
+}
+
+.title {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 23px;
+  color: var(--auth-title);
+}
+
+.subtitle {
+  position: relative;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--auth-muted);
+}
+
+.content {
+  position: relative;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+/* ---- Fields ---------------------------------------------------------------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--auth-label);
+}
+
+.inputRow {
+  display: flex;
+  gap: 10px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 13px;
+  border: 1px solid var(--auth-border);
+  border-radius: 8px;
+  background: var(--auth-input-bg);
+  font: inherit;
+  font-size: 13px;
+  color: var(--auth-title);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.input::placeholder {
+  color: var(--auth-muted);
+}
+
+.input:focus {
+  border-color: var(--brass-b);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px var(--auth-focus-ring);
+}
+
+.inputError,
+.inputError:focus {
+  border-color: var(--auth-error);
+  box-shadow: 0 0 0 3px rgba(181, 48, 33, 0.14);
+}
+
+.secondary {
+  flex: none;
+  width: 84px;
+  height: 46px;
+  padding: 0;
+  border: 0.7px solid var(--auth-secondary-border);
+  border-radius: 8px;
+  background: var(--auth-secondary-bg);
+  font: inherit;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--auth-secondary-label);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.secondary:hover {
+  background: rgba(250, 245, 235, 1);
+}
+
+.secondary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.message {
+  margin-top: -1px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.messageSuccess {
+  color: var(--auth-success);
+}
+
+.messageError {
+  color: var(--auth-error);
+}
+
+.messageMuted {
+  color: var(--auth-muted);
+}
+
+/* ---- Terms ----------------------------------------------------------------- */
+.termsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--auth-label);
+  cursor: pointer;
+}
+
+.checkbox {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin: 1px 0 0;
+  accent-color: var(--brass-b);
+  cursor: pointer;
+}
+
+/* ---- Submit & prompt --------------------------------------------------------- */
+/* Same dark pill as the top bar's "회원가입" / "탐색 중" buttons. */
+.submit {
+  height: 46px;
+  margin-top: 14px;
+  border: 0.7px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: linear-gradient(to right, var(--auth-primary-a), var(--auth-primary-b));
+  box-shadow: var(--auth-primary-shadow);
+  font: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink-on-dark);
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.submitTight {
+  margin-top: 0;
+}
+
+.submit:hover {
+  filter: brightness(1.08);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+  filter: none;
+}
+
+.formError {
+  font-size: 12px;
+  text-align: center;
+  color: var(--auth-error);
+}
+
+.prompt {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--auth-muted);
+}
+
+.promptAction {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--nav-ink-active);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(120, 102, 82, 0.4);
+  text-underline-offset: 3px;
+}
+
+.promptAction:hover {
+  color: var(--auth-title);
+}
+
+@media (max-width: 480px) {
+  .inner {
+    padding: 64px 16px 40px;
+  }
+
+  .card {
+    padding: 28px 22px;
+  }
+}

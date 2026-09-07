@@ -1,0 +1,40 @@
+.root {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #efe8dc;
+}
+
+/*
+ * Warm stand-in painted underneath the photo, so the page still reads as a sunlit
+ * room while the image loads (or if the file is missing).
+ */
+.wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #f4efe6 0%, #ebe3d6 80%, #a9764a 93%, #8f5f38 100%);
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.photoReady {
+  opacity: 1;
+}
+
+/* Optional soft dark veil so light-on-photo chrome (a form card, a headline) stays readable. */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 38%, rgba(43, 33, 22, 0) 40%, rgba(43, 33, 22, 0.16) 100%);
+  pointer-events: none;
+}

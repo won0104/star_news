@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "serve": "python3 scripts/serve_mockup.py",
+    "serve": "python scripts/serve_mockup.py",
     "check": "node --check src/app.js && node --check src/router.js && node --check src/components/app-shell.js && node --check src/components/seed-canvas.js && node --check src/components/exploration-graph.js && node --check src/components/history-panel.js && node --check src/components/record-cluster-graph.js && node --check src/components/report-view.js && node --check src/components/personal-map.js && node --check src/data/repository.js && node --check src/data/selectors.js && node --check src/data/weight-scale.js && node --check src/data/personal-selectors.js && node --check src/data/settings-store.js && node --check src/pages/page-registry.js && node --check src/pages/discovery-pages.js && node --check src/pages/exploration-page.js && node --check src/pages/my-world-pages.js && node --check src/pages/settings-page.js",
     "test": "node --test"
   }

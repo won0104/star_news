@@ -1,0 +1,132 @@
+.bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--topbar-border);
+  background: var(--topbar-bg);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--topbar-shadow);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.brandName {
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--nav-ink-active);
+}
+
+.brandSection {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--nav-ink);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+}
+
+.navItem {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 18px;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--nav-ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.navItem:hover {
+  background: rgba(120, 102, 82, 0.08);
+  color: var(--nav-ink-active);
+}
+
+.navItemActive {
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  color: var(--ink-on-dark);
+  box-shadow: var(--pill-dark-shadow);
+}
+
+.navItemActive:hover {
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  color: var(--ink-on-dark);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.signIn {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 18px;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--nav-ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.signIn:hover {
+  color: var(--nav-ink-active);
+  background: rgba(120, 102, 82, 0.08);
+}
+
+.signUp {
+  padding: 9px 20px;
+  border: 0.7px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink-on-dark);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--pill-dark-shadow), var(--pill-dark-inner);
+}
+
+@media (max-width: 1023px) {
+  .bar {
+    height: 60px;
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .brandSection {
+    display: none;
+  }
+}
