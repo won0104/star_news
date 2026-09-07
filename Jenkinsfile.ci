@@ -16,9 +16,7 @@ pipeline {
     stages {
 
         stage('Checkout') {
-
             steps {
-
                 script {
 
                     def sourceBranch = env.gitlabSourceBranch?.trim()
@@ -60,7 +58,6 @@ pipeline {
                     } else {
 
                         echo "Fallback CI: checkout origin/${checkoutBranch}"
-
                     }
 
                     echo "gitlabSourceBranch=${env.gitlabSourceBranch ?: 'N/A'}"
@@ -84,9 +81,7 @@ pipeline {
                         userRemoteConfigs: [
                             [
                                 credentialsId: 'gitlab-deploy-token',
-
                                 url: 'https://lab.ssafy.com/s15-bigdata-recom-sub1/S15P21E206.git',
-
                                 refspec: '+refs/heads/*:refs/remotes/origin/*'
                             ]
                         ]
@@ -99,9 +94,7 @@ pipeline {
 
 
         stage('CI') {
-
             steps {
-
                 script {
 
                     def isGitLabTriggered = [
@@ -116,15 +109,12 @@ pipeline {
                     if (isGitLabTriggered) {
 
                         gitlabCommitStatus(name: 'ci') {
-
                             sh 'sudo /usr/local/sbin/ci-s15p21e206'
-
                         }
 
                     } else {
 
                         echo 'Manual build: skipping gitlabCommitStatus'
-
                         sh 'sudo /usr/local/sbin/ci-s15p21e206'
                     }
                 }
@@ -151,7 +141,7 @@ pipeline {
                     TARGET_BRANCH="${gitlabTargetBranch:-N/A}"
                     BUILD_LINK="${BUILD_URL:-N/A}"
 
-                    payload=$(printf '{"text":"✅ **CI 성공**\\\\n- Source: %s\\\\n- Target: %s\\\\n- Build: %s"}' \
+                    payload=$(printf '{"text":"✅ **CI 성공**\\n- Source: %s\\n- Target: %s\\n- Build: %s"}' \
                         "$SOURCE_BRANCH" \
                         "$TARGET_BRANCH" \
                         "$BUILD_LINK")
@@ -182,7 +172,7 @@ pipeline {
                     TARGET_BRANCH="${gitlabTargetBranch:-N/A}"
                     BUILD_LINK="${BUILD_URL:-N/A}"
 
-                    payload=$(printf '{"text":"❌ **CI 실패**\\\\n- Source: %s\\\\n- Target: %s\\\\n- Build: %s"}' \
+                    payload=$(printf '{"text":"❌ **CI 실패**\\n- Source: %s\\n- Target: %s\\n- Build: %s"}' \
                         "$SOURCE_BRANCH" \
                         "$TARGET_BRANCH" \
                         "$BUILD_LINK")
