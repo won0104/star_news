@@ -1,5 +1,7 @@
 package com.starlightnews.backend.global.error;
 
+import com.starlightnews.backend.global.request.RequestIdFilter;
+import com.starlightnews.backend.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,12 +13,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class GlobalExceptionHandlerTest {
@@ -28,17 +32,29 @@ class GlobalExceptionHandlerTest {
 		mockMvc = MockMvcBuilders
 				.standaloneSetup(new TestController())
 				.setControllerAdvice(new GlobalExceptionHandler())
+				.addFilters(new RequestIdFilter())
 				.build();
+	}
+
+	@Test
+	void successResponseContainsDataAndRequestId() throws Exception {
+		mockMvc.perform(get("/test/success"))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.result").value("ok"))
+				.andExpect(jsonPath("$.meta.requestId").isString());
 	}
 
 	@Test
 	void businessExceptionReturnsDefinedErrorResponse() throws Exception {
 		mockMvc.perform(get("/test/business-error"))
 				.andExpect(status().isBadRequest())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
 				.andExpect(jsonPath("$.status").value(400))
-				.andExpect(jsonPath("$.code").value("COMMON_001"))
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
 				.andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
 				.andExpect(jsonPath("$.path").value("/test/business-error"))
+				.andExpect(jsonPath("$.requestId").isString())
 				.andExpect(jsonPath("$.errors").isArray());
 	}
 
@@ -48,7 +64,7 @@ class GlobalExceptionHandlerTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content("{\"name\":\"\"}"))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code").value("COMMON_001"))
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
 				.andExpect(jsonPath("$.errors[0].field").value("name"))
 				.andExpect(jsonPath("$.errors[0].message").value("이름은 필수입니다."));
 	}
@@ -59,14 +75,14 @@ class GlobalExceptionHandlerTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content("{\"name\":"))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code").value("COMMON_002"));
+				.andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
 	}
 
 	@Test
 	void wrongPathVariableTypeReturnsTypeMismatchError() throws Exception {
 		mockMvc.perform(get("/test/numbers/not-a-number"))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code").value("COMMON_003"))
+				.andExpect(jsonPath("$.code").value("TYPE_MISMATCH"))
 				.andExpect(jsonPath("$.errors[0].field").value("number"));
 	}
 
@@ -74,13 +90,20 @@ class GlobalExceptionHandlerTest {
 	void unexpectedExceptionDoesNotExposeInternalDetails() throws Exception {
 		mockMvc.perform(get("/test/unexpected-error"))
 				.andExpect(status().isInternalServerError())
-				.andExpect(jsonPath("$.code").value("COMMON_500"))
+				.andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"))
 				.andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."));
 	}
 
 	@RestController
 	@RequestMapping("/test")
 	static class TestController {
+
+		@GetMapping("/success")
+		ApiResponse<TestResponse> success(
+				@RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+		) {
+			return ApiResponse.success(new TestResponse("ok"), requestId);
+		}
 
 		@GetMapping("/business-error")
 		void businessError() {
@@ -104,5 +127,8 @@ class GlobalExceptionHandlerTest {
 	record TestRequest(
 			@NotBlank(message = "이름은 필수입니다.") String name
 	) {
+	}
+
+	record TestResponse(String result) {
 	}
 }

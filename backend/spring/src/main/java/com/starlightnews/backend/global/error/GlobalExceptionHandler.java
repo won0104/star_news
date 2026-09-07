@@ -2,11 +2,11 @@ package com.starlightnews.backend.global.error;
 
 import java.util.List;
 
+import com.starlightnews.backend.global.request.RequestIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -29,7 +29,12 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request
 	) {
 		ErrorCode errorCode = exception.getErrorCode();
-		log.debug("Business exception: code={}, path={}", errorCode.getCode(), request.getRequestURI());
+		log.debug(
+				"Business exception: requestId={}, code={}, path={}",
+				RequestIdFilter.getRequestId(request),
+				errorCode.getCode(),
+				request.getRequestURI()
+		);
 		return createResponse(errorCode, request);
 	}
 
@@ -137,7 +142,12 @@ public class GlobalExceptionHandler {
 			Exception exception,
 			HttpServletRequest request
 	) {
-		log.error("Unhandled exception: path={}", request.getRequestURI(), exception);
+		log.error(
+				"Unhandled exception: requestId={}, path={}",
+				RequestIdFilter.getRequestId(request),
+				request.getRequestURI(),
+				exception
+		);
 		return createResponse(CommonErrorCode.INTERNAL_SERVER_ERROR, request);
 	}
 
@@ -153,7 +163,12 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request,
 			List<FieldErrorResponse> errors
 	) {
-		ErrorResponse response = ErrorResponse.of(errorCode, request.getRequestURI(), errors);
+		ErrorResponse response = ErrorResponse.of(
+				errorCode,
+				request.getRequestURI(),
+				RequestIdFilter.getRequestId(request),
+				errors
+		);
 		return ResponseEntity.status(errorCode.getStatus()).body(response);
 	}
 

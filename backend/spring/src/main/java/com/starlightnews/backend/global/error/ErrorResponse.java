@@ -9,6 +9,7 @@ public record ErrorResponse(
 		String code,
 		String message,
 		String path,
+		String requestId,
 		List<FieldErrorResponse> errors
 ) {
 
@@ -16,13 +17,14 @@ public record ErrorResponse(
 		errors = errors == null ? List.of() : List.copyOf(errors);
 	}
 
-	public static ErrorResponse of(ErrorCode errorCode, String path) {
-		return of(errorCode, path, List.of());
+	public static ErrorResponse of(ErrorCode errorCode, String path, String requestId) {
+		return of(errorCode, path, requestId, List.of());
 	}
 
 	public static ErrorResponse of(
 			ErrorCode errorCode,
 			String path,
+			String requestId,
 			List<FieldErrorResponse> errors
 	) {
 		return new ErrorResponse(
@@ -31,6 +33,7 @@ public record ErrorResponse(
 				errorCode.getCode(),
 				errorCode.getMessage(),
 				path,
+				requestId,
 				errors
 		);
 	}
