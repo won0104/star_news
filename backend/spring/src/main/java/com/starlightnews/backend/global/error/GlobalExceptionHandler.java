@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
 				.map(error -> new FieldErrorResponse(error.getField(), error.getDefaultMessage()))
 				.toList();
 
-		return createResponse(ErrorCode.INVALID_INPUT_VALUE, request, errors);
+		return createResponse(CommonErrorCode.INVALID_INPUT_VALUE, request, errors);
 	}
 
 	@ExceptionHandler(HandlerMethodValidationException.class)
@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
 						)))
 				.toList();
 
-		return createResponse(ErrorCode.INVALID_INPUT_VALUE, request, errors);
+		return createResponse(CommonErrorCode.INVALID_INPUT_VALUE, request, errors);
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)
@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
 				))
 				.toList();
 
-		return createResponse(ErrorCode.INVALID_INPUT_VALUE, request, errors);
+		return createResponse(CommonErrorCode.INVALID_INPUT_VALUE, request, errors);
 	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -87,9 +87,9 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request
 	) {
 		List<FieldErrorResponse> errors = List.of(
-				new FieldErrorResponse(exception.getName(), ErrorCode.TYPE_MISMATCH.getMessage())
+				new FieldErrorResponse(exception.getName(), CommonErrorCode.TYPE_MISMATCH.getMessage())
 		);
-		return createResponse(ErrorCode.TYPE_MISMATCH, request, errors);
+		return createResponse(CommonErrorCode.TYPE_MISMATCH, request, errors);
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
 			HttpMessageNotReadableException exception,
 			HttpServletRequest request
 	) {
-		return createResponse(ErrorCode.MALFORMED_REQUEST, request);
+		return createResponse(CommonErrorCode.MALFORMED_REQUEST, request);
 	}
 
 	@ExceptionHandler(ServletRequestBindingException.class)
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
 			ServletRequestBindingException exception,
 			HttpServletRequest request
 	) {
-		return createResponse(ErrorCode.MISSING_REQUIRED_VALUE, request);
+		return createResponse(CommonErrorCode.MISSING_REQUIRED_VALUE, request);
 	}
 
 	@ExceptionHandler(NoResourceFoundException.class)
@@ -113,7 +113,7 @@ public class GlobalExceptionHandler {
 			NoResourceFoundException exception,
 			HttpServletRequest request
 	) {
-		return createResponse(ErrorCode.RESOURCE_NOT_FOUND, request);
+		return createResponse(CommonErrorCode.RESOURCE_NOT_FOUND, request);
 	}
 
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -121,7 +121,7 @@ public class GlobalExceptionHandler {
 			HttpRequestMethodNotSupportedException exception,
 			HttpServletRequest request
 	) {
-		return createResponse(ErrorCode.METHOD_NOT_ALLOWED, request);
+		return createResponse(CommonErrorCode.METHOD_NOT_ALLOWED, request);
 	}
 
 	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
@@ -129,7 +129,7 @@ public class GlobalExceptionHandler {
 			HttpMediaTypeNotSupportedException exception,
 			HttpServletRequest request
 	) {
-		return createResponse(ErrorCode.UNSUPPORTED_MEDIA_TYPE, request);
+		return createResponse(CommonErrorCode.UNSUPPORTED_MEDIA_TYPE, request);
 	}
 
 	@ExceptionHandler(Exception.class)
@@ -138,7 +138,7 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request
 	) {
 		log.error("Unhandled exception: path={}", request.getRequestURI(), exception);
-		return createResponse(ErrorCode.INTERNAL_SERVER_ERROR, request);
+		return createResponse(CommonErrorCode.INTERNAL_SERVER_ERROR, request);
 	}
 
 	private ResponseEntity<ErrorResponse> createResponse(

@@ -84,7 +84,7 @@ class GlobalExceptionHandlerTest {
 
 		@GetMapping("/business-error")
 		void businessError() {
-			throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+			throw new BusinessException(CommonErrorCode.INVALID_INPUT_VALUE);
 		}
 
 		@PostMapping("/validation")
