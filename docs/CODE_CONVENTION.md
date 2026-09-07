@@ -274,7 +274,7 @@ existsByEmail
 - 예외 처리는 `GlobalExceptionHandler`에서 공통 처리합니다.
 - 단순 `RuntimeException` 대신 의미 있는 Custom Exception을 사용합니다.
 
-```java
+```text
 throw new ArticleNotFoundException(articleId);
 ```
 
@@ -319,54 +319,60 @@ def get_article_embedding(article_text: str) -> list[float]:
 | 함수 | snake_case | `extract_keywords()` |
 | 클래스 | PascalCase | `RecommendationService` |
 | 상수 | UPPER_SNAKE_CASE | `MODEL_NAME` |
-| 파일 | snake_case | `recommendation_service.py` |
+| 파일 | snake_case | `router.py`, `service.py`, `schemas.py`, `repository.py` |
 
 ## 4.3 Directory Structure
 
-```text
-app/
-├── api/
-│   └── routes/
-├── core/
-├── models/
-├── schemas/
-├── services/
-├── repositories/
-├── utils/
-└── main.py
-```
-
-AI 모델 관련 코드가 많다면 다음과 같이 분리합니다.
+도메인(기능)별로 폴더를 나눕니다. 각 도메인 폴더는 `router.py`(요청/응답), `schemas.py`(Pydantic 모델), `service.py`(핵심 로직), `repository.py`(Neo4j 등 데이터 접근)로 구성합니다. `config.py`, `database.py`, `dependencies.py`, `exceptions.py`는 여러 도메인이 함께 쓰는 전역 코드로 `app/` 바로 아래에 둡니다.
 
 ```text
 app/
-├── ml/
+├── main.py
+├── config.py             # 전역 설정
+├── database.py           # Neo4j 드라이버/세션 등 공용 DB 연결
+├── dependencies.py       # 전역 의존성 (내부 서비스 인증 등)
+├── exceptions.py         # 전역 예외 처리
+├── articles/             # 기사 분석 도메인
+│   ├── router.py
+│   ├── schemas.py
+│   ├── service.py
+│   └── repository.py
+├── recommendations/      # 추천 도메인
+│   ├── router.py
+│   ├── schemas.py
+│   ├── service.py
+│   └── repository.py
+├── ml/                   # AI 모델 관련 코드 (임베딩, 추출, 클러스터링 등)
 │   ├── embedding/
 │   ├── clustering/
-│   ├── extraction/
-│   └── recommendation/
+│   └── extraction/
+└── utils/
 ```
+
+도메인이 늘어나면 위 패턴으로 새 도메인 폴더를 추가합니다. 모든 파일을 항상 다 채울 필요는 없고, 필요한 파일만 추가합니다.
 
 ## 4.4 Router
 
-Router에서는 요청과 응답 처리만 담당합니다.
+Router(`<domain>/router.py`)에서는 요청과 응답 처리만 담당합니다.
 
-```python
-@router.post("/recommendations")
-async def recommend_articles(
-    request: RecommendationRequest,
-) -> RecommendationResponse:
-    return recommendation_service.recommend(request)
+```text
+# recommendations/router.py
+@router.post("/recommendations/calculate")
+async def calculate_recommendations(
+    request: RecommendationCalculateRequest,
+) -> RecommendationCalculateResponse:
+    return service.calculate_recommendations(request)
 ```
 
-모델 실행, 전처리 등의 핵심 로직은 `service` 또는 `ml` 계층에 분리합니다.
+모델 실행, 전처리 등의 핵심 로직은 같은 도메인의 `service.py` 또는 `ml` 계층에 분리합니다. Neo4j 쿼리처럼 순수 데이터 접근 코드는 `repository.py`에 분리합니다.
 
 ## 4.5 Schema
 
-Pydantic Schema를 사용하여 요청/응답 타입을 명확히 정의합니다.
+Pydantic Schema를 사용하여 요청/응답 타입을 명확히 정의합니다. 각 도메인 폴더의 `schemas.py`에 둡니다.
 
-```python
-class RecommendationRequest(BaseModel):
+```text
+# recommendations/schemas.py
+class RecommendationCalculateRequest(BaseModel):
     user_id: int
     limit: int = 10
 ```
@@ -631,7 +637,7 @@ Health Check
 
 예시:
 
-```groovy
+```text
 stages {
     stage('Checkout') {
         steps {
