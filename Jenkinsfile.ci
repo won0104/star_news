@@ -1,7 +1,10 @@
 // GitLab Connection은 Jenkins Job 설정에서 지정합니다.
-// Manage Jenkins -> Configure System -> GitLab 또는
+// Manage Jenkins -> Configure System -> GitLab
+// 또는
 // Job -> Build Triggers -> Build when a change is pushed to GitLab
+
 pipeline {
+
     agent any
 
     options {
@@ -11,30 +14,49 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 script {
+
                     def sourceBranch = env.gitlabSourceBranch?.trim()
                     def targetBranch = env.gitlabTargetBranch?.trim()
+
                     def isMergeRequest = sourceBranch && targetBranch
-                    def checkoutBranch = isMergeRequest ? sourceBranch : (env.gitlabBranch?.trim() ?: 'dev')
+
+                    def checkoutBranch = isMergeRequest
+                        ? sourceBranch
+                        : (env.gitlabBranch?.trim() ?: 'dev')
 
                     def extensions = [
-                        [$class: 'CloneOption', noTags: false, shallow: false, depth: 0, honorRefspec: true]
+                        [
+                            $class: 'CloneOption',
+                            noTags: false,
+                            shallow: false,
+                            depth: 0,
+                            honorRefspec: true
+                        ]
                     ]
 
                     if (isMergeRequest) {
-                        extensions.add(0, [
-                            $class: 'PreBuildMerge',
-                            options: [
-                                mergeRemote: 'origin',
-                                mergeTarget: targetBranch,
-                                mergeStrategy: 'DEFAULT',
-                                fastForwardMode: 'FF'
+
+                        extensions.add(
+                            0,
+                            [
+                                $class: 'PreBuildMerge',
+                                options: [
+                                    mergeRemote: 'origin',
+                                    mergeTarget: targetBranch,
+                                    mergeStrategy: 'DEFAULT',
+                                    fastForwardMode: 'FF'
+                                ]
                             ]
-                        ])
+                        )
+
                         echo "MR CI: checkout origin/${checkoutBranch}, merge origin/${targetBranch} in workspace"
+
                     } else {
+
                         echo "Fallback CI: checkout origin/${checkoutBranch}"
                     }
 
@@ -45,14 +67,24 @@ pipeline {
 
                     checkout([
                         $class: 'GitSCM',
-                        branches: [[name: "origin/${checkoutBranch}"]],
+
+                        branches: [
+                            [
+                                name: "origin/${checkoutBranch}"
+                            ]
+                        ],
+
                         doGenerateSubmoduleConfigurations: false,
+
                         extensions: extensions,
-                        userRemoteConfigs: [[
-                            credentialsId: 'gitlab-deploy-token',
-                            url: 'https://lab.ssafy.com/s15-bigdata-recom-sub1/S15P21E206.git',
-                            refspec: '+refs/heads/*:refs/remotes/origin/*'
-                        ]]
+
+                        userRemoteConfigs: [
+                            [
+                                credentialsId: 'gitlab-deploy-token',
+                                url: 'https://lab.ssafy.com/s15-bigdata-recom-sub1/S15P21E206.git',
+                                refspec: '+refs/heads/*:refs/remotes/origin/*'
+                            ]
+                        ]
                     ])
                 }
 
@@ -60,21 +92,28 @@ pipeline {
             }
         }
 
+
         stage('CI') {
             steps {
                 script {
+
                     def isGitLabTriggered = [
                         env.gitlabActionType,
                         env.gitlabSourceBranch,
                         env.gitlabTargetBranch,
                         env.gitlabBranch
-                    ].any { it?.trim() }
+                    ].any {
+                        it?.trim()
+                    }
 
                     if (isGitLabTriggered) {
+
                         gitlabCommitStatus(name: 'ci') {
                             sh 'sudo /usr/local/sbin/ci-s15p21e206'
                         }
+
                     } else {
+
                         echo 'Manual build: skipping gitlabCommitStatus'
                         sh 'sudo /usr/local/sbin/ci-s15p21e206'
                     }
@@ -83,13 +122,68 @@ pipeline {
         }
     }
 
+
     post {
+
         success {
+
             echo 'CI success'
+
+            withCredentials([
+                string(
+                    credentialsId: 'mattermost-webhook',
+                    variable: 'MATTERMOST_URL'
+                )
+            ]) {
+
+                sh '''
+                    SOURCE_BRANCH="${gitlabSourceBranch:-N/A}"
+                    TARGET_BRANCH="${gitlabTargetBranch:-N/A}"
+                    BUILD_LINK="${BUILD_URL:-N/A}"
+
+                    payload=$(printf '{"text":"✅ **CI 성공**\\n- Source: %s\\n- Target: %s\\n- Build: %s"}' \
+                        "$SOURCE_BRANCH" \
+                        "$TARGET_BRANCH" \
+                        "$BUILD_LINK")
+
+                    curl --fail --silent --show-error \
+                        -X POST \
+                        -H 'Content-Type: application/json' \
+                        --data "$payload" \
+                        "$MATTERMOST_URL"
+                '''
+            }
         }
 
+
         failure {
+
             echo 'CI failed'
+
+            withCredentials([
+                string(
+                    credentialsId: 'mattermost-webhook',
+                    variable: 'MATTERMOST_URL'
+                )
+            ]) {
+
+                sh '''
+                    SOURCE_BRANCH="${gitlabSourceBranch:-N/A}"
+                    TARGET_BRANCH="${gitlabTargetBranch:-N/A}"
+                    BUILD_LINK="${BUILD_URL:-N/A}"
+
+                    payload=$(printf '{"text":"❌ **CI 실패**\\n- Source: %s\\n- Target: %s\\n- Build: %s"}' \
+                        "$SOURCE_BRANCH" \
+                        "$TARGET_BRANCH" \
+                        "$BUILD_LINK")
+
+                    curl --fail --silent --show-error \
+                        -X POST \
+                        -H 'Content-Type: application/json' \
+                        --data "$payload" \
+                        "$MATTERMOST_URL"
+                '''
+            }
         }
     }
 }
