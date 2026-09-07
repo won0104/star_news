@@ -273,6 +273,7 @@ existsByEmail
 
 - 예외 처리는 `GlobalExceptionHandler`에서 공통 처리합니다.
 - 단순 `RuntimeException` 대신 의미 있는 Custom Exception을 사용합니다.
+- Spring Security 도입 시 인증·권한 예외은 `AuthenticationEntryPoint`와 `AccessDeniedHandler`에서 공통 응답 형식으로 변환합니다.
 
 ```java
 throw new ArticleNotFoundException(articleId);
@@ -280,14 +281,15 @@ throw new ArticleNotFoundException(articleId);
 
 ## 3.7 API URL
 
-URL에는 명사와 복수형을 사용합니다.
+Frontend가 호출하는 Spring Boot API는 `/api/v1`을 기본 경로로 사용합니다.
+Controller에서는 `ApiPaths.API_V1`을 사용하고 URL에는 명사와 복수형을 사용합니다.
 
 ```text
-GET    /api/articles
-GET    /api/articles/{articleId}
-POST   /api/articles
-PATCH  /api/articles/{articleId}
-DELETE /api/articles/{articleId}
+GET    /api/v1/articles
+GET    /api/v1/articles/{articleId}
+POST   /api/v1/articles
+PATCH  /api/v1/articles/{articleId}
+DELETE /api/v1/articles/{articleId}
 ```
 
 ---

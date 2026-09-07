@@ -1,5 +1,6 @@
 package com.starlightnews.backend.global.error;
 
+import com.jayway.jsonpath.JsonPath;
 import com.starlightnews.backend.global.request.RequestIdFilter;
 import com.starlightnews.backend.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -22,6 +23,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GlobalExceptionHandlerTest {
 
@@ -42,7 +45,11 @@ class GlobalExceptionHandlerTest {
 				.andExpect(status().isOk())
 				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
 				.andExpect(jsonPath("$.data.result").value("ok"))
-				.andExpect(jsonPath("$.meta.requestId").isString());
+				.andExpect(jsonPath("$.meta.requestId").isString())
+				.andExpect(result -> assertEquals(
+						result.getResponse().getHeader(RequestIdFilter.HEADER_NAME),
+						JsonPath.read(result.getResponse().getContentAsString(), "$.meta.requestId")
+				));
 	}
 
 	@Test
@@ -55,7 +62,23 @@ class GlobalExceptionHandlerTest {
 				.andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
 				.andExpect(jsonPath("$.path").value("/test/business-error"))
 				.andExpect(jsonPath("$.requestId").isString())
-				.andExpect(jsonPath("$.errors").isArray());
+				.andExpect(jsonPath("$.errors").isArray())
+				.andExpect(result -> assertEquals(
+						result.getResponse().getHeader(RequestIdFilter.HEADER_NAME),
+						JsonPath.read(result.getResponse().getContentAsString(), "$.requestId")
+				));
+	}
+
+	@Test
+	void errorTimestampIsTruncatedToMilliseconds() {
+		ErrorResponse response = ErrorResponse.of(
+				CommonErrorCode.INTERNAL_SERVER_ERROR,
+				"/test",
+				"request-id"
+		);
+
+		assertEquals(0, response.timestamp().getNano() % 1_000_000);
+		assertTrue(response.timestamp().toString().endsWith("Z"));
 	}
 
 	@Test

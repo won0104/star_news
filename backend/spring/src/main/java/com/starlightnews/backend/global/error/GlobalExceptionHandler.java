@@ -29,12 +29,7 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request
 	) {
 		ErrorCode errorCode = exception.getErrorCode();
-		log.debug(
-				"Business exception: requestId={}, code={}, path={}",
-				RequestIdFilter.getRequestId(request),
-				errorCode.getCode(),
-				request.getRequestURI()
-		);
+		logBusinessException(errorCode, request, exception);
 		return createResponse(errorCode, request);
 	}
 
@@ -176,5 +171,30 @@ public class GlobalExceptionHandler {
 		return parameter.getParameterName() != null
 				? parameter.getParameterName()
 				: "argument" + parameter.getParameterIndex();
+	}
+
+	private void logBusinessException(
+			ErrorCode errorCode,
+			HttpServletRequest request,
+			BusinessException exception
+	) {
+		String requestId = RequestIdFilter.getRequestId(request);
+		if (errorCode.getStatus().is5xxServerError()) {
+			log.error(
+					"Business exception: requestId={}, code={}, path={}",
+					requestId,
+					errorCode.getCode(),
+					request.getRequestURI(),
+					exception
+			);
+			return;
+		}
+
+		log.debug(
+				"Business exception: requestId={}, code={}, path={}",
+				requestId,
+				errorCode.getCode(),
+				request.getRequestURI()
+		);
 	}
 }

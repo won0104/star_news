@@ -1,6 +1,7 @@
 package com.starlightnews.backend.global.error;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public record ErrorResponse(
@@ -28,7 +29,7 @@ public record ErrorResponse(
 			List<FieldErrorResponse> errors
 	) {
 		return new ErrorResponse(
-				Instant.now(),
+				Instant.now().truncatedTo(ChronoUnit.MILLIS),
 				errorCode.getStatus().value(),
 				errorCode.getCode(),
 				errorCode.getMessage(),
