@@ -5,6 +5,13 @@
 const base = '/assets';
 export const photo = {
   backdrop: `${base}/photo/backdrop-attic.png`,
+  /**
+   * The furnished study behind 오늘의 트렌드 only. The bare `backdrop` above is a wall
+   * with nothing in it, which is what the graph view still wants; this one has a desk,
+   * a shelf and a pinboard, so the clippings read as strung across a real room.
+   * webp because it is a photograph — 113KB against 1.8MB for the same pixels as png.
+   */
+  backdropTrend: `${base}/photo/backdrop-trend.webp`,
   eventThumb: `${base}/photo/event-thumb.png`
 };
 export const yarn = {

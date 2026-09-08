@@ -22,9 +22,45 @@ export const authActions = {
   signUp: '회원가입'
 };
 
+/**
+ * The account menu behind the avatar, once someone is signed in. Each `id` is a pane in
+ * the settings overlay (data/settings.js `settingsPanes`), so an entry here opens that
+ * overlay on that pane — 뉴스 관리 opens 관심 관리. `signOut` is kept out of the list
+ * because it is not a place to go: it ends the session.
+ */
+export const accountMenu = {
+  label: '계정 메뉴',
+  items: [{
+    id: 'account',
+    label: '계정설정'
+  }, {
+    id: 'interest',
+    label: '뉴스 관리'
+  }, {
+    id: 'display',
+    label: '화면설정'
+  }],
+  signOut: '로그아웃'
+};
+
 /** The photograph behind every screen. Replace the file at this path to swap it. */
 export const backdrop = {
-  src: '/assets/home/backdrop.png'
+  src: '/assets/home/backdrop.png',
+  /**
+   * The same room in motion — 10 silent seconds the home screen fades in over the still
+   * above, plays once, and fades back off. The clip's own last frame matches that still
+   * closely (34.8dB measured, once the exposure correction in PhotoBackdrop.module.css
+   * is applied), so the hand-back does not read as a cut; the still is also the sharper
+   * picture, at 1672x941 against the clip's 1280x720.
+   *
+   * webm first, mp4 for Safari; re-encode with scripts/encode-backdrop-loop.ps1. Files
+   * in public/ carry no content hash, so a replacement needs a new name
+   * (backdrop-loop-v2) or a CDN will keep handing out the old bytes.
+   */
+  loop: {
+    webm: '/assets/home/backdrop-loop.webm',
+    mp4: '/assets/home/backdrop-loop.mp4'
+  }
 };
 
 /**

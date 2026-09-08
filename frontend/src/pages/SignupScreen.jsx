@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checkIdAvailability, signUp } from '../api/auth';
 import { authMessages, signupCopy } from '../data/auth';
+import { startSession } from '../store/session';
 import { validateConfirm, validateEmail, validateId, validateName, validatePassword } from '../utils/validation';
 import { AuthField } from '../components/auth/AuthField';
 import { AuthForm, AuthFormError, AuthPrompt, AuthShell, AuthSubmit } from '../components/auth/AuthShell';
@@ -92,6 +93,10 @@ export function SignupScreen() {
         name: name.trim(),
         email: email.trim(),
         password
+      });
+      // Signing up drops you straight into a session, same as signing in.
+      startSession({
+        id: trimmedId
       });
       navigate('/');
     } catch {

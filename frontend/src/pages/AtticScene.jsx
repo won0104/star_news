@@ -1,47 +1,52 @@
 import { useNavigate } from 'react-router-dom';
-import { atticMiniContent, miniShells } from '../data/cards';
-import { hints, tagline } from '../data/scene';
-import { AtmospherePapers } from '../components/common/AtmospherePapers';
-import { Backdrop } from '../components/common/Backdrop';
-import { DepthPapers } from '../components/common/DepthPapers';
-import { EventCard } from '../components/attic/EventCard';
-import { Hints } from '../components/common/Hints';
-import { MiniCard } from '../components/attic/MiniCard';
+import { photo } from '../data/assets';
+import { RAIL_LEFT_VEIL, RAIL_WIDTH, TOP_BAR_HEIGHT } from '../data/scene';
+import { useIsCompact } from '../hooks/useIsCompact';
 import { SceneCanvas } from '../components/common/SceneCanvas';
-import { SearchPill } from '../components/attic/SearchPill';
 import { Sidebar } from '../components/attic/Sidebar';
-import { StatementCard } from '../components/attic/StatementCard';
-import { YarnFibers, YarnStrands } from '../components/common/YarnLayer';
+import { TopBar } from '../components/common/TopBar';
+import { AtticCompact } from './AtticCompact';
 
 /**
- * "나의 뉴스 다락방" main view. Layer order follows the Figma stack exactly:
- * room -> yarn -> depth papers -> fibre highlights -> cards -> chrome -> atmosphere -> hints.
+ * "오늘의 트렌드" — the furnished study, the site's top bar, and the left rail. Nothing
+ * else.
+ *
+ * The pinned composition that used to fill this canvas (yarn strands, depth papers,
+ * fibre highlights, the event and statement cards, the seven mini cards, the search
+ * pill, the atmosphere papers and the hint captions) is stripped back to the rail on
+ * purpose, so the room reads on its own while the trend content is redesigned. Every
+ * one of those components is still in the tree untouched — putting a layer back is one
+ * line, in the Figma stacking order: yarn -> depth papers -> fibres -> cards -> chrome
+ * -> atmosphere -> hints.
+ *
+ * The top bar sits outside <SceneCanvas>: it is position:fixed, and the canvas applies
+ * a transform, which would trap it in that transformed box and scale it with the room.
+ *
+ * Below <AtticCompact>'s breakpoint the reflowed column takes over, and that layout is
+ * unchanged — it carries its own header and has no left rail to keep.
  */
 export function AtticScene() {
   const navigate = useNavigate();
+  const compact = useIsCompact();
+
+  if (compact) return <AtticCompact />;
 
   return (
-    <SceneCanvas>
-      <Backdrop />
-      <YarnStrands />
-      <DepthPapers />
-      <YarnFibers />
+    <>
+      <TopBar
+        activeId="trend"
+        onSelect={(id) => navigate(id === 'trend' ? '/trend' : '/')}
+        onAuth={(kind) => navigate(`/${kind}`)}
+      />
 
-      <EventCard />
-      <StatementCard />
-      {miniShells.map((shell) => (
-        <MiniCard
-          key={shell.id}
-          shell={shell}
-          content={atticMiniContent[shell.id]}
-          onSelect={shell.id === 'policy' ? () => navigate('/explore') : undefined}
-        />
-      ))}
-
-      <SearchPill />
-      <Sidebar />
-      <AtmospherePapers />
-      <Hints hints={hints} tagline={tagline} variant="attic" />
-    </SceneCanvas>
+      <SceneCanvas
+        backdrop={photo.backdropTrend}
+        topChrome={TOP_BAR_HEIGHT}
+        railWidth={RAIL_WIDTH}
+        leftVeil={RAIL_LEFT_VEIL}
+      >
+        <Sidebar />
+      </SceneCanvas>
+    </>
   );
 }

@@ -38,3 +38,20 @@
   background: radial-gradient(120% 90% at 50% 38%, rgba(43, 33, 22, 0) 40%, rgba(43, 33, 22, 0.16) 100%);
   pointer-events: none;
 }
+
+/*
+ * The loop was rendered from backdrop.png but came back about a stop under it and a
+ * little flatter — measured against the still at matching size, the clip needs a
+ * per-channel gain of ~1.22 (R 1.241 / G 1.224 / B 1.217, i.e. exposure, not white
+ * balance). Uncorrected the page cools off to grey the moment the video takes over;
+ * these two values put it back on the photo (17.1 dB → 36.1 dB, 0.8% of pixels
+ * clipping, and those are the already-blown window panes). Re-measure if the clip is
+ * ever re-encoded.
+ *
+ * object-position has to match .photo above or the two crop differently on any
+ * viewport that is not 16:9, and the cross-fade slides.
+ */
+.loop {
+  object-position: center bottom;
+  filter: brightness(1.22) saturate(1.12);
+}

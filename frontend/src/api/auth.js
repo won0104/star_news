@@ -20,3 +20,13 @@ export async function signIn(credentials) {
 export async function signUp(account) {
   await wait(600);
 }
+// eslint-disable-next-line no-unused-vars -- signature kept for the real request that replaces this stub
+export async function changeEmail(next) {
+  await wait(500);
+}
+
+/** `change` is `{ current, next }`. A real endpoint rejects a wrong `current`. */
+// eslint-disable-next-line no-unused-vars -- signature kept for the real request that replaces this stub
+export async function changePassword(change) {
+  await wait(500);
+}

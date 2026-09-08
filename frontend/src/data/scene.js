@@ -2,6 +2,41 @@ import { atmosphere, yarn } from './assets';
 export const SCENE_WIDTH = 1672;
 export const SCENE_HEIGHT = 941;
 
+/**
+ * Empty margin around the composition, in design px, that may be cropped when the
+ * viewport's aspect ratio does not match the canvas'. Nothing that has to stay legible
+ * sits inside these bands — the tightest neighbours are the exploration controls (24px
+ * from the top), the right-hand hint (29px from the right), the Explore pill (28px from
+ * the left) and the footer motto (~90px clear of the bottom) — so scaling until only
+ * they are lost closes most of the gap that used to show as dark bars. The edges differ,
+ * so the crop is shared out in proportion rather than split evenly (see useSceneScale).
+ */
+export const SCENE_SAFE_INSET = { top: 24, right: 29, bottom: 90, left: 28 };
+
+/**
+ * Height of <TopBar> (.bar in TopBar.module.css), for scenes that put it above the
+ * canvas: the stage has to be told to keep out from under it or the bar clips the top
+ * of the left rail — measured at 1440x570 it ate 11px of the headline. That bar drops
+ * to 60px at <=1023px while this stays 72, which only ever over-reserves by 12px in
+ * the 901-1023px band, and 12px of extra room is invisible. Keep the two in step.
+ */
+export const TOP_BAR_HEIGHT = 72;
+
+/**
+ * Width of the frosted rail behind the left sidebar, in design px. 390 is where the
+ * backdrop's left veil fades out (23.33% of 1672), and it clears the widest thing in
+ * the rail - the hero title's box ends at 355 - by 35px.
+ */
+export const RAIL_WIDTH = 390;
+
+/**
+ * How much of the backdrop's left wash the trend view keeps. The rail carries the
+ * copy's contrast there, so most of the veil is redundant and only hides the room the
+ * frosted panel exists to show. Lowering this trades legibility for transparency -
+ * re-measure the rail copy against the room before moving it.
+ */
+export const RAIL_LEFT_VEIL = 0.35;
+
 /** Yarn strands, back-to-front: each colour is a shadow pass followed by the strand itself. */
 export const yarnStrands = [{
   src: yarn.redShadow,

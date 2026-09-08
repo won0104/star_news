@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn } from '../api/auth';
 import { authMessages, loginCopy } from '../data/auth';
+import { startSession } from '../store/session';
 import { validateId, validatePassword } from '../utils/validation';
 import { AuthField } from '../components/auth/AuthField';
 import { AuthForm, AuthFormError, AuthPrompt, AuthShell, AuthSubmit } from '../components/auth/AuthShell';
@@ -27,6 +28,11 @@ export function LoginScreen() {
       await signIn({
         id: id.trim(),
         password
+      });
+      // The id is all the stub tells us about the account; the top bar needs only that
+      // much to show the mark. Widen this when signIn starts returning a real user.
+      startSession({
+        id: id.trim()
       });
       navigate('/');
     } catch {

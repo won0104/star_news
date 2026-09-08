@@ -1,0 +1,20 @@
+/*
+ * Each change is its own form on its own card, so it reads as one thing you can do
+ * rather than a wall of inputs with a single button at the end.
+ */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px 20px 18px;
+  border: 1px solid var(--paper-edge);
+  border-radius: 10px;
+  background: var(--auth-input-bg);
+}
+
+/* The button sits with its own form, not in the pane footer: there are two of them and
+   a shared footer could not say which change it would apply. */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}

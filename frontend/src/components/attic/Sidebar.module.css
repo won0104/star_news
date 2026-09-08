@@ -7,13 +7,23 @@
   color: var(--ink-strong);
 }
 
+/*
+ * Everything below the title is --ink-strong, not the --ink-muted it used to be. The
+ * rail is transparent enough now (RAIL_LEFT_VEIL) that the room reads through it, and
+ * measured against the blurred room under the panel --ink-muted came out at 2.6 on the
+ * subtitle, 3.5 on the nav and 3.2 on the motto - all under AA. There is no middle
+ * shade that works: --ink-muted needs a background luminance of about .80 behind it,
+ * which is the old full veil, so transparency and that colour are exclusive. At
+ * --ink-strong the same spots measure 5.3 - 5.8. Size and weight carry the hierarchy
+ * instead of tone. Raise the veil back up and this can go back to --ink-muted.
+ */
 .subtitle {
   position: absolute;
   left: 47px;
   top: 215px;
   width: 285px;
   font-size: 18px;
-  color: var(--ink-muted);
+  color: var(--ink-strong);
 }
 
 .activePill {
@@ -49,7 +59,7 @@
   background: none;
   font: inherit;
   font-size: 17px;
-  color: var(--ink-muted);
+  color: var(--ink-strong);
   white-space: pre;
   cursor: pointer;
 }
@@ -76,6 +86,6 @@
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 10px;
-  color: var(--ink-muted);
+  color: var(--ink-strong);
   opacity: 0.85;
 }

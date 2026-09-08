@@ -6,15 +6,19 @@ import styles from './Auth.module.css';
 /**
  * Same sunlit-room photo as the home page, brand centred above a warm paper card.
  * Shared by login and signup.
+ *
+ * The wordmark in the top-left corner is the way back out — these two screens carry no
+ * top bar, so without it the only exits are a successful submit and the browser's back
+ * button. It reuses `onBrand`, which both screens already point at home.
  */
-export function AuthShell({
-  title,
-  subtitle,
-  onBrand,
-  children
-}) {
-  return <PhotoBackdrop veil>
+export function AuthShell({ title, subtitle, onBrand, children }) {
+  return (
+    <PhotoBackdrop veil>
       <div className={styles.page}>
+        <button type="button" className={styles.homeLink} onClick={onBrand} aria-label="홈으로">
+          {authBrand.name}
+        </button>
+
         <div className={styles.inner}>
           <button type="button" className={styles.brand} onClick={onBrand}>
             {authBrand.name}
@@ -35,7 +39,8 @@ export function AuthShell({
           </div>
         </div>
       </div>
-    </PhotoBackdrop>;
+    </PhotoBackdrop>
+  );
 }
 export function AuthForm({
   onSubmit,
