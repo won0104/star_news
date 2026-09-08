@@ -1,6 +1,6 @@
 package com.starlightnews.backend.domain.user.domain;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class User extends BaseTimeEntity {
 	private String nickname;
 
 	@Column(name = "deleted_at")
-	private Instant deletedAt;
+	private LocalDateTime deletedAt;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserInterest> interests = new ArrayList<>();

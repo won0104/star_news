@@ -1,6 +1,6 @@
 package com.starlightnews.backend.global.entity;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -17,9 +17,9 @@ public abstract class BaseTimeEntity {
 
 	@CreatedDate
 	@Column(updatable = false, nullable = false)
-	private Instant createdAt;
+	private LocalDateTime createdAt;
 
 	@LastModifiedDate
 	@Column(nullable = false)
-	private Instant updatedAt;
+	private LocalDateTime updatedAt;
 }
