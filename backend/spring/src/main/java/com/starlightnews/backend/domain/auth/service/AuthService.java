@@ -3,6 +3,7 @@ package com.starlightnews.backend.domain.auth.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.SignupRequest;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
@@ -22,6 +23,12 @@ public class AuthService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+
+	@Transactional(readOnly = true)
+	public LoginIdAvailabilityResponse checkLoginIdAvailability(String loginId) {
+		boolean available = !userRepository.existsByLoginId(loginId);
+		return new LoginIdAvailabilityResponse(loginId, available);
+	}
 
 	@Transactional
 	public SignupResponse signup(SignupRequest request) {

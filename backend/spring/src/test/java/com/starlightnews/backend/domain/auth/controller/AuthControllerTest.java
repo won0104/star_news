@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
 import com.starlightnews.backend.domain.auth.service.AuthService;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthControllerTest {
 
 	private static final String SIGNUP_PATH = ApiPaths.API_V1 + "/auth/signup";
+	private static final String AVAILABILITY_PATH = ApiPaths.API_V1 + "/auth/login-id/availability";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -115,5 +118,36 @@ class AuthControllerTest {
 						.content(body("starlight01", "password1234", "별빛", List.of("MOVIE"), List.of())))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("INVALID_TOPIC"));
+	}
+
+	@Test
+	void 아이디_사용_가능하면_200과_available_true를_응답한다() throws Exception {
+		given(authService.checkLoginIdAvailability("newbie123"))
+				.willReturn(new LoginIdAvailabilityResponse("newbie123", true));
+
+		mockMvc.perform(get(AVAILABILITY_PATH).param("loginId", "newbie123"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.loginId").value("newbie123"))
+				.andExpect(jsonPath("$.data.available").value(true))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+	}
+
+	@Test
+	void 아이디가_이미_사용중이면_200과_available_false를_응답한다() throws Exception {
+		given(authService.checkLoginIdAvailability("starlight01"))
+				.willReturn(new LoginIdAvailabilityResponse("starlight01", false));
+
+		mockMvc.perform(get(AVAILABILITY_PATH).param("loginId", "starlight01"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.available").value(false));
+	}
+
+	@Test
+	void 형식이_틀린_아이디로_조회하면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(get(AVAILABILITY_PATH).param("loginId", "ab"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+
+		verify(authService, never()).checkLoginIdAvailability(any());
 	}
 }

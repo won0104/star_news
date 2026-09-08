@@ -2,6 +2,7 @@ package com.starlightnews.backend.domain.auth.service;
 
 import java.util.List;
 
+import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.SignupRequest;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
@@ -133,5 +134,25 @@ class AuthServiceTest {
 		catchThrowable(() -> authService.signup(request(List.of("MOVIE"), null)));
 
 		verify(userRepository, never()).existsByLoginId(any());
+	}
+
+	@Test
+	void 사용_중이_아닌_로그인_아이디는_available_true를_반환한다() {
+		given(userRepository.existsByLoginId("newbie123")).willReturn(false);
+
+		LoginIdAvailabilityResponse response = authService.checkLoginIdAvailability("newbie123");
+
+		assertThat(response.loginId()).isEqualTo("newbie123");
+		assertThat(response.available()).isTrue();
+	}
+
+	@Test
+	void 이미_사용_중인_로그인_아이디는_available_false를_반환한다() {
+		given(userRepository.existsByLoginId("starlight01")).willReturn(true);
+
+		LoginIdAvailabilityResponse response = authService.checkLoginIdAvailability("starlight01");
+
+		assertThat(response.loginId()).isEqualTo("starlight01");
+		assertThat(response.available()).isFalse();
 	}
 }
