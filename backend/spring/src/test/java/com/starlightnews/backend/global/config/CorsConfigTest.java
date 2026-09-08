@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
+@WebMvcTest(controllers = CorsConfigTest.TestController.class)
 @Import({CorsConfig.class, CorsConfigTest.TestController.class})
 @ActiveProfiles("test")
 class CorsConfigTest {
