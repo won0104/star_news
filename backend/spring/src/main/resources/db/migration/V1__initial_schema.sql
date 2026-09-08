@@ -25,7 +25,7 @@ CREATE TABLE `users` (
 CREATE TABLE `user_interest` (
     `user_id` BIGINT NOT NULL,
     `topic_code` VARCHAR(32) NOT NULL,
-    `interest_type` ENUM('INTEREST', 'DISLIKE') NOT NULL,
+    `interest_type` VARCHAR(20) NOT NULL,
     `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
         ON UPDATE CURRENT_TIMESTAMP(6),
@@ -66,24 +66,10 @@ CREATE TABLE `articles` (
     `subtopic_code` VARCHAR(64) NULL,
     `reporter` VARCHAR(100) NULL,
     `content` MEDIUMTEXT NOT NULL,
-    `content_type` ENUM(
-        'FULL_TEXT',
-        'TRUNCATED_TEXT',
-        'SOURCE_SUMMARY'
-    ) NOT NULL,
+    `content_type` VARCHAR(32) NOT NULL,
     `summary` TEXT NULL,
-    `summary_status` ENUM(
-        'NOT_REQUESTED',
-        'PROCESSING',
-        'COMPLETED',
-        'FAILED'
-    ) NOT NULL DEFAULT 'NOT_REQUESTED',
-    `analysis_status` ENUM(
-        'PROCESSING',
-        'COMPLETED',
-        'FAILED',
-        'DROPPED'
-    ) NOT NULL DEFAULT 'PROCESSING',
+    `summary_status` VARCHAR(32) NOT NULL DEFAULT 'NOT_REQUESTED',
+    `analysis_status` VARCHAR(32) NOT NULL DEFAULT 'PROCESSING',
     `node_id` CHAR(36) NULL,
     `content_updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     `summary_generated_at` DATETIME(6) NULL,
@@ -145,15 +131,7 @@ CREATE INDEX `idx_article_reads_user_recent`
 CREATE TABLE `user_knowledge_nodes` (
     `user_id` BIGINT NOT NULL,
     `node_label` VARCHAR(255) NOT NULL,
-    `node_type` ENUM(
-        'ARTICLE',
-        'EVENT',
-        'STORY',
-        'TOPIC',
-        'ENTITY',
-        'TIME',
-        'STATEMENT'
-    ) NOT NULL,
+    `node_type` VARCHAR(32) NOT NULL,
     `node_id` CHAR(36) NOT NULL,
     `topic_code` VARCHAR(32) NULL,
     `read_article_count` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -182,7 +160,7 @@ CREATE INDEX `idx_user_knowledge_nodes_node_user`
 CREATE TABLE `trends` (
     `trend_item_id` BIGINT NOT NULL AUTO_INCREMENT,
     `snapshot_at` DATETIME(6) NOT NULL,
-    `node_type` ENUM('EVENT', 'STORY', 'TOPIC', 'ENTITY') NOT NULL,
+    `node_type` VARCHAR(32) NOT NULL,
     `node_id` CHAR(36) NOT NULL,
     `rank` INT UNSIGNED NOT NULL,
     `article_count` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -224,15 +202,7 @@ CREATE TABLE `user_article_favorites` (
 
 CREATE TABLE `user_node_favorites` (
     `user_id` BIGINT NOT NULL,
-    `node_type` ENUM(
-        'ARTICLE',
-        'EVENT',
-        'STORY',
-        'TOPIC',
-        'ENTITY',
-        'TIME',
-        'STATEMENT'
-    ) NOT NULL,
+    `node_type` VARCHAR(32) NOT NULL,
     `node_id` CHAR(36) NOT NULL,
     `favorited_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     CONSTRAINT `pk_user_node_favorites`
@@ -250,12 +220,7 @@ CREATE TABLE `recommendation_events` (
     `event_id` CHAR(36) NOT NULL,
     `title` VARCHAR(500) NOT NULL,
     `summary` TEXT NULL,
-    `summary_status` ENUM(
-        'NOT_REQUESTED',
-        'PROCESSING',
-        'COMPLETED',
-        'FAILED'
-    ) NOT NULL DEFAULT 'NOT_REQUESTED',
+    `summary_status` VARCHAR(32) NOT NULL DEFAULT 'NOT_REQUESTED',
     `topic_code` VARCHAR(32) NOT NULL,
     `event_updated_at` DATETIME(6) NULL,
     `summary_generated_at` DATETIME(6) NULL,
@@ -278,15 +243,12 @@ CREATE TABLE `user_recommendations` (
     `user_recommendation_id` BIGINT NOT NULL AUTO_INCREMENT,
     `user_id` BIGINT NOT NULL,
     `event_id` CHAR(36) NOT NULL,
-    `recommendation_type` ENUM(
-        'INTEREST_BASED',
-        'KNOWLEDGE_GAP'
-    ) NOT NULL,
+    `recommendation_type` VARCHAR(32) NOT NULL,
     `recommendation_score` DECIMAL(10,6) NOT NULL,
     `rank` TINYINT UNSIGNED NOT NULL,
     `reason` VARCHAR(100) NULL,
     `recommended_at` DATETIME(6) NOT NULL,
-    `cycle` ENUM('AM', 'PM') NOT NULL,
+    `cycle` VARCHAR(8) NOT NULL,
     `available_at` DATETIME(6) NOT NULL,
     INDEX `idx_user_recommendations_event` (`event_id`),
     CONSTRAINT `pk_user_recommendations`
@@ -312,7 +274,7 @@ CREATE TABLE `user_recommendations` (
 
 -- TopicCode 허용값:
 -- POLITICS, ECONOMY, SOCIETY, CULTURE, INTERNATIONAL, SPORTS, IT_SCIENCE
--- TopicCode와 SubtopicCode는 DB ENUM이 아닌 문자열 코드로 저장한다.
+-- TopicCode, SubtopicCode 및 상태·유형 코드는 DB ENUM이 아닌 문자열로 저장한다.
 -- 허용값과 한글→영문 매핑은 Spring Boot와 FastAPI의 공통 계약으로 검증한다.
 
 -- Neo4j 논리 참조(FK 생성 안 함):
