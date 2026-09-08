@@ -1,0 +1,157 @@
+package com.starlightnews.backend.global.error;
+
+import com.jayway.jsonpath.JsonPath;
+import com.starlightnews.backend.global.request.RequestIdFilter;
+import com.starlightnews.backend.global.response.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class GlobalExceptionHandlerTest {
+
+	private MockMvc mockMvc;
+
+	@BeforeEach
+	void setUp() {
+		mockMvc = MockMvcBuilders
+				.standaloneSetup(new TestController())
+				.setControllerAdvice(new GlobalExceptionHandler())
+				.addFilters(new RequestIdFilter())
+				.build();
+	}
+
+	@Test
+	void successResponseContainsDataAndRequestId() throws Exception {
+		mockMvc.perform(get("/test/success"))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.result").value("ok"))
+				.andExpect(jsonPath("$.meta.requestId").isString())
+				.andExpect(result -> assertEquals(
+						result.getResponse().getHeader(RequestIdFilter.HEADER_NAME),
+						JsonPath.read(result.getResponse().getContentAsString(), "$.meta.requestId")
+				));
+	}
+
+	@Test
+	void businessExceptionReturnsDefinedErrorResponse() throws Exception {
+		mockMvc.perform(get("/test/business-error"))
+				.andExpect(status().isBadRequest())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.status").value(400))
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
+				.andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
+				.andExpect(jsonPath("$.path").value("/test/business-error"))
+				.andExpect(jsonPath("$.requestId").isString())
+				.andExpect(jsonPath("$.errors").isArray())
+				.andExpect(result -> assertEquals(
+						result.getResponse().getHeader(RequestIdFilter.HEADER_NAME),
+						JsonPath.read(result.getResponse().getContentAsString(), "$.requestId")
+				));
+	}
+
+	@Test
+	void errorTimestampIsTruncatedToMilliseconds() {
+		ErrorResponse response = ErrorResponse.of(
+				CommonErrorCode.INTERNAL_SERVER_ERROR,
+				"/test",
+				"request-id"
+		);
+
+		assertEquals(0, response.timestamp().getNano() % 1_000_000);
+		assertTrue(response.timestamp().toString().endsWith("Z"));
+	}
+
+	@Test
+	void invalidRequestBodyReturnsFieldErrors() throws Exception {
+		mockMvc.perform(post("/test/validation")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"name\":\"\"}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
+				.andExpect(jsonPath("$.errors[0].field").value("name"))
+				.andExpect(jsonPath("$.errors[0].message").value("이름은 필수입니다."));
+	}
+
+	@Test
+	void malformedJsonReturnsMalformedRequestError() throws Exception {
+		mockMvc.perform(post("/test/validation")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"name\":"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+	}
+
+	@Test
+	void wrongPathVariableTypeReturnsTypeMismatchError() throws Exception {
+		mockMvc.perform(get("/test/numbers/not-a-number"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("TYPE_MISMATCH"))
+				.andExpect(jsonPath("$.errors[0].field").value("number"));
+	}
+
+	@Test
+	void unexpectedExceptionDoesNotExposeInternalDetails() throws Exception {
+		mockMvc.perform(get("/test/unexpected-error"))
+				.andExpect(status().isInternalServerError())
+				.andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"))
+				.andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."));
+	}
+
+	@RestController
+	@RequestMapping("/test")
+	static class TestController {
+
+		@GetMapping("/success")
+		ApiResponse<TestResponse> success(
+				@RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+		) {
+			return ApiResponse.success(new TestResponse("ok"), requestId);
+		}
+
+		@GetMapping("/business-error")
+		void businessError() {
+			throw new BusinessException(CommonErrorCode.INVALID_INPUT_VALUE);
+		}
+
+		@PostMapping("/validation")
+		void validate(@Valid @RequestBody TestRequest request) {
+		}
+
+		@GetMapping("/numbers/{number}")
+		void number(@PathVariable Long number) {
+		}
+
+		@GetMapping("/unexpected-error")
+		void unexpectedError() {
+			throw new IllegalStateException("sensitive internal detail");
+		}
+	}
+
+	record TestRequest(
+			@NotBlank(message = "이름은 필수입니다.") String name
+	) {
+	}
+
+	record TestResponse(String result) {
+	}
+}

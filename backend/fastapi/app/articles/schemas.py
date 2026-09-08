@@ -1,0 +1,1 @@
+# POST /internal/v1/articles/analyze 요청/응답 스키마.
