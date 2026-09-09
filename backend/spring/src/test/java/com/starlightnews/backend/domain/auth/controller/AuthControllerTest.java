@@ -14,6 +14,7 @@ import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.request.RequestIdFilter;
+import com.starlightnews.backend.global.security.JwtProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtProvider.class})
 @ActiveProfiles("test")
 class AuthControllerTest {
 
