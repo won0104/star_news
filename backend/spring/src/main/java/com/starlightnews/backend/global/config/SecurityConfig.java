@@ -9,6 +9,7 @@ import com.starlightnews.backend.global.security.JwtProperties;
 import com.starlightnews.backend.global.security.JwtProvider;
 import com.starlightnews.backend.global.security.RestAccessDeniedHandler;
 import com.starlightnews.backend.global.security.RestAuthenticationEntryPoint;
+import com.starlightnews.backend.global.security.TokenBlacklist;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +42,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(
 			HttpSecurity http,
 			JwtProvider jwtProvider,
+			TokenBlacklist tokenBlacklist,
 			ObjectMapper objectMapper,
 			CorsConfigurationSource corsConfigurationSource
 	) throws Exception {
@@ -59,7 +61,7 @@ public class SecurityConfig {
 						.authenticationEntryPoint(new RestAuthenticationEntryPoint(objectMapper))
 						.accessDeniedHandler(new RestAccessDeniedHandler(objectMapper)))
 				.addFilterBefore(
-						new JwtAuthenticationFilter(jwtProvider),
+						new JwtAuthenticationFilter(jwtProvider, tokenBlacklist),
 						UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
