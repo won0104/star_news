@@ -81,6 +81,10 @@ public class AuthService {
 
 	@Transactional(readOnly = true)
 	public RefreshResult refresh(String refreshToken) {
+		if (refreshToken == null || refreshToken.isBlank()) {
+			throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+		}
+
 		String sessionId = parseRefreshSessionId(refreshToken);
 
 		RefreshSession session = refreshSessionStore.find(sessionId)

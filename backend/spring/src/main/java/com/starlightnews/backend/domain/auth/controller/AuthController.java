@@ -4,12 +4,15 @@ import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginRequest;
 import com.starlightnews.backend.domain.auth.dto.LoginResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginResult;
+import com.starlightnews.backend.domain.auth.dto.RefreshResponse;
+import com.starlightnews.backend.domain.auth.dto.RefreshResult;
 import com.starlightnews.backend.domain.auth.dto.SignupRequest;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.service.AuthService;
 import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.request.RequestIdFilter;
 import com.starlightnews.backend.global.response.ApiResponse;
+import com.starlightnews.backend.global.security.AuthenticatedUser;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -17,7 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -65,17 +71,41 @@ public class AuthController {
 			HttpServletResponse response
 	) {
 		LoginResult result = authService.login(request);
-		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie(result).toString());
+		response.addHeader(HttpHeaders.SET_COOKIE,
+				refreshTokenCookie(result.refreshToken(), result.refreshTokenMaxAgeSeconds()).toString());
 		return ApiResponse.success(result.response(), requestId);
 	}
 
-	private ResponseCookie refreshTokenCookie(LoginResult result) {
-		return ResponseCookie.from(REFRESH_TOKEN_COOKIE, result.refreshToken())
+	@PostMapping("/refresh")
+	public ApiResponse<RefreshResponse> refresh(
+			@CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken,
+			@RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId,
+			HttpServletResponse response
+	) {
+		RefreshResult result = authService.refresh(refreshToken);
+		response.addHeader(HttpHeaders.SET_COOKIE,
+				refreshTokenCookie(result.refreshToken(), result.refreshTokenMaxAgeSeconds()).toString());
+		return ApiResponse.success(result.response(), requestId);
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(
+			@AuthenticationPrincipal AuthenticatedUser user,
+			@CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken
+	) {
+		authService.logout(user.jti(), user.accessTokenExpiresAt(), refreshToken);
+		return ResponseEntity.noContent()
+				.header(HttpHeaders.SET_COOKIE, refreshTokenCookie("", 0).toString())
+				.build();
+	}
+
+	private ResponseCookie refreshTokenCookie(String value, long maxAgeSeconds) {
+		return ResponseCookie.from(REFRESH_TOKEN_COOKIE, value)
 				.httpOnly(true)
 				.secure(true)
 				.sameSite("Lax")
 				.path(REFRESH_TOKEN_COOKIE_PATH)
-				.maxAge(result.refreshTokenMaxAgeSeconds())
+				.maxAge(maxAgeSeconds)
 				.build();
 	}
 }
