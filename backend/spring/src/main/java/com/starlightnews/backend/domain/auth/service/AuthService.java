@@ -8,6 +8,8 @@ import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginRequest;
 import com.starlightnews.backend.domain.auth.dto.LoginResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginResult;
+import com.starlightnews.backend.domain.auth.dto.RefreshResponse;
+import com.starlightnews.backend.domain.auth.dto.RefreshResult;
 import com.starlightnews.backend.domain.auth.dto.SignupRequest;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
@@ -17,6 +19,7 @@ import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.security.JwtProvider;
+import com.starlightnews.backend.global.security.JwtValidationException;
 import com.starlightnews.backend.global.security.RefreshSession;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
 import com.starlightnews.backend.global.security.TokenHasher;
@@ -70,6 +73,53 @@ public class AuthService {
 				new LoginResponse.UserSummary(user.getId(), user.getLoginId(), user.getNickname()));
 
 		return new LoginResult(response, refreshToken, jwtProvider.refreshTokenValidity().toSeconds());
+	}
+
+	@Transactional(readOnly = true)
+	public RefreshResult refresh(String refreshToken) {
+		String sessionId = parseRefreshSessionId(refreshToken);
+
+		RefreshSession session = refreshSessionStore.find(sessionId)
+				.orElseThrow(() -> new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND));
+
+		if (!session.refreshTokenHash().equals(TokenHasher.sha256Hex(refreshToken))) {
+			throw new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND);
+		}
+
+		User user = userRepository.findById(session.userId())
+				.orElseThrow(() -> new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND));
+		if (user.isDeleted()) {
+			throw new BusinessException(AuthErrorCode.USER_DELETED);
+		}
+
+		refreshSessionStore.delete(sessionId);
+
+		String newSessionId = UUID.randomUUID().toString();
+		String newAccessToken = jwtProvider.createAccessToken(user.getId());
+		String newRefreshToken = jwtProvider.createRefreshToken(newSessionId);
+		refreshSessionStore.save(
+				newSessionId,
+				new RefreshSession(user.getId(), TokenHasher.sha256Hex(newRefreshToken)),
+				jwtProvider.refreshTokenValidity());
+
+		RefreshResponse response = new RefreshResponse(
+				newAccessToken,
+				TOKEN_TYPE_BEARER,
+				jwtProvider.accessTokenValidity().toSeconds());
+
+		return new RefreshResult(response, newRefreshToken, jwtProvider.refreshTokenValidity().toSeconds());
+	}
+
+	// 토큰 만료, 서명깨짐, 형식 이상, 타입 확인
+	private String parseRefreshSessionId(String refreshToken) {
+		try {
+			return jwtProvider.parseRefreshTokenSessionId(refreshToken);
+		} catch (JwtValidationException exception) {
+			AuthErrorCode errorCode = exception.getReason() == JwtValidationException.Reason.EXPIRED
+					? AuthErrorCode.EXPIRED_REFRESH_TOKEN
+					: AuthErrorCode.INVALID_REFRESH_TOKEN;
+			throw new BusinessException(errorCode);
+		}
 	}
 
 	@Transactional
