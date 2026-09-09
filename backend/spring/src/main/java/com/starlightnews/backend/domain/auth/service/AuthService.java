@@ -1,5 +1,7 @@
 package com.starlightnews.backend.domain.auth.service;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -8,6 +10,8 @@ import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginRequest;
 import com.starlightnews.backend.domain.auth.dto.LoginResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginResult;
+import com.starlightnews.backend.domain.auth.dto.RefreshResponse;
+import com.starlightnews.backend.domain.auth.dto.RefreshResult;
 import com.starlightnews.backend.domain.auth.dto.SignupRequest;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
@@ -17,8 +21,10 @@ import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.security.JwtProvider;
+import com.starlightnews.backend.global.security.JwtValidationException;
 import com.starlightnews.backend.global.security.RefreshSession;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
+import com.starlightnews.backend.global.security.TokenBlacklist;
 import com.starlightnews.backend.global.security.TokenHasher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +41,7 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 	private final RefreshSessionStore refreshSessionStore;
+	private final TokenBlacklist tokenBlacklist;
 
 	@Transactional(readOnly = true)
 	public LoginIdAvailabilityResponse checkLoginIdAvailability(String loginId) {
@@ -70,6 +77,83 @@ public class AuthService {
 				new LoginResponse.UserSummary(user.getId(), user.getLoginId(), user.getNickname()));
 
 		return new LoginResult(response, refreshToken, jwtProvider.refreshTokenValidity().toSeconds());
+	}
+
+	@Transactional(readOnly = true)
+	public RefreshResult refresh(String refreshToken) {
+		if (refreshToken == null || refreshToken.isBlank()) {
+			throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+		}
+
+		String sessionId = parseRefreshSessionId(refreshToken);
+
+		RefreshSession session = refreshSessionStore.find(sessionId)
+				.orElseThrow(() -> new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND));
+
+		if (!session.refreshTokenHash().equals(TokenHasher.sha256Hex(refreshToken))) {
+			throw new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND);
+		}
+
+		User user = userRepository.findById(session.userId())
+				.orElseThrow(() -> new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND));
+		if (user.isDeleted()) {
+			throw new BusinessException(AuthErrorCode.USER_DELETED);
+		}
+
+		refreshSessionStore.delete(sessionId);
+
+		String newSessionId = UUID.randomUUID().toString();
+		String newAccessToken = jwtProvider.createAccessToken(user.getId());
+		String newRefreshToken = jwtProvider.createRefreshToken(newSessionId);
+		refreshSessionStore.save(
+				newSessionId,
+				new RefreshSession(user.getId(), TokenHasher.sha256Hex(newRefreshToken)),
+				jwtProvider.refreshTokenValidity());
+
+		RefreshResponse response = new RefreshResponse(
+				newAccessToken,
+				TOKEN_TYPE_BEARER,
+				jwtProvider.accessTokenValidity().toSeconds());
+
+		return new RefreshResult(response, newRefreshToken, jwtProvider.refreshTokenValidity().toSeconds());
+	}
+
+	// 토큰 만료, 서명깨짐, 형식 이상, 타입 확인
+	private String parseRefreshSessionId(String refreshToken) {
+		try {
+			return jwtProvider.parseRefreshTokenSessionId(refreshToken);
+		} catch (JwtValidationException exception) {
+			AuthErrorCode errorCode = exception.getReason() == JwtValidationException.Reason.EXPIRED
+					? AuthErrorCode.EXPIRED_REFRESH_TOKEN
+					: AuthErrorCode.INVALID_REFRESH_TOKEN;
+			throw new BusinessException(errorCode);
+		}
+	}
+
+	/**
+	 * 로그아웃. Refresh 세션을 지우고, 현재 Access Token 의 jti 를 남은 만료 시간 동안 블랙리스트에 등록한다.
+	 * RT 가 없거나 이미 무효여도 로그아웃은 성공 처리한다.
+	 */
+	@Transactional(readOnly = true)
+	public void logout(String accessTokenJti, Instant accessTokenExpiresAt, String refreshToken) {
+		deleteRefreshSessionQuietly(refreshToken);
+
+		Duration remaining = Duration.between(Instant.now(), accessTokenExpiresAt);
+		if (remaining.isNegative()) {
+			remaining = Duration.ZERO;
+		}
+		tokenBlacklist.blacklist(accessTokenJti, remaining);
+	}
+
+	private void deleteRefreshSessionQuietly(String refreshToken) {
+		if (refreshToken == null || refreshToken.isBlank()) {
+			return;
+		}
+		try {
+			refreshSessionStore.delete(jwtProvider.parseRefreshTokenSessionId(refreshToken));
+		} catch (JwtValidationException ignored) {
+			// RT 가 만료·무효여도 로그아웃은 계속 진행한다.
+		}
 	}
 
 	@Transactional
