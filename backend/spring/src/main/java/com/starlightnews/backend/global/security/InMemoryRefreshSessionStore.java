@@ -5,14 +5,16 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
  * 인메모리 Refresh 세션 저장소 (개발/단일 인스턴스용).
  * 앱을 재시작하면 세션이 사라지고, 인스턴스 간 공유되지 않는다.
- * 운영에서 다중 인스턴스로 확장하려면 Redis 구현으로 교체해야 한다.
+ * app.auth.store=redis 이면 {@link RedisRefreshSessionStore} 로 교체된다.
  */
 @Component
+@ConditionalOnProperty(name = "app.auth.store", havingValue = "memory", matchIfMissing = true)
 public class InMemoryRefreshSessionStore implements RefreshSessionStore {
 
 	private record Entry(RefreshSession session, Instant expiresAt) {
