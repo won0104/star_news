@@ -1,7 +1,14 @@
-from fastapi.testclient import TestClient
+import pytest
 
-from app.database import _driver
-from app.main import app
+# Neo4j 설정(.env 또는 환경변수)이 없는 환경에서는 이 통합 테스트 전체를 건너뜀
+try:
+    from app.config import settings
+    from app.database import _driver
+    from app.main import app
+except Exception as exc:
+    pytest.skip(f"Neo4j 설정이 없어 통합 테스트를 건너뜁니다: {exc}", allow_module_level=True)
+
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
@@ -37,7 +44,7 @@ def test_sync_user_graph_creates_user_and_relationships():
     response = client.post(
         "/internal/v1/user-graph/sync",
         json=payload,
-        headers={"x-internal-api-key": "change-me"},
+        headers={"x-internal-api-key": settings.internal_api_key},
     )
 
     assert response.status_code == 200
