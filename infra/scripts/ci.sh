@@ -2,6 +2,8 @@
 set -Eeuo pipefail
 
 PROJECT_DIR="/var/lib/jenkins/workspace/S15P21E206-ci"
+# FastAPI Settings 필수값. 서버에만 두고 git에는 올리지 않는다.
+ENV_CI_FILE="/home/ubuntu/S15P21E206/.env.ci"
 
 echo "=== Starlight News CI Start ==="
 
@@ -40,19 +42,28 @@ run_in_container "eclipse-temurin:21-jdk" "${PROJECT_DIR}/backend/spring" '
 '
 
 echo "--- FastAPI CI (python:3.11-slim) ---"
-run_in_container "python:3.11-slim" "${PROJECT_DIR}/backend/fastapi" '
-    set -Eeuo pipefail
-    mkdir -p /tmp/app
-    cp -a /src/. /tmp/app/
-    cd /tmp/app
-    pip install --no-cache-dir -r requirements.txt
+if [ ! -f "$ENV_CI_FILE" ]; then
+    echo "Missing CI env file: $ENV_CI_FILE" >&2
+    exit 1
+fi
 
-    if python -c "import importlib.util; raise SystemExit(0 if importlib.util.find_spec(\"pytest\") else 1)" 2>/dev/null \
-        && find . \( -name "test_*.py" -o -name "*_test.py" \) -print -quit | grep -q .; then
-        python -m pytest
-    else
-        python -m compileall app
-    fi
-'
+docker run --rm \
+    --env-file "$ENV_CI_FILE" \
+    -v "${PROJECT_DIR}/backend/fastapi:/src:ro" \
+    python:3.11-slim \
+    sh -c '
+        set -Eeuo pipefail
+        mkdir -p /tmp/app
+        cp -a /src/. /tmp/app/
+        cd /tmp/app
+        pip install --no-cache-dir -r requirements.txt
+
+        if python -c "import importlib.util; raise SystemExit(0 if importlib.util.find_spec(\"pytest\") else 1)" 2>/dev/null \
+            && find . \( -name "test_*.py" -o -name "*_test.py" \) -print -quit | grep -q .; then
+            python -m pytest
+        else
+            python -m compileall app
+        fi
+    '
 
 echo "=== Starlight News CI Complete ==="
