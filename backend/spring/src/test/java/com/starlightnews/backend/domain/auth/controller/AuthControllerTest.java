@@ -6,6 +6,8 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
+import com.starlightnews.backend.domain.auth.dto.LoginResponse;
+import com.starlightnews.backend.domain.auth.dto.LoginResult;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
 import com.starlightnews.backend.domain.auth.service.AuthService;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +46,7 @@ class AuthControllerTest {
 
 	private static final String SIGNUP_PATH = ApiPaths.API_V1 + "/auth/signup";
 	private static final String AVAILABILITY_PATH = ApiPaths.API_V1 + "/auth/login-id/availability";
+	private static final String LOGIN_PATH = ApiPaths.API_V1 + "/auth/login";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -153,5 +157,72 @@ class AuthControllerTest {
 				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
 
 		verify(authService, never()).checkLoginIdAvailability(any());
+	}
+
+	private String loginBody(String loginId, String password) throws Exception {
+		return objectMapper.writeValueAsString(Map.of("loginId", loginId, "password", password));
+	}
+
+	@Test
+	void 로그인_성공시_200과_body_그리고_refreshToken_쿠키를_응답한다() throws Exception {
+		LoginResponse body = new LoginResponse(
+				"access-token-value", "Bearer", 3600L,
+				new LoginResponse.UserSummary(1L, "starlight01", "별빛"));
+		given(authService.login(any()))
+				.willReturn(new LoginResult(body, "refresh-token-value", 1_209_600L));
+
+		mockMvc.perform(post(LOGIN_PATH)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(loginBody("starlight01", "password1234")))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.accessToken").value("access-token-value"))
+				.andExpect(jsonPath("$.data.tokenType").value("Bearer"))
+				.andExpect(jsonPath("$.data.expiresIn").value(3600))
+				.andExpect(jsonPath("$.data.user.userId").value(1))
+				.andExpect(jsonPath("$.data.user.loginId").value("starlight01"))
+				.andExpect(jsonPath("$.data.user.nickname").value("별빛"))
+				.andExpect(jsonPath("$.meta.requestId").isString())
+				.andExpect(cookie().value("refreshToken", "refresh-token-value"))
+				.andExpect(cookie().httpOnly("refreshToken", true))
+				.andExpect(cookie().secure("refreshToken", true))
+				.andExpect(cookie().sameSite("refreshToken", "Lax"))
+				.andExpect(cookie().path("refreshToken", "/api/v1/auth"))
+				.andExpect(cookie().maxAge("refreshToken", 1_209_600));
+	}
+
+	@Test
+	void 로그인_요청_본문이_비어있으면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(post(LOGIN_PATH)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(loginBody("", "")))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
+				.andExpect(jsonPath("$.errors[*].field").value(hasItems("loginId", "password")));
+
+		verify(authService, never()).login(any());
+	}
+
+	@Test
+	void 서비스가_INVALID_CREDENTIALS를_던지면_401을_응답한다() throws Exception {
+		given(authService.login(any()))
+				.willThrow(new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
+
+		mockMvc.perform(post(LOGIN_PATH)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(loginBody("starlight01", "wrong-password")))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
+	}
+
+	@Test
+	void 서비스가_USER_DELETED를_던지면_403을_응답한다() throws Exception {
+		given(authService.login(any()))
+				.willThrow(new BusinessException(AuthErrorCode.USER_DELETED));
+
+		mockMvc.perform(post(LOGIN_PATH)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(loginBody("starlight01", "password1234")))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.code").value("USER_DELETED"));
 	}
 }
