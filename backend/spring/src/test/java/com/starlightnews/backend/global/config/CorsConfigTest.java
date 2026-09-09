@@ -2,6 +2,7 @@ package com.starlightnews.backend.global.config;
 
 import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.request.RequestIdFilter;
+import com.starlightnews.backend.global.security.InMemoryTokenBlacklist;
 import com.starlightnews.backend.global.security.JwtProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CorsConfigTest.TestController.class)
-@Import({SecurityConfig.class, JwtProvider.class, CorsConfigTest.TestController.class})
+@Import({SecurityConfig.class, JwtProvider.class, InMemoryTokenBlacklist.class, CorsConfigTest.TestController.class})
 @ActiveProfiles("test")
 class CorsConfigTest {
 

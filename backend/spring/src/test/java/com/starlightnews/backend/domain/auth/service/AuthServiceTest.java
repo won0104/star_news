@@ -1,12 +1,14 @@
 package com.starlightnews.backend.domain.auth.service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginRequest;
 import com.starlightnews.backend.domain.auth.dto.LoginResult;
+import com.starlightnews.backend.domain.auth.dto.RefreshResult;
 import com.starlightnews.backend.domain.auth.dto.SignupRequest;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
@@ -17,8 +19,10 @@ import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.security.JwtProvider;
+import com.starlightnews.backend.global.security.JwtValidationException;
 import com.starlightnews.backend.global.security.RefreshSession;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
+import com.starlightnews.backend.global.security.TokenBlacklist;
 import com.starlightnews.backend.global.security.TokenHasher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +38,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -52,6 +57,9 @@ class AuthServiceTest {
 
 	@Mock
 	private RefreshSessionStore refreshSessionStore;
+
+	@Mock
+	private TokenBlacklist tokenBlacklist;
 
 	@InjectMocks
 	private AuthService authService;
@@ -250,5 +258,144 @@ class AuthServiceTest {
 		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.USER_DELETED);
 		verify(passwordEncoder, never()).matches(any(), any());
 		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	private static final String OLD_RT = "old-refresh-token";
+	private static final String OLD_SESSION_ID = "old-session-id";
+
+	private void stubValidRefreshToken(long userId) {
+		given(jwtProvider.parseRefreshTokenSessionId(OLD_RT)).willReturn(OLD_SESSION_ID);
+		given(refreshSessionStore.find(OLD_SESSION_ID))
+				.willReturn(Optional.of(new RefreshSession(userId, TokenHasher.sha256Hex(OLD_RT))));
+	}
+
+	private void stubNewTokenIssuance(long userId) {
+		given(jwtProvider.createAccessToken(userId)).willReturn("new-access-token");
+		given(jwtProvider.createRefreshToken(anyString())).willReturn("new-refresh-token");
+		given(jwtProvider.accessTokenValidity()).willReturn(Duration.ofSeconds(3600));
+		given(jwtProvider.refreshTokenValidity()).willReturn(Duration.ofDays(14));
+	}
+
+	@Test
+	void 유효한_RT로_재발급하면_기존_세션을_지우고_새_토큰과_세션을_만든다() {
+		stubValidRefreshToken(1L);
+		given(userRepository.findById(1L)).willReturn(Optional.of(activeUser(1L)));
+		stubNewTokenIssuance(1L);
+
+		RefreshResult result = authService.refresh(OLD_RT);
+
+		assertThat(result.response().accessToken()).isEqualTo("new-access-token");
+		assertThat(result.response().tokenType()).isEqualTo("Bearer");
+		assertThat(result.response().expiresIn()).isEqualTo(3600);
+		assertThat(result.refreshToken()).isEqualTo("new-refresh-token");
+		assertThat(result.refreshTokenMaxAgeSeconds()).isEqualTo(Duration.ofDays(14).toSeconds());
+
+		verify(refreshSessionStore).delete(OLD_SESSION_ID);
+
+		ArgumentCaptor<RefreshSession> saved = ArgumentCaptor.forClass(RefreshSession.class);
+		verify(refreshSessionStore).save(anyString(), saved.capture(), any());
+		assertThat(saved.getValue().userId()).isEqualTo(1L);
+		assertThat(saved.getValue().refreshTokenHash()).isEqualTo(TokenHasher.sha256Hex("new-refresh-token"));
+	}
+
+	@Test
+	void RT가_만료됐으면_EXPIRED_REFRESH_TOKEN_예외() {
+		given(jwtProvider.parseRefreshTokenSessionId(OLD_RT))
+				.willThrow(new JwtValidationException(JwtValidationException.Reason.EXPIRED, "만료", null));
+
+		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.EXPIRED_REFRESH_TOKEN);
+		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	@Test
+	void RT가_무효면_INVALID_REFRESH_TOKEN_예외() {
+		given(jwtProvider.parseRefreshTokenSessionId(OLD_RT))
+				.willThrow(new JwtValidationException(JwtValidationException.Reason.INVALID, "무효", null));
+
+		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.INVALID_REFRESH_TOKEN);
+	}
+
+	@Test
+	void 세션이_없으면_REFRESH_SESSION_NOT_FOUND_예외() {
+		given(jwtProvider.parseRefreshTokenSessionId(OLD_RT)).willReturn(OLD_SESSION_ID);
+		given(refreshSessionStore.find(OLD_SESSION_ID)).willReturn(Optional.empty());
+
+		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.REFRESH_SESSION_NOT_FOUND);
+		verify(refreshSessionStore, never()).delete(any());
+	}
+
+	@Test
+	void 이미_회전된_RT를_다시_쓰면_REFRESH_SESSION_NOT_FOUND_예외() {
+		given(jwtProvider.parseRefreshTokenSessionId(OLD_RT)).willReturn(OLD_SESSION_ID);
+		given(refreshSessionStore.find(OLD_SESSION_ID))
+				.willReturn(Optional.of(new RefreshSession(1L, TokenHasher.sha256Hex("다른-rt"))));
+
+		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.REFRESH_SESSION_NOT_FOUND);
+		verify(refreshSessionStore, never()).delete(any());
+	}
+
+	@Test
+	void 세션의_사용자가_탈퇴했으면_USER_DELETED_예외() {
+		stubValidRefreshToken(1L);
+		User deleted = activeUser(1L);
+		deleted.markDeleted();
+		given(userRepository.findById(1L)).willReturn(Optional.of(deleted));
+
+		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.USER_DELETED);
+		verify(refreshSessionStore, never()).delete(any());
+		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	@Test
+	void 로그아웃하면_Refresh_세션을_지우고_jti를_남은_만료시간_동안_블랙리스트에_등록한다() {
+		given(jwtProvider.parseRefreshTokenSessionId("rt")).willReturn("sid-1");
+		Instant expiresAt = Instant.now().plus(Duration.ofMinutes(30));
+
+		authService.logout("jti-1", expiresAt, "rt");
+
+		verify(refreshSessionStore).delete("sid-1");
+
+		ArgumentCaptor<Duration> ttl = ArgumentCaptor.forClass(Duration.class);
+		verify(tokenBlacklist).blacklist(eq("jti-1"), ttl.capture());
+		assertThat(ttl.getValue()).isBetween(Duration.ofMinutes(29), Duration.ofMinutes(30));
+	}
+
+	@Test
+	void RT가_이미_무효여도_로그아웃은_성공하고_jti는_블랙리스트에_등록된다() {
+		given(jwtProvider.parseRefreshTokenSessionId("rt"))
+				.willThrow(new JwtValidationException(JwtValidationException.Reason.INVALID, "무효", null));
+
+		authService.logout("jti-1", Instant.now().plus(Duration.ofMinutes(30)), "rt");
+
+		verify(refreshSessionStore, never()).delete(any());
+		verify(tokenBlacklist).blacklist(eq("jti-1"), any());
+	}
+
+	@Test
+	void RT_쿠키가_없어도_jti는_블랙리스트에_등록된다() {
+		authService.logout("jti-1", Instant.now().plus(Duration.ofMinutes(30)), null);
+
+		verify(jwtProvider, never()).parseRefreshTokenSessionId(any());
+		verify(refreshSessionStore, never()).delete(any());
+		verify(tokenBlacklist).blacklist(eq("jti-1"), any());
+	}
+
+	@Test
+	void 이미_만료된_AT로_로그아웃하면_블랙리스트_TTL은_0이다() {
+		given(jwtProvider.parseRefreshTokenSessionId("rt")).willReturn("sid-1");
+
+		authService.logout("jti-1", Instant.now().minus(Duration.ofMinutes(1)), "rt");
+
+		verify(tokenBlacklist).blacklist("jti-1", Duration.ZERO);
 	}
 }

@@ -8,6 +8,8 @@ import com.jayway.jsonpath.JsonPath;
 import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginResult;
+import com.starlightnews.backend.domain.auth.dto.RefreshResponse;
+import com.starlightnews.backend.domain.auth.dto.RefreshResult;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
 import com.starlightnews.backend.domain.auth.service.AuthService;
@@ -16,11 +18,14 @@ import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.request.RequestIdFilter;
+import com.starlightnews.backend.global.security.InMemoryTokenBlacklist;
 import com.starlightnews.backend.global.security.JwtProvider;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -40,19 +45,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, JwtProvider.class})
+@Import({SecurityConfig.class, JwtProvider.class, InMemoryTokenBlacklist.class})
 @ActiveProfiles("test")
 class AuthControllerTest {
 
 	private static final String SIGNUP_PATH = ApiPaths.API_V1 + "/auth/signup";
 	private static final String AVAILABILITY_PATH = ApiPaths.API_V1 + "/auth/login-id/availability";
 	private static final String LOGIN_PATH = ApiPaths.API_V1 + "/auth/login";
+	private static final String REFRESH_PATH = ApiPaths.API_V1 + "/auth/refresh";
+	private static final String LOGOUT_PATH = ApiPaths.API_V1 + "/auth/logout";
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private JwtProvider jwtProvider;
 
 	@MockitoBean
 	private AuthService authService;
@@ -224,5 +234,64 @@ class AuthControllerTest {
 						.content(loginBody("starlight01", "password1234")))
 				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.code").value("USER_DELETED"));
+	}
+
+	@Test
+	void refresh_성공시_200과_새_토큰_body_그리고_새_refreshToken_쿠키를_응답한다() throws Exception {
+		given(authService.refresh("old-rt"))
+				.willReturn(new RefreshResult(
+						new RefreshResponse("new-access-token", "Bearer", 3600L),
+						"new-refresh-token", 1_209_600L));
+
+		mockMvc.perform(post(REFRESH_PATH).cookie(new Cookie("refreshToken", "old-rt")))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.accessToken").value("new-access-token"))
+				.andExpect(jsonPath("$.data.tokenType").value("Bearer"))
+				.andExpect(jsonPath("$.data.expiresIn").value(3600))
+				.andExpect(jsonPath("$.data.user").doesNotExist())
+				.andExpect(jsonPath("$.meta.requestId").isString())
+				.andExpect(cookie().value("refreshToken", "new-refresh-token"))
+				.andExpect(cookie().httpOnly("refreshToken", true))
+				.andExpect(cookie().path("refreshToken", "/api/v1/auth"))
+				.andExpect(cookie().maxAge("refreshToken", 1_209_600));
+	}
+
+	@Test
+	void refresh_쿠키가_없으면_서비스가_던진_401을_응답한다() throws Exception {
+		given(authService.refresh(any()))
+				.willThrow(new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN));
+
+		mockMvc.perform(post(REFRESH_PATH))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("INVALID_REFRESH_TOKEN"));
+	}
+
+	@Test
+	void refresh_서비스가_REFRESH_SESSION_NOT_FOUND를_던지면_401을_응답한다() throws Exception {
+		given(authService.refresh("old-rt"))
+				.willThrow(new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND));
+
+		mockMvc.perform(post(REFRESH_PATH).cookie(new Cookie("refreshToken", "old-rt")))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("REFRESH_SESSION_NOT_FOUND"));
+	}
+
+	@Test
+	void logout_인증된_요청은_204와_만료된_refreshToken_쿠키를_응답한다() throws Exception {
+		String accessToken = jwtProvider.createAccessToken(1L);
+
+		mockMvc.perform(post(LOGOUT_PATH)
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+						.cookie(new Cookie("refreshToken", "some-rt")))
+				.andExpect(status().isNoContent())
+				.andExpect(cookie().value("refreshToken", ""))
+				.andExpect(cookie().maxAge("refreshToken", 0));
+	}
+
+	@Test
+	void logout_토큰이_없으면_401_UNAUTHORIZED를_응답한다() throws Exception {
+		mockMvc.perform(post(LOGOUT_PATH))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 	}
 }
