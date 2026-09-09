@@ -12,7 +12,9 @@ public enum AuthErrorCode implements ErrorCode {
 	LOGIN_ID_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 로그인 아이디입니다."),
 	INVALID_TOPIC(HttpStatus.BAD_REQUEST, "허용되지 않는 관심 분야 코드입니다."),
 	DUPLICATED_TOPIC(HttpStatus.BAD_REQUEST, "같은 관심 분야를 중복해서 선택할 수 없습니다."),
-	TOPIC_SELECTION_CONFLICT(HttpStatus.BAD_REQUEST, "관심 분야와 비관심 분야에 같은 항목을 선택할 수 없습니다.");
+	TOPIC_SELECTION_CONFLICT(HttpStatus.BAD_REQUEST, "관심 분야와 비관심 분야에 같은 항목을 선택할 수 없습니다."),
+	INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
+	USER_DELETED(HttpStatus.FORBIDDEN, "탈퇴한 회원입니다.");
 
 	private final HttpStatus status;
 	private final String message;

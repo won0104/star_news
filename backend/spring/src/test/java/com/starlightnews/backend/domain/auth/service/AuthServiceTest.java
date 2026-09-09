@@ -1,8 +1,12 @@
 package com.starlightnews.backend.domain.auth.service;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
+import com.starlightnews.backend.domain.auth.dto.LoginRequest;
+import com.starlightnews.backend.domain.auth.dto.LoginResult;
 import com.starlightnews.backend.domain.auth.dto.SignupRequest;
 import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
@@ -12,6 +16,10 @@ import com.starlightnews.backend.domain.user.repository.UserRepository;
 import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
+import com.starlightnews.backend.global.security.JwtProvider;
+import com.starlightnews.backend.global.security.RefreshSession;
+import com.starlightnews.backend.global.security.RefreshSessionStore;
+import com.starlightnews.backend.global.security.TokenHasher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,11 +27,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -37,11 +47,23 @@ class AuthServiceTest {
 	@Mock
 	private PasswordEncoder passwordEncoder;
 
+	@Mock
+	private JwtProvider jwtProvider;
+
+	@Mock
+	private RefreshSessionStore refreshSessionStore;
+
 	@InjectMocks
 	private AuthService authService;
 
 	private SignupRequest request(List<String> interested, List<String> disliked) {
 		return new SignupRequest("starlight01", "password1234", "별빛", interested, disliked);
+	}
+
+	private User activeUser(long id) {
+		User user = User.create("starlight01", "hashed-password", "별빛");
+		ReflectionTestUtils.setField(user, "id", id);
+		return user;
 	}
 
 	private AuthErrorCode errorCodeOf(Throwable throwable) {
@@ -154,5 +176,79 @@ class AuthServiceTest {
 
 		assertThat(response.loginId()).isEqualTo("starlight01");
 		assertThat(response.available()).isFalse();
+	}
+
+	private LoginRequest loginRequest() {
+		return new LoginRequest("starlight01", "password1234");
+	}
+
+	private void stubTokenIssuance() {
+		given(jwtProvider.createAccessToken(1L)).willReturn("access-token-value");
+		given(jwtProvider.createRefreshToken(anyString())).willReturn("refresh-token-value");
+		given(jwtProvider.accessTokenValidity()).willReturn(Duration.ofSeconds(3600));
+		given(jwtProvider.refreshTokenValidity()).willReturn(Duration.ofDays(14));
+	}
+
+	@Test
+	void 로그인_성공시_토큰을_발급하고_Refresh_세션을_저장한다() {
+		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.of(activeUser(1L)));
+		given(passwordEncoder.matches("password1234", "hashed-password")).willReturn(true);
+		stubTokenIssuance();
+
+		LoginResult result = authService.login(loginRequest());
+
+		assertThat(result.response().accessToken()).isEqualTo("access-token-value");
+		assertThat(result.response().tokenType()).isEqualTo("Bearer");
+		assertThat(result.response().expiresIn()).isEqualTo(3600);
+		assertThat(result.response().user())
+				.isEqualTo(new com.starlightnews.backend.domain.auth.dto.LoginResponse.UserSummary(1L, "starlight01", "별빛"));
+		assertThat(result.refreshToken()).isEqualTo("refresh-token-value");
+		assertThat(result.refreshTokenMaxAgeSeconds()).isEqualTo(Duration.ofDays(14).toSeconds());
+
+		ArgumentCaptor<String> sessionId = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<RefreshSession> session = ArgumentCaptor.forClass(RefreshSession.class);
+		ArgumentCaptor<Duration> ttl = ArgumentCaptor.forClass(Duration.class);
+		verify(refreshSessionStore).save(sessionId.capture(), session.capture(), ttl.capture());
+
+		assertThat(sessionId.getValue()).isNotBlank();
+		assertThat(session.getValue().userId()).isEqualTo(1L);
+		assertThat(session.getValue().refreshTokenHash())
+				.isEqualTo(TokenHasher.sha256Hex("refresh-token-value"))
+				.isNotEqualTo("refresh-token-value");
+		assertThat(ttl.getValue()).isEqualTo(Duration.ofDays(14));
+	}
+
+	@Test
+	void 존재하지_않는_로그인_아이디면_INVALID_CREDENTIALS_예외() {
+		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.empty());
+
+		Throwable thrown = catchThrowable(() -> authService.login(loginRequest()));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.INVALID_CREDENTIALS);
+		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	@Test
+	void 비밀번호가_틀리면_INVALID_CREDENTIALS_예외() {
+		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.of(activeUser(1L)));
+		given(passwordEncoder.matches("password1234", "hashed-password")).willReturn(false);
+
+		Throwable thrown = catchThrowable(() -> authService.login(loginRequest()));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.INVALID_CREDENTIALS);
+		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	@Test
+	void 탈퇴한_회원이면_비밀번호_확인_전에_USER_DELETED_예외() {
+		User deleted = activeUser(1L);
+		deleted.markDeleted();
+		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.of(deleted));
+
+		Throwable thrown = catchThrowable(() -> authService.login(loginRequest()));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.USER_DELETED);
+		verify(passwordEncoder, never()).matches(any(), any());
+		verify(refreshSessionStore, never()).save(any(), any(), any());
 	}
 }
