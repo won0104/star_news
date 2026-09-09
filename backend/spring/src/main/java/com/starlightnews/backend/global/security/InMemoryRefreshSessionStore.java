@@ -45,4 +45,11 @@ public class InMemoryRefreshSessionStore implements RefreshSessionStore {
 	public void delete(String sessionId) {
 		sessions.remove(sessionId);
 	}
+
+	@Override
+	public int deleteAllByUserId(Long userId) {
+		int before = sessions.size();
+		sessions.values().removeIf(entry -> entry.session().userId().equals(userId));
+		return before - sessions.size();
+	}
 }
