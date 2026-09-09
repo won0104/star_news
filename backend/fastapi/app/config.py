@@ -1,5 +1,10 @@
 # 앱 전역 설정값. .env 파일 또는 환경 변수에서 값을 읽어온다.
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+# 실행 위치(CWD)에 상관없이 항상 backend/fastapi/.env를 찾도록 이 파일 기준 절대경로로 지정
+ENV_FILE_PATH = Path(__file__).resolve().parent.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -15,7 +20,7 @@ class Settings(BaseSettings):
     neo4j_password: str = "change-me"
 
     class Config:
-        env_file = ".env"
+        env_file = ENV_FILE_PATH
 
 
 settings = Settings()
