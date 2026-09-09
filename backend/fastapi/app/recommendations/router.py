@@ -1,4 +1,4 @@
-# Spring Boot가 추천 계산을 요청하는 내부 API. 인증 통과 후 service로 위임만 한다.
+# Spring Boot가 추천 계산을 요청하는 내부 API.
 from fastapi import APIRouter, Depends
 
 from app.dependencies import verify_internal_service
