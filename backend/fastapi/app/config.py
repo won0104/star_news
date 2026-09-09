@@ -11,15 +11,15 @@ class Settings(BaseSettings):
     app_name: str = "starlight-news-ai"
     env: str = "local"
     # Spring Boot -> FastAPI 내부 호출을 검증할 때 쓰는 공유 키 (dependencies.py에서 사용)
-    # TODO: 실제 값은 Spring Boot 담당자와 합의 후 .env로 관리
-    internal_api_key: str = "change-me"
+    internal_api_key: str
 
-    # 아래 Neo4j 접속 정보는 아직 임의 기본값.
-    neo4j_uri: str = "bolt://localhost:7687"
-    neo4j_username: str = "neo4j"
-    neo4j_password: str = "change-me"
+    # Neo4j 접속 정보
+    neo4j_uri: str
+    neo4j_username: str
+    neo4j_password: str
 
     class Config:
+        # 실제 .env와 연결
         env_file = ENV_FILE_PATH
 
 
