@@ -2,6 +2,7 @@ package com.starlightnews.backend.global.config;
 
 import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.request.RequestIdFilter;
+import com.starlightnews.backend.global.security.JwtProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,54 +21,52 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CorsConfigTest.TestController.class)
-@Import({CorsConfig.class, CorsConfigTest.TestController.class})
+@Import({SecurityConfig.class, JwtProvider.class, CorsConfigTest.TestController.class})
 @ActiveProfiles("test")
 class CorsConfigTest {
 
 	private static final String ALLOWED_ORIGIN = "http://localhost:3000";
 	private static final String DENIED_ORIGIN = "https://not-allowed.example";
-	private static final String TEST_PATH = ApiPaths.API_V1 + "/cors-test";
+	private static final String TEST_PATH = ApiPaths.API_V1 + "/auth/cors-test";
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Test
-	void allowsPreflightRequestFromConfiguredOrigin() throws Exception {
+	void 허용된_Origin의_preflight_요청을_통과시킨다() throws Exception {
 		mockMvc.perform(options(TEST_PATH)
-					.header(HttpHeaders.ORIGIN, ALLOWED_ORIGIN)
-					.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+						.header(HttpHeaders.ORIGIN, ALLOWED_ORIGIN)
+						.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
 				.andExpect(status().isOk())
 				.andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN))
 				.andExpect(header().string(
 						HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
-						containsString("GET")
-				));
+						containsString("GET")));
 	}
 
 	@Test
-	void rejectsPreflightRequestFromUnconfiguredOrigin() throws Exception {
+	void 허용되지_않은_Origin의_preflight_요청은_거부한다() throws Exception {
 		mockMvc.perform(options(TEST_PATH)
-					.header(HttpHeaders.ORIGIN, DENIED_ORIGIN)
-					.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+						.header(HttpHeaders.ORIGIN, DENIED_ORIGIN)
+						.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
 				.andExpect(status().isForbidden())
 				.andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 	}
 
 	@Test
-	void exposesRequestIdHeaderToConfiguredOrigin() throws Exception {
+	void 허용된_Origin에는_X_Request_Id_헤더를_노출한다() throws Exception {
 		mockMvc.perform(get(TEST_PATH)
-					.header(HttpHeaders.ORIGIN, ALLOWED_ORIGIN))
+						.header(HttpHeaders.ORIGIN, ALLOWED_ORIGIN))
 				.andExpect(status().isOk())
 				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
 				.andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN))
 				.andExpect(header().string(
 						HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
-						containsString(RequestIdFilter.HEADER_NAME)
-				));
+						containsString(RequestIdFilter.HEADER_NAME)));
 	}
 
 	@RestController
-	@RequestMapping(ApiPaths.API_V1 + "/cors-test")
+	@RequestMapping(ApiPaths.API_V1 + "/auth/cors-test")
 	static class TestController {
 
 		@GetMapping

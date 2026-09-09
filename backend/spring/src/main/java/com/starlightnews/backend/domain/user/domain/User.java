@@ -63,6 +63,13 @@ public class User extends BaseTimeEntity {
 	}
 
 	/**
+	 * 회원 탈퇴. 실제 행을 지우지 않고 탈퇴 시각만 기록한다(soft delete).
+	 */
+	public void markDeleted() {
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	/**
 	 * 관심(INTEREST) 또는 비관심(DISLIKE) 분야를 추가한다. 저장은 User 저장 시 cascade 로 함께 처리된다.
 	 */
 	public void addInterest(TopicCode topicCode, InterestType interestType) {
