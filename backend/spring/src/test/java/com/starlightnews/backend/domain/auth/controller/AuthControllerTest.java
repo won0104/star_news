@@ -11,11 +11,13 @@ import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
 import com.starlightnews.backend.domain.auth.service.AuthService;
 import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.enums.TopicCode;
+import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.request.RequestIdFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -34,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
+@Import(SecurityConfig.class)
 @ActiveProfiles("test")
 class AuthControllerTest {
 
