@@ -4,7 +4,7 @@ from datetime import datetime
 from neo4j import Session
 
 
-# User 노드는 userId만 저장 (회원정보 없음). 없으면 생성, 있으면 updatedAt만 갱신
+# User 노드는 userId만 저장. 없으면 생성, 있으면 updatedAt만 갱신
 def upsert_user(session: Session, user_id: int, aggregated_at: datetime) -> None:
     session.run(
         """
@@ -16,9 +16,18 @@ def upsert_user(session: Session, user_id: int, aggregated_at: datetime) -> None
     )
 
 
-# INTERESTED_IN은 Entity/Topic/Story를 다 대상으로 하므로 라벨 지정 없이 nodeId로 매칭한다 (nodeId는 UUID라 라벨 간 충돌 없음)
-def sync_interest_nodes(session: Session, user_id: int, node_keys: list[str], aggregated_at: datetime) -> None:
-    session.run(
+# 이 요청이 기존 User보다 오래된 스냅샷인지 확인하기 위해 현재 updatedAt을 조회 (없으면 신규 유저라 None)
+def get_user_updated_at(session: Session, user_id: int) -> datetime | None:
+    record = session.run(
+        "MATCH (u:User {userId: $userId}) RETURN u.updatedAt AS updatedAt",
+        userId=user_id,
+    ).single()
+    return record["updatedAt"] if record else None
+
+
+# Entity/Topic/Story를 대상으로 INTERESTED_IN 매칭. (반환값: 실제로 매칭된 노드 수)
+def sync_interest_nodes(session: Session, user_id: int, node_keys: list[str], aggregated_at: datetime) -> int:
+    result = session.run(
         """
         MATCH (u:User {userId: $userId})
 
@@ -34,16 +43,18 @@ def sync_interest_nodes(session: Session, user_id: int, node_keys: list[str], ag
         MATCH (target {nodeId: nodeKey})
         MERGE (u)-[r:INTERESTED_IN]->(target)
         SET r.updatedAt = $aggregatedAt
+        RETURN count(target) AS matchedCount
         """,
         userId=user_id,
         nodeKeys=node_keys,
         aggregatedAt=aggregated_at,
-    )
+    ).single()
+    return result["matchedCount"] if result else 0
 
 
-# dislikeTopicCodes에 없는 기존 DISLIKES는 제거하고, 남은 목록으로 다시 MERGE (최신 상태로 동기화)
-def sync_dislike_topics(session: Session, user_id: int, topic_codes: list[str], aggregated_at: datetime) -> None:
-    session.run(
+# dislikeTopicCodes에 없는 기존 DISLIKES는 제거하고, 남은 목록으로 다시 MERGE. (반환값: 실제로 매칭된 Topic 수)
+def sync_dislike_topics(session: Session, user_id: int, topic_codes: list[str], aggregated_at: datetime) -> int:
+    result = session.run(
         """
         MATCH (u:User {userId: $userId})
 
@@ -59,20 +70,20 @@ def sync_dislike_topics(session: Session, user_id: int, topic_codes: list[str], 
         MATCH (t:Topic {topicCode: topicCode})
         MERGE (u)-[r:DISLIKES]->(t)
         SET r.updatedAt = $aggregatedAt
+        RETURN count(t) AS matchedCount
         """,
         userId=user_id,
         topicCodes=topic_codes,
         aggregatedAt=aggregated_at,
-    )
+    ).single()
+    return result["matchedCount"] if result else 0
 
 
-# 소비 이벤트 반영
-# consumed_events: [{"eventId": str, "count": int, "lastViewedAt": datetime}, ...]
+# 소비 이벤트 반영. 반환값: 실제로 매칭된 Event 수
 def sync_consumed_events(
-
     session: Session, user_id: int, consumed_events: list[dict], aggregated_at: datetime
-) -> None:
-    session.run(
+) -> int:
+    result = session.run(
         """
         MATCH (u:User {userId: $userId})
         UNWIND $events AS event
@@ -81,11 +92,13 @@ def sync_consumed_events(
         SET r.count = event.count,
             r.lastViewedAt = event.lastViewedAt,
             r.updatedAt = $aggregatedAt
+        RETURN count(e) AS matchedCount
         """,
         userId=user_id,
         events=consumed_events,
         aggregatedAt=aggregated_at,
-    )
+    ).single()
+    return result["matchedCount"] if result else 0
 
 
 # Story Coverage 계산

@@ -8,6 +8,10 @@ client = TestClient(app)
 
 # /user-graph/sync 엔드포인트 검증. 로컬 Neo4j + mock 데이터 적재 상태를 전제로 한다.
 def test_sync_user_graph_creates_user_and_relationships():
+    # 0) 이전 실행에서 남은 테스트 사용자를 지워서 stale 체크(409)에 안 걸리게 함 (재실행 가능하게)
+    with _driver.session() as session:
+        session.run("MATCH (u:User {userId: 9999}) DETACH DELETE u")
+
     # 1) mock 데이터의 실제 Topic/Event nodeId를 조회해서 요청에 사용 (하드코딩 방지)
     with _driver.session() as session:
         topic_id = session.run("MATCH (t:Topic {topicCode: 'ECONOMY'}) RETURN t.nodeId AS id").single()["id"]
