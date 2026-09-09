@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.auth.service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import com.starlightnews.backend.global.security.JwtProvider;
 import com.starlightnews.backend.global.security.JwtValidationException;
 import com.starlightnews.backend.global.security.RefreshSession;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
+import com.starlightnews.backend.global.security.TokenBlacklist;
 import com.starlightnews.backend.global.security.TokenHasher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +38,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -54,6 +57,9 @@ class AuthServiceTest {
 
 	@Mock
 	private RefreshSessionStore refreshSessionStore;
+
+	@Mock
+	private TokenBlacklist tokenBlacklist;
 
 	@InjectMocks
 	private AuthService authService;
@@ -348,5 +354,48 @@ class AuthServiceTest {
 		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.USER_DELETED);
 		verify(refreshSessionStore, never()).delete(any());
 		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	@Test
+	void 로그아웃하면_Refresh_세션을_지우고_jti를_남은_만료시간_동안_블랙리스트에_등록한다() {
+		given(jwtProvider.parseRefreshTokenSessionId("rt")).willReturn("sid-1");
+		Instant expiresAt = Instant.now().plus(Duration.ofMinutes(30));
+
+		authService.logout("jti-1", expiresAt, "rt");
+
+		verify(refreshSessionStore).delete("sid-1");
+
+		ArgumentCaptor<Duration> ttl = ArgumentCaptor.forClass(Duration.class);
+		verify(tokenBlacklist).blacklist(eq("jti-1"), ttl.capture());
+		assertThat(ttl.getValue()).isBetween(Duration.ofMinutes(29), Duration.ofMinutes(30));
+	}
+
+	@Test
+	void RT가_이미_무효여도_로그아웃은_성공하고_jti는_블랙리스트에_등록된다() {
+		given(jwtProvider.parseRefreshTokenSessionId("rt"))
+				.willThrow(new JwtValidationException(JwtValidationException.Reason.INVALID, "무효", null));
+
+		authService.logout("jti-1", Instant.now().plus(Duration.ofMinutes(30)), "rt");
+
+		verify(refreshSessionStore, never()).delete(any());
+		verify(tokenBlacklist).blacklist(eq("jti-1"), any());
+	}
+
+	@Test
+	void RT_쿠키가_없어도_jti는_블랙리스트에_등록된다() {
+		authService.logout("jti-1", Instant.now().plus(Duration.ofMinutes(30)), null);
+
+		verify(jwtProvider, never()).parseRefreshTokenSessionId(any());
+		verify(refreshSessionStore, never()).delete(any());
+		verify(tokenBlacklist).blacklist(eq("jti-1"), any());
+	}
+
+	@Test
+	void 이미_만료된_AT로_로그아웃하면_블랙리스트_TTL은_0이다() {
+		given(jwtProvider.parseRefreshTokenSessionId("rt")).willReturn("sid-1");
+
+		authService.logout("jti-1", Instant.now().minus(Duration.ofMinutes(1)), "rt");
+
+		verify(tokenBlacklist).blacklist("jti-1", Duration.ZERO);
 	}
 }

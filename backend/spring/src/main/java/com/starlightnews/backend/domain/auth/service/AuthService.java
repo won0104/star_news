@@ -1,5 +1,7 @@
 package com.starlightnews.backend.domain.auth.service;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +24,7 @@ import com.starlightnews.backend.global.security.JwtProvider;
 import com.starlightnews.backend.global.security.JwtValidationException;
 import com.starlightnews.backend.global.security.RefreshSession;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
+import com.starlightnews.backend.global.security.TokenBlacklist;
 import com.starlightnews.backend.global.security.TokenHasher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,6 +41,7 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 	private final RefreshSessionStore refreshSessionStore;
+	private final TokenBlacklist tokenBlacklist;
 
 	@Transactional(readOnly = true)
 	public LoginIdAvailabilityResponse checkLoginIdAvailability(String loginId) {
@@ -119,6 +123,32 @@ public class AuthService {
 					? AuthErrorCode.EXPIRED_REFRESH_TOKEN
 					: AuthErrorCode.INVALID_REFRESH_TOKEN;
 			throw new BusinessException(errorCode);
+		}
+	}
+
+	/**
+	 * 로그아웃. Refresh 세션을 지우고, 현재 Access Token 의 jti 를 남은 만료 시간 동안 블랙리스트에 등록한다.
+	 * RT 가 없거나 이미 무효여도 로그아웃은 성공 처리한다.
+	 */
+	@Transactional(readOnly = true)
+	public void logout(String accessTokenJti, Instant accessTokenExpiresAt, String refreshToken) {
+		deleteRefreshSessionQuietly(refreshToken);
+
+		Duration remaining = Duration.between(Instant.now(), accessTokenExpiresAt);
+		if (remaining.isNegative()) {
+			remaining = Duration.ZERO;
+		}
+		tokenBlacklist.blacklist(accessTokenJti, remaining);
+	}
+
+	private void deleteRefreshSessionQuietly(String refreshToken) {
+		if (refreshToken == null || refreshToken.isBlank()) {
+			return;
+		}
+		try {
+			refreshSessionStore.delete(jwtProvider.parseRefreshTokenSessionId(refreshToken));
+		} catch (JwtValidationException ignored) {
+			// RT 가 만료·무효여도 로그아웃은 계속 진행한다.
 		}
 	}
 
