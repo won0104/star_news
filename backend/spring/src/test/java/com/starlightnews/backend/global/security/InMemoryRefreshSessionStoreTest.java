@@ -61,4 +61,23 @@ class InMemoryRefreshSessionStoreTest {
 
 		assertThat(store.find("sid-1")).contains(new RefreshSession(1L, "new"));
 	}
+
+	@Test
+	void deleteAllByUserId는_해당_사용자_세션만_지우고_삭제한_수를_반환한다() {
+		store.save("a-1", new RefreshSession(1L, "h1"), TTL);
+		store.save("a-2", new RefreshSession(1L, "h2"), TTL);
+		store.save("b-1", new RefreshSession(2L, "h3"), TTL);
+
+		int deleted = store.deleteAllByUserId(1L);
+
+		assertThat(deleted).isEqualTo(2);
+		assertThat(store.find("a-1")).isEmpty();
+		assertThat(store.find("a-2")).isEmpty();
+		assertThat(store.find("b-1")).contains(new RefreshSession(2L, "h3"));
+	}
+
+	@Test
+	void deleteAllByUserId는_세션이_없으면_0을_반환한다() {
+		assertThat(store.deleteAllByUserId(99L)).isZero();
+	}
 }

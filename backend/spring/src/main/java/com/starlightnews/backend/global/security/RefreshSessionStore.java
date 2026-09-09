@@ -17,4 +17,10 @@ public interface RefreshSessionStore {
 
 	/** 세션을 즉시 삭제한다. (로그아웃 / Refresh Token Rotation) */
 	void delete(String sessionId);
+
+	/**
+	 * 해당 사용자의 모든 Refresh 세션을 삭제한다. (회원 탈퇴 시 전체 기기 로그아웃)
+	 * 삭제한 세션 수를 반환한다.
+	 */
+	int deleteAllByUserId(Long userId);
 }
