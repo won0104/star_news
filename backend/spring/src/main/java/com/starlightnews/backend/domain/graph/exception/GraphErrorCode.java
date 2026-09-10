@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum GraphErrorCode implements ErrorCode {
 
 	INVALID_NODE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 그래프 Node 유형입니다."),
+	INVALID_CURSOR(HttpStatus.BAD_REQUEST, "커서가 유효하지 않습니다."),
 	GRAPH_NODE_QUERY_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "그래프 Node 조회에 실패했습니다.");
 
 	private final HttpStatus status;
