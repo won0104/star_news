@@ -1,8 +1,37 @@
 # 추천 도메인의 Neo4j 쿼리.
+from datetime import datetime
+
 from neo4j import Session
 
 # 유사 유저 탐색 시 fan-out을 제한하는 상위 인원 수
 SIMILAR_USER_LIMIT = 50
+
+# 후보 Event로 인정하는 최근성 기간 (일). 이보다 오래된 Event는 후보에서 제외.
+RECENCY_WINDOW_DAYS = 15
+
+
+# 추천 후보 공통 필터링
+# - 미열람 필터: 본인이 이미 CONSUMED한 Event 제외
+# - 비선호 Topic 제외 필터: 본인이 DISLIKES한 Topic으로 분류된 Event 제외
+# - 최근성 필터: recency_threshold보다 오래된 Event 제외
+def find_candidate_events(session: Session, user_id: int, recency_threshold: datetime) -> list[str]:
+    result = session.run(
+        """
+        // 최근성 필터 먼저 적용 (event_occurred_at 인덱스로 좁힘)
+        MATCH (candidate:Event)
+        
+        WHERE candidate.occurredAt >= $recencyThreshold
+        // 비선호 Topic, 미열람 필터 적용 
+        MATCH (u:User {userId: $userId})
+        WHERE NOT (u)-[:CONSUMED]->(candidate)
+          AND NOT (candidate)-[:CLASSIFIED_AS]->(:Topic)<-[:DISLIKES]-(u)
+
+        RETURN candidate.nodeId AS eventId
+        """,
+        userId=user_id,
+        recencyThreshold=recency_threshold,
+    )
+    return [record["eventId"] for record in result]
 
 
 # 협업 필터링(CF) 후보 Event 조회 - 유사도는 Jaccard(교집합/합집합)로 계산
