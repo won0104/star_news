@@ -1,10 +1,14 @@
 package com.starlightnews.backend.domain.user.repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNodeId;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * 사용자 지식 Node 참조 정보 조회·저장. (user_knowledge_nodes)
@@ -15,4 +19,14 @@ public interface UserKnowledgeNodeRepository
 	Optional<UserKnowledgeNode> findById(UserKnowledgeNodeId id);
 
 	UserKnowledgeNode save(UserKnowledgeNode userKnowledgeNode);
+
+	/**
+	 * 해당 Row 가 있으면 node_click_count 를 1 늘리고 last_seen_at 을 갱신한다.
+	 * 반환값은 갱신된 행 수(있으면 1, 없으면 0)이며, 0 이면 호출 측이 새 Row 를 만든다.
+	 */
+	@Modifying
+	@Query("UPDATE UserKnowledgeNode u "
+			+ "SET u.nodeClickCount = u.nodeClickCount + 1, u.lastSeenAt = :now "
+			+ "WHERE u.id = :id")
+	int incrementClick(@Param("id") UserKnowledgeNodeId id, @Param("now") LocalDateTime now);
 }
