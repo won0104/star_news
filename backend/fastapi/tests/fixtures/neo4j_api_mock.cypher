@@ -239,6 +239,17 @@ CALL {
   RETURN count(r) AS r18
 }
 CALL {
+  UNWIND [
+    {start: "00000026-0920-4000-8000-000000000001", end: "00000023-0920-4000-8000-000000000002", props: {isPrimary: true, confidence: 0.96, source: "MANUAL", classifiedAt: datetime("2024-05-24T13:20:00+09:00")}},
+    {start: "00000026-0920-4000-8000-000000000002", end: "00000023-0920-4000-8000-000000000002", props: {isPrimary: true, confidence: 0.97, source: "MANUAL", classifiedAt: datetime("2024-05-25T10:20:00+09:00")}},
+    {start: "00000026-0920-4000-8000-000000000003", end: "00000023-0920-4000-8000-000000000002", props: {isPrimary: true, confidence: 0.95, source: "MANUAL", classifiedAt: datetime("2024-05-23T12:10:00+09:00")}}
+  ] AS row
+  MATCH (a:Statement {nodeId: row.start}), (b:Topic {nodeId: row.end})
+  MERGE (a)-[r:CLASSIFIED_AS]->(b)
+  SET r += row.props
+  RETURN count(r) AS r25
+}
+CALL {
   UNWIND [{start: 950001, end: "00000020-0920-4000-8000-000000000001", props: {readArticleCount: 2, eventClickCount: 3, articleFavoriteCount: 0, eventFavorited: false, lastInteractedAt: datetime("2024-05-24T21:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}, {start: 950001, end: "00000020-0920-4000-8000-000000000004", props: {readArticleCount: 1, eventClickCount: 2, articleFavoriteCount: 1, eventFavorited: true, lastInteractedAt: datetime("2024-05-24T22:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}, {start: 950002, end: "00000020-0920-4000-8000-000000000001", props: {readArticleCount: 1, eventClickCount: 1, articleFavoriteCount: 0, eventFavorited: false, lastInteractedAt: datetime("2024-05-24T21:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}, {start: 950002, end: "00000020-0920-4000-8000-000000000004", props: {readArticleCount: 1, eventClickCount: 2, articleFavoriteCount: 0, eventFavorited: false, lastInteractedAt: datetime("2024-05-24T21:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}, {start: 950002, end: "00000020-0920-4000-8000-000000000005", props: {readArticleCount: 1, eventClickCount: 1, articleFavoriteCount: 1, eventFavorited: false, lastInteractedAt: datetime("2024-05-24T22:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}, {start: 950002, end: "00000020-0920-4000-8000-000000000006", props: {readArticleCount: 1, eventClickCount: 2, articleFavoriteCount: 0, eventFavorited: true, lastInteractedAt: datetime("2024-05-24T22:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}, {start: 950002, end: "00000020-0920-4000-8000-000000000007", props: {readArticleCount: 1, eventClickCount: 1, articleFavoriteCount: 0, eventFavorited: false, lastInteractedAt: datetime("2024-05-24T21:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}, {start: 950002, end: "00000020-0920-4000-8000-000000000008", props: {readArticleCount: 1, eventClickCount: 1, articleFavoriteCount: 0, eventFavorited: false, lastInteractedAt: datetime("2024-05-24T21:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}, {start: 950002, end: "00000020-0920-4000-8000-000000000009", props: {readArticleCount: 1, eventClickCount: 2, articleFavoriteCount: 1, eventFavorited: false, lastInteractedAt: datetime("2024-05-24T22:00:00+09:00"), updatedAt: datetime("2024-05-25T05:20:00+09:00")}}] AS row
   MATCH (a:User {userId: row.start}), (b:Event {nodeId: row.end})
   MERGE (a)-[r:CONSUMED]->(b)
@@ -280,7 +291,7 @@ CALL {
   SET r += row.props
   RETURN count(r) AS r24
 }
-RETURN 87 AS expectedNodeCount, 243 AS expectedRelationshipCount, r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10 + r11 + r12 + r13 + r14 + r15 + r16 + r17 + r18 + r19 + r20 + r21 + r22 + r23 + r24 AS writtenRelationshipCount;
+RETURN 87 AS expectedNodeCount, 246 AS expectedRelationshipCount, r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10 + r11 + r12 + r13 + r14 + r15 + r16 + r17 + r18 + r19 + r20 + r21 + r22 + r23 + r24 + r25 AS writtenRelationshipCount;
 
 // 적재 후 별도로 실행할 검증 쿼리(주석).
 // MATCH (a:Article)-[:COVERS]->(e:Event {nodeId:'00000020-0920-4000-8000-000000000001'})
@@ -291,3 +302,6 @@ RETURN 87 AS expectedNodeCount, 243 AS expectedRelationshipCount, r0 + r1 + r2 +
 // 예상: 통화정책=1/4, 반도체정책=1/1, 엔비디아실적=0/1, HBM=0/3, 의료=0/3.
 // MATCH (n:Article) WHERE NOT (n)-[:COVERS]->(:Event) RETURN count(n); // 예상 0
 // MATCH (u:User {userId:950003})-[:CONSUMED]->() RETURN count(*); // 예상 0
+// MATCH (s:Statement)-[r:CLASSIFIED_AS]->(t:Topic)
+// RETURN s.nodeId, t.topicCode, r.isPrimary, r.confidence, r.source ORDER BY s.nodeId;
+// 예상: Statement 3개가 모두 ECONOMY Topic에 주 분류로 연결되고 source는 MANUAL이다.
