@@ -5,6 +5,7 @@ from app.recommendations import repository
 from app.recommendations.schemas import CFCandidate
 
 
+# 관심 기반/관심 확장 추천 최종 계산
 def calculate_recommendations(request: dict):
     raise NotImplementedError
 
