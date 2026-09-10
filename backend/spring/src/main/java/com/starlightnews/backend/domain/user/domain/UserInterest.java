@@ -47,4 +47,15 @@ public class UserInterest extends BaseTimeEntity {
 	static UserInterest of(User user, TopicCode topicCode, InterestType interestType) {
 		return new UserInterest(user, topicCode, interestType);
 	}
+
+	/**
+	 * 복합키의 내부 구조를 노출하지 않고 이 설정의 Topic 코드를 반환한다.
+	 */
+	public TopicCode getTopicCode() {
+		return id.getTopicCode();
+	}
+
+	public boolean hasType(InterestType interestType) {
+		return this.interestType == interestType;
+	}
 }

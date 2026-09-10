@@ -3,6 +3,7 @@ package com.starlightnews.backend.domain.user.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.starlightnews.backend.global.entity.BaseTimeEntity;
 import com.starlightnews.backend.global.enums.InterestType;
@@ -74,5 +75,17 @@ public class User extends BaseTimeEntity {
 	 */
 	public void addInterest(TopicCode topicCode, InterestType interestType) {
 		interests.add(UserInterest.of(this, topicCode, interestType));
+	}
+
+	/**
+	 * 지정한 관심 유형의 Topic 코드를 공통 Enum 선언 순서로 반환한다.
+	 */
+	public List<TopicCode> getTopicCodes(InterestType interestType) {
+		Objects.requireNonNull(interestType, "interestType must not be null");
+		return interests.stream()
+				.filter(interest -> interest.hasType(interestType))
+				.map(UserInterest::getTopicCode)
+				.sorted()
+				.toList();
 	}
 }

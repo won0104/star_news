@@ -1,0 +1,34 @@
+package com.starlightnews.backend.domain.user.service;
+
+import com.starlightnews.backend.domain.user.domain.User;
+import com.starlightnews.backend.domain.user.dto.TopicPreferenceResponse;
+import com.starlightnews.backend.domain.user.exception.UserErrorCode;
+import com.starlightnews.backend.domain.user.repository.UserRepository;
+import com.starlightnews.backend.global.enums.InterestType;
+import com.starlightnews.backend.global.error.BusinessException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 로그인 사용자의 관심·비관심 Topic 설정을 조회하고 관리한다.
+ */
+@Service
+@RequiredArgsConstructor
+public class TopicPreferenceService {
+
+	private final UserRepository userRepository;
+
+	/**
+	 * 활성 사용자가 설정한 관심 Topic 목록을 반환한다.
+	 * 사용자가 없거나 탈퇴한 경우 USER_NOT_FOUND 예외를 발생시킨다.
+	 */
+	@Transactional(readOnly = true)
+	public TopicPreferenceResponse getInterests(long userId) {
+		User user = userRepository.findById(userId)
+				.filter(found -> !found.isDeleted())
+				.orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+		return new TopicPreferenceResponse(user.getTopicCodes(InterestType.INTEREST));
+	}
+}
