@@ -1,0 +1,138 @@
+/* ---- Adding an item -------------------------------------------------------- */
+.addRow {
+  display: flex;
+  gap: 12px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 15px;
+  border: 1px solid var(--auth-border);
+  border-radius: 8px;
+  background: var(--auth-input-bg);
+  font: inherit;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--auth-title);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.input::placeholder {
+  color: var(--auth-muted);
+}
+
+.input:focus {
+  border-color: var(--brass-b);
+  box-shadow: 0 0 0 3px var(--auth-focus-ring);
+}
+
+/*
+ * Outlined rather than the dark pill: in the frame this 추가 is a plain bordered button
+ * while 관심 관리's is filled, and 변경사항 저장 is the one filled action on the pane.
+ * These are the tokens 중복확인 on the sign-up screen already uses for that role, so a
+ * secondary button looks the same wherever it appears.
+ */
+.add,
+.remove {
+  flex: none;
+  border: 0.7px solid var(--auth-secondary-border);
+  border-radius: 8px;
+  background: var(--auth-secondary-bg);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--auth-secondary-label);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.add:hover,
+.remove:hover {
+  background: rgba(250, 245, 235, 1);
+}
+
+.add {
+  width: 96px;
+  height: 48px;
+  padding: 0;
+}
+
+/* ---- Registered items ------------------------------------------------------ */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 16px 15px 20px;
+  border: 1px solid var(--paper-edge);
+  border-radius: 10px;
+  background: var(--auth-input-bg);
+}
+
+.itemText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itemLabel {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--headline-ink);
+  overflow-wrap: anywhere;
+}
+
+.itemNote {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.remove {
+  height: 38px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.empty {
+  margin: 0;
+  padding: 26px 0;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: var(--ink-faint);
+}
+
+/* ---- Notice ---------------------------------------------------------------- */
+/*
+ * The frame tints this box. Here it is the same low brass wash the picked topic cards
+ * and the terrain's active quadrant use, so "informational" reads the same throughout.
+ * Two lines, kept as two spans so the box breaks where the frame breaks it.
+ */
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 26px 0 0;
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: rgba(186, 133, 56, 0.08);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}

@@ -98,7 +98,7 @@ export function SignupScreen() {
       startSession({
         id: trimmedId
       });
-      navigate('/');
+      navigate('/app');
     } catch {
       setFormError(authMessages.signupFailed);
     } finally {

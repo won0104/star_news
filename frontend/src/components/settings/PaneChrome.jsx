@@ -7,10 +7,11 @@ import styles from './PaneChrome.module.css';
  * is actually its own.
  */
 
+/** `eyebrow` is optional — not every frame carries one. */
 export function PaneHead({ eyebrow, title, blurb }) {
   return (
     <>
-      <p className={styles.eyebrow}>{eyebrow}</p>
+      {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
       <h2 className={styles.title}>{title}</h2>
       <p className={styles.blurb}>{blurb}</p>
     </>

@@ -24,6 +24,11 @@ import { AtticCompact } from './AtticCompact';
  *
  * Below <AtticCompact>'s breakpoint the reflowed column takes over, and that layout is
  * unchanged — it carries its own header and has no left rail to keep.
+ *
+ * No item in the bar is current here: 오늘의 트렌드 left the nav when the four app
+ * destinations replaced it, so this screen is reachable by URL but is not one of them.
+ * Its bar navigates into /app with the chosen destination in the query, since there is
+ * no pane on this page to switch.
  */
 export function AtticScene() {
   const navigate = useNavigate();
@@ -34,8 +39,7 @@ export function AtticScene() {
   return (
     <>
       <TopBar
-        activeId="trend"
-        onSelect={(id) => navigate(id === 'trend' ? '/trend' : '/')}
+        onSelect={(id) => navigate(`/app?view=${id}`)}
         onAuth={(kind) => navigate(`/${kind}`)}
       />
 

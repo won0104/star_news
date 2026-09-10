@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { paneStub, settingsCopy, settingsPanes } from '../../data/settings';
+import { settingsCopy, settingsPanes } from '../../data/settings';
 import { closeSettings, openSettings, useSettingsSection } from '../../store/settings';
 import { AccountPane } from './AccountPane';
+import { DislikesPane } from './DislikesPane';
+import { DisplayPane } from './DisplayPane';
 import { InterestPane } from './InterestPane';
 import styles from './SettingsOverlay.module.css';
 
@@ -12,9 +14,7 @@ import styles from './SettingsOverlay.module.css';
  * looking at and the top bar's account menu is the only thing that has to know it
  * exists. Renders nothing until a pane is asked for.
  *
- * 계정 설정 and 관심 관리 are built. The other two are real frames in the Figma file and
- * their rail entries stay live so the structure reads correctly, but the pane says so
- * rather than showing an empty shell.
+ * All four panes are built.
  */
 export function SettingsOverlay() {
   const section = useSettingsSection();
@@ -42,8 +42,6 @@ export function SettingsOverlay() {
   }, [open]);
 
   if (!open) return null;
-
-  const pane = settingsPanes.find((entry) => entry.id === section);
 
   return (
     <div
@@ -98,9 +96,8 @@ export function SettingsOverlay() {
 
           {section === 'account' && <AccountPane />}
           {section === 'interest' && <InterestPane />}
-          {section !== 'account' && section !== 'interest' && (
-            <p className={styles.stub}>{paneStub.note(pane.label)}</p>
-          )}
+          {section === 'dislikes' && <DislikesPane />}
+          {section === 'display' && <DisplayPane />}
         </div>
       </div>
     </div>

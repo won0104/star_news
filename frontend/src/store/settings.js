@@ -17,7 +17,14 @@ import { useSyncExternalStore } from 'react';
 let section = null;
 
 let values = {
+  theme: 'light',
+  textSize: 'default',
+  reduceMotion: false,
   topics: ['politics', 'economy', 'tech'],
+  dislikes: [
+    { id: 'sports', label: '스포츠' },
+    { id: 'entertainment', label: '연예' },
+  ],
   nodes: [
     { id: 'court', label: '헌법재판소', kind: 'organisation', articles: 12, concepts: 8 },
     { id: 'inflation', label: '인플레이션', kind: 'concept', articles: 9, concepts: 6 },
@@ -46,6 +53,12 @@ export function closeSettings() {
   notify();
 }
 
+/** For the display pane's three plain values. */
+export function setSetting(key, value) {
+  values = { ...values, [key]: value };
+  notify();
+}
+
 export function toggleTopic(id) {
   const kept = values.topics.filter((topic) => topic !== id);
   values = {
@@ -66,6 +79,20 @@ export function addNode(label) {
     // is the safe default kind until the backend can say what it actually is.
     nodes: [...values.nodes, { id: trimmed, label: trimmed, kind: 'concept', articles: 0, concepts: 0 }],
   };
+  notify();
+}
+
+/** 관심 없음 항목. Same guards as addNode: no blanks, no duplicates. */
+export function addDislike(label) {
+  const trimmed = label.trim();
+  if (!trimmed) return;
+  if (values.dislikes.some((item) => item.label === trimmed)) return;
+  values = { ...values, dislikes: [...values.dislikes, { id: trimmed, label: trimmed }] };
+  notify();
+}
+
+export function removeDislike(id) {
+  values = { ...values, dislikes: values.dislikes.filter((item) => item.id !== id) };
   notify();
 }
 

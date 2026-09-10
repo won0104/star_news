@@ -32,17 +32,30 @@
   color: var(--nav-ink-active);
 }
 
-.brandSection {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  color: var(--nav-ink);
-}
-
+/* No gap: the hairlines are the spacing now, and the buttons' own padding keeps the
+   labels off them. */
 .nav {
   display: flex;
   align-items: center;
-  gap: 6px;
   margin-left: 8px;
+}
+
+/*
+ * Short on purpose — 16px against the bar's 72px, so it reads as a separator between
+ * two labels rather than as a rule dividing the bar into cells.
+ *
+ * Not --paper-edge, which is what every other hairline in the app uses. That token is
+ * alpha 0.12 and it is meant for lines on paper; this line is on the bar, which is
+ * itself only half opaque over the photograph, and measured against the composite
+ * behind each rule it came out at 1.14:1 — there but invisible. At 0.45 the same three
+ * spots are 1.66, 1.76 and 1.75, which reads as a hairline without becoming a rule.
+ */
+.navRule {
+  flex: none;
+  width: 1px;
+  height: 16px;
+  margin: 0 3px;
+  background: rgba(120, 102, 82, 0.45);
 }
 
 .navItem {
@@ -122,11 +135,35 @@
     padding: 0 16px;
   }
 
+  /*
+   * Kept, where it used to be hidden. Hiding it was only safe while the left menu board
+   * carried the same destinations at every width; with the board gone this is the only
+   * navigation there is, so below the breakpoint it scrolls sideways instead of
+   * disappearing. `-webkit-overflow-scrolling` is what makes that a flick on iOS.
+   */
   .nav {
+    /* Takes the whole middle and scrolls inside it. `min-width: 0` is what allows that:
+       without it the flex item cannot shrink below its content and the overflow never
+       engages, and with .spacer still claiming the middle the strip was squeezed to a
+       sliver instead. */
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .spacer {
     display: none;
   }
 
-  .brandSection {
+  .nav::-webkit-scrollbar {
     display: none;
+  }
+
+  .navItem {
+    padding: 8px 12px;
+    font-size: 13.5px;
   }
 }

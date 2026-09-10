@@ -4,18 +4,24 @@ export const brand = {
   name: '별빛 뉴스',
   section: '나를 위한 추천'
 };
+/**
+ * The whole of the site's navigation. These were two levels until the left menu board
+ * was removed — 홈 and 나의 뉴스 세계 in the board, each with a two-tab strip inside its
+ * pane — and the four leaves are now flat in the bar, so a screen is one click from any
+ * other instead of two. `id` is what <HomeScene> switches on and what `?view=` carries.
+ */
 export const navItems = [{
+  id: 'trend',
+  label: '주요 트렌드'
+}, {
   id: 'foryou',
   label: '나를 위한 추천'
 }, {
-  id: 'trend',
-  label: '오늘의 트렌드'
-}, {
-  id: 'saved',
-  label: '저장됨'
-}, {
-  id: 'history',
+  id: 'log',
   label: '나의 기록'
+}, {
+  id: 'report',
+  label: '나의 리포트'
 }];
 export const authActions = {
   signIn: '로그인',
@@ -43,8 +49,13 @@ export const accountMenu = {
   signOut: '로그아웃'
 };
 
-/** The photograph behind every screen. Replace the file at this path to swap it. */
+/**
+ * The sunlit room: the scene behind the front door, the auth screens, and every app
+ * destination but 나를 위한 추천. `id` is what <PhotoBackdrop> keys its CSS off and what
+ * <AppScene> keys the component itself off.
+ */
 export const backdrop = {
+  id: 'home',
   src: '/assets/home/backdrop.png',
   /**
    * The same room in motion — 10 silent seconds the home screen fades in over the still
@@ -53,7 +64,7 @@ export const backdrop = {
    * is applied), so the hand-back does not read as a cut; the still is also the sharper
    * picture, at 1672x941 against the clip's 1280x720.
    *
-   * webm first, mp4 for Safari; re-encode with scripts/encode-backdrop-loop.ps1. Files
+   * webm first, mp4 for Safari; re-encode with scripts/encode-clip.ps1. Files
    * in public/ carry no content hash, so a replacement needs a new name
    * (backdrop-loop-v2) or a CDN will keep handing out the old bytes.
    */

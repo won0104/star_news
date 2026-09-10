@@ -31,12 +31,11 @@ export const settingsPanes = [{
 /**
  * 계정 설정 — Figma V3 / Overlay / Settings / Account.
  *
- * Only the two changes that were asked for. The eyebrow follows the Interest frame's
- * `PREFERENCES · <PANE>` shape rather than a word of my own, since I have not read
- * this frame's own header.
+ * Only the two changes that were asked for. No eyebrow: the Interest frame has one and
+ * the Dislikes frame does not, so it is per-pane, and this frame's own header has not
+ * been read. Better absent than invented.
  */
 export const accountPane = {
-  eyebrow: 'PREFERENCES · ACCOUNT',
   title: '계정 설정',
   blurb: '로그인에 쓰는 이메일과 비밀번호를 바꿉니다.',
 
@@ -136,7 +135,61 @@ export const nodeKinds = {
   }
 };
 
-/** Panes that exist as Figma frames but are not built here yet. */
-export const paneStub = {
-  note: (label) => `${label} 화면은 아직 붙이지 않았습니다.`
+/**
+ * 화면 설정 — Figma V3 / Overlay / Settings / Display.
+ *
+ * Three controls. Only the last one is connected to anything: see the note on each.
+ */
+export const displayPane = {
+  eyebrow: 'PREFERENCES · DISPLAY',
+  title: '화면 설정',
+  blurb: '보기 편한 쪽으로 화면을 맞춥니다.',
+
+  themeLabel: '화면 테마',
+  themeHint: '방의 밝기를 정합니다',
+  themes: [{
+    id: 'light',
+    label: '밝게'
+  }, {
+    id: 'dark',
+    label: '어둡게'
+  }],
+  themePending: '어두운 팔레트가 아직 없어 선택만 저장됩니다.',
+
+  textSizeLabel: '글자 크기',
+  textSizeHint: '본문과 카드 글자에 적용됩니다',
+  textSizes: [{
+    id: 'default',
+    label: '보통'
+  }, {
+    id: 'large',
+    label: '크게'
+  }],
+  textSizePending: '화면들이 아직 고정 px로 짜여 있어 선택만 저장됩니다.',
+
+  motionLabel: '애니메이션 없애기',
+  motionHint: '배경 영상을 재생하지 않습니다. OS의 “동작 줄이기”가 켜져 있으면 이 설정과 무관하게 이미 멈춰 있습니다.',
+  motionState: (off) => (off ? '켜짐' : '꺼짐')
+};
+
+/** 관심 없음 관리 — Figma V3 / Overlay / Settings / Dislikes. */
+export const dislikesPane = {
+  title: '관심 없음 관리',
+  blurb: '추천에서 덜 보고 싶은 분야와 주제를 관리합니다.',
+
+  addLabel: '관심 없음 항목 추가',
+  addPlaceholder: '분야 또는 주제를 입력하세요',
+  addSubmit: '추가',
+
+  listLabel: '등록된 항목',
+  listCount: (n) => `${n}개`,
+  listEmpty: '등록된 항목이 없습니다.',
+  itemNote: '추천 후보에서 제외 예정',
+  itemRemove: '목록에서 제거',
+
+  /** Two lines in the frame, kept as two so the box breaks where it does there. */
+  notice: [
+    '추가하거나 제거한 내용은 저장 후 추천에 반영됩니다.',
+    '읽지 않았다는 이유만으로 자동 등록되지 않습니다.'
+  ]
 };

@@ -150,14 +150,6 @@
   stroke-linecap: round;
 }
 
-.stub {
-  margin: 0;
-  padding: 64px 0;
-  font-family: var(--font-sans);
-  font-size: 14px;
-  color: var(--ink-faint);
-}
-
 @media (max-width: 900px) {
   .scrim {
     padding: 14px;

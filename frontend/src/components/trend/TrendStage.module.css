@@ -1,0 +1,55 @@
+/*
+ * 주요 트렌드's whole screen: the clip, then the still it ends on. Full bleed under the
+ * bar rather than a card in the pane, because this *is* the screen — there is nothing
+ * else on it to frame.
+ *
+ * The stars are drawn inside it, positioned against this box - so it is the field the
+ * constellation's percentages are percentages of.
+ *
+ * `fixed`, not `absolute`: <PhotoBackdrop>'s .root is the scroll container, and an
+ * absolute child of a scroller is one viewport tall and scrolls away with the content.
+ * Fixed makes this a stage, the same call .wash and .veil already make. Nothing here
+ * depends on an ancestor's overflow: only transform, filter or contain would capture a
+ * fixed descendant, and none of them is set on the way up.
+ */
+.stage {
+  position: fixed;
+  inset: 72px 0 0;
+  overflow: hidden;
+  /* The still's own mid tone, so the screen does not flash pale before it loads. */
+  background: #46403c;
+}
+
+/*
+ * The still is the picture the screen keeps, and it is the better of the two: 1448x1086,
+ * and not carrying the compression of ten seconds of motion. It sits underneath from the
+ * start and the clip fades off it, so the hand-back at the end is a cross-fade, not a cut.
+ *
+ * object-position has to match .clip, or the two crop differently on any viewport that
+ * is not 4:3 and the cross-fade slides sideways.
+ */
+.still,
+.clip {
+  object-position: center;
+}
+
+.still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.stillReady {
+  opacity: 1;
+}
+
+@media (max-width: 1023px) {
+  /* The bar shrinks to 60px below this width; meet it there. */
+  .stage {
+    inset: 60px 0 0;
+  }
+}

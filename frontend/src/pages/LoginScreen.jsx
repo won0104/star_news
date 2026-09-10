@@ -34,7 +34,7 @@ export function LoginScreen() {
       startSession({
         id: id.trim()
       });
-      navigate('/');
+      navigate('/app');
     } catch {
       setFormError(authMessages.loginFailed);
     } finally {
