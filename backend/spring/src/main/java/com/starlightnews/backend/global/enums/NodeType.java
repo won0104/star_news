@@ -14,7 +14,6 @@ public enum NodeType {
 	STORY("Story", "title", null, "lastEventAt"),
 	TOPIC("Topic", "nameKo", null, null),
 	ENTITY("Entity", "canonicalName", "entityType", null),
-
 	TIME("Time", "value", "granularity", null),
 	STATEMENT("Statement", "text", "statementType", null);
 
