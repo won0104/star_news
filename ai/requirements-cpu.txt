@@ -1,0 +1,4 @@
+# CPU inference runtime only (no model weights).
+# Install torch separately from the PyTorch CPU wheel index.
+transformers==4.51.3
+huggingface-hub==0.30.2
