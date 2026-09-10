@@ -1,6 +1,6 @@
 package com.starlightnews.backend.domain.graph.repository;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * Neo4j 에서 조회한 그래프 Node 의 화면 표시용 원시 값.
@@ -9,6 +9,6 @@ import java.time.ZonedDateTime;
 public record GraphNodeRecord(
 		String title,
 		String type,
-		ZonedDateTime time
+		OffsetDateTime time
 ) {
 }

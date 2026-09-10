@@ -42,7 +42,7 @@ public class Neo4jGraphNodeRepository implements GraphNodeRepository {
 				.mappedBy((typeSystem, record) -> new GraphNodeRecord(
 						record.get("title").isNull() ? null : record.get("title").asString(),
 						record.get("type").isNull() ? null : record.get("type").asString(),
-						record.get("time").isNull() ? null : record.get("time").asZonedDateTime()))
+						record.get("time").isNull() ? null : record.get("time").asZonedDateTime().toOffsetDateTime()))
 				.one();
 	}
 
