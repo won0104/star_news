@@ -11,6 +11,8 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * user_node_favorites 테이블의 복합 기본키 (user_id, node_type, node_id).
@@ -28,6 +30,8 @@ public class UserNodeFavoriteId implements Serializable {
 	@Column(name = "node_type", length = 32)
 	private NodeType nodeType;
 
+	// user_node_favorites.node_id 는 CHAR(36) 이므로 CHAR 로 매핑한다 (기본 VARCHAR 이면 validate 실패).
+	@JdbcTypeCode(SqlTypes.CHAR)
 	@Column(name = "node_id", length = 36)
 	private String nodeId;
 
