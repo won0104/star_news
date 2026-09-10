@@ -1,3 +1,15 @@
 # 추천 계산 비즈니스 로직.
+from neo4j import Session
+
+from app.recommendations import repository
+from app.recommendations.schemas import CFCandidate
+
+
 def calculate_recommendations(request: dict):
     raise NotImplementedError
+
+
+# 협업 필터링(CF) 공용 모듈
+def calculate_cf_scores(user_id: int, session: Session) -> list[CFCandidate]:
+    candidates = repository.find_cf_candidate_events(session, user_id)
+    return [CFCandidate(event_id=c["eventId"], cf_score=c["cfScore"]) for c in candidates]
