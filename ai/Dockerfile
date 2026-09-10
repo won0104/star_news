@@ -4,8 +4,11 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    HF_HUB_OFFLINE=0 \
-    TRANSFORMERS_OFFLINE=0
+    HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1 \
+    KG_MODEL_DIR=/models/artifacts/kg-extractor \
+    ARTICLELOCAL_HF_CACHE=/models/cache/hub \
+    HF_HUB_CACHE=/models/cache/hub
 
 WORKDIR /app
 

@@ -106,28 +106,37 @@ class KPFClassifier:
         }
 
 
+# Server/container defaults: models live on the ai-cpu-models volume at /models.
+DEFAULT_KG_DIR = "/models/artifacts/kg-extractor"
+DEFAULT_HF_CACHE = "/models/cache/hub"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--kg-dir", default=os.environ.get("KG_MODEL_DIR"),
-                        help="KG bundle directory containing config/, runtime/, models/, weights/")
-    parser.add_argument("--hf-cache", default=os.environ.get("ARTICLELOCAL_HF_CACHE"),
-                        help="Hugging Face hub cache directory (contains models--...)")
+    parser.add_argument(
+        "--kg-dir",
+        default=os.environ.get("KG_MODEL_DIR", DEFAULT_KG_DIR),
+        help="KG bundle directory containing config/, runtime/, models/, weights/",
+    )
+    parser.add_argument(
+        "--hf-cache",
+        default=os.environ.get("ARTICLELOCAL_HF_CACHE", DEFAULT_HF_CACHE),
+        help="Hugging Face hub cache directory (contains models--...)",
+    )
     parser.add_argument("--input", type=Path, default=ROOT / "article.json")
     parser.add_argument("--output", type=Path, default=ROOT / "result.json")
     args = parser.parse_args()
-    if not args.kg_dir:
-        parser.error("Set --kg-dir or KG_MODEL_DIR to the installed KG bundle.")
     bundle = Path(args.kg_dir).expanduser().resolve()
     if not (bundle / "config" / "pipeline.json").is_file():
-        parser.error("KG bundle must contain config/pipeline.json")
+        parser.error(
+            f"KG bundle must contain config/pipeline.json (looked in: {bundle})"
+        )
 
     global CACHE
-    if args.hf_cache:
-        CACHE = str(Path(args.hf_cache).expanduser().resolve())
-        os.environ["HF_HUB_CACHE"] = CACHE
-    else:
-        from huggingface_hub.constants import HF_HUB_CACHE
-        CACHE = HF_HUB_CACHE
+    CACHE = str(Path(args.hf_cache).expanduser().resolve())
+    if not Path(CACHE).is_dir():
+        parser.error(f"HF hub cache directory not found: {CACHE}")
+    os.environ["HF_HUB_CACHE"] = CACHE
     os.environ["ARTICLELOCAL_HF_CACHE"] = CACHE
 
     torch = require_cpu()

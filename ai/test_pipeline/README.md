@@ -1,42 +1,63 @@
 # CPU 추론 확인용 최소 예제
 
-서버에 설치된 Python 환경과 모델로 **기사 1건 → 분류 + KG → 결과 JSON**이 출력되는지 확인합니다.
-이 폴더만 Git에 올리면 됩니다. 상위 프로젝트 코드, 모델 가중치, API 키, DB 연결은 필요하지 않습니다.
+서버 AI 환경(`ai-cpu:dev` + volume `ai-cpu-models`)에서
+**기사 1건 → KPF 분류 + KG → `result.json`** 이 되는지 확인한다.
+
+전체 환경 구성·메모리·상주 판단은 상위 [ai/README.md](../README.md)를 본다.
 
 ## 파일
-- `article.json`: 합성 기사 1건
-- `pipeline.py`: 전처리, KPF 분류 3종, KG 추출 (CPU, 순차 실행)
-- `labels.json`: KPF 라벨 이름 및 공식 출처
-- `result.json`: 로컬에서 실제 실행한 요약 결과. 서버 실행 시 덮어씁니다.
-- `.gitignore`: 캐시·가상환경 제외
 
-## 서버 실행
-설치해 둔 CPU 가상환경을 활성화하고 이 폴더에서 실행합니다.
+- `article.json`: 합성 기사 1건
+- `pipeline.py`: 전처리, KPF 분류 3종, KG 추출 (CPU, 순차)
+- `labels.json`: KPF 라벨
+- `result.json`: 마지막 실행 결과 (덮어씀)
+
+## 기본 경로 (컨테이너)
+
+| 용도 | 경로 |
+|------|------|
+| KG 번들 | `/models/artifacts/kg-extractor` |
+| HF hub 캐시 | `/models/cache/hub` |
+
+환경변수 `KG_MODEL_DIR`, `ARTICLELOCAL_HF_CACHE`로 덮어쓸 수 있다.
+모델은 volume에서만 읽으며, 실행 중 다운로드하지 않는다 (`HF_HUB_OFFLINE`).
+
+## 실행
 
 ```bash
-python pipeline.py \
-  --kg-dir /실제/경로/kg-extractor \
-  --hf-cache /실제/경로/huggingface/hub
+sudo docker run --rm \
+  -v ai-cpu-models:/models \
+  -v /home/ubuntu/S15P21E206/ai/test_pipeline:/work \
+  -w /work \
+  -e HF_HUB_OFFLINE=1 \
+  -e TRANSFORMERS_OFFLINE=1 \
+  ai-cpu:dev \
+  python pipeline.py
 ```
 
-- `--kg-dir`: `config/pipeline.json`, `runtime/`, `models/`, `weights/`가 들어 있는 KG 번들 루트.
-- `--hf-cache`: `models--KPF--KPF-bert-cls1` 같은 디렉터리가 있는 **hub 캐시 루트**. 기본 Hugging Face 캐시를 사용한다면 생략 가능합니다.
-- 환경변수 `KG_MODEL_DIR`, `ARTICLELOCAL_HF_CACHE`로 경로를 지정해도 됩니다.
-- KPF 모델/토크나이저 리비전은 코드에 고정되어 있으며, KG 베이스 리비전은 설치된 번들 설정을 따릅니다. 해당 스냅샷이 캐시에 있어야 합니다.
-- 완전 오프라인으로 실행합니다. 캐시가 없으면 다운로드하지 않고 오류가 납니다.
-- 개별 모델 폴더만 복사한 구조라면 이 코드의 Hugging Face 캐시 구조와 맞춰야 합니다.
+성공 시 콘솔 예:
 
-검증된 의존성: Python 3.12, torch 2.6.0+cpu, transformers 4.51.3, huggingface-hub 0.30.2.
-이 폴더에서는 패키지 설치나 모델 다운로드를 수행하지 않습니다.
-
-성공 시 콘솔:
 ```text
 1/2 KPF classification on CPU...
 2/2 KG extraction on CPU...
-PASSED: 9 nodes, 9 edges -> .../result.json
+PASSED: 9 nodes, 9 edges -> /work/result.json
 ```
 
-결과에는 기사, 분류 점수, KG 노드·연결, 검증 상태, 처리 시간이 들어갑니다.
-원본 KG의 긴 근거·추적 정보는 생략한 출력 확인용 요약이며 DB 적재 스키마는 아닙니다.
-`PASSED`는 추론·구조 검증 성공을 의미하고 예측 정확도를 보장하지 않습니다.
-KG 번들의 일부 Relation 추출은 비활성화 상태입니다.
+## 이 서버에서 확인한 결과 (2026-09-10)
+
+| 항목 | 값 |
+|------|-----|
+| 결과 | **PASSED** |
+| 장치 | CPU |
+| E2E (`docker run`마다, 로딩 포함) | 약 **12.7–13.3초** |
+| 순수 추론만 (로딩 제외, 분해 측정) | 약 **4.9초** (KPF ~0.4 + KG ~4.5) |
+| 로딩만 | 약 **7.3초** (KPF ~3.4 + KG ~3.9) |
+| 분류 예 | 경제 / 취업_창업 / 지역일반 |
+| KG | 9 nodes, 9 edges, validation PASS |
+
+매 실행이 새 컨테이너라 E2E는 다음에도 비슷한 13초 전후가 정상이다.
+워커 상주 시에는 이후 요청에서 로딩을 생략할 수 있다. 상주 가능 여부는 상위 README 참고.
+
+`PASSED`는 추론·구조 검증 성공을 뜻하고 예측 정확도를 보장하지 않는다.
+출력 JSON은 확인용 요약이며 DB 적재 스키마가 아니다.
+KG 번들 일부 Relation은 비활성(부분 KG)이다.
