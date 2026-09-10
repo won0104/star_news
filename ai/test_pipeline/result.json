@@ -1,0 +1,162 @@
+{
+  "test_status": "PASSED",
+  "device": "cpu",
+  "article": {
+    "article_id": "cpu-synthetic-001",
+    "title": "서울시, 청년 주거 지원 확대",
+    "content": "서울시는 2026년 9월 8일 서울시청에서 청년 주거 지원 사업을 확대한다고 발표했다.\n김민수 주거정책과장은 다음 달부터 신청을 받는다고 말했다.",
+    "published_at": "2026-09-08T09:00:00+09:00",
+    "source": "synthetic"
+  },
+  "classification": {
+    "big_cls": "경제",
+    "small_cls": "취업_창업",
+    "region_cls": "지역일반",
+    "top_predictions": {
+      "small": [
+        {
+          "label": "취업_창업",
+          "label_id": 52,
+          "score": 1.0
+        },
+        {
+          "label": "전시_공연",
+          "label_id": 28,
+          "score": 5.669508196248785e-10
+        },
+        {
+          "label": "생활",
+          "label_id": 25,
+          "score": 1.6956316559180173e-11
+        }
+      ],
+      "big": [
+        {
+          "label": "경제",
+          "label_id": 1,
+          "score": 1.0
+        },
+        {
+          "label": "사회",
+          "label_id": 2,
+          "score": 1.2771633750574551e-09
+        },
+        {
+          "label": "정치",
+          "label_id": 0,
+          "score": 1.1075297345897184e-09
+        }
+      ],
+      "region": [
+        {
+          "label": "지역일반",
+          "label_id": 12,
+          "score": 0.7844424843788147
+        }
+      ]
+    }
+  },
+  "kg_status": "PARTIAL_KG_ASSEMBLY_READY",
+  "nodes": [
+    {
+      "id": "ART-0f5ad4c9f5c02021cf035319",
+      "kind": "ARTICLE",
+      "text": "서울시, 청년 주거 지원 확대"
+    },
+    {
+      "id": "LENT-96b3fb102811c30277774ffc",
+      "kind": "LOCAL_ENTITY",
+      "text": "서울시",
+      "entity_type": "ORGANIZATION"
+    },
+    {
+      "id": "LENT-4849ecec742f890ae4b4317f",
+      "kind": "LOCAL_ENTITY",
+      "text": "서울시청",
+      "entity_type": "ORGANIZATION"
+    },
+    {
+      "id": "LENT-bf45678de3414995d9249224",
+      "kind": "LOCAL_ENTITY",
+      "text": "김민수",
+      "entity_type": "PERSON"
+    },
+    {
+      "id": "LENT-7b9f8b81935fbafde6050704",
+      "kind": "LOCAL_ENTITY",
+      "text": "김민수 주거정책과장",
+      "entity_type": "PERSON"
+    },
+    {
+      "id": "EFR-f251a6f5eddc0145cacd",
+      "kind": "EVENT",
+      "text": "서울시는 2026년 9월 8일 서울시청에서 청년 주거 지원 사업을 확대한다고 발표했다"
+    },
+    {
+      "id": "LEVT-cdfc97100e352c4535dda081",
+      "kind": "LOCAL_EVENT",
+      "text": "서울시는 2026년 9월 8일 서울시청에서 청년 주거 지원 사업을 확대한다고 발표했다"
+    },
+    {
+      "id": "TIME-d4b2d7107f7acfed7e0134f6",
+      "kind": "TIME",
+      "text": "2026-09-08"
+    },
+    {
+      "id": "STP-5cc6c6426070ba76ed61",
+      "kind": "STATEMENT",
+      "text": "김민수 주거정책과장은 다음 달부터 신청을 받는다고 말했다",
+      "statement_type": "FORECAST"
+    }
+  ],
+  "edges": [
+    {
+      "type": "MENTIONS",
+      "source": "서울시, 청년 주거 지원 확대",
+      "target": "서울시"
+    },
+    {
+      "type": "MENTIONS",
+      "source": "서울시, 청년 주거 지원 확대",
+      "target": "서울시청"
+    },
+    {
+      "type": "MENTIONS",
+      "source": "서울시, 청년 주거 지원 확대",
+      "target": "김민수"
+    },
+    {
+      "type": "MENTIONS",
+      "source": "서울시, 청년 주거 지원 확대",
+      "target": "김민수 주거정책과장"
+    },
+    {
+      "type": "COVERS",
+      "source": "서울시, 청년 주거 지원 확대",
+      "target": "서울시는 2026년 9월 8일 서울시청에서 청년 주거 지원 사업을 확대한다고 발표했다"
+    },
+    {
+      "type": "ACTOR",
+      "source": "서울시는 2026년 9월 8일 서울시청에서 청년 주거 지원 사업을 확대한다고 발표했다",
+      "target": "서울시"
+    },
+    {
+      "type": "MEMBER_OF_EVENT",
+      "source": "서울시는 2026년 9월 8일 서울시청에서 청년 주거 지원 사업을 확대한다고 발표했다",
+      "target": "서울시는 2026년 9월 8일 서울시청에서 청년 주거 지원 사업을 확대한다고 발표했다"
+    },
+    {
+      "type": "OCCURRED_ON",
+      "source": "서울시는 2026년 9월 8일 서울시청에서 청년 주거 지원 사업을 확대한다고 발표했다",
+      "target": "2026-09-08"
+    },
+    {
+      "type": "CONTAINS_STATEMENT",
+      "source": "서울시, 청년 주거 지원 확대",
+      "target": "김민수 주거정책과장은 다음 달부터 신청을 받는다고 말했다"
+    }
+  ],
+  "validation": "PASS",
+  "source_failures": [],
+  "elapsed_seconds": 13.18
+}
