@@ -1,0 +1,59 @@
+# 로컬 개발용 DB 컨테이너 (MySQL / Redis / Neo4j).
+# 배포용 docker-compose.yml 과 별개. backend/spring/.env 의 터널 포트(13306/16379/17687)를 그대로 재사용한다.
+#
+#   실행:   docker compose -f docker-compose.local.yml up -d
+#   중지:   docker compose -f docker-compose.local.yml down          (데이터 유지)
+#   초기화: docker compose -f docker-compose.local.yml down -v       (볼륨까지 삭제)
+#
+# 이걸 켜면 SSH 터널 없이 로컬에서 Spring(local 프로파일)을 돌릴 수 있다.
+
+name: s15p21e206-local
+
+services:
+  mysql:
+    image: mysql:8.4
+    ports:
+      - "127.0.0.1:13306:3306"
+    environment:
+      MYSQL_DATABASE: mysqldb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: ssafy206
+      MYSQL_ROOT_PASSWORD: ssafy206
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    volumes:
+      - local_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -pssafy206 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:16379:6379"
+    command: ["redis-server", "--requirepass", "ssafy206"]
+    volumes:
+      - local_redis_data:/data
+
+  neo4j:
+    image: neo4j:5.26
+    ports:
+      - "127.0.0.1:17687:7687"
+      - "127.0.0.1:17474:7474"
+    environment:
+      NEO4J_AUTH: neo4j/ssafy206
+    volumes:
+      - local_neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+volumes:
+  local_mysql_data:
+  local_redis_data:
+  local_neo4j_data:
