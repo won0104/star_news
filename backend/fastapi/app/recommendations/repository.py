@@ -10,14 +10,16 @@ SIMILAR_USER_LIMIT = 50
 def find_cf_candidate_events(session: Session, user_id: int) -> list[dict]:
     result = session.run(
         """
-        // 공통 CONSUMED Event 수(overlap) 계산
-        MATCH (u:User {userId: $userId})-[:CONSUMED]->(e:Event)<-[:CONSUMED]-(similar:User)
-        WHERE similar <> u
-        WITH u, similar, count(DISTINCT e) AS overlap
+        // 본인의 전체 소비 수는 유사 유저와 무관하니 한 번만 계산 (유사 유저 수만큼 반복 계산되는 것 방지)
+        MATCH (u:User {userId: $userId})-[:CONSUMED]->(ue:Event)
+        WITH u, count(DISTINCT ue) AS uCount
 
-        // 각자의 전체 소비 수 (합집합 계산용)
-        MATCH (u)-[:CONSUMED]->(ue:Event)
-        WITH u, similar, overlap, count(DISTINCT ue) AS uCount
+        // 공통 CONSUMED Event 수(overlap) 계산
+        MATCH (u)-[:CONSUMED]->(e:Event)<-[:CONSUMED]-(similar:User)
+        WHERE similar <> u
+        WITH u, uCount, similar, count(DISTINCT e) AS overlap
+
+        // 유사 유저의 전체 소비 수 (합집합 계산용)
         MATCH (similar)-[:CONSUMED]->(se:Event)
         WITH u, similar, overlap, uCount, count(DISTINCT se) AS simCount
 
