@@ -4,9 +4,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import com.starlightnews.backend.domain.graph.dto.GraphNeighborsResponse;
 import com.starlightnews.backend.domain.graph.dto.GraphNodeDetailResponse;
 import com.starlightnews.backend.domain.graph.dto.RelatedArticlesResponse;
 import com.starlightnews.backend.domain.graph.service.GraphArticleService;
+import com.starlightnews.backend.domain.graph.service.GraphNeighborService;
 import com.starlightnews.backend.domain.graph.service.GraphNodeService;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.enums.NodeType;
@@ -58,7 +60,19 @@ class GraphControllerTest {
 	@MockitoBean
 	private GraphArticleService graphArticleService;
 
+	@MockitoBean
+	private GraphNeighborService graphNeighborService;
+
 	private static final String ARTICLES_PATH = "/api/v1/graphs/nodes/EVENT/" + NODE_KEY + "/articles";
+	private static final String NEIGHBORS_PATH = "/api/v1/graphs/nodes/ENTITY/" + NODE_KEY + "/neighbors";
+
+	private GraphNeighborsResponse sampleNeighbors() {
+		return new GraphNeighborsResponse(
+				new GraphNeighborsResponse.NodeSummary("ENTITY", NODE_KEY, "한국은행"),
+				List.of(new GraphNeighborsResponse.NodeSummary("EVENT", "event-1", "기준금리 동결")),
+				List.of(new GraphNeighborsResponse.Edge("ENTITY", NODE_KEY, "EVENT", "event-1", "ACTOR", 0.9)),
+				1, true, "opaque-cursor");
+	}
 
 	private GraphNodeDetailResponse sampleResponse(boolean bookmarked) {
 		return new GraphNodeDetailResponse("EVENT", NODE_KEY, "한국은행 기준금리 동결", null,
@@ -231,6 +245,103 @@ class GraphControllerTest {
 				.willThrow(new BusinessException(CommonErrorCode.RESOURCE_NOT_FOUND));
 
 		mockMvc.perform(get(ARTICLES_PATH))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+	}
+
+	// --- 주변 그래프 조회 ---
+
+	@Test
+	void 주변_그래프_조회_성공시_200과_center_nodes_edges_구조로_응답한다() throws Exception {
+		given(graphNeighborService.getNeighbors(any(NodeType.class), anyString(), anyInt(), anyInt(), any()))
+				.willReturn(sampleNeighbors());
+
+		mockMvc.perform(get(NEIGHBORS_PATH))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.centerNode.nodeType").value("ENTITY"))
+				.andExpect(jsonPath("$.data.centerNode.nodeKey").value(NODE_KEY))
+				.andExpect(jsonPath("$.data.centerNode.label").value("한국은행"))
+				.andExpect(jsonPath("$.data.nodes[0].nodeType").value("EVENT"))
+				.andExpect(jsonPath("$.data.nodes[0].nodeKey").value("event-1"))
+				.andExpect(jsonPath("$.data.edges[0].sourceNodeKey").value(NODE_KEY))
+				.andExpect(jsonPath("$.data.edges[0].targetNodeKey").value("event-1"))
+				.andExpect(jsonPath("$.data.edges[0].edgeType").value("ACTOR"))
+				.andExpect(jsonPath("$.data.returnedCount").value(1))
+				.andExpect(jsonPath("$.data.hasNext").value(true))
+				.andExpect(jsonPath("$.data.nextCursor").value("opaque-cursor"))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+
+		verify(graphNeighborService).getNeighbors(eq(NodeType.ENTITY), eq(NODE_KEY), eq(1), eq(15), isNull());
+	}
+
+	@Test
+	void depth와_limit과_cursor_쿼리파라미터를_서비스에_전달한다() throws Exception {
+		given(graphNeighborService.getNeighbors(any(NodeType.class), anyString(), anyInt(), anyInt(), any()))
+				.willReturn(sampleNeighbors());
+
+		mockMvc.perform(get(NEIGHBORS_PATH).param("depth", "2").param("limit", "5").param("cursor", "opaque-cursor"))
+				.andExpect(status().isOk());
+
+		verify(graphNeighborService).getNeighbors(
+				eq(NodeType.ENTITY), eq(NODE_KEY), eq(2), eq(5), eq("opaque-cursor"));
+	}
+
+	@Test
+	void depth가_1미만이면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(get(NEIGHBORS_PATH).param("depth", "0"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+
+		verify(graphNeighborService, never()).getNeighbors(any(), any(), anyInt(), anyInt(), any());
+	}
+
+	@Test
+	void depth가_3초과면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(get(NEIGHBORS_PATH).param("depth", "4"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+	}
+
+	@Test
+	void limit이_1미만이면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(get(NEIGHBORS_PATH).param("limit", "0"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+	}
+
+	@Test
+	void limit이_30초과면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(get(NEIGHBORS_PATH).param("limit", "31"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+	}
+
+	@Test
+	void ARTICLE은_주변그래프_대상이_아니라_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(get("/api/v1/graphs/nodes/ARTICLE/" + NODE_KEY + "/neighbors"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(graphNeighborService, never()).getNeighbors(any(), any(), anyInt(), anyInt(), any());
+	}
+
+	@Test
+	void 주변_그래프_서비스가_INVALID_CURSOR를_던지면_400을_응답한다() throws Exception {
+		given(graphNeighborService.getNeighbors(any(NodeType.class), anyString(), anyInt(), anyInt(), any()))
+				.willThrow(new BusinessException(GraphErrorCode.INVALID_CURSOR));
+
+		mockMvc.perform(get(NEIGHBORS_PATH).param("cursor", "broken"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_CURSOR"));
+	}
+
+	@Test
+	void 주변_그래프_조회에서_중심_노드가_없으면_404를_응답한다() throws Exception {
+		given(graphNeighborService.getNeighbors(any(NodeType.class), anyString(), anyInt(), anyInt(), any()))
+				.willThrow(new BusinessException(CommonErrorCode.RESOURCE_NOT_FOUND));
+
+		mockMvc.perform(get(NEIGHBORS_PATH))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
 	}
