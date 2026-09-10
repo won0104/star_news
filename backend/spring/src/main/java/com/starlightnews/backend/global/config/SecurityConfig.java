@@ -32,6 +32,7 @@ public class SecurityConfig {
 	/** 인증 없이 접근 가능한 경로. */
 	private static final String[] PUBLIC_PATHS = {
 			"/api/v1/auth/**",
+			"/api/v1/graphs/**",
 			"/v3/api-docs/**",
 			"/swagger-ui/**",
 			"/swagger-ui.html",
