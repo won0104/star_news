@@ -85,7 +85,8 @@ def find_consumed_events_with_embeddings(session: Session, user_id: int) -> list
         userId=user_id,
     )
     return [
-        {"embedding": record["embedding"], "count": record["count"], "lastViewedAt": record["lastViewedAt"]}
+        # neo4j.time.DateTime -> 파이썬 기본 datetime 변환 (그대로 두면 service.py에서 뺄셈 시 에러남)
+        {"embedding": record["embedding"], "count": record["count"], "lastViewedAt": record["lastViewedAt"].to_native()}
         for record in result
     ]
 
