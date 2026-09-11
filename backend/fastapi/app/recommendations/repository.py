@@ -9,8 +9,11 @@ SIMILAR_USER_LIMIT = 50
 # 후보 Event로 인정하는 최근성 기간 (일). 이보다 오래된 Event는 후보에서 제외.
 RECENCY_WINDOW_DAYS = 15
 
+# 콘텐츠 기반 추천(CBF)에서 최종적으로 반환할 유사 Event 개수
+CONTENT_SIMILAR_EVENT_LIMIT = 20
 
-# 추천 후보 공통 필터링
+
+# 1. 추천 후보 공통 필터링
 # - 미열람 필터: 본인이 이미 CONSUMED한 Event 제외
 # - 비선호 Topic 제외 필터: 본인이 DISLIKES한 Topic으로 분류된 Event 제외
 # - 최근성 필터: recency_threshold보다 오래된 Event 제외
@@ -34,7 +37,7 @@ def find_candidate_events(session: Session, user_id: int, recency_threshold: dat
     return [record["eventId"] for record in result]
 
 
-# 협업 필터링(CF) 후보 Event 조회 - 유사도는 Jaccard(교집합/합집합)로 계산
+# 2. 협업 필터링(CF) 후보 Event 조회 - 유사도는 Jaccard(교집합/합집합)로 계산
 # (반환값: [{eventId, cfScore}, ...] (cfScore 내림차순))
 def find_cf_candidate_events(session: Session, user_id: int) -> list[dict]:
     result = session.run(
@@ -67,3 +70,48 @@ def find_cf_candidate_events(session: Session, user_id: int) -> list[dict]:
         similarUserLimit=SIMILAR_USER_LIMIT,
     )
     return [{"eventId": record["eventId"], "cfScore": record["cfScore"]} for record in result]
+
+
+# 3. 콘텐츠 기반 필터링(CBF)
+# 유저 프로필 벡터 계산에 쓸 CONSUMED Event 임베딩 조회 (count/lastViewedAt은 가중치 계산용)
+def find_consumed_events_with_embeddings(session: Session, user_id: int) -> list[dict]:
+    result = session.run(
+        """
+        // 유저가 소비한 Event 중 임베딩 있는 것만
+        MATCH (u:User {userId: $userId})-[r:CONSUMED]->(e:Event)
+        WHERE e.embedding IS NOT NULL
+        RETURN e.embedding AS embedding, r.count AS count, r.lastViewedAt AS lastViewedAt
+        """,
+        userId=user_id,
+    )
+    return [
+        # neo4j.time.DateTime -> 파이썬 기본 datetime 변환 (그대로 두면 service.py에서 뺄셈 시 에러남)
+        {"embedding": record["embedding"], "count": record["count"], "lastViewedAt": record["lastViewedAt"].to_native()}
+        for record in result
+    ]
+
+
+# 프로필 벡터로 벡터 인덱스에서 유사 Event 검색. 이미 소비한 Event는 제외.
+# (제외 필터링이 인덱스 검색 이후에 걸려서 rawLimit을 넉넉히 잡아 최종 개수가 부족해지는 걸 방지)
+def find_similar_events_by_vector(session: Session, profile_vector: list[float], user_id: int) -> list[dict]:
+    result = session.run(
+        """
+        MATCH (u:User {userId: $userId})
+
+        // 벡터 인덱스에서 프로필 벡터와 가까운 순으로 rawLimit개 조회
+        CALL db.index.vector.queryNodes('event_embedding_index', $rawLimit, $profileVector)
+        YIELD node, score
+
+        // 이미 소비한 Event는 제외
+        WHERE NOT (u)-[:CONSUMED]->(node)
+
+        RETURN node.nodeId AS eventId, score AS contentScore
+        ORDER BY contentScore DESC
+        LIMIT $limit
+        """,
+        userId=user_id,
+        profileVector=profile_vector,
+        rawLimit=CONTENT_SIMILAR_EVENT_LIMIT * 3,
+        limit=CONTENT_SIMILAR_EVENT_LIMIT,
+    )
+    return [{"eventId": record["eventId"], "contentScore": record["contentScore"]} for record in result]
