@@ -142,6 +142,16 @@ class UserGraphControllerTest {
 	}
 
 	@Test
+	void 클릭_기록에서_STORY는_대상이_아니라_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(post("/api/v1/users/me/graph/nodes/STORY/" + NODE_KEY + "/clicks")
+						.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(graphNodeClickService, never()).recordClick(anyLong(), any(), anyString());
+	}
+
+	@Test
 	void TOPIC은_개인그래프_대상이_아니라_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
 		mockMvc.perform(post("/api/v1/users/me/graph/nodes/TOPIC/" + NODE_KEY + "/clicks")
 						.header(HttpHeaders.AUTHORIZATION, bearer()))

@@ -44,9 +44,11 @@ public class PersonalGraphService {
 	/** DB DATETIME(6) 은 KST 벽시계로 저장되므로 응답 시각에 +09:00 오프셋을 붙인다. */
 	private static final ZoneOffset KST = ZoneOffset.ofHours(9);
 
-	/** 개인 그래프 화면에 노출하는 Node 유형. */
+	/**
+	 * 개인 그래프 화면에 노출하는 Node 유형. Article 과 직접(1홉) 관계가 있는 유형만 포함한다.
+	 */
 	private static final Set<NodeType> DISPLAY_TYPES =
-			EnumSet.of(NodeType.EVENT, NodeType.STORY, NodeType.ENTITY, NodeType.STATEMENT);
+			EnumSet.of(NodeType.EVENT, NodeType.ENTITY, NodeType.STATEMENT);
 
 	/** Topic 별 대표 Node 최대 개수. (요약 조회용) */
 	private static final int REPRESENTATIVE_LIMIT = 5;

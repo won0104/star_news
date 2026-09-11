@@ -36,7 +36,7 @@ public record PersonalGraphMapResponse(
 			@Schema(description = "그래프 내 Node 식별자 (nodeType:nodeKey)", example = "ENTITY:00000024-0920-4000-8000-000000000001")
 			String id,
 
-			@Schema(description = "Node 유형 (EVENT·STORY·ENTITY·STATEMENT)", example = "ENTITY")
+			@Schema(description = "Node 유형 (EVENT·ENTITY·STATEMENT)", example = "ENTITY")
 			String nodeType,
 
 			@Schema(description = "Node 업무 ID(nodeId)", example = "00000024-0920-4000-8000-000000000001")

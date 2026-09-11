@@ -48,7 +48,7 @@ public class UserGraphController {
 			summary = "그래프 Node 클릭 기록",
 			description = """
 					사용자가 그래프의 Node 를 직접 클릭했을 때 개인 지식 그래프에 클릭 신호를 기록한다. **Access Token 필요.**
-					- 대상 nodeType: `EVENT, STORY, ENTITY, STATEMENT`
+					- 대상 nodeType: `EVENT, ENTITY, STATEMENT`
 					- Node 상세 조회(GET) 는 클릭으로 치지 않으며, 실제 클릭 이벤트에서만 호출한다
 					- 이미 기록된 Node 면 클릭 수만 +1, 처음이면 새 Row 를 만든다""")
 	@ApiResponses({
@@ -66,7 +66,7 @@ public class UserGraphController {
 	})
 	@PostMapping("/nodes/{nodeType}/{nodeKey}/clicks")
 	public ApiResponse<Void> recordNodeClick(
-			@Parameter(description = "클릭한 Node 유형 (EVENT / STORY / ENTITY / STATEMENT)", example = "ENTITY")
+			@Parameter(description = "클릭한 Node 유형 (EVENT / ENTITY / STATEMENT)", example = "ENTITY")
 			@PathVariable String nodeType,
 			@Parameter(description = "Node 의 업무 ID(nodeId)", example = "00000024-0920-4000-8000-000000000001")
 			@PathVariable String nodeKey,
@@ -82,7 +82,7 @@ public class UserGraphController {
 			description = """
 					선택한 Topic 의 개인 지식 그래프(내가 읽거나 클릭한 Node)와 그 사이 Edge 를 한 번에 조회한다. **Access Token 필요.**
 					- 개인 Node 포함 여부는 MySQL user_knowledge_nodes 기준, Edge 는 Neo4j 조회
-					- 반환 Node 유형: `EVENT, STORY, ENTITY, STATEMENT`""")
+					- 반환 Node 유형: `EVENT, ENTITY, STATEMENT`""")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
@@ -153,7 +153,7 @@ public class UserGraphController {
 			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
 			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
 	) {
-		NodeType resolvedType = resolvePersonalArticleNodeType(nodeType);
+		NodeType resolvedType = resolvePersonalNodeType(nodeType);
 		return ApiResponse.success(
 				personalNodeArticleService.getReadArticles(user.userId(), resolvedType, nodeKey, size, cursor),
 				requestId);
@@ -161,22 +161,10 @@ public class UserGraphController {
 
 	/**
 	 * path 의 nodeType 문자열을 개인 그래프 대상 NodeType 으로 변환한다.
-	 * 알 수 없는 값이거나 EVENT·STORY·ENTITY·STATEMENT 가 아니면 INVALID_NODE_TYPE.
+	 * 알 수 없는 값이거나 EVENT·ENTITY·STATEMENT 가 아니면 INVALID_NODE_TYPE.
+	 * STORY 는 Article 과 직접 관계가 없고 개인 그래프 화면에도 노출하지 않아 대상이 아니다.
 	 */
 	private NodeType resolvePersonalNodeType(String rawNodeType) {
-		NodeType type = NodeType.from(rawNodeType)
-				.orElseThrow(() -> new BusinessException(GraphErrorCode.INVALID_NODE_TYPE));
-		return switch (type) {
-			case EVENT, STORY, ENTITY, STATEMENT -> type;
-			default -> throw new BusinessException(GraphErrorCode.INVALID_NODE_TYPE);
-		};
-	}
-
-	/**
-	 * path 의 nodeType 문자열을 개인 관련 기사 조회 대상 NodeType 으로 변환한다.
-	 * 알 수 없는 값이거나 EVENT·ENTITY·STATEMENT 가 아니면(Article 과 직접 관계가 없는 STORY 포함) INVALID_NODE_TYPE.
-	 */
-	private NodeType resolvePersonalArticleNodeType(String rawNodeType) {
 		NodeType type = NodeType.from(rawNodeType)
 				.orElseThrow(() -> new BusinessException(GraphErrorCode.INVALID_NODE_TYPE));
 		return switch (type) {
