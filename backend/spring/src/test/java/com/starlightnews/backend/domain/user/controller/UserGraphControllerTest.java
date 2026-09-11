@@ -1,6 +1,13 @@
 package com.starlightnews.backend.domain.user.controller;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
+import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse;
+import com.starlightnews.backend.domain.user.exception.PersonalGraphErrorCode;
 import com.starlightnews.backend.domain.user.service.GraphNodeClickService;
+import com.starlightnews.backend.domain.user.service.PersonalGraphService;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.error.BusinessException;
@@ -22,9 +29,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,8 +56,23 @@ class UserGraphControllerTest {
 	@MockitoBean
 	private GraphNodeClickService graphNodeClickService;
 
+	@MockitoBean
+	private PersonalGraphService personalGraphService;
+
+	private static final String MAP_PATH = "/api/v1/users/me/graph/map";
+
 	private String bearer() {
 		return "Bearer " + jwtProvider.createAccessToken(1L);
+	}
+
+	private PersonalGraphMapResponse sampleMap() {
+		return new PersonalGraphMapResponse(
+				OffsetDateTime.of(2026, 9, 11, 17, 30, 0, 0, ZoneOffset.ofHours(9)),
+				new PersonalGraphMapResponse.TopicSummary("ECONOMY", "경제"),
+				List.of(new PersonalGraphMapResponse.Node(
+						"ENTITY:" + NODE_KEY, "ENTITY", NODE_KEY, "한국은행", 5, 0.91)),
+				List.of(new PersonalGraphMapResponse.Edge(
+						"ENTITY:" + NODE_KEY, "EVENT:ev1", "ACTOR", 0.82)));
 	}
 
 	@Test
@@ -98,5 +122,48 @@ class UserGraphControllerTest {
 		mockMvc.perform(post(CLICKS_PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+	}
+
+	// --- 개인 그래프 Topic 스냅샷 ---
+
+	@Test
+	void Topic_스냅샷_조회_성공시_200과_topic_nodes_edges_구조로_응답한다() throws Exception {
+		given(personalGraphService.getTopicMap(1L, "ECONOMY")).willReturn(sampleMap());
+
+		mockMvc.perform(get(MAP_PATH).param("topicCode", "ECONOMY").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.topic.topicCode").value("ECONOMY"))
+				.andExpect(jsonPath("$.data.topic.label").value("경제"))
+				.andExpect(jsonPath("$.data.nodes[0].id").value("ENTITY:" + NODE_KEY))
+				.andExpect(jsonPath("$.data.nodes[0].weight").value(0.91))
+				.andExpect(jsonPath("$.data.edges[0].relationship").value("ACTOR"))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+	}
+
+	@Test
+	void topicCode_쿼리파라미터가_없으면_400을_응답한다() throws Exception {
+		mockMvc.perform(get(MAP_PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest());
+
+		verify(personalGraphService, never()).getTopicMap(anyLong(), anyString());
+	}
+
+	@Test
+	void 서비스가_INVALID_TOPIC_CODE를_던지면_400을_응답한다() throws Exception {
+		given(personalGraphService.getTopicMap(anyLong(), anyString()))
+				.willThrow(new BusinessException(PersonalGraphErrorCode.INVALID_TOPIC_CODE));
+
+		mockMvc.perform(get(MAP_PATH).param("topicCode", "NOPE").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_TOPIC_CODE"));
+	}
+
+	@Test
+	void Topic_스냅샷_조회는_토큰이_없으면_401이다() throws Exception {
+		mockMvc.perform(get(MAP_PATH).param("topicCode", "ECONOMY"))
+				.andExpect(status().isUnauthorized());
+
+		verify(personalGraphService, never()).getTopicMap(anyLong(), anyString());
 	}
 }
