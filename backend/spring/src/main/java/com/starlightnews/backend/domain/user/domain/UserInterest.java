@@ -1,5 +1,7 @@
 package com.starlightnews.backend.domain.user.domain;
 
+import java.util.Objects;
+
 import com.starlightnews.backend.global.entity.BaseTimeEntity;
 import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.enums.TopicCode;
@@ -57,5 +59,12 @@ public class UserInterest extends BaseTimeEntity {
 
 	public boolean hasType(InterestType interestType) {
 		return this.interestType == interestType;
+	}
+
+	/**
+	 * 동일 Topic의 행을 유지하면서 관심·비관심 유형만 전환한다.
+	 */
+	public void changeType(InterestType interestType) {
+		this.interestType = Objects.requireNonNull(interestType, "interestType must not be null");
 	}
 }
