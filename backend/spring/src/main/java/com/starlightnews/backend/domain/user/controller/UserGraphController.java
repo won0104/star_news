@@ -2,6 +2,7 @@ package com.starlightnews.backend.domain.user.controller;
 
 import com.starlightnews.backend.domain.graph.exception.GraphErrorCode;
 import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse;
+import com.starlightnews.backend.domain.user.dto.PersonalGraphSummaryResponse;
 import com.starlightnews.backend.domain.user.service.GraphNodeClickService;
 import com.starlightnews.backend.domain.user.service.PersonalGraphService;
 import com.starlightnews.backend.global.constant.ApiPaths;
@@ -92,6 +93,26 @@ public class UserGraphController {
 			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
 	) {
 		return ApiResponse.success(personalGraphService.getTopicMap(user.userId(), topicCode), requestId);
+	}
+
+	@Operation(
+			summary = "개인 그래프 요약 조회",
+			description = """
+					내 읽기 최초 진입용 요약 그래프를 조회한다. Topic Cluster 와 각 Topic 의 대표 개인 Node(최대 5개)·Edge 를
+					반환한다. **Access Token 필요.**
+					- 개인 Node 가 하나도 없으면 `nodes`·`edges` 모두 빈 배열이다""")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
+					description = "Access Token 오류 (code: UNAUTHORIZED / INVALID_ACCESS_TOKEN / EXPIRED_ACCESS_TOKEN)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	@GetMapping
+	public ApiResponse<PersonalGraphSummaryResponse> getSummary(
+			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
+			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+	) {
+		return ApiResponse.success(personalGraphService.getSummary(user.userId()), requestId);
 	}
 
 	/**

@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse;
+import com.starlightnews.backend.domain.user.dto.PersonalGraphSummaryResponse;
 import com.starlightnews.backend.domain.user.exception.PersonalGraphErrorCode;
 import com.starlightnews.backend.domain.user.service.GraphNodeClickService;
 import com.starlightnews.backend.domain.user.service.PersonalGraphService;
@@ -60,9 +61,27 @@ class UserGraphControllerTest {
 	private PersonalGraphService personalGraphService;
 
 	private static final String MAP_PATH = "/api/v1/users/me/graph/map";
+	private static final String SUMMARY_PATH = "/api/v1/users/me/graph";
 
 	private String bearer() {
 		return "Bearer " + jwtProvider.createAccessToken(1L);
+	}
+
+	private PersonalGraphSummaryResponse sampleSummary() {
+		return new PersonalGraphSummaryResponse(
+				OffsetDateTime.of(2026, 9, 11, 17, 30, 0, 0, ZoneOffset.ofHours(9)),
+				List.of(
+						new PersonalGraphSummaryResponse.Node(
+								"topic:ECONOMY", "TOPIC_CLUSTER", null, null, "ECONOMY", "경제", null, 20, 1.0),
+						new PersonalGraphSummaryResponse.Node(
+								"ENTITY:" + NODE_KEY, "NODE", "ENTITY", NODE_KEY, "ECONOMY", "한국은행", null, 8, 1.0)),
+				List.of(new PersonalGraphSummaryResponse.Edge(
+						"topic:ECONOMY", "ENTITY:" + NODE_KEY, "BELONGS_TO_TOPIC", 1.0)));
+	}
+
+	private PersonalGraphSummaryResponse emptySummary() {
+		return new PersonalGraphSummaryResponse(
+				OffsetDateTime.of(2026, 9, 11, 17, 30, 0, 0, ZoneOffset.ofHours(9)), List.of(), List.of());
 	}
 
 	private PersonalGraphMapResponse sampleMap() {
@@ -165,5 +184,40 @@ class UserGraphControllerTest {
 				.andExpect(status().isUnauthorized());
 
 		verify(personalGraphService, never()).getTopicMap(anyLong(), anyString());
+	}
+
+	// --- 개인 그래프 요약 ---
+
+	@Test
+	void 요약_조회_성공시_200과_클러스터_노드_엣지_구조로_응답한다() throws Exception {
+		given(personalGraphService.getSummary(1L)).willReturn(sampleSummary());
+
+		mockMvc.perform(get(SUMMARY_PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.nodes[0].id").value("topic:ECONOMY"))
+				.andExpect(jsonPath("$.data.nodes[0].kind").value("TOPIC_CLUSTER"))
+				.andExpect(jsonPath("$.data.nodes[1].id").value("ENTITY:" + NODE_KEY))
+				.andExpect(jsonPath("$.data.nodes[1].kind").value("NODE"))
+				.andExpect(jsonPath("$.data.edges[0].relationship").value("BELONGS_TO_TOPIC"))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+	}
+
+	@Test
+	void 개인_노드가_없으면_빈_배열로_응답한다() throws Exception {
+		given(personalGraphService.getSummary(1L)).willReturn(emptySummary());
+
+		mockMvc.perform(get(SUMMARY_PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.nodes").isEmpty())
+				.andExpect(jsonPath("$.data.edges").isEmpty());
+	}
+
+	@Test
+	void 요약_조회는_토큰이_없으면_401이다() throws Exception {
+		mockMvc.perform(get(SUMMARY_PATH))
+				.andExpect(status().isUnauthorized());
+
+		verify(personalGraphService, never()).getSummary(anyLong());
 	}
 }
