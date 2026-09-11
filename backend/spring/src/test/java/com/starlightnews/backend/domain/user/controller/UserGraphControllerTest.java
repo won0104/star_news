@@ -4,11 +4,14 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import com.starlightnews.backend.domain.graph.exception.GraphErrorCode;
 import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse;
 import com.starlightnews.backend.domain.user.dto.PersonalGraphSummaryResponse;
+import com.starlightnews.backend.domain.user.dto.PersonalNodeArticlesResponse;
 import com.starlightnews.backend.domain.user.exception.PersonalGraphErrorCode;
 import com.starlightnews.backend.domain.user.service.GraphNodeClickService;
 import com.starlightnews.backend.domain.user.service.PersonalGraphService;
+import com.starlightnews.backend.domain.user.service.PersonalNodeArticleService;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.error.BusinessException;
@@ -27,9 +30,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
@@ -60,8 +65,12 @@ class UserGraphControllerTest {
 	@MockitoBean
 	private PersonalGraphService personalGraphService;
 
+	@MockitoBean
+	private PersonalNodeArticleService personalNodeArticleService;
+
 	private static final String MAP_PATH = "/api/v1/users/me/graph/map";
 	private static final String SUMMARY_PATH = "/api/v1/users/me/graph";
+	private static final String ARTICLES_PATH = "/api/v1/users/me/graph/nodes/ENTITY/" + NODE_KEY + "/articles";
 
 	private String bearer() {
 		return "Bearer " + jwtProvider.createAccessToken(1L);
@@ -92,6 +101,15 @@ class UserGraphControllerTest {
 						"ENTITY:" + NODE_KEY, "ENTITY", NODE_KEY, "한국은행", 5, 0.91)),
 				List.of(new PersonalGraphMapResponse.Edge(
 						"ENTITY:" + NODE_KEY, "EVENT:ev1", "ACTOR", 0.82)));
+	}
+
+	private PersonalNodeArticlesResponse sampleArticles() {
+		return new PersonalNodeArticlesResponse(
+				new PersonalNodeArticlesResponse.NodeSummary("ENTITY", NODE_KEY, "한국은행"),
+				List.of(new PersonalNodeArticlesResponse.Item(930001L, "한국은행, 기준금리 동결", "연합뉴스", "ECONOMY",
+						OffsetDateTime.of(2026, 8, 31, 9, 10, 0, 0, ZoneOffset.ofHours(9)),
+						"한국은행은 기준금리를 현재 수준으로 유지하기로 했다.", true)),
+				true, "opaque-cursor");
 	}
 
 	@Test
@@ -219,5 +237,95 @@ class UserGraphControllerTest {
 				.andExpect(status().isUnauthorized());
 
 		verify(personalGraphService, never()).getSummary(anyLong());
+	}
+
+	// --- 개인 그래프 노드별 읽은 기사 ---
+
+	@Test
+	void 읽은_기사_조회_성공시_200과_node_items_구조로_응답한다() throws Exception {
+		given(personalNodeArticleService.getReadArticles(eq(1L), eq(NodeType.ENTITY), eq(NODE_KEY), eq(20), any()))
+				.willReturn(sampleArticles());
+
+		mockMvc.perform(get(ARTICLES_PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.node.nodeType").value("ENTITY"))
+				.andExpect(jsonPath("$.data.node.title").value("한국은행"))
+				.andExpect(jsonPath("$.data.items[0].articleId").value(930001))
+				.andExpect(jsonPath("$.data.items[0].organizationName").value("연합뉴스"))
+				.andExpect(jsonPath("$.data.items[0].lastReadAt").value("2026-08-31T09:10:00+09:00"))
+				.andExpect(jsonPath("$.data.items[0].bookmarked").value(true))
+				.andExpect(jsonPath("$.data.hasNext").value(true))
+				.andExpect(jsonPath("$.data.nextCursor").value("opaque-cursor"))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+
+		verify(personalNodeArticleService).getReadArticles(eq(1L), eq(NodeType.ENTITY), eq(NODE_KEY), eq(20), isNull());
+	}
+
+	@Test
+	void size와_cursor_쿼리파라미터를_서비스에_전달한다() throws Exception {
+		given(personalNodeArticleService.getReadArticles(any(), any(), any(), anyInt(), any()))
+				.willReturn(sampleArticles());
+
+		mockMvc.perform(get(ARTICLES_PATH).param("size", "5").param("cursor", "opaque-cursor")
+						.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk());
+
+		verify(personalNodeArticleService).getReadArticles(
+				eq(1L), eq(NodeType.ENTITY), eq(NODE_KEY), eq(5), eq("opaque-cursor"));
+	}
+
+	@Test
+	void size가_1미만이면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(get(ARTICLES_PATH).param("size", "0").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+
+		verify(personalNodeArticleService, never()).getReadArticles(any(), any(), any(), anyInt(), any());
+	}
+
+	@Test
+	void size가_50초과면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(get(ARTICLES_PATH).param("size", "51").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+	}
+
+	@Test
+	void STORY는_개인_관련기사_대상이_아니라_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(get("/api/v1/users/me/graph/nodes/STORY/" + NODE_KEY + "/articles")
+						.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(personalNodeArticleService, never()).getReadArticles(any(), any(), any(), anyInt(), any());
+	}
+
+	@Test
+	void 서비스가_INVALID_CURSOR를_던지면_400을_응답한다() throws Exception {
+		given(personalNodeArticleService.getReadArticles(any(), any(), any(), anyInt(), any()))
+				.willThrow(new BusinessException(GraphErrorCode.INVALID_CURSOR));
+
+		mockMvc.perform(get(ARTICLES_PATH).param("cursor", "broken").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_CURSOR"));
+	}
+
+	@Test
+	void 서비스가_NODE_NOT_ACQUIRED를_던지면_404를_응답한다() throws Exception {
+		given(personalNodeArticleService.getReadArticles(any(), any(), any(), anyInt(), any()))
+				.willThrow(new BusinessException(PersonalGraphErrorCode.NODE_NOT_ACQUIRED));
+
+		mockMvc.perform(get(ARTICLES_PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("NODE_NOT_ACQUIRED"));
+	}
+
+	@Test
+	void 읽은_기사_조회는_토큰이_없으면_401이다() throws Exception {
+		mockMvc.perform(get(ARTICLES_PATH))
+				.andExpect(status().isUnauthorized());
+
+		verify(personalNodeArticleService, never()).getReadArticles(any(), any(), any(), anyInt(), any());
 	}
 }
