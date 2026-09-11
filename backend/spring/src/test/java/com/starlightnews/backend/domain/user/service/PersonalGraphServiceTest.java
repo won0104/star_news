@@ -190,17 +190,26 @@ class PersonalGraphServiceTest {
 
 		PersonalGraphSummaryResponse response = personalGraphService.getSummary(1L);
 
-		assertThat(response.nodes()).hasSize(5);
+		// 7개 Topic 클러스터(대표 노드 없는 5개 포함) + 대표 노드 3개
+		assertThat(response.nodes()).hasSize(10);
+		assertThat(response.nodes()).filteredOn(node -> node.kind().equals("TOPIC_CLUSTER")).hasSize(7);
 		assertThat(nodeById(response, "topic:ECONOMY")).satisfies(node -> {
 			assertThat(node.kind()).isEqualTo("TOPIC_CLUSTER");
 			assertThat(node.title()).isEqualTo("경제");
 			assertThat(node.sourceArticleCount()).isEqualTo(20);
 			assertThat(node.weight()).isEqualTo(1.0);
 		});
-		assertThat(nodeById(response, "topic:SOCIETY").weight()).isEqualTo(0.25);
+		assertThat(nodeById(response, "topic:SOCIETY").weight()).isEqualTo(5.0 / 21); // (읽음5+탐색0) / (경제 읽음20+탐색1)
 		assertThat(nodeById(response, "ENTITY:e1").weight()).isEqualTo(1.0);
 		assertThat(nodeById(response, "EVENT:ev1").weight()).isEqualTo(0.4);
 		assertThat(nodeById(response, "EVENT:ev2").weight()).isEqualTo(0.2);
+
+		// 한 번도 안 읽은 Topic(POLITICS)도 대표 노드 없이 weight 0 클러스터로 나온다
+		assertThat(nodeById(response, "topic:POLITICS")).satisfies(node -> {
+			assertThat(node.sourceArticleCount()).isZero();
+			assertThat(node.weight()).isZero();
+		});
+		assertThat(response.nodes()).filteredOn(node -> node.topicCode().equals("POLITICS")).hasSize(1);
 
 		assertThat(response.edges()).hasSize(4);
 		assertThat(response.edges()).filteredOn(edge -> edge.relationship().equals("BELONGS_TO_TOPIC")).hasSize(3);
@@ -209,6 +218,21 @@ class PersonalGraphServiceTest {
 			assertThat(edge.targetId()).isEqualTo("EVENT:ev1");
 			assertThat(edge.relationship()).isEqualTo("ACTOR");
 		});
+	}
+
+	@Test
+	void 기사를_안읽고_노드만_클릭한_Topic도_weight가_0이_아니다() {
+		given(userKnowledgeNodeRepository.findByUserId(1L)).willReturn(List.of(
+				row(NodeType.ENTITY, "e1", "한국은행", "ECONOMY", 0, 3),
+				row(NodeType.EVENT, "ev1", "기준금리 동결", "ECONOMY", 0, 2)));
+		given(articleReadRepository.countReadArticlesByTopic(1L)).willReturn(List.of()); // 읽은 기사 없음
+		given(graphNeighborRepository.findEdges(any())).willReturn(List.of());
+
+		PersonalGraphSummaryResponse response = personalGraphService.getSummary(1L);
+
+		PersonalGraphSummaryResponse.Node economy = nodeById(response, "topic:ECONOMY");
+		assertThat(economy.sourceArticleCount()).isZero(); // 화면 표시 숫자는 여전히 "읽은 기사 수"만
+		assertThat(economy.weight()).isEqualTo(1.0); // 탐색한 서로 다른 노드 2개가 유일한 참여 신호
 	}
 
 	@Test
@@ -242,8 +266,9 @@ class PersonalGraphServiceTest {
 
 		PersonalGraphSummaryResponse response = personalGraphService.getSummary(1L);
 
-		assertThat(response.nodes()).extracting(PersonalGraphSummaryResponse.Node::id)
-				.containsExactlyInAnyOrder("topic:ECONOMY", "EVENT:ev1");
+		List<String> nodeIds = response.nodes().stream().map(PersonalGraphSummaryResponse.Node::id).toList();
+		assertThat(nodeIds).doesNotContain("ENTITY:e1"); // topicCode 없어서 대표 노드로 못 뽑힘
+		assertThat(nodeIds).contains("topic:ECONOMY", "EVENT:ev1");
 	}
 
 	@Test
@@ -256,19 +281,25 @@ class PersonalGraphServiceTest {
 
 		PersonalGraphSummaryResponse response = personalGraphService.getSummary(1L);
 
-		assertThat(response.nodes()).extracting(PersonalGraphSummaryResponse.Node::id)
-				.containsExactlyInAnyOrder("topic:ECONOMY", "ENTITY:e1");
+		List<String> nodeIds = response.nodes().stream().map(PersonalGraphSummaryResponse.Node::id).toList();
+		assertThat(nodeIds).doesNotContain("TOPIC:t1");
+		assertThat(nodeIds).contains("topic:ECONOMY", "ENTITY:e1");
 	}
 
 	@Test
-	void 개인_노드가_없으면_빈_배열이고_외부_조회를_하지_않는다() {
+	void 개인_노드가_없어도_Topic_7개는_빈_클러스터로_반환되고_Neo4j는_조회하지_않는다() {
 		given(userKnowledgeNodeRepository.findByUserId(1L)).willReturn(List.of());
+		given(articleReadRepository.countReadArticlesByTopic(1L)).willReturn(List.of());
 
 		PersonalGraphSummaryResponse response = personalGraphService.getSummary(1L);
 
-		assertThat(response.nodes()).isEmpty();
+		assertThat(response.nodes()).hasSize(7);
+		assertThat(response.nodes()).allSatisfy(node -> {
+			assertThat(node.kind()).isEqualTo("TOPIC_CLUSTER");
+			assertThat(node.sourceArticleCount()).isZero();
+			assertThat(node.weight()).isZero();
+		});
 		assertThat(response.edges()).isEmpty();
-		verify(articleReadRepository, never()).countReadArticlesByTopic(any());
 		verify(graphNeighborRepository, never()).findEdges(any());
 	}
 

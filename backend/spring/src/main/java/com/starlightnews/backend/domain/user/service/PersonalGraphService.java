@@ -87,8 +87,8 @@ public class PersonalGraphService {
 	}
 
 	/**
-	 * 내 읽기 최초 진입용 요약을 반환한다. Topic 별로 개인 Node 후보를 묶고, 대표 Node(최대 {@value #REPRESENTATIVE_LIMIT}개)와
-	 * Topic Cluster 를 함께 구성한다. 대표 Node 가 하나도 없는 Topic 은 Cluster 자체를 만들지 않는다.
+	 * 내 읽기 최초 진입용 요약을 반환한다. 7개 Topic 전부를 Cluster 로 반환하며, 대표 Node(최대
+	 * {@value #REPRESENTATIVE_LIMIT}개)가 없는 Topic 도 sourceArticleCount·weight 0 인 빈 Cluster 로 나온다
 	 */
 	@Transactional(readOnly = true)
 	public PersonalGraphSummaryResponse getSummary(Long userId) {
@@ -97,10 +97,6 @@ public class PersonalGraphService {
 				.filter(row -> row.getTopicCode() != null)
 				.toList();
 
-		if (rows.isEmpty()) {
-			return new PersonalGraphSummaryResponse(OffsetDateTime.now(KST), List.of(), List.of());
-		}
-
 		Map<String, List<UserKnowledgeNode>> representativesByTopic = groupTopRepresentatives(rows);
 		List<UserKnowledgeNode> allRepresentatives = representativesByTopic.values().stream()
 				.flatMap(List::stream)
@@ -108,26 +104,36 @@ public class PersonalGraphService {
 
 		Map<String, Long> readCountByTopic = toReadCountMap(
 				articleReadRepository.countReadArticlesByTopic(userId));
-		long maxClusterReadCount = representativesByTopic.keySet().stream()
-				.mapToLong(code -> readCountByTopic.getOrDefault(code, 0L))
-				.max().orElse(0L);
+
+		Map<String, Long> exploredNodeCountByTopic = rows.stream()
+				.filter(row -> row.getNodeClickCount() > 0)
+				.collect(Collectors.groupingBy(UserKnowledgeNode::getTopicCode, Collectors.counting()));
+		Map<String, Long> engagementByTopic = new LinkedHashMap<>();
+		for (TopicCode topic : TopicCode.values()) {
+			String topicCode = topic.name();
+			engagementByTopic.put(topicCode,
+					readCountByTopic.getOrDefault(topicCode, 0L) + exploredNodeCountByTopic.getOrDefault(topicCode, 0L));
+		}
+		long maxClusterEngagement = engagementByTopic.values().stream()
+				.mapToLong(Long::longValue).max().orElse(0L);
 		int maxImportance = allRepresentatives.stream()
 				.mapToInt(PersonalGraphService::importance).max().orElse(1);
 
 		List<PersonalGraphSummaryResponse.Node> nodes = new ArrayList<>();
 		List<PersonalGraphSummaryResponse.Edge> edges = new ArrayList<>();
 
-		for (Map.Entry<String, List<UserKnowledgeNode>> entry : representativesByTopic.entrySet()) {
-			String topicCode = entry.getKey();
+		for (TopicCode topic : TopicCode.values()) {
+			String topicCode = topic.name();
 			long readCount = readCountByTopic.getOrDefault(topicCode, 0L);
-			double clusterWeight = maxClusterReadCount == 0 ? 0.0 : (double) readCount / maxClusterReadCount;
+			long engagement = engagementByTopic.get(topicCode);
+			double clusterWeight = maxClusterEngagement == 0 ? 0.0 : (double) engagement / maxClusterEngagement;
 			String clusterId = "topic:" + topicCode;
 
 			nodes.add(new PersonalGraphSummaryResponse.Node(
-					clusterId, "TOPIC_CLUSTER", null, null, topicCode, topicLabel(topicCode), null,
+					clusterId, "TOPIC_CLUSTER", null, null, topicCode, topic.labelKo(), null,
 					(int) readCount, clusterWeight));
 
-			for (UserKnowledgeNode row : entry.getValue()) {
+			for (UserKnowledgeNode row : representativesByTopic.getOrDefault(topicCode, List.of())) {
 				String nodeId = graphNodeId(row);
 				double nodeWeight = (double) importance(row) / maxImportance;
 				nodes.add(new PersonalGraphSummaryResponse.Node(
@@ -179,10 +185,6 @@ public class PersonalGraphService {
 	private Map<String, Long> toReadCountMap(List<TopicReadCount> counts) {
 		return counts.stream()
 				.collect(Collectors.toMap(TopicReadCount::getTopicCode, TopicReadCount::getCount));
-	}
-
-	private static String topicLabel(String topicCode) {
-		return TopicCode.from(topicCode).map(TopicCode::labelKo).orElse(topicCode);
 	}
 
 	/** 주어진 Node 집합 안에서만 Neo4j Edge 를 조회한다. Node 가 없으면 빈 목록. */
