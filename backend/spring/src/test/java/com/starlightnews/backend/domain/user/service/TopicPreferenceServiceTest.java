@@ -88,6 +88,51 @@ class TopicPreferenceServiceTest {
 	}
 
 	@Test
+	void 비관심_Topic만_Enum_선언_순서로_반환한다() {
+		User user = activeUser();
+		user.addInterest(TopicCode.IT_SCIENCE, InterestType.DISLIKE);
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		user.addInterest(TopicCode.POLITICS, InterestType.DISLIKE);
+		given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+		TopicPreferenceResponse response = topicPreferenceService.getDislikes(1L);
+
+		assertThat(response.topicCodes())
+				.containsExactly(TopicCode.POLITICS, TopicCode.IT_SCIENCE);
+	}
+
+	@Test
+	void 설정한_비관심_Topic이_없으면_빈_목록을_반환한다() {
+		User user = activeUser();
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+		TopicPreferenceResponse response = topicPreferenceService.getDislikes(1L);
+
+		assertThat(response.topicCodes()).isEmpty();
+	}
+
+	@Test
+	void 비관심_Topic_조회시_사용자가_존재하지_않으면_USER_NOT_FOUND_예외() {
+		given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+		Throwable thrown = catchThrowable(() -> topicPreferenceService.getDislikes(1L));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(UserErrorCode.USER_NOT_FOUND);
+	}
+
+	@Test
+	void 비관심_Topic_조회시_탈퇴한_사용자이면_USER_NOT_FOUND_예외() {
+		User user = activeUser();
+		user.markDeleted();
+		given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+		Throwable thrown = catchThrowable(() -> topicPreferenceService.getDislikes(1L));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(UserErrorCode.USER_NOT_FOUND);
+	}
+
+	@Test
 	void 요청_목록을_최종_관심_Topic으로_반영한다() {
 		User user = activeUser();
 		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);

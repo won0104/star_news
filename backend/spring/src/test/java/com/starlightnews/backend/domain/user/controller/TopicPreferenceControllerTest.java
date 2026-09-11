@@ -45,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TopicPreferenceControllerTest {
 
 	private static final String INTERESTS_PATH = "/api/v1/users/me/topic-preferences/interests";
+	private static final String DISLIKES_PATH = "/api/v1/users/me/topic-preferences/dislikes";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -119,6 +120,59 @@ class TopicPreferenceControllerTest {
 				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 
 		verify(topicPreferenceService, never()).getInterests(anyLong());
+	}
+
+	@Test
+	void 비관심_Topic_조회_성공시_200과_data_meta_구조로_응답한다() throws Exception {
+		given(topicPreferenceService.getDislikes(1L))
+				.willReturn(new TopicPreferenceResponse(List.of(TopicCode.POLITICS, TopicCode.IT_SCIENCE)));
+
+		mockMvc.perform(get(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L)))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.topicCodes[0]").value("POLITICS"))
+				.andExpect(jsonPath("$.data.topicCodes[1]").value("IT_SCIENCE"))
+				.andExpect(jsonPath("$.data.topicCodes.length()").value(2))
+				.andExpect(jsonPath("$.meta.requestId").isString())
+				.andExpect(result -> assertThat(
+						JsonPath.<String>read(result.getResponse().getContentAsString(), "$.meta.requestId"))
+						.isEqualTo(result.getResponse().getHeader(RequestIdFilter.HEADER_NAME)));
+
+		verify(topicPreferenceService).getDislikes(1L);
+	}
+
+	@Test
+	void 비관심_Topic이_없으면_topicCodes는_빈_배열이다() throws Exception {
+		given(topicPreferenceService.getDislikes(1L))
+				.willReturn(new TopicPreferenceResponse(List.of()));
+
+		mockMvc.perform(get(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.topicCodes").isArray())
+				.andExpect(jsonPath("$.data.topicCodes").isEmpty());
+	}
+
+	@Test
+	void 비관심_Topic_조회시_서비스가_USER_NOT_FOUND를_던지면_404를_응답한다() throws Exception {
+		given(topicPreferenceService.getDislikes(1L))
+				.willThrow(new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+		mockMvc.perform(get(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L)))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("USER_NOT_FOUND"))
+				.andExpect(jsonPath("$.requestId").isString());
+	}
+
+	@Test
+	void 비관심_Topic_조회시_인증_토큰이_없으면_401_UNAUTHORIZED를_응답한다() throws Exception {
+		mockMvc.perform(get(DISLIKES_PATH))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+
+		verify(topicPreferenceService, never()).getDislikes(anyLong());
 	}
 
 	@Test

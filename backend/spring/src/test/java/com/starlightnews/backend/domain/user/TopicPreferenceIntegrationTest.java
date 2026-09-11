@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TopicPreferenceIntegrationTest {
 
 	private static final String INTERESTS_PATH = ApiPaths.API_V1 + "/users/me/topic-preferences/interests";
+	private static final String DISLIKES_PATH = ApiPaths.API_V1 + "/users/me/topic-preferences/dislikes";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -96,6 +97,45 @@ class TopicPreferenceIntegrationTest {
 						.header(HttpHeaders.AUTHORIZATION, bearer(Long.MAX_VALUE)))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+	}
+
+	@Test
+	void DB에_저장된_비관심_Topic만_Enum_순서로_조회한다() throws Exception {
+		User user = User.create("starlight01", "hashed-password", "별빛");
+		user.addInterest(TopicCode.IT_SCIENCE, InterestType.DISLIKE);
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		user.addInterest(TopicCode.POLITICS, InterestType.DISLIKE);
+		long userId = userRepository.saveAndFlush(user).getId();
+		entityManager.clear();
+
+		mockMvc.perform(get(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(userId)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.topicCodes[0]").value("POLITICS"))
+				.andExpect(jsonPath("$.data.topicCodes[1]").value("IT_SCIENCE"))
+				.andExpect(jsonPath("$.data.topicCodes.length()").value(2))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+	}
+
+	@Test
+	void DB에_비관심_Topic이_없으면_빈_배열을_응답한다() throws Exception {
+		User user = User.create("starlight01", "hashed-password", "별빛");
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		long userId = userRepository.saveAndFlush(user).getId();
+		entityManager.clear();
+
+		mockMvc.perform(get(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(userId)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.topicCodes").isArray())
+				.andExpect(jsonPath("$.data.topicCodes").isEmpty());
+	}
+
+	@Test
+	void 비관심_Topic_조회시_인증_토큰이_없으면_401_UNAUTHORIZED를_응답한다() throws Exception {
+		mockMvc.perform(get(DISLIKES_PATH))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 	}
 
 	@Test

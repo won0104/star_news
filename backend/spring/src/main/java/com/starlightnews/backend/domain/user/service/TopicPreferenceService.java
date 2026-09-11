@@ -35,6 +35,16 @@ public class TopicPreferenceService {
 	}
 
 	/**
+	 * 활성 사용자가 설정한 비관심 Topic 목록을 반환한다.
+	 * 사용자가 없거나 탈퇴한 경우 USER_NOT_FOUND 예외를 발생시킨다.
+	 */
+	@Transactional(readOnly = true)
+	public TopicPreferenceResponse getDislikes(long userId) {
+		User user = findActiveUser(userId);
+		return new TopicPreferenceResponse(user.getTopicCodes(InterestType.DISLIKE));
+	}
+
+	/**
 	 * 요청 목록을 활성 사용자의 최종 관심 Topic 상태로 저장한다.
 	 */
 	@Transactional

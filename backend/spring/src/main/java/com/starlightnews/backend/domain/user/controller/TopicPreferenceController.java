@@ -53,6 +53,26 @@ public class TopicPreferenceController {
 	}
 
 	@Operation(
+			summary = "비관심 Topic 목록 조회",
+			description = "현재 로그인한 사용자가 설정한 비관심 Topic 목록을 조회한다. **Access Token 필요.**")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
+					description = "Access Token 오류 (code: UNAUTHORIZED / INVALID_ACCESS_TOKEN / EXPIRED_ACCESS_TOKEN)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+					description = "사용자를 찾을 수 없음 (code: USER_NOT_FOUND)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	@GetMapping("/dislikes")
+	public ApiResponse<TopicPreferenceResponse> getDislikes(
+			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
+			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+	) {
+		return ApiResponse.success(topicPreferenceService.getDislikes(user.userId()), requestId);
+	}
+
+	@Operation(
 			summary = "관심 Topic 목록 일괄 변경",
 			description = "요청한 Topic 목록을 현재 로그인 사용자의 최종 관심 목록으로 저장한다. **Access Token 필요.**")
 	@ApiResponses({
