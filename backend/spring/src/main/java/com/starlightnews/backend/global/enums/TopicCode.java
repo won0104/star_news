@@ -8,13 +8,24 @@ import java.util.Optional;
  */
 public enum TopicCode {
 
-	POLITICS,
-	ECONOMY,
-	SOCIETY,
-	CULTURE,
-	INTERNATIONAL,
-	SPORTS,
-	IT_SCIENCE;
+	POLITICS("정치"),
+	ECONOMY("경제"),
+	SOCIETY("사회"),
+	CULTURE("문화"),
+	INTERNATIONAL("국제"),
+	SPORTS("스포츠"),
+	IT_SCIENCE("IT·과학");
+
+	private final String labelKo;
+
+	TopicCode(String labelKo) {
+		this.labelKo = labelKo;
+	}
+
+	/** 화면 표시용 한글 분류명 (Neo4j Topic.nameKo 와 동일). */
+	public String labelKo() {
+		return labelKo;
+	}
 
 	/**
 	 * 문자열 코드를 TopicCode로 변환한다. 앞뒤 공백과 대소문자는 허용한다.

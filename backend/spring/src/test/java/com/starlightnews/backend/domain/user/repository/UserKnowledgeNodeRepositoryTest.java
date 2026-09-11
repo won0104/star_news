@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.user.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNodeId;
@@ -95,5 +96,25 @@ class UserKnowledgeNodeRepositoryTest {
 		entityManager.clear();
 
 		assertThat(userKnowledgeNodeRepository.findById(id).orElseThrow().getTopicCode()).isNull();
+	}
+
+	@Test
+	void findByUserIdAndTopicCode는_해당_사용자의_해당_토픽_노드만_반환한다() {
+		LocalDateTime now = LocalDateTime.of(2024, 5, 25, 5, 20);
+		entityManager.persist(UserKnowledgeNode.forFirstClick(
+				id(1L, NodeType.ENTITY, "00000024-0920-4000-8000-000000000001"), "한국은행", "ECONOMY", now));
+		entityManager.persist(UserKnowledgeNode.forFirstClick(
+				id(1L, NodeType.EVENT, "00000020-0920-4000-8000-000000000001"), "기준금리 동결", "ECONOMY", now));
+		entityManager.persist(UserKnowledgeNode.forFirstClick(
+				id(1L, NodeType.EVENT, "00000020-0920-4000-8000-000000000009"), "의대 증원", "SOCIETY", now));
+		entityManager.persist(UserKnowledgeNode.forFirstClick(
+				id(2L, NodeType.ENTITY, "00000024-0920-4000-8000-000000000002"), "다른 유저 노드", "ECONOMY", now));
+		entityManager.flush();
+		entityManager.clear();
+
+		List<UserKnowledgeNode> found = userKnowledgeNodeRepository.findByUserIdAndTopicCode(1L, "ECONOMY");
+
+		assertThat(found).extracting(UserKnowledgeNode::getNodeLabel)
+				.containsExactlyInAnyOrder("한국은행", "기준금리 동결");
 	}
 }

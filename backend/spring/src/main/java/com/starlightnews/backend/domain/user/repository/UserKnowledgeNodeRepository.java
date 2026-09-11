@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.user.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
@@ -29,4 +30,10 @@ public interface UserKnowledgeNodeRepository
 			+ "SET u.nodeClickCount = u.nodeClickCount + 1, u.lastSeenAt = :now "
 			+ "WHERE u.id = :id")
 	int incrementClick(@Param("id") UserKnowledgeNodeId id, @Param("now") LocalDateTime now);
+
+	/** 해당 사용자의 특정 Topic 개인 Node 전체. (개인 그래프 Topic 스냅샷용) */
+	@Query("SELECT u FROM UserKnowledgeNode u "
+			+ "WHERE u.id.userId = :userId AND u.topicCode = :topicCode")
+	List<UserKnowledgeNode> findByUserIdAndTopicCode(@Param("userId") Long userId,
+			@Param("topicCode") String topicCode);
 }
