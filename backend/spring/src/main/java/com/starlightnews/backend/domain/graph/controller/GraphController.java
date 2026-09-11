@@ -51,7 +51,7 @@ public class GraphController {
 					선택한 그래프 Node 의 화면 표시 정보(title·type·time)를 조회한다. 인증 불필요.
 					유효한 Access Token 이 있으면 해당 사용자의 즐겨찾기 여부(bookmarked)를 함께 반환하고, 비로그인이면 false.
 
-					- 대상 nodeType: `EVENT, STORY, ENTITY, TOPIC, STATEMENT, TIME` (`ARTICLE` 및 그 외는 `INVALID_NODE_TYPE`)
+					- 대상 nodeType: `EVENT, ENTITY, STATEMENT` (그 외는 `INVALID_NODE_TYPE`)
 					- nodeKey: Neo4j 내부 ID 가 아닌 Node 의 업무 ID(nodeId, UUID)
 					""")
 	@ApiResponses({
@@ -123,7 +123,7 @@ public class GraphController {
 			summary = "그래프 Node 주변 그래프 조회",
 			description = """
 					중심 Node 를 기준으로 depth Hop 이내의 주변 Node 와 그 사이 Edge 를 조회한다. 인증 불필요.
-					- 반환 Node 유형: `EVENT, STORY, ENTITY, STATEMENT` (`ARTICLE, TOPIC, TIME` 등은 반환·경유 제외)
+					- 반환 Node 유형: `EVENT, ENTITY, STATEMENT, TIME` (`STORY` 는 화면 미노출로 제외, `ARTICLE, TOPIC` 등도 제외)
 					- 내부 neighborScore 높은 순 정렬, 커서 페이지네이션
 					- 첫 요청은 `cursor` 없이, 이후에는 직전 응답의 `nextCursor` 를 `cursor` 로 그대로 전달""")
 	@ApiResponses({
@@ -159,16 +159,16 @@ public class GraphController {
 	}
 
 	/**
-	 * path 의 nodeType 문자열을 공용 그래프 조회 대상 NodeType 으로 변환한다.
-	 * 알 수 없는 값이거나 그래프 조회 범위가 아닌 ARTICLE 이면 INVALID_NODE_TYPE.
+	 * path 의 nodeType 문자열을 공용 그래프 조회(상세·주변) 중심 Node 대상 NodeType 으로 변환한다.
+	 * 알 수 없는 값이거나 EVENT·ENTITY·STATEMENT 가 아니면 INVALID_NODE_TYPE.
 	 */
 	private NodeType resolveGraphNodeType(String rawNodeType) {
 		NodeType type = NodeType.from(rawNodeType)
 				.orElseThrow(() -> new BusinessException(GraphErrorCode.INVALID_NODE_TYPE));
-		if (type == NodeType.ARTICLE) {
-			throw new BusinessException(GraphErrorCode.INVALID_NODE_TYPE);
-		}
-		return type;
+		return switch (type) {
+			case EVENT, ENTITY, STATEMENT -> type;
+			default -> throw new BusinessException(GraphErrorCode.INVALID_NODE_TYPE);
+		};
 	}
 
 	/**

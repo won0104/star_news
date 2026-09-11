@@ -31,7 +31,7 @@ public record GraphNeighborsResponse(
 
 	public record NodeSummary(
 
-			@Schema(description = "Node 유형 (EVENT·STORY·ENTITY·STATEMENT)", example = "EVENT")
+			@Schema(description = "Node 유형 (EVENT·ENTITY·STATEMENT·TIME)", example = "EVENT")
 			String nodeType,
 
 			@Schema(description = "Node 업무 ID(nodeId)", example = "00000020-0920-4000-8000-000000000001")

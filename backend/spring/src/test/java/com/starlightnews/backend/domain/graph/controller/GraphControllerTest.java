@@ -137,6 +137,33 @@ class GraphControllerTest {
 	}
 
 	@Test
+	void STORY는_상세조회_대상이_아니라_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(get("/api/v1/graphs/nodes/STORY/" + NODE_KEY))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(graphNodeService, never()).getNodeDetail(any(), any(), any());
+	}
+
+	@Test
+	void TOPIC은_상세조회_대상이_아니라_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(get("/api/v1/graphs/nodes/TOPIC/" + NODE_KEY))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(graphNodeService, never()).getNodeDetail(any(), any(), any());
+	}
+
+	@Test
+	void TIME은_상세조회_대상이_아니라_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(get("/api/v1/graphs/nodes/TIME/" + NODE_KEY))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(graphNodeService, never()).getNodeDetail(any(), any(), any());
+	}
+
+	@Test
 	void 서비스가_RESOURCE_NOT_FOUND를_던지면_404를_응답한다() throws Exception {
 		given(graphNodeService.getNodeDetail(any(NodeType.class), anyString(), any()))
 				.willThrow(new BusinessException(CommonErrorCode.RESOURCE_NOT_FOUND));
@@ -320,6 +347,33 @@ class GraphControllerTest {
 	@Test
 	void ARTICLE은_주변그래프_대상이_아니라_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
 		mockMvc.perform(get("/api/v1/graphs/nodes/ARTICLE/" + NODE_KEY + "/neighbors"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(graphNeighborService, never()).getNeighbors(any(), any(), anyInt(), anyInt(), any());
+	}
+
+	@Test
+	void STORY는_주변그래프_중심이_될_수_없어_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(get("/api/v1/graphs/nodes/STORY/" + NODE_KEY + "/neighbors"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(graphNeighborService, never()).getNeighbors(any(), any(), anyInt(), anyInt(), any());
+	}
+
+	@Test
+	void TIME은_주변그래프_중심이_될_수_없어_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(get("/api/v1/graphs/nodes/TIME/" + NODE_KEY + "/neighbors"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+
+		verify(graphNeighborService, never()).getNeighbors(any(), any(), anyInt(), anyInt(), any());
+	}
+
+	@Test
+	void TOPIC은_주변그래프_중심이_될_수_없어_400_INVALID_NODE_TYPE를_응답한다() throws Exception {
+		mockMvc.perform(get("/api/v1/graphs/nodes/TOPIC/" + NODE_KEY + "/neighbors"))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
 
