@@ -56,6 +56,18 @@ public class TopicPreferenceService {
 		return new TopicPreferenceResponse(user.getTopicCodes(InterestType.INTEREST));
 	}
 
+	/**
+	 * 요청 목록을 활성 사용자의 최종 비관심 Topic 상태로 저장한다.
+	 */
+	@Transactional
+	public TopicPreferenceResponse replaceDislikes(long userId, UpdateTopicPreferenceRequest request) {
+		Set<TopicCode> requestedTopics = parseDistinctTopics(request.topicCodes());
+		User user = findActiveUser(userId);
+
+		user.replaceTopicPreferences(InterestType.DISLIKE, requestedTopics);
+		return new TopicPreferenceResponse(user.getTopicCodes(InterestType.DISLIKE));
+	}
+
 	private User findActiveUser(long userId) {
 		return userRepository.findById(userId)
 				.filter(found -> !found.isDeleted())

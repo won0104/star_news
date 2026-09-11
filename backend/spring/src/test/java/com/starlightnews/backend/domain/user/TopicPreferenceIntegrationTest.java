@@ -208,4 +208,78 @@ class TopicPreferenceIntegrationTest {
 		assertThat(unchanged.getTopicCodes(InterestType.INTEREST))
 				.containsExactly(TopicCode.ECONOMY);
 	}
+
+	@Test
+	void 비관심_Topic_변경사항이_DB에_최종_상태로_저장된다() throws Exception {
+		User user = User.create("starlight01", "hashed-password", "별빛");
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		user.addInterest(TopicCode.IT_SCIENCE, InterestType.INTEREST);
+		user.addInterest(TopicCode.POLITICS, InterestType.DISLIKE);
+		user.addInterest(TopicCode.SPORTS, InterestType.DISLIKE);
+		long userId = userRepository.saveAndFlush(user).getId();
+		entityManager.clear();
+
+		mockMvc.perform(put(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(userId))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(List.of("ECONOMY", "CULTURE", "SPORTS"))))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.topicCodes[0]").value("ECONOMY"))
+				.andExpect(jsonPath("$.data.topicCodes[1]").value("CULTURE"))
+				.andExpect(jsonPath("$.data.topicCodes[2]").value("SPORTS"));
+
+		entityManager.flush();
+		entityManager.clear();
+		User updated = userRepository.findById(userId).orElseThrow();
+		assertThat(updated.getTopicCodes(InterestType.DISLIKE))
+				.containsExactly(TopicCode.ECONOMY, TopicCode.CULTURE, TopicCode.SPORTS);
+		assertThat(updated.getTopicCodes(InterestType.INTEREST))
+				.containsExactly(TopicCode.IT_SCIENCE);
+	}
+
+	@Test
+	void 빈_배열로_변경하면_DB의_비관심_Topic만_모두_삭제된다() throws Exception {
+		User user = User.create("starlight01", "hashed-password", "별빛");
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		user.addInterest(TopicCode.SPORTS, InterestType.DISLIKE);
+		long userId = userRepository.saveAndFlush(user).getId();
+		entityManager.clear();
+
+		mockMvc.perform(put(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(userId))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(List.of())))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.topicCodes").isEmpty());
+
+		entityManager.flush();
+		entityManager.clear();
+		User updated = userRepository.findById(userId).orElseThrow();
+		assertThat(updated.getTopicCodes(InterestType.DISLIKE)).isEmpty();
+		assertThat(updated.getTopicCodes(InterestType.INTEREST))
+				.containsExactly(TopicCode.ECONOMY);
+	}
+
+	@Test
+	void 잘못된_비관심_Topic으로_변경하면_400이고_DB_상태는_유지된다() throws Exception {
+		User user = User.create("starlight01", "hashed-password", "별빛");
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		user.addInterest(TopicCode.SPORTS, InterestType.DISLIKE);
+		long userId = userRepository.saveAndFlush(user).getId();
+		entityManager.clear();
+
+		mockMvc.perform(put(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(userId))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(List.of("MOVIE"))))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_TOPIC"));
+
+		entityManager.clear();
+		User unchanged = userRepository.findById(userId).orElseThrow();
+		assertThat(unchanged.getTopicCodes(InterestType.DISLIKE))
+				.containsExactly(TopicCode.SPORTS);
+		assertThat(unchanged.getTopicCodes(InterestType.INTEREST))
+				.containsExactly(TopicCode.ECONOMY);
+	}
 }

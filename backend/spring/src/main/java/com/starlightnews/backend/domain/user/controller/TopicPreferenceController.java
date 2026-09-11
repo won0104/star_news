@@ -95,4 +95,28 @@ public class TopicPreferenceController {
 	) {
 		return ApiResponse.success(topicPreferenceService.replaceInterests(user.userId(), request), requestId);
 	}
+
+	@Operation(
+			summary = "비관심 Topic 목록 일괄 변경",
+			description = "요청한 Topic 목록을 현재 로그인 사용자의 최종 비관심 목록으로 저장한다. **Access Token 필요.**")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "변경 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
+					description = "입력값 오류 (code: INVALID_INPUT_VALUE / INVALID_TOPIC / DUPLICATED_TOPIC)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
+					description = "Access Token 오류 (code: UNAUTHORIZED / INVALID_ACCESS_TOKEN / EXPIRED_ACCESS_TOKEN)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+					description = "사용자를 찾을 수 없음 (code: USER_NOT_FOUND)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	@PutMapping("/dislikes")
+	public ApiResponse<TopicPreferenceResponse> replaceDislikes(
+			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
+			@Valid @RequestBody UpdateTopicPreferenceRequest request,
+			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+	) {
+		return ApiResponse.success(topicPreferenceService.replaceDislikes(user.userId(), request), requestId);
+	}
 }

@@ -254,4 +254,84 @@ class TopicPreferenceControllerTest {
 
 		verify(topicPreferenceService, never()).replaceInterests(anyLong(), any());
 	}
+
+	@Test
+	void 비관심_Topic_변경_성공시_200과_최종_목록을_응답한다() throws Exception {
+		given(topicPreferenceService.replaceDislikes(eq(1L), any(UpdateTopicPreferenceRequest.class)))
+				.willReturn(new TopicPreferenceResponse(List.of(TopicCode.INTERNATIONAL, TopicCode.SPORTS)));
+
+		mockMvc.perform(put(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(List.of("INTERNATIONAL", "SPORTS"))))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.topicCodes[0]").value("INTERNATIONAL"))
+				.andExpect(jsonPath("$.data.topicCodes[1]").value("SPORTS"))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+
+		verify(topicPreferenceService).replaceDislikes(eq(1L), any(UpdateTopicPreferenceRequest.class));
+	}
+
+	@Test
+	void 비관심_변경시_topicCodes가_누락되면_400_INVALID_INPUT_VALUE를_응답한다() throws Exception {
+		mockMvc.perform(put(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(null)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
+				.andExpect(jsonPath("$.errors[*].field").value(hasItems("topicCodes")));
+
+		verify(topicPreferenceService, never()).replaceDislikes(anyLong(), any());
+	}
+
+	@Test
+	void 비관심_변경시_서비스가_INVALID_TOPIC을_던지면_400을_응답한다() throws Exception {
+		given(topicPreferenceService.replaceDislikes(eq(1L), any(UpdateTopicPreferenceRequest.class)))
+				.willThrow(new BusinessException(UserErrorCode.INVALID_TOPIC));
+
+		mockMvc.perform(put(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(List.of("MOVIE"))))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_TOPIC"));
+	}
+
+	@Test
+	void 비관심_변경시_서비스가_DUPLICATED_TOPIC을_던지면_400을_응답한다() throws Exception {
+		given(topicPreferenceService.replaceDislikes(eq(1L), any(UpdateTopicPreferenceRequest.class)))
+				.willThrow(new BusinessException(UserErrorCode.DUPLICATED_TOPIC));
+
+		mockMvc.perform(put(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(List.of("POLITICS", "POLITICS"))))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("DUPLICATED_TOPIC"));
+	}
+
+	@Test
+	void 비관심_Topic_변경시_서비스가_USER_NOT_FOUND를_던지면_404를_응답한다() throws Exception {
+		given(topicPreferenceService.replaceDislikes(eq(1L), any(UpdateTopicPreferenceRequest.class)))
+				.willThrow(new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+		mockMvc.perform(put(DISLIKES_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(List.of("POLITICS"))))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+	}
+
+	@Test
+	void 비관심_Topic_변경시_인증_토큰이_없으면_401_UNAUTHORIZED를_응답한다() throws Exception {
+		mockMvc.perform(put(DISLIKES_PATH)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(body(List.of("POLITICS"))))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+
+		verify(topicPreferenceService, never()).replaceDislikes(anyLong(), any());
+	}
 }

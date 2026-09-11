@@ -196,4 +196,69 @@ class TopicPreferenceServiceTest {
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(UserErrorCode.USER_NOT_FOUND);
 	}
+
+	@Test
+	void 요청_목록을_최종_비관심_Topic으로_반영한다() {
+		User user = activeUser();
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		user.addInterest(TopicCode.IT_SCIENCE, InterestType.INTEREST);
+		user.addInterest(TopicCode.POLITICS, InterestType.DISLIKE);
+		user.addInterest(TopicCode.SPORTS, InterestType.DISLIKE);
+		given(userRepository.findById(1L)).willReturn(Optional.of(user));
+		UpdateTopicPreferenceRequest request = new UpdateTopicPreferenceRequest(
+				List.of(" economy ", "CULTURE", "SPORTS"));
+
+		TopicPreferenceResponse response = topicPreferenceService.replaceDislikes(1L, request);
+
+		assertThat(response.topicCodes())
+				.containsExactly(TopicCode.ECONOMY, TopicCode.CULTURE, TopicCode.SPORTS);
+		assertThat(user.getTopicCodes(InterestType.INTEREST))
+				.containsExactly(TopicCode.IT_SCIENCE);
+	}
+
+	@Test
+	void 빈_배열이면_비관심_Topic만_모두_해제한다() {
+		User user = activeUser();
+		user.addInterest(TopicCode.ECONOMY, InterestType.INTEREST);
+		user.addInterest(TopicCode.SPORTS, InterestType.DISLIKE);
+		given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+		TopicPreferenceResponse response = topicPreferenceService.replaceDislikes(
+				1L, new UpdateTopicPreferenceRequest(List.of()));
+
+		assertThat(response.topicCodes()).isEmpty();
+		assertThat(user.getTopicCodes(InterestType.INTEREST))
+				.containsExactly(TopicCode.ECONOMY);
+	}
+
+	@Test
+	void 비관심_변경시_존재하지_않는_Topic이면_INVALID_TOPIC_예외() {
+		UpdateTopicPreferenceRequest request = new UpdateTopicPreferenceRequest(List.of("MOVIE"));
+
+		Throwable thrown = catchThrowable(() -> topicPreferenceService.replaceDislikes(1L, request));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(UserErrorCode.INVALID_TOPIC);
+		verify(userRepository, never()).findById(anyLong());
+	}
+
+	@Test
+	void 비관심_변경시_정규화한_Topic이_중복이면_DUPLICATED_TOPIC_예외() {
+		UpdateTopicPreferenceRequest request = new UpdateTopicPreferenceRequest(
+				List.of("POLITICS", " politics "));
+
+		Throwable thrown = catchThrowable(() -> topicPreferenceService.replaceDislikes(1L, request));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(UserErrorCode.DUPLICATED_TOPIC);
+		verify(userRepository, never()).findById(anyLong());
+	}
+
+	@Test
+	void 비관심_Topic_변경시_사용자가_없으면_USER_NOT_FOUND_예외() {
+		given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+		Throwable thrown = catchThrowable(() -> topicPreferenceService.replaceDislikes(
+				1L, new UpdateTopicPreferenceRequest(List.of("POLITICS"))));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(UserErrorCode.USER_NOT_FOUND);
+	}
 }
