@@ -1,9 +1,12 @@
 package com.starlightnews.backend.domain.user.repository;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import com.starlightnews.backend.domain.user.domain.ArticleRead;
 import com.starlightnews.backend.domain.user.domain.ArticleReadId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +23,21 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 		long getCount();
 	}
 
+	/** 개인 그래프 Node 별 읽은 기사 목록 한 행. */
+	interface ReadArticleRow {
+		Long getArticleId();
+
+		String getTitle();
+
+		String getOrganizationName();
+
+		String getTopicCode();
+
+		LocalDateTime getLastReadAt();
+
+		String getSummary();
+	}
+
 	/**
 	 * 해당 사용자가 읽은 기사를 articles.topic_code 기준으로 묶어 Topic 별 개수를 센다.
 	 * topic_code 가 없는 기사는 집계에서 제외한다.
@@ -31,4 +49,34 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 			+ "AND a.topicCode IS NOT NULL "
 			+ "GROUP BY a.topicCode")
 	List<TopicReadCount> countReadArticlesByTopic(@Param("userId") Long userId);
+
+	/**
+	 * candidateArticleIds(Neo4j 에서 조회한 Node 관련 기사) 중 이 사용자가 실제로 읽은 것만,
+	 * lastReadAt DESC, articleId DESC 로 첫 페이지를 가져온다.
+	 */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
+			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, a.summary AS summary "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId "
+			+ "AND r.id.userId = :userId "
+			+ "AND r.id.articleId IN :candidateArticleIds "
+			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
+	List<ReadArticleRow> findFirstReadPage(@Param("userId") Long userId,
+			@Param("candidateArticleIds") Collection<Long> candidateArticleIds, Pageable pageable);
+
+	/** 위와 같지만 cursor 위치(lastReadAt, articleId) 다음부터 가져온다. */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
+			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, a.summary AS summary "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId "
+			+ "AND r.id.userId = :userId "
+			+ "AND r.id.articleId IN :candidateArticleIds "
+			+ "AND (r.lastReadAt < :cursorLastReadAt "
+			+ "     OR (r.lastReadAt = :cursorLastReadAt AND r.id.articleId < :cursorArticleId)) "
+			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
+	List<ReadArticleRow> findNextReadPage(@Param("userId") Long userId,
+			@Param("candidateArticleIds") Collection<Long> candidateArticleIds,
+			@Param("cursorLastReadAt") LocalDateTime cursorLastReadAt,
+			@Param("cursorArticleId") Long cursorArticleId,
+			Pageable pageable);
 }

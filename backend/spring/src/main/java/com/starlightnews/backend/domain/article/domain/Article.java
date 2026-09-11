@@ -14,6 +14,8 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * 기사. (articles)
@@ -38,6 +40,10 @@ public class Article {
 
 	@Column(name = "topic_code", length = 32)
 	private String topicCode;
+
+	@JdbcTypeCode(SqlTypes.LONGVARCHAR)
+	@Column(name = "summary")
+	private String summary;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")
