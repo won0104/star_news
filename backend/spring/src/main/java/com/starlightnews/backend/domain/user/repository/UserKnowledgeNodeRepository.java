@@ -36,4 +36,8 @@ public interface UserKnowledgeNodeRepository
 			+ "WHERE u.id.userId = :userId AND u.topicCode = :topicCode")
 	List<UserKnowledgeNode> findByUserIdAndTopicCode(@Param("userId") Long userId,
 			@Param("topicCode") String topicCode);
+
+	/** 해당 사용자의 개인 Node 전체. (개인 그래프 요약 조회용) */
+	@Query("SELECT u FROM UserKnowledgeNode u WHERE u.id.userId = :userId")
+	List<UserKnowledgeNode> findByUserId(@Param("userId") Long userId);
 }

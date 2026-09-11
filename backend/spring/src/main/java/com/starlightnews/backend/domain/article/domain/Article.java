@@ -36,6 +36,9 @@ public class Article {
 	@Column(name = "published_at", nullable = false)
 	private LocalDateTime publishedAt;
 
+	@Column(name = "topic_code", length = 32)
+	private String topicCode;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")
 	private NewsOrganization organization;
