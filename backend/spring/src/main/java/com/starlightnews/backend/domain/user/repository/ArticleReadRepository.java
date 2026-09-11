@@ -38,6 +38,23 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 		String getSummary();
 	}
 
+	/** 사용자 전체 열람 기록 한 행. (ReadArticleRow 에 clickCount 가 추가됨) */
+	interface HistoryRow {
+		Long getArticleId();
+
+		String getTitle();
+
+		String getOrganizationName();
+
+		String getTopicCode();
+
+		LocalDateTime getLastReadAt();
+
+		int getClickCount();
+
+		String getSummary();
+	}
+
 	/**
 	 * 해당 사용자가 읽은 기사를 articles.topic_code 기준으로 묶어 Topic 별 개수를 센다.
 	 * topic_code 가 없는 기사는 집계에서 제외한다.
@@ -76,6 +93,36 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
 	List<ReadArticleRow> findNextReadPage(@Param("userId") Long userId,
 			@Param("candidateArticleIds") Collection<Long> candidateArticleIds,
+			@Param("cursorLastReadAt") LocalDateTime cursorLastReadAt,
+			@Param("cursorArticleId") Long cursorArticleId,
+			Pageable pageable);
+
+	/**
+	 * 사용자의 전체 열람 기록을 lastReadAt DESC, articleId DESC 로 첫 페이지 가져온다.
+	 * topicCode 가 null 이면 전체, 있으면 그 Topic 만 필터한다.
+	 */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
+			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, r.clickCount AS clickCount, a.summary AS summary "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId "
+			+ "AND r.id.userId = :userId "
+			+ "AND (:topicCode IS NULL OR a.topicCode = :topicCode) "
+			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
+	List<HistoryRow> findFirstHistoryPage(@Param("userId") Long userId,
+			@Param("topicCode") String topicCode, Pageable pageable);
+
+	/** 위와 같지만 cursor 위치(lastReadAt, articleId) 다음부터 가져온다. */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
+			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, r.clickCount AS clickCount, a.summary AS summary "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId "
+			+ "AND r.id.userId = :userId "
+			+ "AND (:topicCode IS NULL OR a.topicCode = :topicCode) "
+			+ "AND (r.lastReadAt < :cursorLastReadAt "
+			+ "     OR (r.lastReadAt = :cursorLastReadAt AND r.id.articleId < :cursorArticleId)) "
+			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
+	List<HistoryRow> findNextHistoryPage(@Param("userId") Long userId,
+			@Param("topicCode") String topicCode,
 			@Param("cursorLastReadAt") LocalDateTime cursorLastReadAt,
 			@Param("cursorArticleId") Long cursorArticleId,
 			Pageable pageable);
