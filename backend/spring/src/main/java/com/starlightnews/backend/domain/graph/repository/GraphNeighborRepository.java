@@ -13,7 +13,7 @@ public interface GraphNeighborRepository {
 
 	/**
 	 * 중심 Node 에서 depth Hop 이내로 연결된 주변 Node 를 neighborScore 순으로 조회한다.
-	 * 반환 Node 유형은 EVENT·STORY·ENTITY·STATEMENT 로 한정하며, 경로 중간 Node 도 같은 유형만 허용한다.
+	 * 반환 Node 유형은 EVENT·ENTITY·STATEMENT·TIME 으로 한정하며, 경로 중간 Node 도 같은 유형만 허용한다.
 	 * neighborScore DESC, nodeType ASC, nodeKey ASC 로 정렬해 최대 fetchCap 개까지 가져온다.
 	 */
 	List<NeighborNode> findNeighbors(NodeType centerType, String centerKey, int depth, int fetchCap);

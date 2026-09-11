@@ -11,7 +11,8 @@ import org.springframework.stereotype.Repository;
 /**
  * Neo4jClient 기반 주변 그래프 조회 구현.
  * 가변 길이 경로의 상한(depth)은 파라미터화할 수 없으므로 1~3 으로 검증한 뒤 Cypher 에 정수로 끼워 넣고,
- * Label 은 labels() 포함 여부로 필터한다. 표시 Node 유형은 EVENT·STORY·ENTITY·STATEMENT 로 한정한다.
+ * Label 은 labels() 포함 여부로 필터한다. 표시 Node 유형은 EVENT·ENTITY·STATEMENT·TIME 으로 한정한다.
+
  */
 @Repository
 public class Neo4jGraphNeighborRepository implements GraphNeighborRepository {
@@ -21,32 +22,32 @@ public class Neo4jGraphNeighborRepository implements GraphNeighborRepository {
 
 	/**
 	 * 중심 Node 에서 depth Hop 이내 주변 Node 를 조회한다.
-	 * - 경로의 마지막·중간 Node 는 모두 표시 유형(Event·Story·Entity·Statement)이어야 한다.
+	 * - 경로의 마지막·중간 Node 는 모두 표시 유형(Event·Entity·Statement·Time)이어야 한다.
 	 * - neighborScore = 각 연결 경로의 (관계 가중치 곱 / Hop 수) 중 최댓값.
 	 */
 	private static final String NEIGHBORS_CYPHER = """
 			MATCH path = (c)-[*%d..%d]-(n)
 			WHERE $centerLabel IN labels(c) AND c.nodeId = $centerKey
 			  AND n <> c
-			  AND (n:Event OR n:Story OR n:Entity OR n:Statement)
-			  AND all(x IN nodes(path)[1..-1] WHERE x:Event OR x:Story OR x:Entity OR x:Statement)
+			  AND (n:Event OR n:Entity OR n:Statement OR n:Time)
+			  AND all(x IN nodes(path)[1..-1] WHERE x:Event OR x:Entity OR x:Statement OR x:Time)
 			WITH n, reduce(s = 1.0, r IN relationships(path) |
 			              s * coalesce(r.relevance, r.weight, r.confidence, 0.5)) / length(path) AS pathScore
 			WITH n, max(pathScore) AS neighborScore
 			WITH n, neighborScore,
-			     [lbl IN labels(n) WHERE lbl IN ['Event', 'Story', 'Entity', 'Statement']][0] AS primaryLabel
+			     [lbl IN labels(n) WHERE lbl IN ['Event', 'Entity', 'Statement', 'Time']][0] AS primaryLabel
 			WITH n, neighborScore,
 			     CASE primaryLabel
 			         WHEN 'Event' THEN 'EVENT'
-			         WHEN 'Story' THEN 'STORY'
 			         WHEN 'Entity' THEN 'ENTITY'
 			         WHEN 'Statement' THEN 'STATEMENT'
+			         WHEN 'Time' THEN 'TIME'
 			     END AS nodeType,
 			     CASE primaryLabel
 			         WHEN 'Event' THEN n.title
-			         WHEN 'Story' THEN n.title
 			         WHEN 'Entity' THEN n.canonicalName
 			         WHEN 'Statement' THEN n.text
+			         WHEN 'Time' THEN n.value
 			     END AS label
 			RETURN nodeType, n.nodeId AS nodeKey, label, neighborScore
 			ORDER BY neighborScore DESC, nodeType ASC, nodeKey ASC
