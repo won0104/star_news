@@ -1,0 +1,227 @@
+/*
+ * The right-hand panel: what the centre star opens.
+ *
+ * Dark rather than the app's paper, and that is not a break from the house style but the
+ * same rule applied — text goes on a surface it can be read on, and the surface here has
+ * to belong to a night wall with lit stars on it. Cream paper on this screen would read
+ * as a page pasted over a photograph.
+ *
+ * Inside the stage, so it stops at the top bar and cannot cover it. It overlays the
+ * constellation rather than pushing it aside, which is how the menu board was settled
+ * too — and it closes, so nothing under it is lost for good.
+ */
+.panel {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 430px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(255, 226, 158, 0.16);
+  background: rgba(26, 23, 21, 0.94);
+  backdrop-filter: blur(14px);
+  box-shadow: -18px 0 44px rgba(0, 0, 0, 0.36);
+  transition: transform 320ms cubic-bezier(0.32, 0.72, 0.3, 1);
+}
+
+.panelClosed {
+  transform: translateX(100%);
+}
+
+/* ---- Head ------------------------------------------------------------------ */
+.head {
+  flex: none;
+  padding: 26px 28px 20px;
+  border-bottom: 1px solid rgba(255, 226, 158, 0.14);
+}
+
+.eyebrow {
+  display: block;
+  margin: 0 0 10px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  color: #c9a86a;
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 23px;
+  line-height: 1.35;
+  color: #f8e9b7;
+  /* Korean wraps between syllables by default; hold words together. */
+  word-break: keep-all;
+}
+
+/* Echoes the star that opened this, so the panel reads as belonging to that node. */
+.titleStar {
+  flex: none;
+  font-size: 17px;
+  line-height: 1;
+  color: #ffcf72;
+}
+
+.meta {
+  margin: 10px 0 0;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: #e4d8ae;
+}
+
+.summary {
+  margin: 16px 0 0;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #ded2b6;
+  word-break: keep-all;
+}
+
+/* ---- Articles -------------------------------------------------------------- */
+/* The only part that scrolls, so the head stays put while the list moves. */
+.list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.item {
+  padding: 18px 28px 20px;
+  border-bottom: 1px solid rgba(255, 226, 158, 0.12);
+}
+
+.itemHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.source {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: #cbbe9c;
+}
+
+.headline {
+  margin: 10px 0 0;
+  font-family: var(--font-serif-kr);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #f6efe2;
+  word-break: keep-all;
+}
+
+.detail {
+  margin: 14px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12.5px;
+  color: #e9c477;
+  cursor: pointer;
+}
+
+.detail:hover {
+  color: #ffd98a;
+}
+
+.detail:focus-visible,
+.bookmark:focus-visible,
+.close:focus-visible {
+  outline: 2px solid var(--brass-b);
+  outline-offset: 3px;
+}
+
+/* ---- Bookmark -------------------------------------------------------------- */
+.bookmark {
+  flex: none;
+  padding: 2px;
+  border: 0;
+  background: none;
+  line-height: 0;
+  color: #8d8368;
+  cursor: pointer;
+}
+
+.bookmarkIcon {
+  display: block;
+  width: 13px;
+  height: 17px;
+}
+
+.bookmark:hover {
+  color: #d9c48d;
+}
+
+.bookmarkOn {
+  color: #ffcf72;
+}
+
+.bookmarkOn:hover {
+  color: #ffdd97;
+}
+
+/* ---- Close ----------------------------------------------------------------- */
+.close {
+  position: absolute;
+  right: 18px;
+  top: 20px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 226, 158, 0.2);
+  border-radius: 50%;
+  background: rgba(255, 226, 158, 0.06);
+  font-size: 15px;
+  line-height: 1;
+  color: #e4d8ae;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #fff4d4;
+  background: rgba(255, 226, 158, 0.14);
+}
+
+/*
+ * Below the width where the constellation goes vertical, a 430px column would leave the
+ * picture no room at all, so the panel takes the whole stage instead.
+ */
+@media (max-width: 900px) {
+  .panel {
+    width: 100%;
+    border-left: 0;
+  }
+
+  .head {
+    padding: 22px 20px 18px;
+  }
+
+  .item {
+    padding: 16px 20px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition: none;
+  }
+}

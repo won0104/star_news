@@ -1,0 +1,195 @@
+/*
+ * 뉴스 상세 — the bar that opens on the right when an article is pressed.
+ *
+ * Paper, not the dark of <TrendPanel>. That one sits on a night wall and had to belong to
+ * it; this one sits on the sunlit room, where paper is what the whole app reads on.
+ *
+ * Fixed rather than absolute: it has to stop at the top bar and reach the bottom of the
+ * window whatever the page's own scroll is doing, and the page under it is a normal
+ * scrolling document rather than a fixed stage.
+ */
+.panel {
+  position: fixed;
+  right: 0;
+  top: 72px;
+  bottom: 0;
+  z-index: 12;
+  width: 430px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-left: 0.7px solid var(--auth-card-border);
+  background: #fbf6ea;
+  box-shadow: -18px 0 44px rgba(43, 33, 22, 0.22);
+  transition: transform 320ms cubic-bezier(0.32, 0.72, 0.3, 1);
+}
+
+.panelClosed {
+  transform: translateX(100%);
+}
+
+.head {
+  flex: none;
+  padding: 24px 28px 20px;
+  border-bottom: 0.7px solid var(--paper-edge);
+}
+
+.eyebrow {
+  display: block;
+  margin: 0 0 10px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  color: var(--brass-a);
+}
+
+.source {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+.headline {
+  margin: 10px 0 0;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.45;
+  color: var(--headline-ink);
+  /* Korean breaks between syllables by default; hold words together. */
+  word-break: keep-all;
+}
+
+/* The only part that scrolls, so the headline stays put while the text moves. */
+.body {
+  flex: 1;
+  min-height: 0;
+  padding: 22px 28px 26px;
+  overflow-y: auto;
+}
+
+.leadLabel {
+  margin: 0 0 8px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.lead {
+  margin: 0;
+  font-family: var(--font-serif-kr);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--headline-ink);
+  word-break: keep-all;
+}
+
+.note {
+  margin: 22px 0 0;
+  padding: 14px 16px;
+  border: 0.7px solid var(--paper-edge);
+  border-radius: 10px;
+  background: var(--paper-depth);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+  word-break: keep-all;
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  gap: 10px;
+  padding: 16px 28px 22px;
+  border-top: 0.7px solid var(--paper-edge);
+}
+
+.save {
+  padding: 9px 16px;
+  border: 0.7px solid var(--chip-solid-border);
+  border-radius: 18px;
+  background: var(--chip-solid-bg);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.save:hover {
+  color: var(--headline-ink);
+}
+
+.saveOn,
+.saveOn:hover {
+  border-color: transparent;
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  color: var(--ink-on-dark);
+}
+
+.close {
+  position: absolute;
+  right: 20px;
+  top: 22px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.7px solid var(--chip-solid-border);
+  border-radius: 50%;
+  background: var(--chip-ghost-bg);
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--headline-ink);
+  background: var(--chip-solid-bg);
+}
+
+.close:focus-visible,
+.save:focus-visible {
+  outline: 2px solid var(--brass-b);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1023px) {
+  .panel {
+    top: 60px;
+  }
+}
+
+/* Below this width a 430px column would leave the article list nothing, so it covers. */
+@media (max-width: 900px) {
+  .panel {
+    width: 100%;
+    border-left: 0;
+  }
+
+  .head {
+    padding: 22px 20px 18px;
+  }
+
+  .body {
+    padding: 20px 20px 24px;
+  }
+
+  .actions {
+    padding: 14px 20px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition: none;
+  }
+}

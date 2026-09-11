@@ -1,0 +1,28 @@
+.chip {
+  position: absolute;
+  overflow: hidden;
+  border: 0.6px solid var(--relation-border);
+  border-radius: 12px;
+  background: var(--relation-bg);
+  box-shadow: var(--relation-shadow);
+}
+
+.dot {
+  position: absolute;
+  left: 9.4px;
+  top: 8.9px;
+  width: 5px;
+  height: 5px;
+}
+
+.label {
+  position: absolute;
+  left: 20.4px;
+  top: 4.4px;
+  height: 20px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 8px;
+  color: var(--relation-label);
+  white-space: nowrap;
+}

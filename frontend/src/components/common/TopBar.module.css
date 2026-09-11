@@ -1,0 +1,273 @@
+.bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--topbar-border);
+  background: var(--topbar-bg);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--topbar-shadow);
+}
+
+/* Figma 870:2 — the navigation is part of the night attic rather than pale chrome
+   floating over it. This variant is scoped to 주요 트렌드 so the paper screens keep
+   their existing daylight bar. */
+.barAttic {
+  height: 76px;
+  gap: 0;
+  padding: 0 42px 0 50px;
+  border-bottom-color: rgba(231, 204, 157, 0.56);
+  background: #3b3531;
+  backdrop-filter: none;
+  box-shadow:
+    0 1px 0 rgba(255, 237, 204, 0.08) inset,
+    0 7px 18px rgba(8, 5, 5, 0.34);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.brandName {
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--nav-ink-active);
+}
+
+.brandStar {
+  font-size: 15px;
+  line-height: 1;
+  color: rgba(246, 223, 178, 0.98);
+}
+
+.barAttic .brand {
+  gap: 8px;
+}
+
+.barAttic .brandName {
+  font-size: 19px;
+  color: rgba(246, 223, 178, 0.98);
+}
+
+/* No gap: the hairlines are the spacing now, and the buttons' own padding keeps the
+   labels off them. */
+.nav {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+/*
+ * Short on purpose — 16px against the bar's 72px, so it reads as a separator between
+ * two labels rather than as a rule dividing the bar into cells.
+ *
+ * Not --paper-edge, which is what every other hairline in the app uses. That token is
+ * alpha 0.12 and it is meant for lines on paper; this line is on the bar, which is
+ * itself only half opaque over the photograph, and measured against the composite
+ * behind each rule it came out at 1.14:1 — there but invisible. At 0.45 the same three
+ * spots are 1.66, 1.76 and 1.75, which reads as a hairline without becoming a rule.
+ */
+.navRule {
+  flex: none;
+  width: 1px;
+  height: 16px;
+  margin: 0 3px;
+  background: rgba(120, 102, 82, 0.45);
+}
+
+.navItem {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 18px;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--nav-ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.navItem:hover {
+  background: rgba(120, 102, 82, 0.08);
+  color: var(--nav-ink-active);
+}
+
+.navItemActive {
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  color: var(--ink-on-dark);
+  box-shadow: var(--pill-dark-shadow);
+}
+
+.navItemActive:hover {
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  color: var(--ink-on-dark);
+}
+
+.barAttic .nav {
+  margin-left: 34px;
+}
+
+.barAttic .navRule {
+  display: none;
+}
+
+.barAttic .navItem {
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: 23px;
+  font-size: 15px;
+  color: rgba(224, 209, 189, 0.92);
+}
+
+.barAttic .navItem:hover {
+  color: rgba(246, 223, 178, 0.98);
+  background: rgba(14, 13, 12, 0.38);
+}
+
+.barAttic .navItemActive,
+.barAttic .navItemActive:hover {
+  min-width: 128px;
+  border: 1px solid rgba(224, 196, 150, 0.34);
+  background: rgba(14, 13, 12, 0.72);
+  color: rgba(246, 223, 178, 0.98);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.signIn {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 18px;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--nav-ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.signIn:hover {
+  color: var(--nav-ink-active);
+  background: rgba(120, 102, 82, 0.08);
+}
+
+.signUp {
+  padding: 9px 20px;
+  border: 0.7px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink-on-dark);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--pill-dark-shadow), var(--pill-dark-inner);
+}
+
+.barAttic .signIn {
+  font-size: 15px;
+  color: rgba(224, 209, 189, 0.92);
+}
+
+.barAttic .signIn:hover {
+  color: rgba(246, 223, 178, 0.98);
+  background: rgba(14, 13, 12, 0.38);
+}
+
+.barAttic .signUp {
+  min-width: 110px;
+  min-height: 46px;
+  border-color: rgba(224, 196, 150, 0.34);
+  border-radius: 23px;
+  background: rgba(14, 13, 12, 0.72);
+  font-size: 15px;
+  color: rgba(246, 223, 178, 0.98);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 1023px) {
+  .bar {
+    height: 60px;
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  .barAttic {
+    height: 60px;
+    padding: 0 16px;
+  }
+
+  .barAttic .brandName {
+    font-size: 17px;
+  }
+
+  .barAttic .nav {
+    margin-left: 12px;
+  }
+
+  .barAttic .navItem {
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 13.5px;
+  }
+
+  .barAttic .navItemActive {
+    min-width: auto;
+  }
+
+  /*
+   * Kept, where it used to be hidden. Hiding it was only safe while the left menu board
+   * carried the same destinations at every width; with the board gone this is the only
+   * navigation there is, so below the breakpoint it scrolls sideways instead of
+   * disappearing. `-webkit-overflow-scrolling` is what makes that a flick on iOS.
+   */
+  .nav {
+    /* Takes the whole middle and scrolls inside it. `min-width: 0` is what allows that:
+       without it the flex item cannot shrink below its content and the overflow never
+       engages, and with .spacer still claiming the middle the strip was squeezed to a
+       sliver instead. */
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .spacer {
+    display: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navItem {
+    padding: 8px 12px;
+    font-size: 13.5px;
+  }
+}

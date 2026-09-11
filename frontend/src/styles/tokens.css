@@ -1,0 +1,129 @@
+/*
+ * Design tokens — Figma: "Service / 나의 뉴스 다락방 / Main v2" (node 654:2)
+ * Raw hex from the Figma node is centralised here; components never inline colours.
+ */
+:root {
+  /* Scene canvas (Figma frame size) */
+  --scene-w: 1672;
+  --scene-h: 941;
+
+  /* Ink */
+  --ink-strong: #3b3833;
+  --ink-muted: #6b665e;
+  --ink-faint: #756e63;
+  --ink-on-dark: #f0f0eb;
+  --ink-on-glass: #ebe8e0;
+
+  /* Accents */
+  --accent-event: #b53021;
+
+  /* Paper */
+  --paper-depth: #f5edde;
+  --paper-edge: rgba(120, 102, 82, 0.12);
+  --paper-top-highlight: rgba(255, 254, 249, 0.34);
+  --paper-bottom-shade: rgba(82, 66, 51, 0.03);
+  --paper-bottom-shade-strong: rgba(82, 66, 51, 0.04);
+  --paper-inner-glow: rgba(107, 87, 64, 0.05);
+  --thumb-border: rgba(77, 71, 64, 0.14);
+
+  /* Brass pin */
+  --brass-a: #573614;
+  --brass-b: #ba8538;
+  --brass-c: #6e471a;
+  --brass-clip-shadow: rgba(26, 18, 9, 0.2);
+  --brass-clip-highlight: rgba(255, 201, 97, 0.34);
+
+  /* Backdrop veils */
+  --veil-left-a: rgba(255, 252, 246, 0.98);
+  --veil-left-b: rgba(255, 252, 246, 0.88);
+  --veil-left-c: rgba(255, 252, 246, 0);
+  --veil-right-a: rgba(51, 48, 46, 0);
+  --veil-right-b: rgba(51, 48, 46, 0.04);
+  --veil-right-c: rgba(46, 43, 41, 0.1);
+
+  /* Chrome (nav pill / search pill) */
+  --pill-dark-a: rgba(48, 48, 46, 0.98);
+  --pill-dark-b: rgba(33, 33, 31, 0.98);
+  --pill-dark-shadow: 0 4px 10px rgba(15, 13, 10, 0.18);
+  --pill-dark-inner: inset 0 1px 1.2px rgba(255, 255, 255, 0.07);
+  --glass-bg: rgba(255, 255, 255, 0.09);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-shadow: 0 4px 12px rgba(26, 23, 20, 0.09);
+  --glass-inner: inset 0 1px 1.5px rgba(255, 255, 255, 0.08);
+
+  /* Card elevation */
+  --card-lift: drop-shadow(2px 9px 5.5px rgba(31, 26, 22, 0.11))
+    drop-shadow(0 2px 1.1px rgba(31, 26, 22, 0.12));
+  --card-radius: 2.5px;
+
+  /* Graph screen — entity type accents */
+  --entity-color: #28795e;
+  --topic-color: #d79721;
+  --time-color: #526b8c;
+  --story-color: #8a6640;
+  --statement-color: #2a8ab5;
+  --entity-title: #3d3933;
+  --headline-ink: #38352f;
+
+  /* Graph screen — chrome */
+  --relation-bg: rgba(247, 240, 227, 0.76);
+  --relation-border: rgba(141, 128, 111, 0.14);
+  --relation-shadow: 0 2px 5px rgba(31, 26, 20, 0.08);
+  --relation-label: #625b52;
+
+  --controls-bg: rgba(235, 227, 212, 0.18);
+  --controls-border: rgba(255, 255, 255, 0.18);
+  --controls-shadow: 0 5px 14px rgba(26, 20, 15, 0.06);
+  --controls-eyebrow: rgba(89, 84, 74, 0.68);
+  --chip-solid-bg: rgba(250, 245, 235, 0.86);
+  --chip-solid-border: rgba(115, 105, 89, 0.12);
+  --chip-solid-label: #544f47;
+  --chip-ghost-bg: rgba(250, 245, 235, 0.55);
+  --chip-ghost-label: rgba(99, 92, 79, 0.82);
+  --chip-dark-bg: rgba(46, 46, 43, 0.92);
+  --chip-dark-label: #f5f2e8;
+  --chip-dark-shadow: 0 3px 7px rgba(20, 15, 10, 0.12);
+
+  --graph-search-bg: rgba(247, 242, 232, 0.58);
+  --graph-search-border: rgba(255, 255, 255, 0.34);
+  --graph-search-shadow: 0 4px 10px rgba(31, 26, 20, 0.08);
+  --graph-search-label: #ece9e1;
+  --brand-ink: #716b62;
+
+  /* Graph screen — event thumbnail illustration */
+  --thumb-bg-a: #d7d3c9;
+  --thumb-bg-b: #b8b4aa;
+  --thumb-base: rgba(77, 80, 75, 0.62);
+  --thumb-column: rgba(86, 89, 83, 0.55);
+  --thumb-caption: #41423e;
+
+  /* Home — top bar over the room photo */
+  --topbar-bg: rgba(250, 246, 238, 0.5);
+  --topbar-border: rgba(120, 102, 82, 0.12);
+  --topbar-shadow: 0 1px 14px rgba(43, 33, 22, 0.07);
+  --nav-ink: #5c554b;
+  --nav-ink-active: #2f2b25;
+
+  /* Auth screens — same photo backdrop and paper/brass palette as the rest of the site */
+  --auth-card-border: rgba(120, 102, 82, 0.14);
+  --auth-card-shadow: 0 24px 60px rgba(43, 33, 22, 0.28), 0 2px 8px rgba(43, 33, 22, 0.12);
+  --auth-title: var(--headline-ink);
+  --auth-label: var(--ink-muted);
+  --auth-muted: var(--ink-faint);
+  --auth-border: rgba(120, 102, 82, 0.22);
+  --auth-input-bg: rgba(255, 255, 255, 0.72);
+  --auth-primary-a: var(--pill-dark-a);
+  --auth-primary-b: var(--pill-dark-b);
+  --auth-primary-shadow: var(--pill-dark-shadow), var(--pill-dark-inner);
+  --auth-secondary-bg: var(--chip-solid-bg);
+  --auth-secondary-border: var(--chip-solid-border);
+  --auth-secondary-label: var(--nav-ink-active);
+  --auth-success: var(--entity-color);
+  --auth-error: var(--accent-event);
+  --auth-focus-ring: rgba(186, 133, 56, 0.25);
+
+  /* Type */
+  --font-serif: 'Libre Baskerville', 'Times New Roman', serif;
+  --font-sans: 'Noto Sans KR', system-ui, sans-serif;
+  --font-serif-kr: 'Noto Serif KR', 'Nanum Myeongjo', serif;
+}

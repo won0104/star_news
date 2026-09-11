@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="2.17693" height="16.3263" viewBox="0 0 2.17693 16.3263" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="Hanger / Entity bank" opacity="0.92" d="M1.08847 0.163163C2.08847 4.96316 0.0884674 11.3632 1.08847 16.1632" stroke="url(#paint0_linear_0_4)" stroke-width="1.6"/>
+<defs>
+<linearGradient id="paint0_linear_0_4" x1="1.08847" y1="0.163163" x2="1.08847" y2="16.1632" gradientUnits="userSpaceOnUse">
+<stop stop-color="#1C7A6E" stop-opacity="0.1"/>
+<stop offset="0.22" stop-color="#1C7A6E" stop-opacity="0.42"/>
+<stop offset="0.76" stop-color="#1C7A6E" stop-opacity="0.72"/>
+<stop offset="1" stop-color="#1C7A6E" stop-opacity="0.88"/>
+</linearGradient>
+</defs>
+</svg>

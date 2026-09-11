@@ -1,0 +1,468 @@
+/*
+ * 나를 위한 추천 — a framed board with the recommendations pinned to it.
+ *
+ * The cards were sheets in a column before this; now the board is the surface they sit
+ * on, which is why they are smaller, tilted and pinned. Notes on a board, not a list.
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  /* Wider than the 900px reading column the list used: a board needs room for a grid of
+     notes, and the notes are what is read now rather than one column of full-width rows. */
+  max-width: 1680px;
+}
+
+/* ---- Section head ---------------------------------------------------------- */
+/*
+ * On paper of its own rather than straight on the photograph, for the measured reason the
+ * report's header block has one: ink on this room runs from 1.0 to 3.5 against AA's 4.5,
+ * and no ink colour fixes a background that spans that much.
+ *
+ * Above the board rather than pinned to it — it names the screen, and a title pinned
+ * among the notes would read as one more of them.
+ */
+.head {
+  width: fit-content;
+  max-width: 620px;
+  padding: 20px 24px 22px 22px;
+  border: 0.7px solid var(--auth-card-border);
+  border-left: 4px solid var(--brass-b);
+  border-radius: 12px;
+  background: var(--paper-depth);
+  box-shadow: 0 10px 26px rgba(43, 33, 22, 0.12), 0 1px 3px rgba(43, 33, 22, 0.08);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.4;
+  color: var(--headline-ink);
+  /* Korean breaks between syllables by default; hold words together. */
+  word-break: keep-all;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: var(--ink-muted);
+  word-break: keep-all;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  /* On the head's deeper paper, where faint measures 4.33 against AA's 4.5. */
+  color: var(--ink-muted);
+}
+
+.count {
+  padding: 3px 9px;
+  border-radius: 10px;
+  background: rgba(186, 133, 56, 0.14);
+  font-weight: 500;
+  color: var(--brass-a);
+}
+
+/* ---- The board ------------------------------------------------------------- */
+/*
+ * The board is the photograph: the board on its wall, with the desk under it and the lamp
+ * and plant at its edges. The cork the notes go on is a rectangle inside that picture, not
+ * the whole of it, so the inset below is not a designer's margin — it is where the frame
+ * actually is, measured off the file: the cork runs from x223 to x1441 and from y47 to
+ * y669 in a 1672x839 picture, which is 13.3% in on the left, 13.8% on the right, 5.6%
+ * down from the top and 20.3% up from the bottom. A point of slack is added to each so a
+ * note never touches the wood.
+ *
+ * `aspect-ratio` holds the picture's own 1672x839 so nothing in it is stretched, and the
+ * notes are sized to fit the cork at that ratio rather than the box being allowed to grow.
+ * A board that is a tight crop of a frame can take a little stretching; this one has a
+ * lamp and a plant in it, and stretching those shows immediately.
+ */
+.board {
+  position: relative;
+  aspect-ratio: 1672 / 839;
+  background: url('/assets/board/board.webp') center / 100% 100% no-repeat;
+}
+
+/*
+ * The cork, as a layer of its own pinned to where the frame is. Absolute rather than
+ * padding, and this is the point of the whole arrangement: in flow, ten notes were taller
+ * than the picture's ratio allows and pushed the board 5% out of shape, which bends the
+ * lamp and the plant in it. Out of flow they cannot move it at all, so the picture is
+ * always exactly itself.
+ *
+ * Nothing scrolls here. The cork carried a scrollbar for a while, because ten notes at
+ * their full size stop fitting somewhere around a 1300px window; a board with a scrollbar
+ * down its inside edge is not a board, so the notes give way instead — see .notes.
+ *
+ * It is also the container the notes measure themselves against. Their room is the cork,
+ * not the window: the two are proportional, but naming the real one means the numbers in
+ * the @container rules below are the widths a note actually gets.
+ */
+.cork {
+  position: absolute;
+  inset: 6.8% 14.8% 21.4% 14.3%;
+  container-type: inline-size;
+}
+
+/*
+ * The board arrives once the room has stopped moving: it starts a little larger than its
+ * place and settles back into it, which is the zoom-out that hands the screen over from
+ * the clip. Held at that starting size until then, so nothing appears over the movement.
+ */
+.boardWaiting {
+  opacity: 0;
+  transform: scale(1.06);
+}
+
+.boardIn {
+  animation: boardArrive 620ms cubic-bezier(0.22, 0.68, 0.32, 1) forwards;
+}
+
+@keyframes boardArrive {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boardIn {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Five across and two down, at every size: the grid is the cork and nothing else.
+ *
+ * Fixed counts rather than auto-fill, and that is what took the scrollbar away. auto-fill
+ * drops a column as the cork narrows, and ten notes in four columns is three rows, which
+ * the cork has never been tall enough for — at a 1180px window the third row ran 323px
+ * past the bottom edge. Five and two always multiply to ten, so the tiling is the one
+ * thing that cannot change; what changes is how much a note carries, further down.
+ *
+ * `minmax(0, 1fr)` on both axes rather than 1fr: a track's default minimum is its own
+ * content, so one long word could otherwise push its column, and the grid, past the cork.
+ */
+.notes {
+  height: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  /* Room for the pins, which stand above their notes' top edge. */
+  padding: 6px 2px 2px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  /* Wide enough that a note's tilt cannot reach its neighbour. The row gap is the tighter
+     of the two because it is what the cork runs out of first. */
+  gap: 13px 16px;
+  list-style: none;
+}
+
+/* ---- A pinned note --------------------------------------------------------- */
+/*
+ * `position: relative` is load-bearing: <BrassPin> places its parts absolutely, and this
+ * is what they are placed against.
+ *
+ * The tilt is set per note in the component, from a fixed table rather than at random, so
+ * a note does not jump to a new angle on every render.
+ */
+.note {
+  position: relative;
+  display: block;
+  /* Room above for the pin, which sits above the paper's own top edge. */
+  margin-top: 8px;
+  /* Stretched to its row, which is what .paper's max-height resolves against. A grid
+     item's default minimum is its content; this releases it. */
+  min-height: 0;
+}
+
+/*
+ * `max-height` rather than `height`: a note keeps its natural size, so on a wide screen
+ * there is air under the second row the way there is under pinned paper, but it can
+ * never be taller than the cell the cork gave it. With the clamps below, the tallest of
+ * the ten clears its cell at every width down to a 690px window — by 15px at the tightest
+ * point of the desktop range — so the ceiling is not actually reached; `overflow: hidden`
+ * is there so that if a font or a longer headline ever changes that, the photograph still
+ * holds its shape rather than the note spilling onto the frame.
+ */
+.paper {
+  display: block;
+  box-sizing: border-box;
+  max-height: 100%;
+  overflow: hidden;
+  padding: 16px 15px 14px;
+  border: 0.7px solid var(--auth-card-border);
+  border-radius: 3px;
+  background: #fbf6ea;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.34), 0 2px 4px rgba(0, 0, 0, 0.2);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+/* Straightens and lifts under the cursor, the way a hand would to read one. */
+.note:hover .paper {
+  transform: rotate(0deg) translateY(-3px);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.22);
+}
+
+.paper:focus-visible {
+  outline: 2px solid var(--brass-b);
+  outline-offset: 3px;
+}
+
+/* The pin's anchor: a zero-width point on the note's top edge, centred. <BrassPin>
+   derives every part from it, so the cluster lands over the paper's own top. */
+.pin {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 2;
+  width: 0;
+  height: 0;
+}
+
+/*
+ * The reason leads, in the chip the app already uses for a small standing label. It is
+ * the point of the note, but it is set small: the event's name is what is being read.
+ */
+.reason {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0;
+  padding: 3px 9px;
+  border: 0.7px solid var(--chip-solid-border);
+  border-radius: 12px;
+  background: var(--chip-solid-bg);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--ink-muted);
+  word-break: keep-all;
+}
+
+.reasonKey {
+  color: var(--ink-faint);
+}
+
+/* Clamped for the same reason the summary is: a note has a ceiling now, and a headline
+   running to four lines in a narrow column is what would reach it first. */
+.noteTitle {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  margin: 9px 0 0;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 15.5px;
+  line-height: 1.35;
+  color: var(--headline-ink);
+  word-break: keep-all;
+}
+
+/* Two lines at most: the cork is only 622px of the picture's 839, and the whole summary
+   is one press away on the event's own page. */
+.noteSummary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 6px 0 0;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  word-break: keep-all;
+}
+
+.noteFoot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 9px 0 0;
+}
+
+.noteTags {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  word-break: keep-all;
+}
+
+.noteGo {
+  flex: none;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--brass-a);
+}
+
+/*
+ * The tiling is fixed, so this is the give: as the cork narrows a note drops what it can
+ * spare, the largest thing first, and the ten stay where they are. The thresholds are
+ * cork widths rather than window widths, and each is where the note that carries the most
+ * lines stops fitting its cell — found by sweeping the board's width in 5px steps and
+ * comparing every note's scrollHeight against its cell, not by eye.
+ *
+ * The reason chip is the last thing that would go, after the summary and after the tags:
+ * it is why the note is on the board at all, and the summary it gives up is one press
+ * away on the event's own page.
+ */
+@container (max-width: 1000px) {
+  .noteTitle {
+    -webkit-line-clamp: 2;
+  }
+}
+
+@container (max-width: 980px) {
+  .noteSummary {
+    display: none;
+  }
+}
+
+@container (max-width: 880px) {
+  .paper {
+    padding: 13px 12px 12px;
+  }
+
+  .noteTitle {
+    font-size: 14px;
+  }
+
+  .noteTags {
+    display: none;
+  }
+}
+
+@container (max-width: 790px) {
+  .paper {
+    padding: 10px 9px 9px;
+  }
+
+  /* The label goes before the reason itself does: "추천 이유 ·" costs a line of its own at
+     this width, and the chip it sits in is already saying that. */
+  .reasonKey {
+    display: none;
+  }
+
+  .noteTitle {
+    font-size: 13px;
+  }
+}
+
+@container (max-width: 680px) {
+  .reason {
+    font-size: 10px;
+  }
+
+  .noteTitle {
+    font-size: 12.5px;
+  }
+
+  /* Nothing left in the foot but the arrow, and the whole note is the link. */
+  .noteFoot {
+    display: none;
+  }
+}
+
+/*
+ * Under a 900px window — where every other illustrated screen in the app hands over to a
+ * reflowed layout, see COMPACT_QUERY — a note is about 90px across and the reason runs to
+ * five lines in it. Clamped so it ends in an ellipsis rather than at whatever the cell's
+ * bottom edge cuts through. The board is not a good shape for a window this narrow; this
+ * is only so that it stays whole while it is one.
+ */
+@container (max-width: 620px) {
+  .reason {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+}
+
+@container (max-width: 520px) {
+  .reason {
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (max-width: 1023px) {
+  .head {
+    padding: 18px 18px 20px 16px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .notes {
+    gap: 10px 12px;
+  }
+}
+
+/*
+ * Under 900px the board stops being the right container and the notes come off it.
+ *
+ * Five columns is the whole reason the ten fit without a scrollbar, and it is also what
+ * breaks here: a fifth of a 380px cork is a 66px note, and no amount of dropping lines
+ * makes a headline fit that. The steps above run out somewhere around a 690px window,
+ * below which a title is cut mid-word — which is what this replaces.
+ *
+ * So at the same width where every other illustrated screen in the app hands over to a
+ * reflowed layout (COMPACT_QUERY in useIsCompact) the photograph goes and the notes are
+ * pinned to the room itself: a flow grid, as many columns as fit, the page scrolling the
+ * way a page does. Nothing here is clipped or boxed, because nothing here is inside a
+ * fixed rectangle any more.
+ *
+ * `container-type: normal` is what switches the @container steps off — with no container
+ * above them they stop matching, so a note goes back to carrying everything.
+ */
+@media (max-width: 900px) {
+  .board {
+    aspect-ratio: auto;
+    background: none;
+  }
+
+  .cork {
+    position: static;
+    container-type: normal;
+  }
+
+  .notes {
+    height: auto;
+    padding: 8px 0 0;
+    grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+    grid-template-rows: auto;
+    gap: 26px 16px;
+  }
+
+  .paper {
+    max-height: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper {
+    transition: none;
+  }
+}

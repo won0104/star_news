@@ -1,0 +1,41 @@
+.viewport {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The canvas is allowed to overflow (see useSceneScale), so clip it here. */
+  overflow: hidden;
+  background: #2a2724;
+}
+
+/*
+ * The top bar's treatment stood on its side - same tint, same hairline, same blur as
+ * .bar in TopBar.module.css - so the two meet at the corner and read as one piece of
+ * chrome wrapped around the room. `top` is set inline to the bar's height, because an
+ * absolute child's containing block is the padding box - padding included - so top:0
+ * here would tuck the rail behind the bar and stack the two tints into a darker patch.
+ *
+ * The shadow is thrown sideways: --topbar-shadow is `0 1px 14px`, which is the right
+ * direction for a horizontal bar and invisible on a vertical one.
+ */
+.rail {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  background: var(--topbar-bg);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid var(--topbar-border);
+  box-shadow: 1px 0 14px rgba(43, 33, 22, 0.07);
+}
+
+.canvas {
+  position: relative;
+  flex: none;
+  width: 1672px;
+  height: 941px;
+  /* Clipped so a strand of yarn never trails off into the bare room, but transparent:
+     the room behind it shows through past the canvas edge. */
+  overflow: hidden;
+  transform-origin: center center;
+}
