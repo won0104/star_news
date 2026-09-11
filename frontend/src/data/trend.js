@@ -38,8 +38,24 @@
  * well under a megabyte.
  */
 export const nightfall = {
-  still: '/assets/trend/nightfall.webp',
+  still: '/assets/trend/figma/attic-night.png',
   clip: { mp4: '/assets/trend/nightfall-v3.mp4' },
+};
+
+/** Exact exported layers from Figma frame 870:2. The relation layer includes the
+ * ambient stars, six authored edges, the centre sticker, the upper entity and the
+ * faded continuation event; the remaining assets sit above it at their named slots. */
+export const trendFigmaAssets = {
+  relations: '/assets/trend/figma/relations.svg',
+  centreGlow: '/assets/trend/figma/event-center-glow.svg',
+  relatedLeftGlow: '/assets/trend/figma/event-related-left-glow.svg',
+  relatedLeftSticker: '/assets/trend/figma/event-related-left-sticker.svg',
+  relatedRightGlow: '/assets/trend/figma/event-related-right-glow.svg',
+  relatedRightSticker: '/assets/trend/figma/event-related-right-sticker.svg',
+  entityGlow: '/assets/trend/figma/entity-glow.svg',
+  entitySticker: '/assets/trend/figma/entity-sticker.svg',
+  statementGlow: '/assets/trend/figma/statement-glow.svg',
+  statementSticker: '/assets/trend/figma/statement-sticker.svg',
 };
 
 /**
@@ -163,12 +179,12 @@ export const constellationCopy = {
  * statement. The entities are the descriptors, so they are the ones to lose.
  */
 export const constellationSlots = [
-  { role: 'centre', at: [50, 40], atNarrow: [50, 26], side: 'above', sideNarrow: 'above' },
-  { role: 'related', at: [19, 22], atNarrow: [20, 52], side: 'above', sideNarrow: 'below' },
-  { role: 'related', at: [81, 22], atNarrow: [80, 52], side: 'above', sideNarrow: 'below' },
-  { role: 'entity', at: [14, 60], side: 'left', hideNarrow: true },
-  { role: 'entity', at: [86, 60], side: 'right', hideNarrow: true },
-  { role: 'statement', at: [50, 79], atNarrow: [50, 76], side: 'below', sideNarrow: 'below' },
+  { role: 'centre', visual: 'centre', at: [43.68, 55.89], atNarrow: [50, 28] },
+  { role: 'related', visual: 'relatedLeft', at: [23.68, 33.33], atNarrow: [23, 52] },
+  { role: 'related', visual: 'relatedRight', at: [68.01, 42.89], atNarrow: [77, 52] },
+  { role: 'entity', visual: 'entityLeft', at: [22.4, 61.56], hideNarrow: true },
+  { role: 'entity', visual: 'entityTop', at: [65.38, 20.28], hideNarrow: true },
+  { role: 'statement', visual: 'statement', at: [50, 78.11], atNarrow: [50, 76] },
 ];
 
 /**

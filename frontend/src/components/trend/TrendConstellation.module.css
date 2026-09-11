@@ -1,58 +1,96 @@
-/*
- * The constellation over the night wall. Fills whatever box it is given; the field's
- * shape is the viewport's, so everything below is placed in percentages of it.
- */
 .field {
   position: absolute;
   inset: 0;
+  overflow: hidden;
 }
 
-/*
- * The links, in their own layer under the stars.
- *
- * `viewBox="0 0 100 100"` with `preserveAspectRatio="none"` makes the SVG's units the
- * same percentages the nodes are placed in, so one set of numbers positions both and
- * they cannot drift apart. The cost is that the units are stretched unevenly, which
- * would smear the strokes — `vector-effect: non-scaling-stroke` on the lines is what
- * pays it: the stroke is measured after the distortion, so it stays a hairline at any
- * window shape.
- */
-.links {
+.fieldFull {
+  position: fixed;
+  z-index: 60;
+  background: #302b29 url('/assets/trend/figma/attic-night.png') center / cover no-repeat;
+}
+
+.fullToggle {
+  position: absolute;
+  z-index: 5;
+  top: 20px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid rgba(226, 197, 126, 0.42);
+  border-radius: 999px;
+  background: rgba(20, 18, 18, 0.7);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  color: rgba(248, 226, 181, 0.96);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.fullToggle:hover {
+  border-color: rgba(238, 207, 132, 0.72);
+  background: rgba(33, 29, 27, 0.82);
+}
+
+.fullToggle:focus-visible {
+  outline: 2px solid #e4c679;
+  outline-offset: 3px;
+}
+
+/* The source frame is 1440 × 900. A cover-sized canvas keeps the Figma background,
+   relation SVG, node coordinates and type scale in one coordinate system. */
+.canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, 160vh);
+  aspect-ratio: 8 / 5;
+  transform: translate(-50%, -50%);
+  container-type: inline-size;
+}
+
+.relations {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  animation: appear 850ms ease 300ms forwards;
 }
 
-.link {
-  stroke: rgba(255, 216, 126, 0.40);
-  stroke-width: 1.15;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
+.mobileLinks {
+  display: none;
 }
 
-/*
- * One node. The box is the star and only the star, so the point it is centred on is
- * where the star is — which is the same point the links are drawn to. The text is
- * absolute and hangs off it, on whichever side has no links running through it.
- *
- * The text was in flow here at first, in a column with the star. That made the box the
- * two of them together, so the star sat half a text-height off the point the links met,
- * and moving a label to the other side moved its star.
- */
 .node {
   position: absolute;
+  z-index: 1;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
   transform: translate(-50%, -50%);
-  text-align: center;
+  animation: rise 620ms ease forwards;
 }
 
-/*
- * The centre star's button, which is the star and nothing more: no padding, no border,
- * no background. The star image inside it is what is seen, and the focus ring is drawn
- * around that.
- */
+.art,
 .starButton {
+  position: absolute;
+  left: 50%;
+  top: 50%;
   display: block;
+  width: var(--hit-size);
+  height: var(--hit-size);
+  transform: translate(-50%, -50%);
+}
+
+.starButton {
+  z-index: 1;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -61,209 +99,175 @@
 }
 
 .starButton:focus-visible {
-  outline: 2px solid var(--brass-b);
+  outline: 2px solid #e4c679;
   outline-offset: 4px;
 }
 
-/* Lifts on hover, so the one star that can be pressed says so. */
-.starButton:hover .star {
-  filter: drop-shadow(0 0 16px rgba(255, 214, 130, 0.5));
+.starButton:hover {
+  filter: brightness(1.14) drop-shadow(0 0 10px rgba(255, 199, 87, 0.3));
 }
 
-.star {
-  display: block;
-  /* The glow is baked into the image and is part of what makes these read as light
-     rather than as stickers, so the frame is deliberately larger than the star: the
-     body is 1/1.8 of what is set here. */
-  width: var(--star-size);
-  height: var(--star-size);
-  /* Cropped frames still carry a faint square edge on some scalers; a hair of blur on
-     the alpha edge is cheaper than re-rendering the assets. */
-  filter: drop-shadow(0 0 10px rgba(255, 204, 79, 0.28));
+.layer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  max-width: none;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
-/* Largest to smallest, and the size is the only thing that says which is which. The
-   centre is the one you are looking at; a related event is still an event, so it keeps
-   the event star and takes the next size down. */
+.centreGlow {
+  width: 16.875cqw;
+}
+
+.relatedLeftGlow {
+  width: 9.097cqw;
+}
+
+.relatedLeftSticker {
+  width: 5.764cqw;
+}
+
+.relatedRightGlow {
+  width: 9.514cqw;
+}
+
+.relatedRightSticker {
+  width: 6.11cqw;
+}
+
+.entityGlow {
+  width: 7.569cqw;
+}
+
+.entitySticker {
+  width: 4.838cqw;
+}
+
+.statementGlow {
+  width: 8.403cqw;
+}
+
+.statementSticker {
+  width: 5.193cqw;
+}
+
 .centreNode {
-  --star-size: 173px;
+  --hit-size: 9.24cqw;
 }
 
 .relatedNode {
-  --star-size: 124px;
-}
-
-.statementNode {
-  --star-size: 108px;
+  --hit-size: 6.46cqw;
 }
 
 .entityNode {
-  --star-size: 76px;
+  --hit-size: 4.52cqw;
 }
 
-/*
- * Set into the star's own glow, which is mostly empty pixels — without the overlap the
- * text sits a full halo away from the star it belongs to. Each kind overlaps by its own
- * amount because the halo is proportional to the star.
- *
- * `max-content` so a short label shrinks to its text: the box is centred by pulling it
- * back half its own width, and a box stretched to --text-width would centre the box
- * rather than the words in it.
- */
+.statementNode {
+  --hit-size: 5.35cqw;
+}
+
+.mobileStar {
+  display: none;
+}
+
 .text {
   position: absolute;
-  left: 50%;
-  width: max-content;
-  max-width: var(--text-width);
-  transform: translateX(-50%);
-  /* CJK breaks between syllables by default, which split 늘린다" across two lines as
-     늘린 / 다". keep-all holds a Korean word together and breaks at spaces instead. */
-  word-break: keep-all;
-}
-
-.textBelow {
-  top: calc(100% - var(--star-size) * 0.16);
-}
-
-.textAbove {
-  bottom: calc(100% - var(--star-size) * 0.16);
-}
-
-/*
- * Beside the star, for a node whose links all leave vertically. Both override .text's
- * horizontal centring rather than adding to it, and both are ragged away from the star
- * so the text's edge follows the star instead of drifting from it.
- */
-.textLeft,
-.textRight {
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.textLeft {
-  left: auto;
-  right: calc(100% - var(--star-size) * 0.16);
-  text-align: right;
-}
-
-.textRight {
-  left: calc(100% - var(--star-size) * 0.16);
-  text-align: left;
-}
-
-.centreNode .text {
-  --text-width: 260px;
-}
-
-.relatedNode .text {
-  --text-width: 200px;
-}
-
-.statementNode .text {
-  --text-width: 240px;
-}
-
-.entityNode .text {
-  --text-width: 150px;
-}
-
-/*
- * Light on a dark wall, and the event is the one line set in the serif — it is the
- * sentence the rest of the picture is about.
- */
-.label {
-  margin: 0;
+  width: var(--text-width);
   font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1.45;
-  color: #f8e9b7;
-  text-shadow: 0 1px 6px rgba(20, 16, 12, 0.75);
+  color: rgba(229, 209, 171, 0.86);
+  word-break: keep-all;
+  pointer-events: none;
 }
 
-.centreNode .label {
+.label,
+.meta {
+  margin: 0;
+}
+
+.label {
   font-family: var(--font-serif-kr);
   font-weight: 700;
-  font-size: 21px;
-  line-height: 1.4;
-}
-
-/* A related event is a sentence too, so it keeps the serif — a size down, because it is
-   not the one being read. */
-.relatedNode .label {
-  font-family: var(--font-serif-kr);
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 1.4;
-}
-
-.statementNode .label {
-  font-size: 15px;
+  font-size: 1.319cqw;
+  line-height: 1.55;
+  color: rgba(245, 219, 168, 0.98);
+  text-align: center;
+  text-shadow: 0 0 8px rgba(255, 199, 87, 0.12);
 }
 
 .meta {
-  margin: 5px 0 0;
-  font-family: var(--font-sans);
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  /* The dim sibling of the label's gold. Set by measurement rather than by taste: the
-     first try at it, #d8cb9f, came out at 4.53 over the wall's brightest patch under a
-     label, which clears AA by 0.03 and would not survive a different crop of the photo.
-     This is 5.15 there, and still plainly quieter than the label above it. */
-  color: #e4d8ae;
-  text-shadow: 0 1px 5px rgba(20, 16, 12, 0.7);
-}
-
-/* ---- The caption, bottom-left, off the constellation ----------------------- */
-.caption {
-  position: absolute;
-  left: 40px;
-  bottom: 32px;
-  max-width: 300px;
-}
-
-.captionTitle {
-  margin: 0;
-  font-family: var(--font-serif-kr);
-  font-weight: 500;
-  font-size: 15px;
-  color: #efe0ae;
-  text-shadow: 0 1px 6px rgba(20, 16, 12, 0.75);
-}
-
-.captionHint {
-  margin: 6px 0 0;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
+  margin-top: 0.28cqw;
+  font-size: 0.799cqw;
   line-height: 1.5;
-  color: #e4d8ae;
-  text-shadow: 0 1px 5px rgba(20, 16, 12, 0.7);
+  text-align: center;
+  color: rgba(229, 209, 171, 0.84);
 }
 
-/*
- * The picture arrives rather than appearing, and the stars arrive in the order they are
- * read: the event first, then what hangs off it. Each node's delay is set in the
- * component, since it depends on that node's place in the list. The links come in last,
- * once there is something at both of their ends.
- *
- * Two keyframes for one movement, because a node is centred on its point with a
- * transform and an animation on `transform` would throw that centring away mid-flight.
- * `rise` carries the -50%/-50% through; `riseFlat` is for the two layers that are not
- * centred on anything.
- */
-.node {
-  opacity: 0;
-  animation: rise 700ms ease forwards;
+.centreText {
+  left: 13.54cqw;
+  top: 0.35cqw;
+  width: 22.92cqw;
+  transform: translateX(-50%);
 }
 
-.caption {
-  opacity: 0;
-  animation: riseFlat 700ms ease forwards;
+.centreText .label {
+  font-size: 1.528cqw;
 }
 
-.links {
-  opacity: 0;
-  animation: riseFlat 900ms ease 520ms forwards;
+.relatedLeftText {
+  left: -1.08cqw;
+  top: -9.03cqw;
+  width: 21.88cqw;
+  transform: translateX(-50%);
+}
+
+.relatedRightText {
+  left: 9.17cqw;
+  top: -5.35cqw;
+  width: 19.86cqw;
+  transform: translateX(-50%);
+}
+
+.entityLeftText {
+  right: 2.4cqw;
+  top: -1.1cqw;
+  width: 6.81cqw;
+}
+
+.entityTopText {
+  left: -7.12cqw;
+  right: auto;
+  top: -3.25cqw;
+  width: 8.06cqw;
+}
+
+.entityNode .label {
+  font-weight: 400;
+  font-size: 1.181cqw;
+  color: rgba(176, 188, 253, 0.96);
+}
+
+.entityNode .meta {
+  color: rgba(176, 188, 253, 0.76);
+}
+
+.statementText {
+  left: 0;
+  top: 3.5cqw;
+  width: 15.28cqw;
+  transform: translateX(-50%);
+}
+
+.statementNode .label {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.95cqw;
+  color: rgba(176, 235, 242, 0.96);
+}
+
+.statementNode .meta {
+  color: rgba(176, 235, 242, 0.82);
 }
 
 @keyframes rise {
@@ -278,100 +282,126 @@
   }
 }
 
-@keyframes riseFlat {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
+@keyframes appear {
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 900px) {
+  .canvas {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    transform: none;
+  }
+
+  .fullToggle {
+    top: 14px;
+    right: 14px;
+    min-height: 36px;
+    padding: 7px 11px;
+    font-size: 12px;
+  }
+
+  .relations {
+    display: none;
+  }
+
+  .mobileLinks {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mobileLinks line {
+    stroke: rgba(228, 198, 121, 0.46);
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .layer {
+    display: none;
+  }
+
+  .mobileStar {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: block;
+    width: var(--mobile-star);
+    height: var(--mobile-star);
+    transform: translate(-50%, -50%);
+  }
+
   .centreNode {
-    --star-size: 128px;
+    --hit-size: 132px;
+    --mobile-star: 132px;
   }
 
   .relatedNode {
-    --star-size: 96px;
+    --hit-size: 98px;
+    --mobile-star: 98px;
   }
 
   .statementNode {
-    --star-size: 88px;
+    --hit-size: 88px;
+    --mobile-star: 88px;
   }
 
-  .entityNode {
-    --star-size: 62px;
+  .text {
+    width: 132px;
+    transform: translateX(-50%);
   }
 
-  .centreNode .label {
-    font-size: 17px;
+  .centreText {
+    left: 0;
+    top: -112px;
+    width: 210px;
   }
 
-  .centreNode .text {
-    --text-width: 190px;
+  .relatedLeftText,
+  .relatedRightText {
+    left: 0;
+    top: 56px;
+    width: 126px;
+    transform: translateX(-50%);
   }
 
-  .relatedNode .label {
-    font-size: 14.5px;
+  .statementText {
+    left: 0;
+    top: 51px;
+    width: 190px;
   }
 
-  .relatedNode .text {
-    --text-width: 150px;
+  .label,
+  .centreText .label {
+    font-size: 15px;
+    line-height: 1.45;
   }
 
-  /* Still the wide positions between 901px and here, where the two statement labels have
-     243px of clearance rather than 276px — so they come in to match, and only below
-     NARROW_QUERY do the stars themselves move. */
-  .statementNode .text {
-    --text-width: 210px;
-  }
-
-  .caption {
-    left: 20px;
-    bottom: 20px;
-  }
-}
-
-/*
- * NARROW_QUERY in hooks/useIsNarrow.js, mirrored: below this width the component
- * switches every node to its `atNarrow` position, and the labels have to come in with
- * them or they will overlap at the new spacing. Change one and change the other.
- */
-@media (max-width: 900px) {
-  .statementNode .text {
-    --text-width: 132px;
+  .centreText .label {
+    font-size: 18px;
   }
 
   .statementNode .label {
     font-size: 13px;
   }
 
-  .entityNode .text {
-    --text-width: 110px;
-  }
-
-  /* Narrow enough to stay on the field at 20% and 80% of a 375px screen, where a 140px
-     box ran off both edges by 10px. */
-  .relatedNode .text {
-    --text-width: 120px;
+  .meta {
+    margin-top: 4px;
+    font-size: 11px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .node,
-  .caption,
-  .links {
+  .relations {
     opacity: 1;
     animation: none;
-    transform: none;
-  }
-
-  /* The nodes still have to be centred on their point; only the movement goes. */
-  .node {
-    transform: translate(-50%, -50%);
   }
 }

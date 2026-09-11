@@ -14,10 +14,20 @@
  */
 .stage {
   position: fixed;
-  inset: 72px 0 0;
+  top: 76px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-top: 1px solid rgba(12, 9, 8, 0.7);
   overflow: hidden;
-  /* The still's own mid tone, so the screen does not flash pale before it loads. */
-  background: #46403c;
+  /* Figma 870:2's night ceiling while its photograph is loading. */
+  background: #302b29;
+}
+
+@media (max-width: 1023px) {
+  .stage {
+    top: 60px;
+  }
 }
 
 /*
@@ -45,11 +55,4 @@
 
 .stillReady {
   opacity: 1;
-}
-
-@media (max-width: 1023px) {
-  /* The bar shrinks to 60px below this width; meet it there. */
-  .stage {
-    inset: 60px 0 0;
-  }
 }
