@@ -1,0 +1,348 @@
+/* Typography and geometry for the reflowed cards. The desktop equivalents pin every
+   line at a coordinate inside the card; here the card is only as tall as its content. */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 14px;
+  margin-top: 24px;
+}
+
+@media (min-width: 560px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.sectionLabel {
+  margin-top: 34px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+/* ---- Type eyebrow ---------------------------------------------------------- */
+.typeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+}
+
+.type {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.typeEvent {
+  color: var(--accent-event);
+}
+
+.typeStatement {
+  color: var(--statement-color);
+}
+
+.bookmark {
+  margin-left: auto;
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+/* ---- Event (feature) card -------------------------------------------------- */
+.thumb {
+  position: relative;
+  margin-top: 14px;
+  overflow: hidden;
+  aspect-ratio: 215 / 162;
+  border: 0.6px solid var(--thumb-border);
+  border-radius: 2px;
+}
+
+.thumbPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Holds the crop the desktop card frames by hand. */
+  object-position: 52% 35%;
+}
+
+.headline {
+  margin: 18px 0 0;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: clamp(21px, 5.6vw, 26px);
+  line-height: 1.3;
+  color: var(--headline-ink);
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 14px;
+}
+
+.meta {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+.arrow {
+  margin-top: 16px;
+  text-align: right;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+/* ---- Statement card -------------------------------------------------------- */
+.quoteMark {
+  margin-top: 4px;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  line-height: 0.9;
+  color: var(--ink-muted);
+}
+
+.quoteBody {
+  margin-top: 6px;
+  font-family: var(--font-serif-kr);
+  font-weight: 500;
+  font-size: clamp(16px, 4.4vw, 19px);
+  line-height: 1.5;
+  color: var(--headline-ink);
+}
+
+.quoteSource {
+  margin-top: 14px;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  color: var(--ink-muted);
+}
+
+/* ---- Mini / entity tiles --------------------------------------------------- */
+.tileBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 104px;
+}
+
+.miniGlyph {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+.tileFoot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: auto;
+}
+
+.tileDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+}
+
+.miniLabel {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.entityType {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.entityTitle {
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--entity-title);
+}
+
+.entitySub {
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  color: var(--ink-muted);
+}
+
+/* ---- Graph: relation chips & exploration controls -------------------------- */
+.chipRow {
+  display: flex;
+  gap: 8px;
+  margin: 0 -20px;
+  padding: 0 20px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chipRow::-webkit-scrollbar {
+  display: none;
+}
+
+.relationChip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 0.6px solid var(--relation-border);
+  border-radius: 13px;
+  background: var(--relation-bg);
+  box-shadow: var(--relation-shadow);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 10px;
+  color: var(--relation-label);
+}
+
+.relationDot {
+  flex: none;
+  width: 5px;
+  height: 5px;
+}
+
+.controls {
+  margin-top: 22px;
+  padding: 14px 16px;
+  border: 0.7px solid var(--controls-border);
+  border-radius: 18px;
+  background: rgba(235, 227, 212, 0.4);
+  backdrop-filter: blur(3.5px);
+  box-shadow: var(--controls-shadow);
+}
+
+.controlsEyebrow {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--controls-eyebrow);
+}
+
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.controlChip {
+  height: 32px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  white-space: pre;
+  cursor: pointer;
+}
+
+.chipSolid {
+  border: 0.7px solid var(--chip-solid-border);
+  background: var(--chip-solid-bg);
+  color: var(--chip-solid-label);
+}
+
+.chipGhost {
+  background: var(--chip-ghost-bg);
+  color: var(--chip-ghost-label);
+}
+
+.chipDark {
+  margin-left: auto;
+  background: var(--chip-dark-bg);
+  box-shadow: var(--chip-dark-shadow);
+  font-weight: 500;
+  color: var(--chip-dark-label);
+}
+
+/* ---- Graph: bank facade illustration --------------------------------------- */
+/* Same drawing as the scene, with the Figma offsets expressed as percentages of the
+   thumbnail so it holds together at any width. */
+.bankThumb {
+  position: relative;
+  margin-top: 14px;
+  overflow: hidden;
+  aspect-ratio: 215 / 162;
+  border: 0.6px solid var(--thumb-border);
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--thumb-bg-a), var(--thumb-bg-b));
+}
+
+.bankRoof {
+  position: absolute;
+  left: 50%;
+  top: 14.8%;
+  width: 43.9%;
+  height: 20.4%;
+  transform: translateX(-50%);
+}
+
+.bankColumns {
+  position: absolute;
+  left: 24.2%;
+  top: 36.4%;
+  display: flex;
+  justify-content: space-between;
+  width: 52.1%;
+  height: 34%;
+}
+
+.bankColumn {
+  width: 5.6%;
+  border-radius: 1px;
+  background: var(--thumb-column);
+}
+
+.bankBase {
+  position: absolute;
+  left: 19.5%;
+  top: 69.1%;
+  width: 61.4%;
+  height: 11.1%;
+  border-radius: 1px;
+  background: var(--thumb-base);
+}
+
+.bankCaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 84%;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: clamp(13px, 3.4vw, 15px);
+  text-align: center;
+  color: var(--thumb-caption);
+}

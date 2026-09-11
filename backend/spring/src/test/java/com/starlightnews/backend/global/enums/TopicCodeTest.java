@@ -44,4 +44,13 @@ class TopicCodeTest {
 		Optional<TopicCode> result = TopicCode.from("POLITICS");
 		assertThat(result).isPresent();
 	}
+
+	@Test
+	void labelKo는_상수마다_한글_분류명을_반환한다() {
+		assertThat(TopicCode.ECONOMY.labelKo()).isEqualTo("경제");
+		assertThat(TopicCode.IT_SCIENCE.labelKo()).isEqualTo("IT·과학");
+		for (TopicCode topicCode : TopicCode.values()) {
+			assertThat(topicCode.labelKo()).isNotBlank();
+		}
+	}
 }

@@ -3,6 +3,8 @@ package com.starlightnews.backend.domain.user.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import com.starlightnews.backend.global.entity.BaseTimeEntity;
 import com.starlightnews.backend.global.enums.InterestType;
@@ -74,5 +76,39 @@ public class User extends BaseTimeEntity {
 	 */
 	public void addInterest(TopicCode topicCode, InterestType interestType) {
 		interests.add(UserInterest.of(this, topicCode, interestType));
+	}
+
+	/**
+	 * 지정한 관심 유형의 Topic 코드를 공통 Enum 선언 순서로 반환한다.
+	 */
+	public List<TopicCode> getTopicCodes(InterestType interestType) {
+		Objects.requireNonNull(interestType, "interestType must not be null");
+		return interests.stream()
+				.filter(interest -> interest.hasType(interestType))
+				.map(UserInterest::getTopicCode)
+				.sorted()
+				.toList();
+	}
+
+	/**
+	 * 요청 목록을 지정한 관심 유형의 최종 상태로 반영한다.
+	 * 요청에 포함된 반대 유형 Topic은 새 행을 만들지 않고 유형만 전환한다.
+	 */
+	public void replaceTopicPreferences(InterestType targetType, Set<TopicCode> requestedTopicCodes) {
+		Objects.requireNonNull(targetType, "targetType must not be null");
+		Set<TopicCode> requestedTopics = Set.copyOf(
+				Objects.requireNonNull(requestedTopicCodes, "requestedTopicCodes must not be null"));
+
+		interests.removeIf(interest -> interest.hasType(targetType)
+				&& !requestedTopics.contains(interest.getTopicCode()));
+
+		for (TopicCode topicCode : requestedTopics) {
+			interests.stream()
+					.filter(interest -> interest.getTopicCode() == topicCode)
+					.findFirst()
+					.ifPresentOrElse(
+							interest -> interest.changeType(targetType),
+							() -> addInterest(topicCode, targetType));
+		}
 	}
 }

@@ -1,0 +1,32 @@
+.hint {
+  position: absolute;
+}
+
+.tagline {
+  position: absolute;
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.sans {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.taglineSerifScene {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  color: var(--ink-faint);
+}
+
+.taglineSansScene {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 8px;
+  color: var(--ink-faint);
+}

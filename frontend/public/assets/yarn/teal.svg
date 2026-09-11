@@ -1,0 +1,16 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1306" height="716" viewBox="0 0 1306 716" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Yarn / teal" opacity="0.84" filter="url(#filter0_d_0_15)">
+<path d="M106.5 2.00002C110.5 118 112.5 248 116.5 414M3.50034 85C221.5 130 438.5 194 673.5 262C899.5 326 1076.5 346 1302.5 329M80.5003 711C313.5 668 557.5 662 792.5 678C1029.5 695 1191.5 658 1302.5 623" stroke="#1A6E6E" stroke-opacity="0.92" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<filter id="filter0_d_0_15" x="0" y="0" width="1306" height="716" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1.5"/>
+<feGaussianBlur stdDeviation="0.9"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.16 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_15"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_15" result="shape"/>
+</filter>
+</defs>
+</svg>

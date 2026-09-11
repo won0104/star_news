@@ -1,0 +1,158 @@
+/* ---- Event card ---------------------------------------------------------- */
+.thumbFrame {
+  position: absolute;
+  left: 34.4px;
+  top: 64.4px;
+  width: 215px;
+  height: 162px;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.thumbCrop {
+  position: absolute;
+  left: -788.33px;
+  top: -251.86px;
+  width: 1711.81px;
+  height: 963.405px;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.thumbBorder {
+  position: absolute;
+  left: 34.4px;
+  top: 64.4px;
+  width: 215px;
+  height: 162px;
+  border: 0.6px solid var(--thumb-border);
+}
+
+.eventDot {
+  position: absolute;
+  left: 27.4px;
+  top: 29.4px;
+  width: 10px;
+  height: 10px;
+}
+
+.eventType {
+  position: absolute;
+  left: 46.4px;
+  top: 23.4px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--accent-event);
+  white-space: nowrap;
+}
+
+.eventHeadline {
+  position: absolute;
+  left: 34.4px;
+  top: 245.4px;
+  width: 220px;
+  font-size: 22px;
+  color: var(--ink-strong);
+}
+
+.eventMeta {
+  position: absolute;
+  left: 34.4px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  white-space: pre;
+}
+
+.eventDate {
+  top: 324.4px;
+}
+
+.eventPlace {
+  top: 355.4px;
+}
+
+.eventArrow {
+  position: absolute;
+  left: 243.4px;
+  top: 371.4px;
+  font-size: 25px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* ---- Statement card ------------------------------------------------------ */
+.statementDot {
+  position: absolute;
+  left: 23.4px;
+  top: 27.4px;
+  width: 10px;
+  height: 10px;
+}
+
+.statementType {
+  position: absolute;
+  left: 42.4px;
+  top: 21.4px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.quoteMark {
+  position: absolute;
+  left: 23.4px;
+  top: 54.4px;
+  font-size: 38px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.statementBody {
+  position: absolute;
+  left: 23.4px;
+  top: 103.4px;
+  width: 150px;
+  font-size: 17px;
+  color: var(--ink-strong);
+}
+
+.statementSource {
+  position: absolute;
+  left: 23.4px;
+  top: 201.4px;
+  width: 150px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+/* ---- Mini cards ---------------------------------------------------------- */
+.miniGlyph {
+  position: absolute;
+  left: 35.4px;
+  top: 33.4px;
+  font-size: 26px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.miniDot {
+  position: absolute;
+  left: 23.4px;
+  top: 105.4px;
+  width: 8px;
+  height: 8px;
+}
+
+.miniLabel {
+  position: absolute;
+  left: 39.4px;
+  top: 99.4px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 10px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}

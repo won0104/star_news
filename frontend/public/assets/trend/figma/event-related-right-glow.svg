@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="137" height="137" viewBox="0 0 137 137" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Event / top-right / &#237;&#149;&#156;&#235;&#175;&#184;&#235;&#176;&#152;&#235;&#143;&#132;&#236;&#178;&#180; HBM &#235;&#179;&#184;&#235;&#141;&#148; &#236;&#136;&#152;&#236;&#163;&#188; / glow" filter="url(#filter0_f_0_13)">
+<circle cx="68.5" cy="68.5" r="46.5" fill="#FFC757" fill-opacity="0.11"/>
+</g>
+<defs>
+<filter id="filter0_f_0_13" x="0" y="0" width="137" height="137" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="11" result="effect1_foregroundBlur_0_13"/>
+</filter>
+</defs>
+</svg>

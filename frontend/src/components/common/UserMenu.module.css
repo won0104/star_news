@@ -1,0 +1,89 @@
+.root {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Takes over the slot the 회원가입 pill had, and keeps its treatment, so the right end
+   of the bar stays anchored by the same dark shape whether or not anyone is signed in. */
+.mark {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0.7px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  box-shadow: var(--pill-dark-shadow), var(--pill-dark-inner);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink-on-dark);
+  cursor: pointer;
+}
+
+.mark:hover {
+  filter: brightness(1.12);
+}
+
+/*
+ * Hangs off the bar's bottom edge rather than the mark's. The mark is 34px centred in a
+ * 72px bar, so its own bottom sits 19px short of the bar's; that is where the offset
+ * comes from, and the media query below repeats it for the 60px bar. Keep both in step
+ * with .bar in TopBar.module.css.
+ */
+.panel {
+  position: absolute;
+  top: calc(100% + 19px);
+  right: 0;
+  z-index: 1;
+  min-width: 184px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  border: 0.7px solid var(--chip-solid-border);
+  border-radius: 12px;
+  background: var(--chip-solid-bg);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Whose account this is. A label, not a control — the id is the only thing the session
+   knows about the user until the real endpoint returns a display name. */
+.who {
+  margin: 0;
+  padding: 6px 10px 10px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--ink-faint);
+  overflow-wrap: anywhere;
+}
+
+.item {
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--nav-ink-active);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: rgba(120, 102, 82, 0.08);
+}
+
+.divider {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--paper-edge);
+}
+
+@media (max-width: 1023px) {
+  .panel {
+    top: calc(100% + 13px);
+  }
+}

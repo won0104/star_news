@@ -1,0 +1,197 @@
+/*
+ * Structure is the Figma frame's; the palette is this project's. Where the frame uses a
+ * slate blue for selection and primary actions, that role here belongs to brass
+ * (--brass-b) and the dark pill the rest of the site already uses for its primary
+ * buttons, so the overlay reads as the same product as the room behind it.
+ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  /* The warm dark the auth card already casts its shadow in, rather than a neutral grey. */
+  background: rgba(43, 33, 22, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  display: flex;
+  width: 100%;
+  max-width: 1180px;
+  max-height: 88vh;
+  overflow: hidden;
+  border: 0.7px solid var(--auth-card-border);
+  border-radius: 16px;
+  background: #fbf6ea;
+  box-shadow: var(--auth-card-shadow);
+  outline: none;
+}
+
+/* ---- Rail ------------------------------------------------------------------ */
+.rail {
+  flex: none;
+  width: 290px;
+  padding: 34px 22px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  border-right: 1px solid var(--paper-edge);
+  background: var(--paper-depth);
+}
+
+.railTitle {
+  margin: 0 0 0 12px;
+  font-family: var(--font-serif-kr);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--headline-ink);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navItem {
+  position: relative;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--ink-muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.navItem:hover {
+  color: var(--headline-ink);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.navItemActive,
+.navItemActive:hover {
+  font-weight: 500;
+  color: var(--headline-ink);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+/* The frame marks the open pane with a bar down its left edge. */
+.navItemActive::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--brass-b);
+}
+
+/* Pushed to the bottom of the rail by the gap above it. */
+.back {
+  margin-top: auto;
+  padding: 0 0 0 12px;
+  border: 0;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: var(--ink-faint);
+  text-align: left;
+  cursor: pointer;
+}
+
+.back:hover {
+  color: var(--headline-ink);
+}
+
+/* ---- Pane ------------------------------------------------------------------ */
+.pane {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 34px 40px 40px;
+  overflow-y: auto;
+}
+
+.close {
+  position: absolute;
+  top: 26px;
+  right: 30px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--headline-ink);
+  background: rgba(120, 102, 82, 0.08);
+}
+
+.close svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  margin: 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+@media (max-width: 900px) {
+  .scrim {
+    padding: 14px;
+  }
+
+  .modal {
+    flex-direction: column;
+    max-height: 92vh;
+  }
+
+  /* Stacked, the rail becomes a header strip and its nav scrolls sideways. */
+  .rail {
+    width: auto;
+    gap: 16px;
+    padding: 20px 18px 14px;
+    border-right: 0;
+    border-bottom: 1px solid var(--paper-edge);
+  }
+
+  .nav {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .navItem {
+    white-space: nowrap;
+  }
+
+  .navItemActive::before {
+    top: auto;
+    right: 8px;
+    bottom: 0;
+    left: 8px;
+    width: auto;
+    height: 3px;
+  }
+
+  .back {
+    margin-top: 0;
+  }
+
+  .pane {
+    padding: 26px 20px 30px;
+  }
+}

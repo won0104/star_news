@@ -1,0 +1,43 @@
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.room {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Widths are the Figma bands (390px and 1120px of 1672px) expressed proportionally. */
+.veil {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+
+.leftVeil {
+  left: 0;
+  width: 23.33%;
+  background: linear-gradient(
+    to right,
+    var(--veil-left-a),
+    var(--veil-left-b) 65%,
+    var(--veil-left-c)
+  );
+}
+
+.rightVeil {
+  left: 33.01%;
+  width: 66.99%;
+  background: linear-gradient(
+    to right,
+    var(--veil-right-a),
+    var(--veil-right-b) 55%,
+    var(--veil-right-c)
+  );
+}

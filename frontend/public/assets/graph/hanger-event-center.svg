@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="2.17721" height="29.1827" viewBox="0 0 2.17721 29.1827" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="Hanger / Event center" opacity="0.92" d="M1.08861 0.0913525C2.08861 8.79135 0.0886073 20.3914 1.08861 29.0914" stroke="url(#paint0_linear_0_4)" stroke-width="1.6"/>
+<defs>
+<linearGradient id="paint0_linear_0_4" x1="1.08861" y1="0.0913525" x2="1.08861" y2="29.0914" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BA2E1C" stop-opacity="0.1"/>
+<stop offset="0.22" stop-color="#BA2E1C" stop-opacity="0.42"/>
+<stop offset="0.76" stop-color="#BA2E1C" stop-opacity="0.72"/>
+<stop offset="1" stop-color="#BA2E1C" stop-opacity="0.88"/>
+</linearGradient>
+</defs>
+</svg>

@@ -1,0 +1,91 @@
+.title {
+  position: absolute;
+  left: 45px;
+  top: 112px;
+  width: 310px;
+  font-size: 34px;
+  color: var(--ink-strong);
+}
+
+/*
+ * Everything below the title is --ink-strong, not the --ink-muted it used to be. The
+ * rail is transparent enough now (RAIL_LEFT_VEIL) that the room reads through it, and
+ * measured against the blurred room under the panel --ink-muted came out at 2.6 on the
+ * subtitle, 3.5 on the nav and 3.2 on the motto - all under AA. There is no middle
+ * shade that works: --ink-muted needs a background luminance of about .80 behind it,
+ * which is the old full veil, so transparency and that colour are exclusive. At
+ * --ink-strong the same spots measure 5.3 - 5.8. Size and weight carry the hierarchy
+ * instead of tone. Raise the veil back up and this can go back to --ink-muted.
+ */
+.subtitle {
+  position: absolute;
+  left: 47px;
+  top: 215px;
+  width: 285px;
+  font-size: 18px;
+  color: var(--ink-strong);
+}
+
+.activePill {
+  position: absolute;
+  left: 28px;
+  top: 305px;
+  width: 185px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 26px;
+  overflow: hidden;
+  cursor: pointer;
+  font: inherit;
+  background: linear-gradient(to right, var(--pill-dark-a), var(--pill-dark-b));
+  box-shadow: var(--pill-dark-shadow), var(--pill-dark-inner);
+}
+
+.activePillLabel {
+  position: absolute;
+  left: 24px;
+  top: 14px;
+  font-size: 18px;
+  color: var(--ink-on-dark);
+  white-space: pre;
+}
+
+.navItem {
+  position: absolute;
+  left: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 17px;
+  color: var(--ink-strong);
+  white-space: pre;
+  cursor: pointer;
+}
+
+.footerRule {
+  position: absolute;
+  left: 48px;
+  top: 742px;
+  width: 38px;
+  height: 0;
+}
+
+.footerRuleArt {
+  position: absolute;
+  inset: -1px 0 0 0;
+  width: 100%;
+}
+
+.motto {
+  position: absolute;
+  left: 47px;
+  top: 790px;
+  width: 120px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 10px;
+  color: var(--ink-strong);
+  opacity: 0.85;
+}

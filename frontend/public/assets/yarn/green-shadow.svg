@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1170.4" height="228.4" viewBox="0 0 1170.4 228.4" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Yarn shadow / green" opacity="0.42" filter="url(#filter0_f_0_52)">
+<path d="M3.20011 3.20011C201.2 24.2001 371.2 66.2001 545.2 116.2C758.2 176.2 933.2 217.2 1167.2 225.2" stroke="#2E2821" stroke-opacity="0.28" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<filter id="filter0_f_0_52" x="-1.19209e-07" y="-1.19209e-07" width="1170.4" height="228.4" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="0.9" result="effect1_foregroundBlur_0_52"/>
+</filter>
+</defs>
+</svg>

@@ -1,0 +1,210 @@
+/* ---- Cards ----------------------------------------------------------------- */
+/* Two columns for both the topics and the nodes. An odd count leaves the last card
+   alone in the left column, which is what the frame does. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 15px 18px;
+  border: 1px solid var(--paper-edge);
+  border-radius: 10px;
+  background: var(--auth-input-bg);
+  cursor: pointer;
+}
+
+.card:hover {
+  border-color: var(--auth-border);
+}
+
+/* Where the frame tints the chosen card slate blue, here it is brass at low strength —
+   enough to separate from the paper it sits on without becoming a second accent. */
+.cardPicked,
+.cardPicked:hover {
+  border-color: rgba(186, 133, 56, 0.5);
+  background: rgba(186, 133, 56, 0.1);
+}
+
+.cardTitle {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--headline-ink);
+}
+
+.box {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--brass-b);
+  cursor: pointer;
+}
+
+.cardScope {
+  grid-column: 1 / -1;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+/* ---- Adding a node -------------------------------------------------------- */
+.addRow {
+  display: flex;
+  gap: 12px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--auth-border);
+  border-radius: 8px;
+  background: var(--auth-input-bg);
+  font: inherit;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--auth-title);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.input::placeholder {
+  color: var(--auth-muted);
+}
+
+.input:focus {
+  border-color: var(--brass-b);
+  box-shadow: 0 0 0 3px var(--auth-focus-ring);
+}
+
+/* ---- Suggestions ---------------------------------------------------------- */
+.suggested {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+
+.suggestedLabel {
+  margin: 0 8px 0 0;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.chip {
+  padding: 6px 13px;
+  border: 0.7px solid var(--chip-solid-border);
+  border-radius: 16px;
+  background: var(--chip-ghost-bg);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip:hover {
+  color: var(--headline-ink);
+  background: var(--chip-solid-bg);
+}
+
+/* ---- Node cards ----------------------------------------------------------- */
+.node {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 14px 14px 14px 16px;
+  border: 1px solid var(--paper-edge);
+  border-radius: 10px;
+  background: var(--auth-input-bg);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* The graph view's own type colours, so a keyword kept here is the same colour when
+   you meet it again on /explore. */
+.entity {
+  background: var(--entity-color);
+}
+
+.topic {
+  background: var(--topic-color);
+}
+
+.story {
+  background: var(--story-color);
+}
+
+.nodeTitle {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--headline-ink);
+  overflow-wrap: anywhere;
+}
+
+.kind {
+  padding: 3px 9px;
+  border: 0.7px solid var(--chip-solid-border);
+  border-radius: 5px;
+  background: var(--chip-solid-bg);
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.remove {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.remove:hover {
+  color: var(--accent-event);
+  background: rgba(120, 102, 82, 0.08);
+}
+
+.remove svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+  margin: 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+/* Meta sits under the title, clear of the dot's column. */
+.nodeMeta {
+  grid-column: 2 / -1;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,74 @@
+.root {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #efe8dc;
+}
+
+/*
+ * Warm stand-in painted underneath the photo, so the page still reads as a sunlit
+ * room while the image loads (or if the file is missing).
+ *
+ * `fixed`, not `absolute`: .root is the scroll container, and an absolute child of a
+ * scroller is one viewport tall and scrolls away with the content — past the first
+ * screen the room ran out and left .root's flat colour behind it, 517px of it once the
+ * report landed on the home page. Fixed makes the room a stage the content moves over,
+ * which is how the attic and graph screens already treat it. Nothing here depends on
+ * .root's `overflow` for containment: only transform, filter or contain would capture
+ * a fixed descendant, and no ancestor sets one.
+ */
+.wash {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #f4efe6 0%, #ebe3d6 80%, #a9764a 93%, #8f5f38 100%);
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.photoReady {
+  opacity: 1;
+}
+
+/* Optional soft dark veil so light-on-photo chrome (a form card, a headline) stays
+   readable. Fixed for the same reason as .wash — it has to stay registered with the
+   photo it is shading, including on a sign-up form long enough to scroll. */
+.veil {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 38%, rgba(43, 33, 22, 0) 40%, rgba(43, 33, 22, 0.16) 100%);
+  pointer-events: none;
+}
+
+/*
+ * The loop was rendered from backdrop.png but came back about a stop under it and a
+ * little flatter — measured against the still at matching size, the clip needs a
+ * per-channel gain of ~1.22 (R 1.241 / G 1.224 / B 1.217, i.e. exposure, not white
+ * balance). Uncorrected the page cools off to grey the moment the video takes over;
+ * these two values put it back on the photo (17.1 dB → 36.1 dB, 0.8% of pixels
+ * clipping, and those are the already-blown window panes). Re-measure if the clip is
+ * ever re-encoded.
+ *
+ * object-position has to match .photo above or the two crop differently on any
+ * viewport that is not 16:9, and the cross-fade slides.
+ *
+ * Split in two once there was a second scene: .loop is what every clip needs, and
+ * .loopHome carries the correction measured for that one clip against that one still.
+ * Applied to another clip it would simply be a stop of unwanted exposure.
+ */
+.loop {
+  object-position: center bottom;
+}
+
+.loopHome {
+  filter: brightness(1.22) saturate(1.12);
+}
