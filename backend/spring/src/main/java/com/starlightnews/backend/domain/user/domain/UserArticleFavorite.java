@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * 사용자의 기사 즐겨찾기(북마크). (user_article_favorites)
- * 추가·삭제는 별도 API 담당이며, 여기서는 조회에 사용한다.
  */
 @Entity
 @Table(name = "user_article_favorites")

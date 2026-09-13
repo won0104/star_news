@@ -113,4 +113,20 @@ class UserArticleFavoriteRepositoryTest {
 		assertThat(rows).extracting(ArticleBookmarkRow::getArticleId)
 				.containsExactly(lowerId.getArticleId());
 	}
+
+	@Test
+	void 선택한_사용자의_기사_북마크만_일괄_삭제한다() {
+		favorite(1L, 10L);
+		favorite(1L, 20L);
+		favorite(1L, 30L);
+		favorite(2L, 10L);
+
+		int deleted = repository.deleteByUserIdAndArticleIds(1L, List.of(10L, 20L));
+
+		assertThat(deleted).isEqualTo(2);
+		assertThat(repository.findFavoritedArticleIds(1L, List.of(10L, 20L, 30L)))
+				.containsExactly(30L);
+		assertThat(repository.findFavoritedArticleIds(2L, List.of(10L)))
+				.containsExactly(10L);
+	}
 }

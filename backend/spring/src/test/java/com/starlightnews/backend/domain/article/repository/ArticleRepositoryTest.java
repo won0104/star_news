@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.domain.NewsOrganization;
+import com.starlightnews.backend.global.enums.AnalysisStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -44,5 +45,22 @@ class ArticleRepositoryTest {
 	@Test
 	void 존재하지_않는_articleId면_빈_목록이다() {
 		assertThat(articleRepository.findAllWithOrganizationByArticleIdIn(List.of(999L))).isEmpty();
+	}
+
+	@Test
+	void 요청한_ID_중_COMPLETED_기사_ID만_반환한다() {
+		NewsOrganization organization = entityManager.persist(new NewsOrganization("연합뉴스"));
+		LocalDateTime publishedAt = LocalDateTime.of(2026, 9, 1, 9, 0);
+		Article completed = entityManager.persist(new Article(
+				"분석 완료", publishedAt, organization, null, AnalysisStatus.COMPLETED));
+		Article processing = entityManager.persist(new Article(
+				"분석 중", publishedAt, organization, null, AnalysisStatus.PROCESSING));
+		entityManager.flush();
+
+		List<Long> found = articleRepository.findArticleIdsByIdInAndAnalysisStatus(
+				List.of(completed.getArticleId(), processing.getArticleId(), 999L),
+				AnalysisStatus.COMPLETED);
+
+		assertThat(found).containsExactly(completed.getArticleId());
 	}
 }

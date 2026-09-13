@@ -5,8 +5,16 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.StreamSupport;
 
+import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.user.domain.User;
+import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
+import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest.ArticleBookmarkChange;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
 import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository.ArticleBookmarkRow;
@@ -15,7 +23,6 @@ import com.starlightnews.backend.domain.user.support.ArticleBookmarkCursor;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.response.CursorResponse;
-import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +50,9 @@ class BookmarkServiceTest {
 	private UserRepository userRepository;
 
 	@Mock
+	private ArticleRepository articleRepository;
+
+	@Mock
 	private UserArticleFavoriteRepository userArticleFavoriteRepository;
 
 	@InjectMocks
@@ -50,8 +60,8 @@ class BookmarkServiceTest {
 
 	@BeforeEach
 	void setUpActiveUser() {
-		given(userRepository.findById(USER_ID))
-				.willReturn(Optional.of(User.create("login", "hash", "nickname")));
+		org.mockito.Mockito.lenient().when(userRepository.findById(USER_ID))
+				.thenReturn(Optional.of(User.create("login", "hash", "nickname")));
 	}
 
 	@Test
@@ -132,6 +142,97 @@ class BookmarkServiceTest {
 				.findFirstArticleBookmarkPage(any(), any(), any());
 		verify(userArticleFavoriteRepository, never())
 				.findNextArticleBookmarkPage(any(), any(), any(), any(), any());
+	}
+
+	@Test
+	void 등록과_해제를_한_요청에서_최종_상태로_반영하고_요청순서대로_응답한다() {
+		UpdateArticleBookmarksRequest request = request(
+				new ArticleBookmarkChange(101L, true),
+				new ArticleBookmarkChange(102L, false),
+				new ArticleBookmarkChange(103L, true),
+				new ArticleBookmarkChange(104L, false));
+		given(articleRepository.findArticleIdsByIdInAndAnalysisStatus(
+				eq(Set.of(101L, 103L)), eq(AnalysisStatus.COMPLETED)))
+				.willReturn(List.of(101L, 103L));
+		given(userArticleFavoriteRepository.findFavoritedArticleIds(
+				eq(USER_ID), eq(Set.of(101L, 102L, 103L, 104L))))
+				.willReturn(List.of(101L, 102L));
+
+		UpdateArticleBookmarksResponse response =
+				bookmarkService.updateArticleBookmarks(USER_ID, request);
+
+		assertThat(response.results())
+				.extracting(result -> result.articleId() + ":" + result.bookmarked())
+				.containsExactly("101:true", "102:false", "103:true", "104:false");
+		verify(userArticleFavoriteRepository).saveAll(org.mockito.ArgumentMatchers.argThat(favorites -> {
+			List<UserArticleFavoriteId> savedIds = StreamSupport.stream(favorites.spliterator(), false)
+					.map(favorite -> favorite.getId())
+					.toList();
+			return savedIds.equals(List.of(new UserArticleFavoriteId(USER_ID, 103L)));
+		}));
+		verify(userArticleFavoriteRepository).deleteByUserIdAndArticleIds(USER_ID, List.of(102L));
+	}
+
+	@Test
+	void 빈_changes는_EMPTY_CHANGES이고_DB를_조회하지_않는다() {
+		assertThatThrownBy(() -> bookmarkService.updateArticleBookmarks(
+				USER_ID, new UpdateArticleBookmarksRequest(List.of())))
+				.isInstanceOfSatisfying(BusinessException.class,
+						exception -> assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.EMPTY_CHANGES));
+
+		verifyNoInteractions(articleRepository, userArticleFavoriteRepository);
+	}
+
+	@Test
+	void 같은_articleId가_중복이면_DUPLICATED_ARTICLE_CHANGE이다() {
+		UpdateArticleBookmarksRequest request = request(
+				new ArticleBookmarkChange(101L, true),
+				new ArticleBookmarkChange(101L, false));
+
+		assertThatThrownBy(() -> bookmarkService.updateArticleBookmarks(USER_ID, request))
+				.isInstanceOfSatisfying(BusinessException.class,
+						exception -> assertThat(exception.getErrorCode())
+								.isEqualTo(UserErrorCode.DUPLICATED_ARTICLE_CHANGE));
+
+		verifyNoInteractions(articleRepository, userArticleFavoriteRepository);
+	}
+
+	@Test
+	void 등록할_기사_중_COMPLETED가_아닌_기사가_있으면_ARTICLE_NOT_FOUND이다() {
+		UpdateArticleBookmarksRequest request = request(
+				new ArticleBookmarkChange(101L, true),
+				new ArticleBookmarkChange(102L, true));
+		given(articleRepository.findArticleIdsByIdInAndAnalysisStatus(
+				eq(Set.of(101L, 102L)), eq(AnalysisStatus.COMPLETED)))
+				.willReturn(List.of(101L));
+
+		assertThatThrownBy(() -> bookmarkService.updateArticleBookmarks(USER_ID, request))
+				.isInstanceOfSatisfying(BusinessException.class,
+						exception -> assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.ARTICLE_NOT_FOUND));
+
+		verifyNoInteractions(userArticleFavoriteRepository);
+	}
+
+	@Test
+	void 해제만_요청하면_기사_공개상태를_조회하지_않고_없는_북마크도_성공한다() {
+		UpdateArticleBookmarksRequest request = request(new ArticleBookmarkChange(999L, false));
+		given(userArticleFavoriteRepository.findFavoritedArticleIds(USER_ID, Set.of(999L)))
+				.willReturn(List.of());
+
+		UpdateArticleBookmarksResponse response =
+				bookmarkService.updateArticleBookmarks(USER_ID, request);
+
+		assertThat(response.results()).singleElement().satisfies(result -> {
+			assertThat(result.articleId()).isEqualTo(999L);
+			assertThat(result.bookmarked()).isFalse();
+		});
+		verifyNoInteractions(articleRepository);
+		verify(userArticleFavoriteRepository, never()).saveAll(any());
+		verify(userArticleFavoriteRepository, never()).deleteByUserIdAndArticleIds(any(), any());
+	}
+
+	private UpdateArticleBookmarksRequest request(ArticleBookmarkChange... changes) {
+		return new UpdateArticleBookmarksRequest(List.of(changes));
 	}
 
 	private ArticleBookmarkRow row(long articleId, String title, LocalDateTime publishedAt,

@@ -8,15 +8,16 @@ import com.starlightnews.backend.domain.user.domain.UserArticleFavorite;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 /**
- * 사용자 기사 즐겨찾기 조회 (읽기 전용).
+ * 사용자 기사 즐겨찾기 조회 및 변경.
  */
 public interface UserArticleFavoriteRepository
-		extends Repository<UserArticleFavorite, UserArticleFavoriteId> {
+		extends JpaRepository<UserArticleFavorite, UserArticleFavoriteId> {
 
 	/** 기사 북마크 목록 응답에 필요한 MySQL 조회 결과 한 행. */
 	interface ArticleBookmarkRow {
@@ -68,4 +69,12 @@ public interface UserArticleFavoriteRepository
 			@Param("cursorBookmarkedAt") LocalDateTime cursorBookmarkedAt,
 			@Param("cursorArticleId") Long cursorArticleId,
 			Pageable pageable);
+
+	/** 지정 사용자의 선택된 기사 북마크를 한 번에 삭제한다. */
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("DELETE FROM UserArticleFavorite f "
+			+ "WHERE f.id.userId = :userId AND f.id.articleId IN :articleIds")
+	int deleteByUserIdAndArticleIds(
+			@Param("userId") Long userId,
+			@Param("articleIds") Collection<Long> articleIds);
 }

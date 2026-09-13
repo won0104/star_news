@@ -1,6 +1,8 @@
 package com.starlightnews.backend.domain.user.controller;
 
 import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
 import com.starlightnews.backend.domain.user.service.BookmarkService;
 import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.error.ErrorResponse;
@@ -16,11 +18,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,5 +65,30 @@ public class BookmarkController {
 	) {
 		return ApiResponse.success(
 				bookmarkService.getArticleBookmarks(user.userId(), cursor, size), requestId);
+	}
+
+	@Operation(
+			summary = "기사 북마크 상태 변경",
+			description = "한 개 또는 여러 기사의 북마크 최종 상태를 하나의 트랜잭션으로 변경한다. **Access Token 필요.**")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "변경 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
+					description = "입력값 오류 (code: INVALID_INPUT_VALUE / EMPTY_CHANGES / DUPLICATED_ARTICLE_CHANGE)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
+					description = "Access Token 오류 (code: UNAUTHORIZED / INVALID_ACCESS_TOKEN / EXPIRED_ACCESS_TOKEN)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+					description = "사용자 또는 북마크 가능한 기사를 찾을 수 없음 (code: USER_NOT_FOUND / ARTICLE_NOT_FOUND)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	@PatchMapping("/articles")
+	public ApiResponse<UpdateArticleBookmarksResponse> updateArticleBookmarks(
+			@Valid @RequestBody UpdateArticleBookmarksRequest request,
+			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
+			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+	) {
+		return ApiResponse.success(
+				bookmarkService.updateArticleBookmarks(user.userId(), request), requestId);
 	}
 }

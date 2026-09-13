@@ -5,6 +5,9 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse.ArticleBookmarkResult;
 import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.service.BookmarkService;
 import com.starlightnews.backend.global.config.SecurityConfig;
@@ -18,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,11 +29,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -125,6 +132,80 @@ class BookmarkControllerTest {
 				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 
 		verify(bookmarkService, never()).getArticleBookmarks(anyLong(), isNull(), anyInt());
+	}
+
+	@Test
+	void 기사_북마크_변경_성공시_요청순서의_최종상태와_requestId를_응답한다() throws Exception {
+		given(bookmarkService.updateArticleBookmarks(eq(1L), any(UpdateArticleBookmarksRequest.class)))
+				.willReturn(new UpdateArticleBookmarksResponse(List.of(
+						new ArticleBookmarkResult(101L, true),
+						new ArticleBookmarkResult(102L, false))));
+
+		mockMvc.perform(patch(PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"changes":[
+								  {"articleId":101,"bookmarked":true},
+								  {"articleId":102,"bookmarked":false}
+								]}"""))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.results[0].articleId").value(101))
+				.andExpect(jsonPath("$.data.results[0].bookmarked").value(true))
+				.andExpect(jsonPath("$.data.results[1].articleId").value(102))
+				.andExpect(jsonPath("$.data.results[1].bookmarked").value(false))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+
+		verify(bookmarkService).updateArticleBookmarks(eq(1L), any(UpdateArticleBookmarksRequest.class));
+	}
+
+	@Test
+	void changes가_누락되면_400_INVALID_INPUT_VALUE이다() throws Exception {
+		mockMvc.perform(patch(PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+
+		verify(bookmarkService, never()).updateArticleBookmarks(anyLong(), any());
+	}
+
+	@Test
+	void 변경항목의_필드가_누락되면_400_INVALID_INPUT_VALUE이다() throws Exception {
+		mockMvc.perform(patch(PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"changes\":[{\"articleId\":101}]}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+
+		verify(bookmarkService, never()).updateArticleBookmarks(anyLong(), any());
+	}
+
+	@Test
+	void 서비스가_EMPTY_CHANGES를_던지면_400이다() throws Exception {
+		given(bookmarkService.updateArticleBookmarks(eq(1L), any(UpdateArticleBookmarksRequest.class)))
+				.willThrow(new BusinessException(UserErrorCode.EMPTY_CHANGES));
+
+		mockMvc.perform(patch(PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"changes\":[]}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("EMPTY_CHANGES"));
+	}
+
+	@Test
+	void 기사_북마크_변경시_인증토큰이_없으면_401_UNAUTHORIZED이다() throws Exception {
+		mockMvc.perform(patch(PATH)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"changes\":[{\"articleId\":101,\"bookmarked\":true}]}"))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+
+		verify(bookmarkService, never()).updateArticleBookmarks(anyLong(), any());
 	}
 
 	private String bearer(long userId) {

@@ -1,10 +1,22 @@
 package com.starlightnews.backend.domain.user.service;
 
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.user.domain.User;
+import com.starlightnews.backend.domain.user.domain.UserArticleFavorite;
+import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
 import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest.ArticleBookmarkChange;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
+import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse.ArticleBookmarkResult;
 import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository.ArticleBookmarkRow;
@@ -27,6 +39,7 @@ public class BookmarkService {
 	private static final ZoneOffset KST = ZoneOffset.ofHours(9);
 
 	private final UserRepository userRepository;
+	private final ArticleRepository articleRepository;
 	private final UserArticleFavoriteRepository userArticleFavoriteRepository;
 
 	/** 공개 상태인 북마크 기사를 최신 등록순으로 조회한다. */
@@ -52,6 +65,77 @@ public class BookmarkService {
 		String nextCursor = hasNext ? encodeCursor(page.get(page.size() - 1)) : null;
 
 		return CursorResponse.of(items, hasNext, nextCursor);
+	}
+
+	/** 요청에 포함된 기사만 목표 북마크 상태로 변경한다. */
+	@Transactional
+	public UpdateArticleBookmarksResponse updateArticleBookmarks(
+			long userId, UpdateArticleBookmarksRequest request) {
+		List<ArticleBookmarkChange> changes = request.changes();
+		validateChanges(changes);
+		findActiveUser(userId);
+
+		Set<Long> requestedArticleIds = changes.stream()
+				.map(ArticleBookmarkChange::articleId)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+		Set<Long> articlesToBookmark = changes.stream()
+				.filter(change -> change.bookmarked())
+				.map(ArticleBookmarkChange::articleId)
+				.collect(Collectors.toSet());
+		validateArticlesToBookmark(articlesToBookmark);
+
+		Set<Long> currentlyBookmarked = new HashSet<>(
+				userArticleFavoriteRepository.findFavoritedArticleIds(userId, requestedArticleIds));
+		LocalDateTime favoritedAt = LocalDateTime.now(KST);
+		List<UserArticleFavorite> favoritesToAdd = changes.stream()
+				.filter(ArticleBookmarkChange::bookmarked)
+				.filter(change -> !currentlyBookmarked.contains(change.articleId()))
+				.map(change -> new UserArticleFavorite(
+						new UserArticleFavoriteId(userId, change.articleId()), favoritedAt))
+				.toList();
+		List<Long> articleIdsToRemove = changes.stream()
+				.filter(change -> !change.bookmarked())
+				.map(ArticleBookmarkChange::articleId)
+				.filter(currentlyBookmarked::contains)
+				.toList();
+
+		if (!favoritesToAdd.isEmpty()) {
+			userArticleFavoriteRepository.saveAll(favoritesToAdd);
+		}
+		if (!articleIdsToRemove.isEmpty()) {
+			userArticleFavoriteRepository.deleteByUserIdAndArticleIds(userId, articleIdsToRemove);
+		}
+
+		List<ArticleBookmarkResult> results = changes.stream()
+				.map(change -> new ArticleBookmarkResult(change.articleId(), change.bookmarked()))
+				.toList();
+		return new UpdateArticleBookmarksResponse(results);
+	}
+
+	private void validateChanges(List<ArticleBookmarkChange> changes) {
+		if (changes.isEmpty()) {
+			throw new BusinessException(UserErrorCode.EMPTY_CHANGES);
+		}
+
+		Set<Long> articleIds = new HashSet<>();
+		for (ArticleBookmarkChange change : changes) {
+			if (!articleIds.add(change.articleId())) {
+				throw new BusinessException(UserErrorCode.DUPLICATED_ARTICLE_CHANGE);
+			}
+		}
+	}
+
+	private void validateArticlesToBookmark(Set<Long> articleIds) {
+		if (articleIds.isEmpty()) {
+			return;
+		}
+
+		Set<Long> availableArticleIds = Set.copyOf(
+				articleRepository.findArticleIdsByIdInAndAnalysisStatus(
+						articleIds, AnalysisStatus.COMPLETED));
+		if (!availableArticleIds.containsAll(articleIds)) {
+			throw new BusinessException(UserErrorCode.ARTICLE_NOT_FOUND);
+		}
 	}
 
 	private User findActiveUser(long userId) {
