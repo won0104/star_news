@@ -33,6 +33,28 @@ public interface UserKnowledgeNodeRepository
 			+ "WHERE u.id = :id")
 	int incrementClick(@Param("id") UserKnowledgeNodeId id, @Param("now") LocalDateTime now);
 
+	/**
+	 * 주어진 id 중 이미 존재하는 것만 돌려준다.
+	 * 기사 하나에 연결된 Node 를 한 번에 처리하려고, 갱신 대상과 신규 생성 대상을 질의 한 번으로 가른다.
+	 */
+	@Query("SELECT u.id FROM UserKnowledgeNode u WHERE u.id IN :ids")
+	List<UserKnowledgeNodeId> findExistingIds(@Param("ids") Collection<UserKnowledgeNodeId> ids);
+
+	/**
+	 * 최초 열람: 해당 Row 들의 read_article_count 를 1 늘리고 last_seen_at 을 갱신한다.
+	 * read_article_count 는 그 Node 를 건드린 고유 기사 수라 같은 기사 재열람으로는 늘지 않는다.
+	 */
+	@Modifying
+	@Query("UPDATE UserKnowledgeNode u "
+			+ "SET u.readArticleCount = u.readArticleCount + 1, u.lastSeenAt = :now "
+			+ "WHERE u.id IN :ids")
+	int incrementReadForAll(@Param("ids") Collection<UserKnowledgeNodeId> ids, @Param("now") LocalDateTime now);
+
+	/** 재열람: 고유 기사 수는 그대로 두고 last_seen_at 만 갱신한다. */
+	@Modifying
+	@Query("UPDATE UserKnowledgeNode u SET u.lastSeenAt = :now WHERE u.id IN :ids")
+	int touchLastSeenForAll(@Param("ids") Collection<UserKnowledgeNodeId> ids, @Param("now") LocalDateTime now);
+
 	/** 해당 사용자의 특정 Topic 개인 Node 전체. (개인 그래프 Topic 스냅샷용) */
 	@Query("SELECT u FROM UserKnowledgeNode u "
 			+ "WHERE u.id.userId = :userId AND u.topicCode = :topicCode")

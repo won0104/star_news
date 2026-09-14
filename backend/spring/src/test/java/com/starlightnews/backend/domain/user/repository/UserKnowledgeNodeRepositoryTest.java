@@ -149,4 +149,104 @@ class UserKnowledgeNodeRepositoryTest {
 		assertThat(counts).filteredOn(c -> c.getTopicCode().equals("SOCIETY"))
 				.singleElement().satisfies(c -> assertThat(c.getCount()).isEqualTo(1));
 	}
+
+	@Test
+	void forFirstRead로_저장하면_read_article_count가_1이고_click_count는_0이다() {
+		LocalDateTime now = LocalDateTime.of(2024, 5, 25, 5, 20);
+		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
+
+		userKnowledgeNodeRepository.save(UserKnowledgeNode.forFirstRead(id, "기준금리 동결", "ECONOMY", now));
+		entityManager.flush();
+		entityManager.clear();
+
+		UserKnowledgeNode found = userKnowledgeNodeRepository.findById(id).orElseThrow();
+		assertThat(found.getReadArticleCount()).isEqualTo(1);
+		assertThat(found.getNodeClickCount()).isZero();
+		assertThat(found.getFirstSeenAt()).isEqualTo(now);
+		assertThat(found.getLastSeenAt()).isEqualTo(now);
+	}
+
+	@Test
+	void findExistingIds는_주어진_복합키_중_존재하는_것만_반환한다() {
+		LocalDateTime now = LocalDateTime.of(2024, 5, 25, 5, 20);
+		UserKnowledgeNodeId existing = id(1L, NodeType.EVENT, NODE_ID);
+		UserKnowledgeNodeId missing = id(1L, NodeType.ENTITY, "00000024-0920-4000-8000-000000000099");
+		UserKnowledgeNodeId otherUser = id(2L, NodeType.EVENT, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstRead(existing, "기준금리 동결", "ECONOMY", now));
+		entityManager.persist(UserKnowledgeNode.forFirstRead(otherUser, "기준금리 동결", "ECONOMY", now));
+		entityManager.flush();
+		entityManager.clear();
+
+		List<UserKnowledgeNodeId> found = userKnowledgeNodeRepository
+				.findExistingIds(List.of(existing, missing));
+
+		assertThat(found).containsExactly(existing); // 다른 사용자(otherUser) Row 는 섞이지 않는다
+	}
+
+	@Test
+	void incrementReadForAll은_대상_Row들의_고유_기사_수와_lastSeenAt을_갱신한다() {
+		LocalDateTime first = LocalDateTime.of(2024, 5, 25, 5, 20);
+		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
+		UserKnowledgeNodeId event = id(1L, NodeType.EVENT, NODE_ID);
+		UserKnowledgeNodeId entity = id(1L, NodeType.ENTITY, NODE_ID);
+		UserKnowledgeNodeId untouched = id(1L, NodeType.STATEMENT, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstRead(event, "기준금리 동결", "ECONOMY", first));
+		entityManager.persist(UserKnowledgeNode.forFirstRead(entity, "한국은행", null, first));
+		entityManager.persist(UserKnowledgeNode.forFirstRead(untouched, "어떤 주장", null, first));
+		entityManager.flush();
+		entityManager.clear();
+
+		int updated = userKnowledgeNodeRepository.incrementReadForAll(List.of(event, entity), later);
+		entityManager.flush();
+		entityManager.clear();
+
+		assertThat(updated).isEqualTo(2);
+		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(event).orElseThrow();
+		assertThat(reloaded.getReadArticleCount()).isEqualTo(2);
+		assertThat(reloaded.getLastSeenAt()).isEqualTo(later);
+		assertThat(reloaded.getFirstSeenAt()).isEqualTo(first);
+		assertThat(reloaded.getNodeClickCount()).isZero();
+
+		UserKnowledgeNode skipped = userKnowledgeNodeRepository.findById(untouched).orElseThrow();
+		assertThat(skipped.getReadArticleCount()).isEqualTo(1);
+		assertThat(skipped.getLastSeenAt()).isEqualTo(first);
+	}
+
+	@Test
+	void touchLastSeenForAll은_고유_기사_수를_두고_lastSeenAt만_갱신한다() {
+		LocalDateTime first = LocalDateTime.of(2024, 5, 25, 5, 20);
+		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
+		UserKnowledgeNodeId event = id(1L, NodeType.EVENT, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstRead(event, "기준금리 동결", "ECONOMY", first));
+		entityManager.flush();
+		entityManager.clear();
+
+		int updated = userKnowledgeNodeRepository.touchLastSeenForAll(List.of(event), later);
+		entityManager.flush();
+		entityManager.clear();
+
+		assertThat(updated).isEqualTo(1);
+		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(event).orElseThrow();
+		assertThat(reloaded.getReadArticleCount()).isEqualTo(1);
+		assertThat(reloaded.getLastSeenAt()).isEqualTo(later);
+		assertThat(reloaded.getFirstSeenAt()).isEqualTo(first);
+	}
+
+	@Test
+	void 클릭으로_만들어진_Row에_열람이_더해지면_두_신호가_따로_쌓인다() {
+		LocalDateTime first = LocalDateTime.of(2024, 5, 25, 5, 20);
+		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
+		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstClick(id, "기준금리 동결", "ECONOMY", first));
+		entityManager.flush();
+		entityManager.clear();
+
+		userKnowledgeNodeRepository.incrementReadForAll(List.of(id), later);
+		entityManager.flush();
+		entityManager.clear();
+
+		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
+		assertThat(reloaded.getNodeClickCount()).isEqualTo(1);
+		assertThat(reloaded.getReadArticleCount()).isEqualTo(1);
+	}
 }
