@@ -5,12 +5,15 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
+import com.starlightnews.backend.domain.user.dto.NodeBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse.ArticleBookmarkResult;
 import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.service.BookmarkService;
+import com.starlightnews.backend.domain.graph.exception.GraphErrorCode;
 import com.starlightnews.backend.global.config.SecurityConfig;
+import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.request.RequestIdFilter;
 import com.starlightnews.backend.global.response.CursorResponse;
@@ -47,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BookmarkControllerTest {
 
 	private static final String PATH = "/api/v1/users/me/bookmarks/articles";
+	private static final String NODE_PATH = "/api/v1/users/me/bookmarks/nodes";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -206,6 +210,55 @@ class BookmarkControllerTest {
 				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 
 		verify(bookmarkService, never()).updateArticleBookmarks(anyLong(), any());
+	}
+
+	@Test
+	void 즐겨찾기_Node조회_성공시_이름과_페이지정보를_응답한다() throws Exception {
+		OffsetDateTime bookmarkedAt = OffsetDateTime.of(
+				2026, 9, 14, 9, 0, 0, 0, ZoneOffset.ofHours(9));
+		given(bookmarkService.getNodeBookmarks(1L, "ENTITY", null, 20))
+				.willReturn(CursorResponse.of(List.of(new NodeBookmarkItem(
+						NodeType.ENTITY,
+						"00000000-0000-0000-0000-000000000001",
+						"한국은행",
+						bookmarkedAt)), false, null));
+
+		mockMvc.perform(get(NODE_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.param("nodeType", "ENTITY"))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.items[0].nodeType").value("ENTITY"))
+				.andExpect(jsonPath("$.data.items[0].nodeId")
+						.value("00000000-0000-0000-0000-000000000001"))
+				.andExpect(jsonPath("$.data.items[0].name").value("한국은행"))
+				.andExpect(jsonPath("$.data.items[0].description").doesNotExist())
+				.andExpect(jsonPath("$.data.items[0].bookmarkedAt")
+						.value("2026-09-14T09:00:00+09:00"))
+				.andExpect(jsonPath("$.data.hasNext").value(false))
+				.andExpect(jsonPath("$.data.nextCursor").doesNotExist())
+				.andExpect(jsonPath("$.meta.requestId").isString());
+	}
+
+	@Test
+	void 즐겨찾기_Node조회시_서비스가_INVALID_NODE_TYPE을_던지면_400이다() throws Exception {
+		given(bookmarkService.getNodeBookmarks(1L, "CONCEPT", null, 20))
+				.willThrow(new BusinessException(GraphErrorCode.INVALID_NODE_TYPE));
+
+		mockMvc.perform(get(NODE_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.param("nodeType", "CONCEPT"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+	}
+
+	@Test
+	void 즐겨찾기_Node조회시_인증토큰이_없으면_401_UNAUTHORIZED이다() throws Exception {
+		mockMvc.perform(get(NODE_PATH))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+
+		verify(bookmarkService, never()).getNodeBookmarks(anyLong(), any(), any(), anyInt());
 	}
 
 	private String bearer(long userId) {

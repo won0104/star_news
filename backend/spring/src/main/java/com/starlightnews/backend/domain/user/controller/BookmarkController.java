@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.user.controller;
 
 import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
+import com.starlightnews.backend.domain.user.dto.NodeBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
 import com.starlightnews.backend.domain.user.service.BookmarkService;
@@ -90,5 +91,38 @@ public class BookmarkController {
 	) {
 		return ApiResponse.success(
 				bookmarkService.updateArticleBookmarks(user.userId(), request), requestId);
+	}
+
+	@Operation(
+			summary = "즐겨찾기 Node 목록 조회",
+			description = "즐겨찾기한 Event·Story·Entity·Statement를 최신 등록순으로 조회한다. **Access Token 필요.**")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
+					description = "지원하지 않는 nodeType(INVALID_NODE_TYPE) / size 범위 위반(INVALID_INPUT_VALUE) / 잘못된 cursor(INVALID_CURSOR)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
+					description = "Access Token 오류 (code: UNAUTHORIZED / INVALID_ACCESS_TOKEN / EXPIRED_ACCESS_TOKEN)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+					description = "사용자를 찾을 수 없음 (code: USER_NOT_FOUND)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",
+					description = "Neo4j 조회 또는 데이터 정합성 오류 (code: GRAPH_NODE_QUERY_FAILED)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	@GetMapping("/nodes")
+	public ApiResponse<CursorResponse<NodeBookmarkItem>> getNodeBookmarks(
+			@Parameter(description = "Node 유형 필터 (EVENT, STORY, ENTITY, STATEMENT)", example = "ENTITY")
+			@RequestParam(required = false) String nodeType,
+			@Parameter(description = "더 보기 커서 (직전 응답의 nextCursor)")
+			@RequestParam(required = false) String cursor,
+			@Parameter(description = "이번 응답 최대 Node 수 (1~100)", example = "20")
+			@RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
+			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
+			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+	) {
+		return ApiResponse.success(
+				bookmarkService.getNodeBookmarks(user.userId(), nodeType, cursor, size), requestId);
 	}
 }

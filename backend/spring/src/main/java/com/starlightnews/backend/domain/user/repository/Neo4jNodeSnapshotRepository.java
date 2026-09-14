@@ -1,5 +1,7 @@
 package com.starlightnews.backend.domain.user.repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,6 +26,12 @@ public class Neo4jNodeSnapshotRepository implements NodeSnapshotRepository {
 			RETURN coalesce(n[$titleProp], $nodeKey) AS label, head(collect(topicCode)) AS topicCode
 			""";
 
+	private static final String FIND_NAMES_CYPHER = """
+			MATCH (n)
+			WHERE $label IN labels(n) AND n.nodeId IN $nodeIds
+			RETURN n.nodeId AS nodeId, n[$titleProp] AS name
+			""";
+
 	private final Neo4jClient neo4jClient;
 
 	public Neo4jNodeSnapshotRepository(Neo4jClient neo4jClient) {
@@ -42,5 +50,23 @@ public class Neo4jNodeSnapshotRepository implements NodeSnapshotRepository {
 						record.get("label").asString(),
 						record.get("topicCode").isNull() ? null : record.get("topicCode").asString()))
 				.one();
+	}
+
+	@Override
+	public List<NodeName> findNames(NodeType nodeType, Collection<String> nodeIds) {
+		if (nodeIds.isEmpty()) {
+			return List.of();
+		}
+
+		return List.copyOf(neo4jClient.query(FIND_NAMES_CYPHER)
+				.bindAll(Map.of(
+						"nodeIds", List.copyOf(nodeIds),
+						"label", nodeType.label(),
+						"titleProp", nodeType.titleProperty()))
+				.fetchAs(NodeName.class)
+				.mappedBy((typeSystem, record) -> new NodeName(
+						record.get("nodeId").asString(),
+						record.get("name").asString()))
+				.all());
 	}
 }
