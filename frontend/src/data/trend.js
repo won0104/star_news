@@ -46,7 +46,7 @@ export const nightfall = {
  * ambient stars, six authored edges, the centre sticker, the upper entity and the
  * faded continuation event; the remaining assets sit above it at their named slots. */
 export const trendFigmaAssets = {
-  relations: '/assets/trend/figma/relations.svg',
+  relations: '/assets/trend/figma/relations-core.svg',
   centreGlow: '/assets/trend/figma/event-center-glow.svg',
   relatedLeftGlow: '/assets/trend/figma/event-related-left-glow.svg',
   relatedLeftSticker: '/assets/trend/figma/event-related-left-sticker.svg',
@@ -57,6 +57,34 @@ export const trendFigmaAssets = {
   statementGlow: '/assets/trend/figma/statement-glow.svg',
   statementSticker: '/assets/trend/figma/statement-sticker.svg',
 };
+
+/**
+ * Decorative stars from the Figma relation export, now represented as independent
+ * elements. `events` records which event neighbourhood can light each star when the
+ * exploration hover treatment is added.
+ */
+export const ambientStars = [
+  { id: 'ambient-01', role: 'entity', at: [7.47, 29.83], size: 35, rotate: -8, events: ['increase', 'adopt'] },
+  { id: 'ambient-02', role: 'statement', at: [12.29, 16.72], size: 40, rotate: 4, events: ['adopt'] },
+  { id: 'ambient-03', role: 'event', at: [14.34, 36.5], size: 44, rotate: -4, events: ['adopt', 'increase'] },
+  { id: 'ambient-04', role: 'entity', at: [94.34, 65.5], size: 34, rotate: 8, opacity: 0.38, events: ['bonder', 'cowos'] },
+  { id: 'ambient-05', role: 'statement', at: [74.1, 62.83], size: 42, rotate: 3, events: ['bonder'] },
+  { id: 'ambient-06', role: 'event', at: [58.99, 75.83], size: 30, rotate: -2, events: ['bonder', 'cowos'] },
+  { id: 'ambient-07', role: 'entity', at: [35.31, 85.72], size: 34, rotate: -5, events: ['increase'] },
+  { id: 'ambient-08', role: 'statement', at: [62.22, 90.28], size: 42, rotate: 6, events: ['increase', 'cowos'] },
+  { id: 'ambient-09', role: 'statement', at: [39.44, 79.17], size: 42, rotate: -7, events: ['increase'] },
+  { id: 'ambient-10', role: 'event', at: [38.99, 94.17], size: 44, rotate: 5, events: ['cowos'] },
+  { id: 'ambient-11', role: 'entity', at: [64.41, 32.5], size: 34, rotate: -3, events: ['adopt', 'bonder'] },
+  { id: 'ambient-12', role: 'statement', at: [74.1, 26.94], size: 42, rotate: 7, events: ['adopt'] },
+  { id: 'ambient-13', role: 'event', at: [87.71, 41.44], size: 38, rotate: -6, events: ['bonder'] },
+  { id: 'ambient-14', role: 'statement', at: [8.4, 73.94], size: 42, rotate: 2, events: ['increase'] },
+  { id: 'ambient-15', role: 'event', at: [18.16, 77.06], size: 44, rotate: -4, events: ['increase', 'adopt'] },
+  { id: 'ambient-16', role: 'event', at: [10.8, 57.39], size: 38, rotate: 5, events: ['increase'] },
+  { id: 'ambient-17', role: 'event', at: [11.77, 86.17], size: 36, rotate: -5, events: ['cowos'] },
+  { id: 'ambient-18', role: 'statement', at: [55.27, 24.84], size: 42, rotate: 68, events: ['adopt'] },
+  { id: 'ambient-19', role: 'statement', at: [71.42, 13.03], size: 42, rotate: -3, events: ['bonder'] },
+  { id: 'ambient-20', role: 'event', at: [53.06, 14.89], size: 44, rotate: 7, events: ['adopt'] },
+];
 
 /**
  * The stars themselves. Three renders, each cropped to the same body-relative frame so

@@ -2,8 +2,11 @@ package com.starlightnews.backend.domain.article.domain;
 
 import java.time.LocalDateTime;
 
+import com.starlightnews.backend.global.enums.AnalysisStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -45,13 +48,30 @@ public class Article {
 	@Column(name = "summary")
 	private String summary;
 
+	/** Neo4j Article Node 의 nodeId. AI 분석 전이면 null 이라 Neo4j 에 대응 Node 가 없다. */
+	// articles.node_id 는 CHAR(36) 이므로 CHAR 로 매핑한다 (기본 VARCHAR 이면 validate 실패).
+	@JdbcTypeCode(SqlTypes.CHAR)
+	@Column(name = "node_id", length = 36)
+	private String nodeId;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "analysis_status", nullable = false, length = 32)
+	private AnalysisStatus analysisStatus;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")
 	private NewsOrganization organization;
 
 	public Article(String title, LocalDateTime publishedAt, NewsOrganization organization) {
+		this(title, publishedAt, organization, null, AnalysisStatus.PROCESSING);
+	}
+
+	public Article(String title, LocalDateTime publishedAt, NewsOrganization organization,
+			String summary, AnalysisStatus analysisStatus) {
 		this.title = title;
 		this.publishedAt = publishedAt;
 		this.organization = organization;
+		this.summary = summary;
+		this.analysisStatus = analysisStatus;
 	}
 }

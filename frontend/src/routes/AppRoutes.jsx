@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { AppScene } from '../pages/AppScene';
 import { EventScene } from '../pages/EventScene';
+import { HistoryEventScene } from '../pages/HistoryEventScene';
 import { MainScene } from '../pages/MainScene';
 import { AtticScene } from '../pages/AtticScene';
 import { GraphScene } from '../pages/GraphScene';
@@ -28,6 +29,7 @@ export function AppRoutes() {
       <Route path="/" element={<MainScene />} />
       <Route path="/app" element={<AppScene />} />
       <Route path="/event/:id" element={<EventScene />} />
+      <Route path="/history/:storyId/events/:eventId" element={<HistoryEventScene />} />
       <Route path="/trend" element={<AtticScene />} />
       <Route path="/explore" element={<GraphScene />} />
       <Route path="/login" element={<LoginScreen />} />
