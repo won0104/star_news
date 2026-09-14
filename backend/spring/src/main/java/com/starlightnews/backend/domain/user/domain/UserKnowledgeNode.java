@@ -62,6 +62,7 @@ public class UserKnowledgeNode {
 	/**
 	 * 개인 Node 가 아직 없을 때, 기사 열람으로 새 Row 를 만든다. read_article_count=1, click_count=0.
 	 * 이 기사가 해당 Node 를 건드린 첫 고유 기사이므로 재열람이더라도 1 로 시작한다.
+	 * (운영 경로는 UserKnowledgeNodeRepository#upsertRead 가 쓰고, 이 팩토리는 테스트 픽스처용이다)
 	 */
 	public static UserKnowledgeNode forFirstRead(UserKnowledgeNodeId id, String nodeLabel, String topicCode,
 			LocalDateTime now) {

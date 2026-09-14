@@ -34,26 +34,28 @@ public interface UserKnowledgeNodeRepository
 	int incrementClick(@Param("id") UserKnowledgeNodeId id, @Param("now") LocalDateTime now);
 
 	/**
-	 * 주어진 id 중 이미 존재하는 것만 돌려준다.
-	 * 기사 하나에 연결된 Node 를 한 번에 처리하려고, 갱신 대상과 신규 생성 대상을 질의 한 번으로 가른다.
-	 */
-	@Query("SELECT u.id FROM UserKnowledgeNode u WHERE u.id IN :ids")
-	List<UserKnowledgeNodeId> findExistingIds(@Param("ids") Collection<UserKnowledgeNodeId> ids);
-
-	/**
-	 * 최초 열람: 해당 Row 들의 read_article_count 를 1 늘리고 last_seen_at 을 갱신한다.
-	 * read_article_count 는 그 Node 를 건드린 고유 기사 수라 같은 기사 재열람으로는 늘지 않는다.
+	 * 기사 열람으로 얻은 개인 Node 를 한 문장으로 저장하거나 갱신한다.
+	 * 처음 보는 Node 면 read_article_count=1 로 INSERT 하고(이 기사가 그 Node 를 건드린 첫 고유 기사),
+	 * 이미 있으면 node_label·topic_code·first_seen_at 은 그대로 둔 채 last_seen_at 을 갱신하고
+	 * read_article_count 에 readIncrement 를 더한다.
+	 *
+	 * <p>readIncrement 는 이 기사를 처음 읽을 때만 1, 재열람이면 0 이다.
+	 * read_article_count 가 그 Node 를 건드린 고유 기사 수라 같은 기사 재열람으로는 늘면 안 된다.
+	 *
+	 * <p>UPDATE 를 먼저 치고 0 행이면 INSERT 하는 방식은 동시 요청에서 InnoDB 갭 락 데드락을 일으켜 쓰지 않는다.
 	 */
 	@Modifying
-	@Query("UPDATE UserKnowledgeNode u "
-			+ "SET u.readArticleCount = u.readArticleCount + 1, u.lastSeenAt = :now "
-			+ "WHERE u.id IN :ids")
-	int incrementReadForAll(@Param("ids") Collection<UserKnowledgeNodeId> ids, @Param("now") LocalDateTime now);
-
-	/** 재열람: 고유 기사 수는 그대로 두고 last_seen_at 만 갱신한다. */
-	@Modifying
-	@Query("UPDATE UserKnowledgeNode u SET u.lastSeenAt = :now WHERE u.id IN :ids")
-	int touchLastSeenForAll(@Param("ids") Collection<UserKnowledgeNodeId> ids, @Param("now") LocalDateTime now);
+	@Query(value = "INSERT INTO user_knowledge_nodes "
+			+ "(user_id, node_type, node_id, node_label, topic_code, "
+			+ " read_article_count, node_click_count, first_seen_at, last_seen_at) "
+			+ "VALUES (:userId, :nodeType, :nodeId, :nodeLabel, :topicCode, 1, 0, :now, :now) "
+			+ "ON DUPLICATE KEY UPDATE "
+			+ " read_article_count = read_article_count + :readIncrement, last_seen_at = :now",
+			nativeQuery = true)
+	int upsertRead(@Param("userId") Long userId, @Param("nodeType") String nodeType,
+			@Param("nodeId") String nodeId, @Param("nodeLabel") String nodeLabel,
+			@Param("topicCode") String topicCode, @Param("readIncrement") int readIncrement,
+			@Param("now") LocalDateTime now);
 
 	/** 해당 사용자의 특정 Topic 개인 Node 전체. (개인 그래프 Topic 스냅샷용) */
 	@Query("SELECT u FROM UserKnowledgeNode u "

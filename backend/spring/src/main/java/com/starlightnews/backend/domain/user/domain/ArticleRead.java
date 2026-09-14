@@ -40,8 +40,4 @@ public class ArticleRead {
 		this.clickCount = clickCount;
 	}
 
-	/** 사용자가 이 기사를 처음 열람했을 때 새 Row 를 만든다. click_count=1, first_read_at=last_read_at=now. */
-	public static ArticleRead forFirstRead(ArticleReadId id, LocalDateTime now) {
-		return new ArticleRead(id, now, now, 1);
-	}
 }

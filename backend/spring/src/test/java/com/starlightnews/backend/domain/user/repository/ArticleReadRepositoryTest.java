@@ -232,24 +232,25 @@ class ArticleReadRepositoryTest {
 	}
 
 	@Test
-	void forFirstRead로_저장하면_click_count가_1이고_first_last_read_at이_같다() {
+	void upsertRead는_처음이면_click_count_1로_INSERT하고_1을_반환한다() {
 		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
 		Article article = article(org, "제목1", "ECONOMY");
 		LocalDateTime now = LocalDateTime.of(2026, 8, 29, 9, 0);
-		ArticleReadId id = new ArticleReadId(1L, article.getArticleId());
-
-		articleReadRepository.save(ArticleRead.forFirstRead(id, now));
 		entityManager.flush();
+
+		int affected = articleReadRepository.upsertRead(1L, article.getArticleId(), now);
 		entityManager.clear();
 
-		ArticleRead found = entityManager.find(ArticleRead.class, id);
+		assertThat(affected).isEqualTo(1); // INSERT
+		ArticleRead found = entityManager.find(ArticleRead.class,
+				new ArticleReadId(1L, article.getArticleId()));
 		assertThat(found.getClickCount()).isEqualTo(1);
 		assertThat(found.getFirstReadAt()).isEqualTo(now);
 		assertThat(found.getLastReadAt()).isEqualTo(now);
 	}
 
 	@Test
-	void incrementRead는_click_count와_last_read_at만_바꾸고_first_read_at은_유지한다() {
+	void upsertRead는_재열람이면_first_read_at을_유지하고_2를_반환한다() {
 		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
 		Article article = article(org, "제목1", "ECONOMY");
 		LocalDateTime first = LocalDateTime.of(2026, 8, 29, 9, 0);
@@ -257,13 +258,11 @@ class ArticleReadRepositoryTest {
 		ArticleReadId id = new ArticleReadId(1L, article.getArticleId());
 		entityManager.persist(new ArticleRead(id, first, first, 1));
 		entityManager.flush();
+
+		int affected = articleReadRepository.upsertRead(1L, article.getArticleId(), later);
 		entityManager.clear();
 
-		int updated = articleReadRepository.incrementRead(id, later);
-		entityManager.flush();
-		entityManager.clear();
-
-		assertThat(updated).isEqualTo(1);
+		assertThat(affected).isEqualTo(2); // 기존 행 갱신
 		ArticleRead reloaded = entityManager.find(ArticleRead.class, id);
 		assertThat(reloaded.getClickCount()).isEqualTo(2);
 		assertThat(reloaded.getLastReadAt()).isEqualTo(later);
@@ -271,36 +270,21 @@ class ArticleReadRepositoryTest {
 	}
 
 	@Test
-	void incrementRead는_대상_Row가_없으면_0을_반환한다() {
-		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
-		Article article = article(org, "제목1", "ECONOMY");
-		entityManager.flush();
-		entityManager.clear();
-
-		int updated = articleReadRepository.incrementRead(
-				new ArticleReadId(1L, article.getArticleId()), LocalDateTime.of(2026, 8, 29, 9, 0));
-
-		assertThat(updated).isZero();
-	}
-
-	@Test
-	void incrementRead는_같은_기사라도_다른_사용자의_Row는_건드리지_않는다() {
+	void upsertRead는_같은_기사라도_다른_사용자의_Row는_건드리지_않는다() {
 		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
 		Article article = article(org, "제목1", "ECONOMY");
 		LocalDateTime first = LocalDateTime.of(2026, 8, 29, 9, 0);
 		LocalDateTime later = LocalDateTime.of(2026, 8, 31, 14, 30);
-		ArticleReadId mine = new ArticleReadId(1L, article.getArticleId());
 		ArticleReadId others = new ArticleReadId(2L, article.getArticleId());
-		entityManager.persist(new ArticleRead(mine, first, first, 1));
+		entityManager.persist(new ArticleRead(new ArticleReadId(1L, article.getArticleId()), first, first, 1));
 		entityManager.persist(new ArticleRead(others, first, first, 1));
 		entityManager.flush();
+
+		articleReadRepository.upsertRead(1L, article.getArticleId(), later);
 		entityManager.clear();
 
-		articleReadRepository.incrementRead(mine, later);
-		entityManager.flush();
-		entityManager.clear();
-
-		assertThat(entityManager.find(ArticleRead.class, others).getClickCount()).isEqualTo(1);
-		assertThat(entityManager.find(ArticleRead.class, others).getLastReadAt()).isEqualTo(first);
+		ArticleRead untouched = entityManager.find(ArticleRead.class, others);
+		assertThat(untouched.getClickCount()).isEqualTo(1);
+		assertThat(untouched.getLastReadAt()).isEqualTo(first);
 	}
 }

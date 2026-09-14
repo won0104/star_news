@@ -20,14 +20,24 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 	ArticleRead save(ArticleRead articleRead);
 
 	/**
-	 * 해당 Row 가 있으면 click_count 를 1 늘리고 last_read_at 을 갱신한다. first_read_at 은 건드리지 않는다.
-	 * 반환값은 갱신된 행 수(있으면 1, 없으면 0)이며, 0 이면 호출 측이 새 Row 를 만든다.
+	 * 열람 기록을 한 문장으로 저장하거나 갱신한다.
+	 * 처음이면 click_count=1 로 INSERT 하고, 이미 있으면 first_read_at 은 그대로 둔 채
+	 * last_read_at 을 갱신하고 click_count 를 1 늘린다.
+	 *
+	 * <p>UPDATE 를 먼저 치고 0 행이면 INSERT 하는 방식은 쓰지 않는다. 없는 행에 UPDATE 를 치면
+	 * InnoDB 가 갭 락을 잡고, 같은 (user_id, article_id) 로 동시에 들어온 요청들이 그 갭에
+	 * INSERT 하려다 서로 대기해 데드락이 난다(실측: 동시 10건 중 9건 실패).
+	 *
+	 * @return MySQL 영향 행 수. INSERT 되면 1, 기존 행이 갱신되면 2. (last_read_at 이 항상 바뀌므로 0 은 나오지 않는다)
 	 */
 	@Modifying
-	@Query("UPDATE ArticleRead r "
-			+ "SET r.clickCount = r.clickCount + 1, r.lastReadAt = :now "
-			+ "WHERE r.id = :id")
-	int incrementRead(@Param("id") ArticleReadId id, @Param("now") LocalDateTime now);
+	@Query(value = "INSERT INTO article_reads "
+			+ "(user_id, article_id, first_read_at, last_read_at, click_count) "
+			+ "VALUES (:userId, :articleId, :now, :now, 1) "
+			+ "ON DUPLICATE KEY UPDATE last_read_at = :now, click_count = click_count + 1",
+			nativeQuery = true)
+	int upsertRead(@Param("userId") Long userId, @Param("articleId") Long articleId,
+			@Param("now") LocalDateTime now);
 
 	/** Topic 코드별 집계 결과 한 행. */
 	interface TopicReadCount {

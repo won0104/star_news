@@ -167,86 +167,81 @@ class UserKnowledgeNodeRepositoryTest {
 	}
 
 	@Test
-	void findExistingIds는_주어진_복합키_중_존재하는_것만_반환한다() {
+	void upsertRead는_없던_Node를_read_article_count_1로_INSERT한다() {
 		LocalDateTime now = LocalDateTime.of(2024, 5, 25, 5, 20);
-		UserKnowledgeNodeId existing = id(1L, NodeType.EVENT, NODE_ID);
-		UserKnowledgeNodeId missing = id(1L, NodeType.ENTITY, "00000024-0920-4000-8000-000000000099");
-		UserKnowledgeNodeId otherUser = id(2L, NodeType.EVENT, NODE_ID);
-		entityManager.persist(UserKnowledgeNode.forFirstRead(existing, "기준금리 동결", "ECONOMY", now));
-		entityManager.persist(UserKnowledgeNode.forFirstRead(otherUser, "기준금리 동결", "ECONOMY", now));
-		entityManager.flush();
+		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
+
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 1, now);
 		entityManager.clear();
 
-		List<UserKnowledgeNodeId> found = userKnowledgeNodeRepository
-				.findExistingIds(List.of(existing, missing));
-
-		assertThat(found).containsExactly(existing); // 다른 사용자(otherUser) Row 는 섞이지 않는다
+		UserKnowledgeNode found = userKnowledgeNodeRepository.findById(id).orElseThrow();
+		assertThat(found.getNodeLabel()).isEqualTo("기준금리 동결");
+		assertThat(found.getTopicCode()).isEqualTo("ECONOMY");
+		assertThat(found.getReadArticleCount()).isEqualTo(1);
+		assertThat(found.getNodeClickCount()).isZero();
+		assertThat(found.getFirstSeenAt()).isEqualTo(now);
 	}
 
 	@Test
-	void incrementReadForAll은_대상_Row들의_고유_기사_수와_lastSeenAt을_갱신한다() {
+	void upsertRead는_재열람이어도_없던_Node면_1로_시작한다() {
+		LocalDateTime now = LocalDateTime.of(2024, 5, 25, 5, 20);
+		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
+
+		// readIncrement=0(재열람)이어도 INSERT 되는 Row 는 이 기사가 첫 고유 기사이므로 1 이다
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 0, now);
+		entityManager.clear();
+
+		assertThat(userKnowledgeNodeRepository.findById(id).orElseThrow().getReadArticleCount()).isEqualTo(1);
+	}
+
+	@Test
+	void upsertRead는_기존_Node면_readIncrement만큼_더하고_label과_firstSeenAt은_유지한다() {
 		LocalDateTime first = LocalDateTime.of(2024, 5, 25, 5, 20);
 		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
-		UserKnowledgeNodeId event = id(1L, NodeType.EVENT, NODE_ID);
-		UserKnowledgeNodeId entity = id(1L, NodeType.ENTITY, NODE_ID);
-		UserKnowledgeNodeId untouched = id(1L, NodeType.STATEMENT, NODE_ID);
-		entityManager.persist(UserKnowledgeNode.forFirstRead(event, "기준금리 동결", "ECONOMY", first));
-		entityManager.persist(UserKnowledgeNode.forFirstRead(entity, "한국은행", null, first));
-		entityManager.persist(UserKnowledgeNode.forFirstRead(untouched, "어떤 주장", null, first));
+		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstRead(id, "기준금리 동결", "ECONOMY", first));
 		entityManager.flush();
+
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "다른 제목", "SOCIETY", 1, later);
 		entityManager.clear();
 
-		int updated = userKnowledgeNodeRepository.incrementReadForAll(List.of(event, entity), later);
-		entityManager.flush();
-		entityManager.clear();
-
-		assertThat(updated).isEqualTo(2);
-		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(event).orElseThrow();
+		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
 		assertThat(reloaded.getReadArticleCount()).isEqualTo(2);
 		assertThat(reloaded.getLastSeenAt()).isEqualTo(later);
 		assertThat(reloaded.getFirstSeenAt()).isEqualTo(first);
-		assertThat(reloaded.getNodeClickCount()).isZero();
-
-		UserKnowledgeNode skipped = userKnowledgeNodeRepository.findById(untouched).orElseThrow();
-		assertThat(skipped.getReadArticleCount()).isEqualTo(1);
-		assertThat(skipped.getLastSeenAt()).isEqualTo(first);
+		assertThat(reloaded.getNodeLabel()).isEqualTo("기준금리 동결"); // 기존 Snapshot 유지
+		assertThat(reloaded.getTopicCode()).isEqualTo("ECONOMY"); // 기존 대표 Topic 유지
 	}
 
 	@Test
-	void touchLastSeenForAll은_고유_기사_수를_두고_lastSeenAt만_갱신한다() {
+	void upsertRead는_재열람이면_기존_Node의_고유_기사_수를_늘리지_않는다() {
 		LocalDateTime first = LocalDateTime.of(2024, 5, 25, 5, 20);
 		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
-		UserKnowledgeNodeId event = id(1L, NodeType.EVENT, NODE_ID);
-		entityManager.persist(UserKnowledgeNode.forFirstRead(event, "기준금리 동결", "ECONOMY", first));
+		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstRead(id, "기준금리 동결", "ECONOMY", first));
 		entityManager.flush();
+
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 0, later);
 		entityManager.clear();
 
-		int updated = userKnowledgeNodeRepository.touchLastSeenForAll(List.of(event), later);
-		entityManager.flush();
-		entityManager.clear();
-
-		assertThat(updated).isEqualTo(1);
-		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(event).orElseThrow();
+		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
 		assertThat(reloaded.getReadArticleCount()).isEqualTo(1);
 		assertThat(reloaded.getLastSeenAt()).isEqualTo(later);
-		assertThat(reloaded.getFirstSeenAt()).isEqualTo(first);
 	}
 
 	@Test
-	void 클릭으로_만들어진_Row에_열람이_더해지면_두_신호가_따로_쌓인다() {
+	void upsertRead는_클릭으로_만들어진_Row의_click_count를_보존한다() {
 		LocalDateTime first = LocalDateTime.of(2024, 5, 25, 5, 20);
 		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
 		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
 		entityManager.persist(UserKnowledgeNode.forFirstClick(id, "기준금리 동결", "ECONOMY", first));
 		entityManager.flush();
-		entityManager.clear();
 
-		userKnowledgeNodeRepository.incrementReadForAll(List.of(id), later);
-		entityManager.flush();
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 1, later);
 		entityManager.clear();
 
 		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
-		assertThat(reloaded.getNodeClickCount()).isEqualTo(1);
-		assertThat(reloaded.getReadArticleCount()).isEqualTo(1);
+		assertThat(reloaded.getNodeClickCount()).isEqualTo(1); // 클릭 신호는 그대로
+		assertThat(reloaded.getReadArticleCount()).isEqualTo(1); // 열람 신호는 따로 쌓인다
 	}
 }
