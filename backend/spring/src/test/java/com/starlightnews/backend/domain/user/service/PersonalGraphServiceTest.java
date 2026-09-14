@@ -2,9 +2,12 @@ package com.starlightnews.backend.domain.user.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.starlightnews.backend.domain.graph.repository.GraphNeighborRepository;
 import com.starlightnews.backend.domain.graph.repository.NeighborEdge;
+import com.starlightnews.backend.domain.user.cache.ExploredNodeCountCache;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNodeId;
 import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse;
@@ -45,6 +48,9 @@ class PersonalGraphServiceTest {
 
 	@Mock
 	private GraphNeighborRepository graphNeighborRepository;
+
+	@Mock
+	private ExploredNodeCountCache exploredNodeCountCache;
 
 	@InjectMocks
 	private PersonalGraphService personalGraphService;
@@ -251,6 +257,35 @@ class PersonalGraphServiceTest {
 			assertThat(edge.targetId()).isEqualTo("EVENT:ev1");
 			assertThat(edge.relationship()).isEqualTo("ACTOR");
 		});
+	}
+
+	@Test
+	void 참여도_집계가_캐시에_있으면_DB를_다시_세지_않고_캐시값을_그대로_쓴다() {
+		given(exploredNodeCountCache.get(1L)).willReturn(Optional.of(Map.of("ECONOMY", 3L)));
+		stubRepresentatives("ECONOMY", List.of(row(NodeType.ENTITY, "e1", "한국은행", "ECONOMY", 0, 0)));
+		given(articleReadRepository.countReadArticlesByTopic(1L)).willReturn(List.of());
+		given(graphNeighborRepository.findEdges(any())).willReturn(List.of());
+
+		PersonalGraphSummaryResponse response = personalGraphService.getSummary(1L);
+
+		assertThat(nodeById(response, "topic:ECONOMY").weight()).isEqualTo(1.0); // 캐시된 참여도 3 이 그대로 반영됨
+		verify(userKnowledgeNodeRepository, never()).countExploredNodesByTopic(any(), any());
+		verify(exploredNodeCountCache, never()).put(any(), any());
+	}
+
+	@Test
+	void 참여도_집계가_캐시에_없으면_DB에서_계산해서_캐시에_채워넣는다() {
+		given(exploredNodeCountCache.get(1L)).willReturn(Optional.empty());
+		stubRepresentatives("ECONOMY", List.of(row(NodeType.ENTITY, "e1", "한국은행", "ECONOMY", 0, 0)));
+		given(articleReadRepository.countReadArticlesByTopic(1L)).willReturn(List.of());
+		given(userKnowledgeNodeRepository.countExploredNodesByTopic(eq(1L), any()))
+				.willReturn(List.of(topicNodeCount("ECONOMY", 4)));
+		given(graphNeighborRepository.findEdges(any())).willReturn(List.of());
+
+		PersonalGraphSummaryResponse response = personalGraphService.getSummary(1L);
+
+		assertThat(nodeById(response, "topic:ECONOMY").weight()).isEqualTo(1.0);
+		verify(exploredNodeCountCache).put(1L, Map.of("ECONOMY", 4L));
 	}
 
 	@Test

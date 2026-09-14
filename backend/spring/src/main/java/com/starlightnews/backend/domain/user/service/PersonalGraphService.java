@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import com.starlightnews.backend.domain.graph.repository.GraphNeighborRepository;
 import com.starlightnews.backend.domain.graph.repository.NeighborEdge;
+import com.starlightnews.backend.domain.user.cache.ExploredNodeCountCache;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse;
 import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse.Edge;
@@ -65,6 +66,7 @@ public class PersonalGraphService {
 	private final UserKnowledgeNodeRepository userKnowledgeNodeRepository;
 	private final ArticleReadRepository articleReadRepository;
 	private final GraphNeighborRepository graphNeighborRepository;
+	private final ExploredNodeCountCache exploredNodeCountCache;
 
 	/**
 	 * 선택한 Topic 의 개인 Node·Edge 스냅샷을 반환한다.
@@ -114,8 +116,13 @@ public class PersonalGraphService {
 		Map<String, Long> readCountByTopic = toReadCountMap(
 				articleReadRepository.countReadArticlesByTopic(userId));
 
-		Map<String, Long> exploredNodeCountByTopic = toCountMap(
-				userKnowledgeNodeRepository.countExploredNodesByTopic(userId, DISPLAY_TYPES));
+		Map<String, Long> exploredNodeCountByTopic = exploredNodeCountCache.get(userId)
+				.orElseGet(() -> {
+					Map<String, Long> computed = toCountMap(
+							userKnowledgeNodeRepository.countExploredNodesByTopic(userId, DISPLAY_TYPES));
+					exploredNodeCountCache.put(userId, computed);
+					return computed;
+				});
 		Map<String, Long> engagementByTopic = new LinkedHashMap<>();
 		for (TopicCode topic : TopicCode.values()) {
 			String topicCode = topic.name();

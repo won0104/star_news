@@ -3,6 +3,7 @@ package com.starlightnews.backend.domain.user.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.starlightnews.backend.domain.user.cache.ExploredNodeCountCache;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNodeId;
 import com.starlightnews.backend.domain.user.repository.NodeSnapshot;
@@ -39,6 +40,9 @@ class GraphNodeClickServiceTest {
 	@Mock
 	private NodeSnapshotRepository nodeSnapshotRepository;
 
+	@Mock
+	private ExploredNodeCountCache exploredNodeCountCache;
+
 	@InjectMocks
 	private GraphNodeClickService graphNodeClickService;
 
@@ -60,6 +64,7 @@ class GraphNodeClickServiceTest {
 				eq(new UserKnowledgeNodeId(USER_ID, NodeType.ENTITY, NODE_KEY)), any(LocalDateTime.class));
 		verify(userKnowledgeNodeRepository, never()).save(any());
 		verifyNoInteractions(nodeSnapshotRepository);
+		verify(exploredNodeCountCache).evict(USER_ID);
 	}
 
 	@Test
@@ -79,6 +84,7 @@ class GraphNodeClickServiceTest {
 		assertThat(saved.getNodeClickCount()).isEqualTo(1);
 		assertThat(saved.getReadArticleCount()).isZero();
 		assertThat(saved.getFirstSeenAt()).isEqualTo(saved.getLastSeenAt());
+		verify(exploredNodeCountCache).evict(USER_ID);
 	}
 
 	@Test
@@ -91,6 +97,7 @@ class GraphNodeClickServiceTest {
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(CommonErrorCode.RESOURCE_NOT_FOUND);
 		verify(userKnowledgeNodeRepository, never()).save(any());
+		verifyNoInteractions(exploredNodeCountCache); // 실패했으니 캐시를 건드릴 이유가 없다
 	}
 
 	@Test
@@ -103,6 +110,7 @@ class GraphNodeClickServiceTest {
 				() -> graphNodeClickService.recordClick(USER_ID, NodeType.ENTITY, NODE_KEY));
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(CommonErrorCode.INTERNAL_SERVER_ERROR);
+		verifyNoInteractions(exploredNodeCountCache); // 실패했으니 캐시를 건드릴 이유가 없다
 	}
 
 	@Test
@@ -116,5 +124,6 @@ class GraphNodeClickServiceTest {
 		graphNodeClickService.recordClick(USER_ID, NodeType.ENTITY, NODE_KEY);
 
 		verify(userKnowledgeNodeRepository, times(2)).incrementClick(any(), any());
+		verify(exploredNodeCountCache).evict(USER_ID);
 	}
 }
