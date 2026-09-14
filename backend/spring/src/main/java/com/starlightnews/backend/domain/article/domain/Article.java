@@ -45,6 +45,10 @@ public class Article {
 	@Column(name = "summary")
 	private String summary;
 
+	/** Neo4j Article Node 의 nodeId. AI 분석 전이면 null 이라 Neo4j 에 대응 Node 가 없다. */
+	@Column(name = "node_id", length = 36)
+	private String nodeId;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")
 	private NewsOrganization organization;
