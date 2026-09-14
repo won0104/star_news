@@ -26,9 +26,9 @@ def test_build_user_profile_vector_computes_weighted_average():
     now = datetime.now(timezone.utc)
     consumed_events = [
         # 최근 + 많이 본 Event -> 가중치가 커서 프로필 벡터에 크게 반영돼야 함
-        {"embedding": [0.2, 0.5, 0.1, 0.3, 0.0, 0.4, 0.2, 0.1], "count": 5, "lastViewedAt": now},
+        {"embedding": [0.2, 0.5, 0.1, 0.3, 0.0, 0.4, 0.2, 0.1], "count": 5, "lastViewedAt": now, "isFavorited": False},
         # 90일 전 + 1번만 본 Event -> 가중치가 작아 거의 영향 없어야 함
-        {"embedding": [0.1, 0.3, 0.4, 0.0, 0.2, 0.1, 0.3, 0.5], "count": 1, "lastViewedAt": now - timedelta(days=90)},
+        {"embedding": [0.1, 0.3, 0.4, 0.0, 0.2, 0.1, 0.3, 0.5], "count": 1, "lastViewedAt": now - timedelta(days=90), "isFavorited": False},
     ]
 
     profile_vector = service._build_user_profile_vector(consumed_events)
@@ -42,6 +42,20 @@ def test_build_user_profile_vector_computes_weighted_average():
 # Cold Start 검증: CONSUMED 이력이 없으면 벡터를 만들 수 없으니 None 반환
 def test_build_user_profile_vector_returns_none_when_no_history():
     assert service._build_user_profile_vector([]) is None
+
+
+# 즐겨찾기 가중치 검증: count/최근성이 완전히 같아도 즐겨찾기한 쪽이 프로필 벡터에 더 크게 반영돼야 함
+def test_build_user_profile_vector_weighs_favorited_event_more():
+    now = datetime.now(timezone.utc)
+    favorited = [
+        {"embedding": _unit_vector(0), "count": 1, "lastViewedAt": now, "isFavorited": True},
+        {"embedding": _unit_vector(1), "count": 1, "lastViewedAt": now, "isFavorited": False},
+    ]
+
+    profile_vector = service._build_user_profile_vector(favorited)
+
+    # 즐겨찾기(index 0)가 FAVORITE_WEIGHT_MULTIPLIER배 더 크니까, 그 방향으로 더 쏠려야 함
+    assert profile_vector[0] > profile_vector[1]
 
 # 이전 테스트 실행에서 남은 데이터 정리 (재실행 시 누적 방지)
 def _reset_fixture(session):
