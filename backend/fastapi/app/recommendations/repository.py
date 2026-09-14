@@ -80,13 +80,21 @@ def find_consumed_events_with_embeddings(session: Session, user_id: int) -> list
         // 유저가 소비한 Event 중 임베딩 있는 것만
         MATCH (u:User {userId: $userId})-[r:CONSUMED]->(e:Event)
         WHERE e.embedding IS NOT NULL
-        RETURN e.embedding AS embedding, r.count AS count, r.lastViewedAt AS lastViewedAt
+        
+        // 즐겨찾기 여부(=이 Event를 대상으로 한 INTERESTED_IN도 있는지) 같이 조회
+        RETURN e.embedding AS embedding, r.count AS count, r.lastViewedAt AS lastViewedAt,
+               EXISTS { (u)-[:INTERESTED_IN]->(e) } AS isFavorited
         """,
         userId=user_id,
     )
     return [
-        # neo4j.time.DateTime -> 파이썬 기본 datetime 변환 (그대로 두면 service.py에서 뺄셈 시 에러남)
-        {"embedding": record["embedding"], "count": record["count"], "lastViewedAt": record["lastViewedAt"].to_native()}
+        {
+            "embedding": record["embedding"],
+            "count": record["count"],
+            # neo4j.time.DateTime -> 파이썬 기본 datetime 변환 (그대로 두면 service.py에서 뺄셈 시 에러남)
+            "lastViewedAt": record["lastViewedAt"].to_native(),
+            "isFavorited": record["isFavorited"],
+        }
         for record in result
     ]
 
