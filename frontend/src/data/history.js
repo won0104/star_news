@@ -1,3 +1,5 @@
+import { historyGraphMock } from './historyGraphMock.js';
+
 export const historyOverview = {
   generatedAt: '2026.09.14 00:00',
   periodLabel: '최근 90일',
@@ -158,15 +160,59 @@ export const historyStories = [
   ]),
 ];
 
+/**
+ * 현재 로컬 기록과 임시 목업을 개인 그래프 API의 요약 응답 형태로 합친 fallback이다.
+ * 백엔드 적재가 완성되면 historyGraphMock 병합부만 실제 응답 adapter로 교체한다.
+ */
+const graphEvents = historyStories.flatMap((cluster) => cluster.story.events);
+const maxTopicArticleCount = Math.max(...historyStories.map((cluster) => cluster.articleCount));
+const maxEventArticleCount = Math.max(...graphEvents.map((event) => event.articleCount));
+
+const historyTopicNodes = historyStories.map((cluster) => ({
+  id: `topic:${cluster.topicCode}`,
+  kind: 'TOPIC_CLUSTER',
+  nodeType: null,
+  nodeKey: null,
+  topicCode: cluster.topicCode,
+  title: cluster.topicName,
+  sourceArticleCount: cluster.articleCount,
+  weight: cluster.articleCount / maxTopicArticleCount,
+}));
+
+const historyEventNodes = historyStories.flatMap((cluster) => cluster.story.events.map((event) => ({
+  id: `EVENT:${event.id}`,
+  kind: 'NODE',
+  nodeType: 'EVENT',
+  nodeKey: event.id,
+  topicCode: cluster.topicCode,
+  title: event.title,
+  sourceArticleCount: event.articleCount,
+  weight: event.articleCount / maxEventArticleCount,
+  localContext: { storyId: cluster.story.id, eventId: event.id },
+})));
+
+const historyTopicEdges = historyStories.flatMap((cluster) => cluster.story.events.map((event) => ({
+  sourceId: `topic:${cluster.topicCode}`,
+  targetId: `EVENT:${event.id}`,
+  relationship: 'BELONGS_TO_TOPIC',
+  weight: event.articleCount / maxEventArticleCount,
+})));
+
+export const historyGraph = {
+  generatedAt: historyOverview.generatedAt,
+  mockSource: historyGraphMock.source,
+  mockNotice: historyGraphMock.notice,
+  nodes: [...historyTopicNodes, ...historyEventNodes, ...historyGraphMock.nodes],
+  edges: [...historyTopicEdges, ...historyGraphMock.edges],
+};
+
 export const historyCopy = {
   title: '나의 기록',
-  description: '분야 안의 Story를 보고, 연결된 Event를 선택하면 내가 읽은 기사를 확인할 수 있어요.',
+  description: '분야를 선택하고, 3D 기록 행성을 돌려 내가 읽은 맥락을 탐색해보세요.',
   articles: (count) => `읽은 기사 ${count}개`,
   eventCount: (count) => `Event ${count}개`,
-  storyLabel: 'STORY',
   eventLabel: 'EVENT',
   articleLabel: 'ARTICLE',
-  openStory: (title) => `${title} Story 강조하기`,
   openEvent: (title) => `${title} 관련 읽은 기사 보기`,
   panelTitle: '내가 읽은 기사',
   panelCount: (count) => `이 Event에서 읽은 기사 ${count}개`,
@@ -175,7 +221,4 @@ export const historyCopy = {
   previous: '이전 분야',
   next: '다음 분야',
   page: (current, total) => `${current} / ${total} 페이지`,
-  storyPage: (current, total) => `Story ${current} / ${total}`,
-  previousStory: '이전 Story',
-  nextStory: '다음 Story',
 };
