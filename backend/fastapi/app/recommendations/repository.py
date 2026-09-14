@@ -15,6 +15,9 @@ CONTENT_SIMILAR_EVENT_LIMIT = 20
 # Cold Start 폴백에서 최종적으로 반환할 Event 개수
 FALLBACK_EVENT_LIMIT = 20
 
+# 관심 기반 추천에서 최종적으로 반환할 Event 개수
+FINAL_RECOMMENDATION_LIMIT = 5
+
 
 # 1. 추천 후보 공통 필터링
 # - 미열람 필터: 본인이 이미 CONSUMED한 Event 제외

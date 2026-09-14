@@ -21,6 +21,10 @@ POPULARITY_HALF_LIFE_DAYS = 3
 def calculate_recommendations(request: dict):
     raise NotImplementedError
 
+# CF/CBF 결합 가중치 기본값. 나중에 -84에서 튜닝.
+DEFAULT_CBF_WEIGHT = 0.5
+DEFAULT_CF_WEIGHT = 0.5
+
 # 1. 추천 후보 공통 필터링 공용 모듈
 def get_eligible_candidate_event_ids(user_id: int, session: Session) -> set[str]:
     recency_threshold = datetime.now(timezone.utc) - timedelta(days=repository.RECENCY_WINDOW_DAYS)
@@ -116,3 +120,44 @@ def get_cold_start_fallback(user_id: int, session: Session) -> list[ScoredEvent]
     # 점수 높은 순 정렬 후 상위 N개만
     scored.sort(key=lambda s: s.score, reverse=True)
     return scored[: repository.FALLBACK_EVENT_LIMIT]
+
+
+# 5. 관심 기반 추천 최종 계산 (CF + CBF 가중합)
+# final_score = cbf_weight × cbf_score + cf_weight × cf_score
+def calculate_final_score(cbf_score: float, cf_score: float, cbf_weight: float, cf_weight: float) -> float:
+    return cbf_weight * cbf_score + cf_weight * cf_score
+
+
+# 관심 기반 추천 메인 함수
+# Cold Start면 인기도 폴백, 아니면 후보 필터링 ∩ (CF+CBF 가중합) 계산
+def calculate_interest_based_recommendations(
+    user_id: int,
+    session: Session,
+    cbf_weight: float = DEFAULT_CBF_WEIGHT,
+    cf_weight: float = DEFAULT_CF_WEIGHT,
+) -> list[ScoredEvent]:
+
+    # 콜드 스타트 처리
+    if not repository.has_consumption_history(session, user_id):
+        return get_cold_start_fallback(user_id, session)
+
+    # 후보 필터링 ∩ (CF+CBF 가중합) 계산
+    eligible_ids = get_eligible_candidate_event_ids(user_id, session)
+    cf_scores = {c.event_id: c.cf_score for c in calculate_cf_scores(user_id, session)}
+    cbf_scores = {c.event_id: c.content_score for c in calculate_cbf_scores(user_id, session)}
+
+    # CF든 CBF든 하나라도 점수가 있는 Event 중, 후보 필터링을 통과한 것만 최종 후보로 남김
+    candidate_ids = (set(cf_scores) | set(cbf_scores)) & eligible_ids
+
+    scored = [
+        ScoredEvent(
+            event_id=event_id,
+            score=calculate_final_score(
+                cbf_scores.get(event_id, 0.0), cf_scores.get(event_id, 0.0), cbf_weight, cf_weight
+            ),
+        )
+        for event_id in candidate_ids
+    ]
+    scored.sort(key=lambda s: s.score, reverse=True)
+    # 상위 5개 반환
+    return scored[: repository.FINAL_RECOMMENDATION_LIMIT]
