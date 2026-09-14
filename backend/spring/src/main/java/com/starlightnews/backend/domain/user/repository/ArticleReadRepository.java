@@ -7,14 +7,27 @@ import java.util.List;
 import com.starlightnews.backend.domain.user.domain.ArticleRead;
 import com.starlightnews.backend.domain.user.domain.ArticleReadId;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 /**
- * 사용자 기사 열람 기록 조회 (읽기 전용).
+ * 사용자 기사 열람 기록 조회·저장. (article_reads)
  */
 public interface ArticleReadRepository extends Repository<ArticleRead, ArticleReadId> {
+
+	ArticleRead save(ArticleRead articleRead);
+
+	/**
+	 * 해당 Row 가 있으면 click_count 를 1 늘리고 last_read_at 을 갱신한다. first_read_at 은 건드리지 않는다.
+	 * 반환값은 갱신된 행 수(있으면 1, 없으면 0)이며, 0 이면 호출 측이 새 Row 를 만든다.
+	 */
+	@Modifying
+	@Query("UPDATE ArticleRead r "
+			+ "SET r.clickCount = r.clickCount + 1, r.lastReadAt = :now "
+			+ "WHERE r.id = :id")
+	int incrementRead(@Param("id") ArticleReadId id, @Param("now") LocalDateTime now);
 
 	/** Topic 코드별 집계 결과 한 행. */
 	interface TopicReadCount {

@@ -13,6 +13,9 @@ import org.springframework.data.repository.query.Param;
  */
 public interface ArticleRepository extends Repository<Article, Long> {
 
+	/** 해당 기사가 존재하는지 확인한다. (열람 기록 저장 전 대상 검증용) */
+	boolean existsById(Long articleId);
+
 	/** articleId 목록으로 기사를 언론사와 함께(JOIN FETCH) 조회한다. */
 	@Query("SELECT a FROM Article a JOIN FETCH a.organization WHERE a.articleId IN :articleIds")
 	List<Article> findAllWithOrganizationByArticleIdIn(@Param("articleIds") Collection<Long> articleIds);
