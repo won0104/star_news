@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -118,21 +119,34 @@ class UserKnowledgeNodeRepositoryTest {
 				.containsExactlyInAnyOrder("한국은행", "기준금리 동결");
 	}
 
+	private UserKnowledgeNode rowWithCounts(long userId, NodeType nodeType, String nodeId, String label,
+			String topicCode, int readCount, int clickCount, LocalDateTime now) {
+		UserKnowledgeNode node = UserKnowledgeNode.forFirstClick(
+				id(userId, nodeType, nodeId), label, topicCode, now);
+		ReflectionTestUtils.setField(node, "readArticleCount", readCount);
+		ReflectionTestUtils.setField(node, "nodeClickCount", clickCount);
+		return node;
+	}
+
 	@Test
-	void findByUserId는_토픽에_상관없이_해당_사용자의_모든_개인_Node를_반환한다() {
+	void countExploredNodesByTopic는_클릭수가_0보다_큰_Node만_Topic별로_센다() {
 		LocalDateTime now = LocalDateTime.of(2024, 5, 25, 5, 20);
-		entityManager.persist(UserKnowledgeNode.forFirstClick(
-				id(1L, NodeType.ENTITY, "00000024-0920-4000-8000-000000000001"), "한국은행", null, now));
-		entityManager.persist(UserKnowledgeNode.forFirstClick(
-				id(1L, NodeType.EVENT, "00000020-0920-4000-8000-000000000001"), "기준금리 동결", "ECONOMY", now));
-		entityManager.persist(UserKnowledgeNode.forFirstClick(
-				id(2L, NodeType.ENTITY, "00000024-0920-4000-8000-000000000002"), "다른 유저 노드", "ECONOMY", now));
+		entityManager.persist(rowWithCounts(1L, NodeType.ENTITY, "e1", "한국은행", "ECONOMY", 0, 1, now));
+		entityManager.persist(rowWithCounts(1L, NodeType.EVENT, "ev1", "기준금리 동결", "ECONOMY", 0, 2, now));
+		entityManager.persist(rowWithCounts(1L, NodeType.EVENT, "ev2", "클릭안함", "ECONOMY", 0, 0, now));
+		entityManager.persist(rowWithCounts(1L, NodeType.EVENT, "ev3", "다른토픽", "SOCIETY", 0, 1, now));
+		entityManager.persist(rowWithCounts(1L, NodeType.STATEMENT, "s1", "토픽없음", null, 0, 1, now));
+		entityManager.persist(rowWithCounts(2L, NodeType.ENTITY, "e2", "다른사용자", "ECONOMY", 0, 1, now));
 		entityManager.flush();
 		entityManager.clear();
 
-		List<UserKnowledgeNode> found = userKnowledgeNodeRepository.findByUserId(1L);
+		List<UserKnowledgeNodeRepository.TopicNodeCount> counts = userKnowledgeNodeRepository
+				.countExploredNodesByTopic(1L, List.of(NodeType.EVENT, NodeType.ENTITY, NodeType.STATEMENT));
 
-		assertThat(found).extracting(UserKnowledgeNode::getNodeLabel)
-				.containsExactlyInAnyOrder("한국은행", "기준금리 동결");
+		assertThat(counts).hasSize(2);
+		assertThat(counts).filteredOn(c -> c.getTopicCode().equals("ECONOMY"))
+				.singleElement().satisfies(c -> assertThat(c.getCount()).isEqualTo(2));
+		assertThat(counts).filteredOn(c -> c.getTopicCode().equals("SOCIETY"))
+				.singleElement().satisfies(c -> assertThat(c.getCount()).isEqualTo(1));
 	}
 }
