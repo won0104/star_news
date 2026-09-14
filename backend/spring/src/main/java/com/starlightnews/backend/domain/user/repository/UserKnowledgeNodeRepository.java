@@ -24,14 +24,39 @@ public interface UserKnowledgeNodeRepository
 	UserKnowledgeNode save(UserKnowledgeNode userKnowledgeNode);
 
 	/**
-	 * 해당 Row 가 있으면 node_click_count 를 1 늘리고 last_seen_at 을 갱신한다.
-	 * 반환값은 갱신된 행 수(있으면 1, 없으면 0)이며, 0 이면 호출 측이 새 Row 를 만든다.
+	 * 해당 개인 Node 가 이미 있는지 확인한다. 잠금을 잡지 않는 일반 조회다.
+	 * 없는 행에 UPDATE 를 먼저 쳐서 존재 여부를 알아내면 InnoDB 갭 락이 걸려 동시 첫 클릭이 데드락 난다.
+	 */
+	boolean existsById(UserKnowledgeNodeId id);
+
+	/**
+	 * 이미 있는 Row 의 node_click_count 를 1 늘리고 last_seen_at 을 갱신한다.
+	 * 존재를 확인한 뒤에만 호출한다. (없는 행에 치면 갭 락이 걸린다)
 	 */
 	@Modifying
 	@Query("UPDATE UserKnowledgeNode u "
 			+ "SET u.nodeClickCount = u.nodeClickCount + 1, u.lastSeenAt = :now "
 			+ "WHERE u.id = :id")
 	int incrementClick(@Param("id") UserKnowledgeNodeId id, @Param("now") LocalDateTime now);
+
+	/**
+	 * 없던 개인 Node 를 첫 클릭으로 만든다. node_click_count=1, read_article_count=0.
+	 * 동시에 같은 Node 로 첫 클릭이 들어와 이미 만들어졌으면 클릭 수만 1 늘린다.
+	 *
+	 * <p>INSERT 를 시도하고 제약 위반을 예외로 잡아 되돌리는 방식은 쓰지 않는다.
+	 * 위반이 commit 시점에 나서 서비스의 try/catch 로는 잡히지 않기 때문이다.
+	 */
+	@Modifying
+	@Query(value = "INSERT INTO user_knowledge_nodes "
+			+ "(user_id, node_type, node_id, node_label, topic_code, "
+			+ " read_article_count, node_click_count, first_seen_at, last_seen_at) "
+			+ "VALUES (:userId, :nodeType, :nodeId, :nodeLabel, :topicCode, 0, 1, :now, :now) "
+			+ "ON DUPLICATE KEY UPDATE "
+			+ " node_click_count = node_click_count + 1, last_seen_at = :now",
+			nativeQuery = true)
+	int upsertClick(@Param("userId") Long userId, @Param("nodeType") String nodeType,
+			@Param("nodeId") String nodeId, @Param("nodeLabel") String nodeLabel,
+			@Param("topicCode") String topicCode, @Param("now") LocalDateTime now);
 
 	/**
 	 * 기사 열람으로 얻은 개인 Node 를 한 문장으로 저장하거나 갱신한다.
