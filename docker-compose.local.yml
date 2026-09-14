@@ -4,8 +4,6 @@
 #   실행:   docker compose -f docker-compose.local.yml up -d
 #   중지:   docker compose -f docker-compose.local.yml down          (데이터 유지)
 #   초기화: docker compose -f docker-compose.local.yml down -v       (볼륨까지 삭제)
-#
-# 이걸 켜면 SSH 터널 없이 로컬에서 Spring(local 프로파일)을 돌릴 수 있다.
 
 name: s15p21e206-local
 

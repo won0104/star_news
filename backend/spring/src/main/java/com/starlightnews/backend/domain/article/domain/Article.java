@@ -2,8 +2,11 @@ package com.starlightnews.backend.domain.article.domain;
 
 import java.time.LocalDateTime;
 
+import com.starlightnews.backend.global.enums.AnalysisStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -51,13 +54,24 @@ public class Article {
 	@Column(name = "node_id", length = 36)
 	private String nodeId;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "analysis_status", nullable = false, length = 32)
+	private AnalysisStatus analysisStatus;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")
 	private NewsOrganization organization;
 
 	public Article(String title, LocalDateTime publishedAt, NewsOrganization organization) {
+		this(title, publishedAt, organization, null, AnalysisStatus.PROCESSING);
+	}
+
+	public Article(String title, LocalDateTime publishedAt, NewsOrganization organization,
+			String summary, AnalysisStatus analysisStatus) {
 		this.title = title;
 		this.publishedAt = publishedAt;
 		this.organization = organization;
+		this.summary = summary;
+		this.analysisStatus = analysisStatus;
 	}
 }
