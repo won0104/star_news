@@ -37,7 +37,7 @@ ai/
 │   ├── models/               # 래퍼만 (로드/추론)
 │   │   ├── kpf_classifier.py # Topic용 대/소/지역 분류
 │   │   ├── kg_extractor.py   # ArticleLocalKGPipeline (HF 번들)
-│   │   └── event_embedder.py # jhgan/ko-sroberta-multitask
+│   │   └── event_embedder.py # nlpai-lab/KURE-v1 (server volume, 1024-d)
 │   ├── adapter/
 │   │   └── neo4j_schema.py   # V2 KG + Topic + embedding → 서비스 스키마 JSON
 │   └── contracts/
@@ -66,7 +66,7 @@ return result  # 또는 AnalyzeResponse.model_validate(result)
   → (1) preprocess          본문 정리 (기존 test_pipeline과 동일 계열)
   → (2) KPF classify        big/small/region → Topic 힌트 ("경제" 등)
   → (3) KG extract          HF ArticleLocalKGPipeline (public v2)
-  → (4) Event embed         각 EVENT 문장 → 768-d 벡터
+  → (4) Event embed         각 EVENT 문장 → 1024-d 벡터 (KURE-v1)
   → (5) schema adapter      서비스 Neo4j에 가까운 nodes/edges JSON
   → 반환 dict
 ```
@@ -75,7 +75,7 @@ return result  # 또는 AnalyzeResponse.model_validate(result)
 |------|-------------|------|
 | 분류 | `KPF/KPF-bert-cls1/2/3` + `jinmang2/kpfbert` | Topic 문자열(대분류 `nameKo`) |
 | KG | `sysy9292/kf-deberta-base-kg-extractor` V2 + base `kakaobank/kf-deberta-base` | 5종 노드 · 7종 엣지 |
-| 임베딩 | `jhgan/ko-sroberta-multitask` | Event당 `embedding` / `embeddingModel` |
+| 임베딩 | `nlpai-lab/KURE-v1` (volume) | Event당 `embedding` / `embeddingModel` (1024-d) |
 
 KG 공식 공개 엣지(모델 카드):  
 `COVERS`, `CONTAINS_STATEMENT`, `MENTIONS`, `ACTOR`, `TARGET`, `PLACE`, `OCCURRED_ON`  
@@ -122,8 +122,8 @@ FastAPI → AI 코어로 넘길 최소 필드.
   "warnings": [],
   "meta": {
     "kg_schema_version": "articlelocal-kg-public-v2",
-    "embedding_model": "jhgan/ko-sroberta-multitask",
-    "embedding_dim": 768,
+    "embedding_model": "nlpai-lab/KURE-v1",
+    "embedding_dim": 1024,
     "device": "cpu"
   }
 }
@@ -176,9 +176,24 @@ FastAPI → AI 코어로 넘길 최소 필드.
 
 ### 5.4 Event 임베딩
 
-- 차원: **768**, L2 정규화 예정 (`normalize_embeddings=True`)
+- 모델: **`nlpai-lab/KURE-v1`** (서버 `ai-cpu-models` 캐시와 동일)
+- 차원: **1024**, L2 정규화 (`normalize_embeddings=True`)
 - property: `embedding: number[]`, `embeddingModel: string`
-- 용도: 적재·이후 유사 검색. **AI 단건 API 안에서 교차 기사 병합하지 않음**
+- `HF` 캐시는 분류/KG와 같은 `hf_cache`(` /models/cache/hub`)를 사용한다
+- **LOCAL_EVENT는 노드/임베딩 대상에서 제외** (V2 public kind = `EVENT`만)
+- 용도: 적재·이후 유사 검색. 단건 API 안에서 교차 기사 병합하지 않음
+
+### 5.5 Entity / Time 주의
+
+- `PERSON` → `Entity:Person`, `LOCATION` → `Entity:Location`
+- `ORGANIZATION` → `Entity`만 + `entityType=ORGANIZATION` (Company/GovernmentAgency 세분은 적재·후처리)
+- Time: `value`/`granularity` 외에 **`timeKey`를 value로 채움** (UNIQUE 제약용)
+
+### 5.6 없는 것
+
+- `PUBLISHED_BY` — Spring
+- KLUE-RE 등 별도 Relation 모델 — **없음**. Role/관계는 KG 번들 엣지에만 의존
+- `ASSERTED_BY` / `ABOUT` / `CAUSES` — KG 릴리스 NOT_RUN
 
 ---
 
@@ -217,8 +232,8 @@ AI 코어 완성 전에도 schemas만 먼저 맞춰 두면 연동이 수월하�
 | `HF_HUB_OFFLINE` | `1` 권장 (서버) | 재다운로드 금지 |
 | `STARLIGHT_AI_DEVICE` | `cpu` / `cuda` / `auto` | 서버는 `cpu` |
 
-임베딩 모델도 volume 캐시에 미리 받아 둔다 (`jhgan/ko-sroberta-multitask`).  
-`requirements-cpu.txt`에 `sentence-transformers` 추가 예정.
+임베딩 모델은 volume의 `nlpai-lab/KURE-v1`을 쓴다. 오버라이드: `STARLIGHT_EMBEDDING_MODEL`.
+
 
 ---
 

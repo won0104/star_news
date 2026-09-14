@@ -58,9 +58,24 @@ def test_adapt_maps_v2_kinds_and_embedding():
                 "properties": {"text": "정부가 정책을 발표했다"},
             },
             {
+                "node_id": "LEVT-1",
+                "kind": "LOCAL_EVENT",
+                "properties": {"text": "정부가 정책을 발표했다"},
+            },
+            {
                 "node_id": "ENT-1",
                 "kind": "ENTITY",
                 "properties": {"canonical_name": "정부", "entity_type": "ORGANIZATION"},
+            },
+            {
+                "node_id": "ENT-2",
+                "kind": "ENTITY",
+                "properties": {"canonical_name": "김씨", "entity_type": "PERSON"},
+            },
+            {
+                "node_id": "TIME-1",
+                "kind": "TIME",
+                "properties": {"normalized_value": "2026-09-08", "granularity": "DAY"},
             },
             {
                 "node_id": "STP-1",
@@ -96,6 +111,12 @@ def test_adapt_maps_v2_kinds_and_embedding():
                 "source_id": "EVT-1",
                 "target_id": "ENT-1",
             },
+            {
+                "edge_id": "e5",
+                "edge_type": "OCCURRED_ON",
+                "source_id": "EVT-1",
+                "target_id": "TIME-1",
+            },
         ],
     }
     emb = {"EVT-1": [0.1, 0.2, 0.3]}
@@ -104,18 +125,22 @@ def test_adapt_maps_v2_kinds_and_embedding():
         kg=kg,
         classification={"big_cls": "경제", "small_cls": "x", "region_cls": "y", "topic": "경제"},
         event_embeddings=emb,
-        embedding_model="jhgan/ko-sroberta-multitask",
+        embedding_model="nlpai-lab/KURE-v1",
         embedding_dim=3,
     )
     assert out["schema_version"] == "starlight-article-analyze-v1"
     assert out["classification"]["topic"] == "경제"
-    labels = {tuple(n["labels"]) for n in out["nodes"]}
-    assert ("Article",) in labels or any("Article" in n["labels"] for n in out["nodes"])
+    assert not any(n["properties"]["nodeId"] == "LEVT-1" for n in out["nodes"])
     event = next(n for n in out["nodes"] if "Event" in n["labels"])
     assert event["properties"]["title"] == "정부가 정책을 발표했다"
     assert event["properties"]["embedding"] == [0.1, 0.2, 0.3]
-    entity = next(n for n in out["nodes"] if "Entity" in n["labels"])
-    assert "Organization" in entity["labels"]
+    org = next(n for n in out["nodes"] if n["properties"].get("canonicalName") == "정부")
+    assert org["labels"] == ["Entity"]
+    assert org["properties"]["entityType"] == "ORGANIZATION"
+    person = next(n for n in out["nodes"] if n["properties"].get("canonicalName") == "김씨")
+    assert "Person" in person["labels"]
+    time_n = next(n for n in out["nodes"] if "Time" in n["labels"])
+    assert time_n["properties"]["timeKey"] == "2026-09-08"
     edge_types = {e["type"] for e in out["edges"]}
     assert "CONTAINS_STATEMENT" in edge_types
     assert "MEMBER_OF_EVENT" not in edge_types

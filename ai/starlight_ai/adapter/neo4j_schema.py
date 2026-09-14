@@ -7,12 +7,11 @@ from typing import Any
 
 ENTITY_TYPE_LABEL: dict[str, str] = {
     "PERSON": "Person",
-    "ORGANIZATION": "Organization",
     "LOCATION": "Location",
     "COMPANY": "Company",
     "GOVERNMENT_AGENCY": "GovernmentAgency",
     "NEWS_ORGANIZATION": "NewsOrganization",
-    "PRODUCT": "Product",
+    # ORGANIZATION / PRODUCT: Entity only + entityType; loader may refine.
 }
 
 PUBLIC_EDGE_TYPES = {
@@ -27,6 +26,8 @@ PUBLIC_EDGE_TYPES = {
 
 # V1 leftovers still seen in some local bundles — drop for service schema.
 DROP_EDGE_TYPES = {"MEMBER_OF_EVENT", "SAME_EVENT"}
+# EventMention layer — not a Neo4j Event (V2 public kind is EVENT only).
+DROP_NODE_KINDS = {"LOCAL_EVENT"}
 
 
 def _prop(node: dict[str, Any]) -> dict[str, Any]:
@@ -58,6 +59,16 @@ def _time_labels(granularity: str | None) -> list[str]:
     if secondary:
         labels.append(secondary)
     return labels
+
+
+def _time_key(value: str | None, granularity: str | None, existing: Any) -> str | None:
+    if existing:
+        return str(existing)
+    if not value:
+        return None
+    text = str(value).strip()
+    # Prefer ISO-like normalized values as timeKey (matches UNIQUE constraint usage).
+    return text or None
 
 
 def _article_node_id(article: dict[str, Any], kg_nodes: list[dict[str, Any]]) -> str:
@@ -96,6 +107,10 @@ def adapt_to_schema(
         if not nid:
             continue
 
+        if kind in DROP_NODE_KINDS:
+            warnings.append(f"dropped_local_event:{nid}")
+            continue
+
         if kind == "ARTICLE":
             has_article = True
             out_props: dict[str, Any] = {
@@ -113,7 +128,7 @@ def adapt_to_schema(
             seen_ids.add(nid)
             continue
 
-        if kind in {"EVENT", "LOCAL_EVENT"}:
+        if kind == "EVENT":
             title = _display_text(props, "canonical_text", "text", "name", "title")
             out_props = {
                 "nodeId": nid,
@@ -144,9 +159,12 @@ def adapt_to_schema(
 
         if kind in {"ENTITY", "LOCAL_ENTITY"}:
             et = props.get("entity_type") or props.get("entityType")
+            et_str = str(et) if et else None
+            if et_str and et_str.upper() == "ORGANIZATION":
+                warnings.append(f"entity_type_ORGANIZATION_unrefined:{nid}")
             nodes_out.append(
                 {
-                    "labels": _entity_labels(str(et) if et else None),
+                    "labels": _entity_labels(et_str),
                     "properties": {
                         "nodeId": nid,
                         "canonicalName": _display_text(
@@ -159,8 +177,6 @@ def adapt_to_schema(
             seen_ids.add(nid)
             continue
 
-        # Bundle may already split Person/Organization/Location as kind-like labels
-        # via properties only; also accept label field from hole wrappers.
         label = node.get("label")
         if label in {"Person", "Organization", "Location", "Entity"} and kind not in {
             "TIME",
@@ -171,15 +187,19 @@ def adapt_to_schema(
             et = props.get("entity_type") or props.get("type") or (
                 label.upper() if label != "Entity" else None
             )
+            et_str = str(et) if et else None
+            if label == "Organization" and (not et_str or et_str.upper() == "ORGANIZATION"):
+                et_str = "ORGANIZATION"
+                warnings.append(f"entity_type_ORGANIZATION_unrefined:{nid}")
             nodes_out.append(
                 {
-                    "labels": _entity_labels(str(et) if et else None),
+                    "labels": _entity_labels(et_str),
                     "properties": {
                         "nodeId": nid,
                         "canonicalName": _display_text(
                             props, "canonical_name", "name", "text"
                         ),
-                        "entityType": et,
+                        "entityType": et_str or et,
                     },
                 }
             )
@@ -193,14 +213,24 @@ def adapt_to_schema(
                 or props.get("value")
                 or _display_text(props, "text", "name")
             )
+            time_key = _time_key(
+                str(value) if value else None,
+                str(gran) if gran else None,
+                props.get("timeKey") or props.get("time_key"),
+            )
             out_props = {
                 "nodeId": nid,
                 "value": value,
                 "granularity": gran,
             }
-            if props.get("timeKey") or props.get("time_key"):
-                out_props["timeKey"] = props.get("timeKey") or props.get("time_key")
-            nodes_out.append({"labels": _time_labels(str(gran) if gran else None), "properties": out_props})
+            if time_key:
+                out_props["timeKey"] = time_key
+            nodes_out.append(
+                {
+                    "labels": _time_labels(str(gran) if gran else None),
+                    "properties": out_props,
+                }
+            )
             seen_ids.add(nid)
             continue
 

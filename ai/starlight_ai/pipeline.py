@@ -80,6 +80,7 @@ class ArticleAnalyzer:
             self._embedder = EventEmbedder(
                 self.embedding_model,
                 device=self.device,
+                cache_folder=str(self.hf_cache),
             )
         return self._embedder
 
@@ -104,13 +105,14 @@ class ArticleAnalyzer:
         kg = self._ensure_kg().run(work)
 
         event_embeddings: dict[str, list[float]] = {}
-        emb_dim = 768
+        emb_dim = 1024
         emb_model = self.embedding_model
         if self.enable_embedding:
+            # Public ontology: EVENT only (LOCAL_EVENT = mention layer, not Neo4j).
             events = [
                 n
                 for n in (kg.get("nodes") or [])
-                if str(n.get("kind") or "").upper() in {"EVENT", "LOCAL_EVENT"}
+                if str(n.get("kind") or "").upper() == "EVENT"
             ]
             texts = [_event_text(n) for n in events]
             ids = [str(n.get("node_id") or n.get("id")) for n in events]

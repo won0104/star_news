@@ -19,16 +19,18 @@ GPU는 없다. 모델 가중치는 Git/이미지에 넣지 않고 volume에만 �
 
 ```text
 ai-cpu-models (/models)
-├── artifacts/kg-extractor/   # KG 번들 (config, runtime, weights…)
+├── artifacts/kg-extractor/   # 팀원 HF 번들 (sysy9292/… heads·config·runtime)
 └── cache/hub/                # HF hub 캐시 (models--*)
-    ├── models--kakaobank--kf-deberta-base
+    ├── models--kakaobank--kf-deberta-base   # 번들용 동결 backbone (번들에 미포함)
     ├── models--jinmang2--kpfbert
     ├── models--KPF--KPF-bert-cls1
     ├── models--KPF--KPF-bert-cls2
-    └── models--KPF--KPF-bert-cls3
+    ├── models--KPF--KPF-bert-cls3
+    └── models--nlpai-lab--KURE-v1           # Event 임베딩 (1024-d)
 ```
 
-디스크 합계 약 **6.1GB**. 추론은 `HF_HUB_OFFLINE=1` / `local_files_only`로 **재다운로드하지 않는다**.
+`kakaobank/kf-deberta-base`는 팀원 KG의 **베이스**이지, 기사 KG 추출기 자체가 아니다.  
+Event 임베딩 기본 모델은 **서버 volume의 `nlpai-lab/KURE-v1`(1024-d)** 이다.
 
 ### 이미지 빌드
 
