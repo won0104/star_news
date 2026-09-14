@@ -105,4 +105,28 @@ class UserNodeFavoriteRepositoryTest {
 		assertThat(rows).extracting(UserNodeFavoriteRepository.NodeFavoriteRow::getNodeId)
 				.containsExactly(higherId, eventId);
 	}
+
+	@Test
+	void 복합키_목록으로_즐겨찾기를_조회하고_선택한_항목만_삭제한다() {
+		UserNodeFavoriteId entityId = new UserNodeFavoriteId(
+				1L, NodeType.ENTITY, "00000000-0000-0000-0000-000000000001");
+		UserNodeFavoriteId eventId = new UserNodeFavoriteId(
+				1L, NodeType.EVENT, "00000000-0000-0000-0000-000000000002");
+		repository.saveAll(List.of(
+				new UserNodeFavorite(entityId, LocalDateTime.of(2026, 9, 14, 9, 0)),
+				new UserNodeFavorite(eventId, LocalDateTime.of(2026, 9, 14, 10, 0))));
+		repository.flush();
+		entityManager.clear();
+
+		assertThat(repository.findAllById(List.of(entityId, eventId)))
+				.extracting(UserNodeFavorite::getId)
+				.containsExactlyInAnyOrder(entityId, eventId);
+
+		repository.deleteAllByIdInBatch(List.of(eventId));
+		repository.flush();
+		entityManager.clear();
+
+		assertThat(repository.existsById(entityId)).isTrue();
+		assertThat(repository.existsById(eventId)).isFalse();
+	}
 }

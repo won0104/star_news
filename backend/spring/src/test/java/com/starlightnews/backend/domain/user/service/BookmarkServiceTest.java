@@ -12,11 +12,16 @@ import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.graph.exception.GraphErrorCode;
 import com.starlightnews.backend.domain.user.domain.User;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
+import com.starlightnews.backend.domain.user.domain.UserNodeFavorite;
+import com.starlightnews.backend.domain.user.domain.UserNodeFavoriteId;
 import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.NodeBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest.ArticleBookmarkChange;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksRequest;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksRequest.NodeBookmarkChange;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksResponse;
 import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository.ArticleBookmarkRow;
@@ -28,7 +33,6 @@ import com.starlightnews.backend.domain.user.repository.UserNodeFavoriteReposito
 import com.starlightnews.backend.domain.user.support.ArticleBookmarkCursor;
 import com.starlightnews.backend.domain.user.support.NodeBookmarkCursor;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
-import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.response.CursorResponse;
@@ -347,8 +351,154 @@ class BookmarkServiceTest {
 								.isEqualTo(GraphErrorCode.GRAPH_NODE_QUERY_FAILED));
 	}
 
+	@Test
+	void Node등록과_해제를_한_요청에서_최종상태로_반영하고_요청순서대로_응답한다() {
+		String entityId = "00000000-0000-0000-0000-000000000001";
+		String eventId = "00000000-0000-0000-0000-000000000002";
+		String storyId = "00000000-0000-0000-0000-000000000003";
+		String statementId = "00000000-0000-0000-0000-000000000004";
+		UpdateNodeBookmarksRequest request = nodeRequest(
+				new NodeBookmarkChange(" entity ", " " + entityId + " ", true),
+				new NodeBookmarkChange("EVENT", eventId, false),
+				new NodeBookmarkChange("STORY", storyId, true),
+				new NodeBookmarkChange("STATEMENT", statementId, false));
+		given(nodeSnapshotRepository.findNames(NodeType.ENTITY, List.of(entityId)))
+				.willReturn(List.of(new NodeName(entityId, "한국은행")));
+		given(nodeSnapshotRepository.findNames(NodeType.EVENT, List.of(eventId)))
+				.willReturn(List.of(new NodeName(eventId, "기준금리 동결")));
+		given(nodeSnapshotRepository.findNames(NodeType.STORY, List.of(storyId)))
+				.willReturn(List.of(new NodeName(storyId, "금리 흐름")));
+		given(nodeSnapshotRepository.findNames(NodeType.STATEMENT, List.of(statementId)))
+				.willReturn(List.of(new NodeName(statementId, "통화정책 발언")));
+		List<UserNodeFavoriteId> requestedIds = List.of(
+				new UserNodeFavoriteId(USER_ID, NodeType.ENTITY, entityId),
+				new UserNodeFavoriteId(USER_ID, NodeType.EVENT, eventId),
+				new UserNodeFavoriteId(USER_ID, NodeType.STORY, storyId),
+				new UserNodeFavoriteId(USER_ID, NodeType.STATEMENT, statementId));
+		given(userNodeFavoriteRepository.findAllById(requestedIds))
+				.willReturn(List.of(
+						new UserNodeFavorite(requestedIds.get(0), LocalDateTime.now()),
+						new UserNodeFavorite(requestedIds.get(1), LocalDateTime.now())));
+
+		UpdateNodeBookmarksResponse response = bookmarkService.updateNodeBookmarks(USER_ID, request);
+
+		assertThat(response.results())
+				.extracting(result -> result.nodeType() + ":" + result.nodeId() + ":" + result.bookmarked())
+				.containsExactly(
+						"ENTITY:" + entityId + ":true",
+						"EVENT:" + eventId + ":false",
+						"STORY:" + storyId + ":true",
+						"STATEMENT:" + statementId + ":false");
+		verify(userNodeFavoriteRepository).saveAll(org.mockito.ArgumentMatchers.argThat(favorites -> {
+			List<UserNodeFavoriteId> savedIds = StreamSupport.stream(favorites.spliterator(), false)
+					.map(UserNodeFavorite::getId)
+					.toList();
+			return savedIds.equals(List.of(requestedIds.get(2)));
+		}));
+		verify(userNodeFavoriteRepository).deleteAllByIdInBatch(List.of(requestedIds.get(1)));
+	}
+
+	@Test
+	void Node변경의_빈_changes는_EMPTY_CHANGES이고_저장소를_조회하지_않는다() {
+		assertThatThrownBy(() -> bookmarkService.updateNodeBookmarks(
+				USER_ID, new UpdateNodeBookmarksRequest(List.of())))
+				.isInstanceOfSatisfying(BusinessException.class,
+						exception -> assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.EMPTY_CHANGES));
+
+		verifyNoInteractions(userNodeFavoriteRepository, nodeSnapshotRepository);
+	}
+
+	@Test
+	void Node변경에_지원하지_않는_유형이_있으면_INVALID_NODE_TYPE이다() {
+		UpdateNodeBookmarksRequest request = nodeRequest(new NodeBookmarkChange(
+				"CONCEPT", "00000000-0000-0000-0000-000000000001", true));
+
+		assertThatThrownBy(() -> bookmarkService.updateNodeBookmarks(USER_ID, request))
+				.isInstanceOfSatisfying(BusinessException.class,
+						exception -> assertThat(exception.getErrorCode())
+								.isEqualTo(GraphErrorCode.INVALID_NODE_TYPE));
+
+		verifyNoInteractions(userNodeFavoriteRepository, nodeSnapshotRepository);
+	}
+
+	@Test
+	void Node유형과_ID가_정규화후_중복이면_DUPLICATED_NODE_CHANGE이다() {
+		String nodeId = "00000000-0000-0000-0000-000000000001";
+		UpdateNodeBookmarksRequest request = nodeRequest(
+				new NodeBookmarkChange("entity", nodeId, true),
+				new NodeBookmarkChange(" ENTITY ", " " + nodeId + " ", false));
+
+		assertThatThrownBy(() -> bookmarkService.updateNodeBookmarks(USER_ID, request))
+				.isInstanceOfSatisfying(BusinessException.class,
+						exception -> assertThat(exception.getErrorCode())
+								.isEqualTo(UserErrorCode.DUPLICATED_NODE_CHANGE));
+
+		verifyNoInteractions(userNodeFavoriteRepository, nodeSnapshotRepository);
+	}
+
+	@Test
+	void Node변경대상_중_Neo4j에_없는_Node가_있으면_NODE_NOT_FOUND이다() {
+		String entityId = "00000000-0000-0000-0000-000000000001";
+		String eventId = "00000000-0000-0000-0000-000000000002";
+		UpdateNodeBookmarksRequest request = nodeRequest(
+				new NodeBookmarkChange("ENTITY", entityId, true),
+				new NodeBookmarkChange("EVENT", eventId, false));
+		given(nodeSnapshotRepository.findNames(NodeType.ENTITY, List.of(entityId)))
+				.willReturn(List.of(new NodeName(entityId, "한국은행")));
+		given(nodeSnapshotRepository.findNames(NodeType.EVENT, List.of(eventId)))
+				.willReturn(List.of());
+
+		assertThatThrownBy(() -> bookmarkService.updateNodeBookmarks(USER_ID, request))
+				.isInstanceOfSatisfying(BusinessException.class,
+						exception -> assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.NODE_NOT_FOUND));
+
+		verifyNoInteractions(userNodeFavoriteRepository);
+	}
+
+	@Test
+	void Node변경중_Neo4j조회가_실패하면_GRAPH_NODE_QUERY_FAILED이다() {
+		String nodeId = "00000000-0000-0000-0000-000000000001";
+		UpdateNodeBookmarksRequest request = nodeRequest(
+				new NodeBookmarkChange("ENTITY", nodeId, true));
+		given(nodeSnapshotRepository.findNames(NodeType.ENTITY, List.of(nodeId)))
+				.willThrow(new RuntimeException("bolt connection failed"));
+
+		assertThatThrownBy(() -> bookmarkService.updateNodeBookmarks(USER_ID, request))
+				.isInstanceOfSatisfying(BusinessException.class,
+						exception -> assertThat(exception.getErrorCode())
+								.isEqualTo(GraphErrorCode.GRAPH_NODE_QUERY_FAILED));
+
+		verifyNoInteractions(userNodeFavoriteRepository);
+	}
+
+	@Test
+	void Node목표상태가_이미_같으면_쓰기없이_성공한다() {
+		String entityId = "00000000-0000-0000-0000-000000000001";
+		String eventId = "00000000-0000-0000-0000-000000000002";
+		UpdateNodeBookmarksRequest request = nodeRequest(
+				new NodeBookmarkChange("ENTITY", entityId, true),
+				new NodeBookmarkChange("EVENT", eventId, false));
+		given(nodeSnapshotRepository.findNames(NodeType.ENTITY, List.of(entityId)))
+				.willReturn(List.of(new NodeName(entityId, "한국은행")));
+		given(nodeSnapshotRepository.findNames(NodeType.EVENT, List.of(eventId)))
+				.willReturn(List.of(new NodeName(eventId, "기준금리 동결")));
+		given(userNodeFavoriteRepository.findAllById(any()))
+				.willReturn(List.of(new UserNodeFavorite(
+						new UserNodeFavoriteId(USER_ID, NodeType.ENTITY, entityId), LocalDateTime.now())));
+
+		UpdateNodeBookmarksResponse response = bookmarkService.updateNodeBookmarks(USER_ID, request);
+
+		assertThat(response.results()).hasSize(2);
+		verify(userNodeFavoriteRepository, never()).saveAll(any());
+		verify(userNodeFavoriteRepository, never()).deleteAllByIdInBatch(any());
+	}
+
 	private UpdateArticleBookmarksRequest request(ArticleBookmarkChange... changes) {
 		return new UpdateArticleBookmarksRequest(List.of(changes));
+	}
+
+	private UpdateNodeBookmarksRequest nodeRequest(NodeBookmarkChange... changes) {
+		return new UpdateNodeBookmarksRequest(List.of(changes));
 	}
 
 	private NodeFavoriteRow nodeRow(String nodeType, String nodeId, LocalDateTime bookmarkedAt) {

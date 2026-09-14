@@ -7,14 +7,14 @@ import java.util.List;
 import com.starlightnews.backend.domain.user.domain.UserNodeFavorite;
 import com.starlightnews.backend.domain.user.domain.UserNodeFavoriteId;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 /**
- * 사용자 Node 즐겨찾기 조회 (읽기 전용).
+ * 사용자 Node 즐겨찾기 조회 및 변경.
  */
-public interface UserNodeFavoriteRepository extends Repository<UserNodeFavorite, UserNodeFavoriteId> {
+public interface UserNodeFavoriteRepository extends JpaRepository<UserNodeFavorite, UserNodeFavoriteId> {
 
 	/** 즐겨찾기 Node 목록 조회 결과 한 행. */
 	interface NodeFavoriteRow {

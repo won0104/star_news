@@ -4,6 +4,8 @@ import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.NodeBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksRequest;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksResponse;
 import com.starlightnews.backend.domain.user.service.BookmarkService;
 import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.error.ErrorResponse;
@@ -124,5 +126,33 @@ public class BookmarkController {
 	) {
 		return ApiResponse.success(
 				bookmarkService.getNodeBookmarks(user.userId(), nodeType, cursor, size), requestId);
+	}
+
+	@Operation(
+			summary = "Node 즐겨찾기 상태 변경",
+			description = "한 개 또는 여러 Event·Story·Entity·Statement의 즐겨찾기 최종 상태를 변경한다. **Access Token 필요.**")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "변경 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
+					description = "입력값 오류 (code: INVALID_INPUT_VALUE / EMPTY_CHANGES / INVALID_NODE_TYPE / DUPLICATED_NODE_CHANGE)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
+					description = "Access Token 오류 (code: UNAUTHORIZED / INVALID_ACCESS_TOKEN / EXPIRED_ACCESS_TOKEN)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+					description = "사용자 또는 Neo4j Node를 찾을 수 없음 (code: USER_NOT_FOUND / NODE_NOT_FOUND)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",
+					description = "Neo4j 조회 실패 (code: GRAPH_NODE_QUERY_FAILED)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	@PatchMapping("/nodes")
+	public ApiResponse<UpdateNodeBookmarksResponse> updateNodeBookmarks(
+			@Valid @RequestBody UpdateNodeBookmarksRequest request,
+			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
+			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+	) {
+		return ApiResponse.success(
+				bookmarkService.updateNodeBookmarks(user.userId(), request), requestId);
 	}
 }

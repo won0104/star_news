@@ -9,6 +9,9 @@ import com.starlightnews.backend.domain.user.dto.NodeBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse.ArticleBookmarkResult;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksRequest;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksResponse;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksResponse.NodeBookmarkResult;
 import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.service.BookmarkService;
 import com.starlightnews.backend.domain.graph.exception.GraphErrorCode;
@@ -259,6 +262,113 @@ class BookmarkControllerTest {
 				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
 
 		verify(bookmarkService, never()).getNodeBookmarks(anyLong(), any(), any(), anyInt());
+	}
+
+	@Test
+	void Node즐겨찾기_변경_성공시_요청순서의_최종상태와_requestId를_응답한다() throws Exception {
+		String entityId = "00000000-0000-0000-0000-000000000001";
+		String eventId = "00000000-0000-0000-0000-000000000002";
+		given(bookmarkService.updateNodeBookmarks(eq(1L), any(UpdateNodeBookmarksRequest.class)))
+				.willReturn(new UpdateNodeBookmarksResponse(List.of(
+						new NodeBookmarkResult(NodeType.ENTITY, entityId, true),
+						new NodeBookmarkResult(NodeType.EVENT, eventId, false))));
+
+		mockMvc.perform(patch(NODE_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"changes":[
+								  {"nodeType":"ENTITY","nodeId":"%s","bookmarked":true},
+								  {"nodeType":"EVENT","nodeId":"%s","bookmarked":false}
+								]}""".formatted(entityId, eventId)))
+				.andExpect(status().isOk())
+				.andExpect(header().exists(RequestIdFilter.HEADER_NAME))
+				.andExpect(jsonPath("$.data.results[0].nodeType").value("ENTITY"))
+				.andExpect(jsonPath("$.data.results[0].nodeId").value(entityId))
+				.andExpect(jsonPath("$.data.results[0].bookmarked").value(true))
+				.andExpect(jsonPath("$.data.results[1].nodeType").value("EVENT"))
+				.andExpect(jsonPath("$.data.results[1].nodeId").value(eventId))
+				.andExpect(jsonPath("$.data.results[1].bookmarked").value(false))
+				.andExpect(jsonPath("$.meta.requestId").isString());
+
+		verify(bookmarkService).updateNodeBookmarks(eq(1L), any(UpdateNodeBookmarksRequest.class));
+	}
+
+	@Test
+	void Node변경항목의_필드가_누락되거나_공백이면_400_INVALID_INPUT_VALUE이다() throws Exception {
+		mockMvc.perform(patch(NODE_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"changes\":[{\"nodeType\":\"ENTITY\",\"nodeId\":\" \"}]}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+
+		verify(bookmarkService, never()).updateNodeBookmarks(anyLong(), any());
+	}
+
+	@Test
+	void Node변경시_서비스가_EMPTY_CHANGES를_던지면_400이다() throws Exception {
+		given(bookmarkService.updateNodeBookmarks(eq(1L), any(UpdateNodeBookmarksRequest.class)))
+				.willThrow(new BusinessException(UserErrorCode.EMPTY_CHANGES));
+
+		mockMvc.perform(patch(NODE_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"changes\":[]}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("EMPTY_CHANGES"));
+	}
+
+	@Test
+	void Node변경시_서비스가_INVALID_NODE_TYPE을_던지면_400이다() throws Exception {
+		given(bookmarkService.updateNodeBookmarks(eq(1L), any(UpdateNodeBookmarksRequest.class)))
+				.willThrow(new BusinessException(GraphErrorCode.INVALID_NODE_TYPE));
+
+		mockMvc.perform(patch(NODE_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"changes":[{
+								  "nodeType":"CONCEPT",
+								  "nodeId":"00000000-0000-0000-0000-000000000001",
+								  "bookmarked":true
+								}]}"""))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_NODE_TYPE"));
+	}
+
+	@Test
+	void Node변경시_서비스가_NODE_NOT_FOUND를_던지면_404이다() throws Exception {
+		given(bookmarkService.updateNodeBookmarks(eq(1L), any(UpdateNodeBookmarksRequest.class)))
+				.willThrow(new BusinessException(UserErrorCode.NODE_NOT_FOUND));
+
+		mockMvc.perform(patch(NODE_PATH)
+						.header(HttpHeaders.AUTHORIZATION, bearer(1L))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"changes":[{
+								  "nodeType":"ENTITY",
+								  "nodeId":"00000000-0000-0000-0000-000000000001",
+								  "bookmarked":true
+								}]}"""))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("NODE_NOT_FOUND"));
+	}
+
+	@Test
+	void Node즐겨찾기_변경시_인증토큰이_없으면_401_UNAUTHORIZED이다() throws Exception {
+		mockMvc.perform(patch(NODE_PATH)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{"changes":[{
+								  "nodeType":"ENTITY",
+								  "nodeId":"00000000-0000-0000-0000-000000000001",
+								  "bookmarked":true
+								}]}"""))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+
+		verify(bookmarkService, never()).updateNodeBookmarks(anyLong(), any());
 	}
 
 	private String bearer(long userId) {

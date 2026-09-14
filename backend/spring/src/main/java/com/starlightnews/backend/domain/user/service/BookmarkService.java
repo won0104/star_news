@@ -16,12 +16,18 @@ import com.starlightnews.backend.domain.graph.exception.GraphErrorCode;
 import com.starlightnews.backend.domain.user.domain.User;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavorite;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
+import com.starlightnews.backend.domain.user.domain.UserNodeFavorite;
+import com.starlightnews.backend.domain.user.domain.UserNodeFavoriteId;
 import com.starlightnews.backend.domain.user.dto.ArticleBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.NodeBookmarkItem;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksRequest.ArticleBookmarkChange;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse;
 import com.starlightnews.backend.domain.user.dto.UpdateArticleBookmarksResponse.ArticleBookmarkResult;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksRequest;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksRequest.NodeBookmarkChange;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksResponse;
+import com.starlightnews.backend.domain.user.dto.UpdateNodeBookmarksResponse.NodeBookmarkResult;
 import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository.ArticleBookmarkRow;
@@ -161,6 +167,48 @@ public class BookmarkService {
 		return CursorResponse.of(items, hasNext, nextCursor);
 	}
 
+	/** 요청에 포함된 그래프 Node만 목표 즐겨찾기 상태로 변경한다. */
+	@Transactional
+	public UpdateNodeBookmarksResponse updateNodeBookmarks(
+			long userId, UpdateNodeBookmarksRequest request) {
+		List<ParsedNodeChange> changes = parseNodeChanges(request.changes());
+		findActiveUser(userId);
+		validateNodesExist(changes);
+
+		List<UserNodeFavoriteId> requestedIds = changes.stream()
+				.map(change -> new UserNodeFavoriteId(userId, change.nodeType(), change.nodeId()))
+				.toList();
+		Set<UserNodeFavoriteId> currentlyBookmarked = userNodeFavoriteRepository.findAllById(requestedIds)
+				.stream()
+				.map(UserNodeFavorite::getId)
+				.collect(Collectors.toSet());
+		LocalDateTime favoritedAt = LocalDateTime.now(KST);
+		List<UserNodeFavorite> favoritesToAdd = changes.stream()
+				.filter(ParsedNodeChange::bookmarked)
+				.map(change -> new UserNodeFavoriteId(userId, change.nodeType(), change.nodeId()))
+				.filter(id -> !currentlyBookmarked.contains(id))
+				.map(id -> new UserNodeFavorite(id, favoritedAt))
+				.toList();
+		List<UserNodeFavoriteId> favoriteIdsToRemove = changes.stream()
+				.filter(change -> !change.bookmarked())
+				.map(change -> new UserNodeFavoriteId(userId, change.nodeType(), change.nodeId()))
+				.filter(currentlyBookmarked::contains)
+				.toList();
+
+		if (!favoritesToAdd.isEmpty()) {
+			userNodeFavoriteRepository.saveAll(favoritesToAdd);
+		}
+		if (!favoriteIdsToRemove.isEmpty()) {
+			userNodeFavoriteRepository.deleteAllByIdInBatch(favoriteIdsToRemove);
+		}
+
+		List<NodeBookmarkResult> results = changes.stream()
+				.map(change -> new NodeBookmarkResult(
+						change.nodeType(), change.nodeId(), change.bookmarked()))
+				.toList();
+		return new UpdateNodeBookmarksResponse(results);
+	}
+
 	private void validateChanges(List<ArticleBookmarkChange> changes) {
 		if (changes.isEmpty()) {
 			throw new BusinessException(UserErrorCode.EMPTY_CHANGES);
@@ -198,6 +246,53 @@ public class BookmarkService {
 			throw new BusinessException(GraphErrorCode.INVALID_NODE_TYPE);
 		}
 		return nodeType;
+	}
+
+	private List<ParsedNodeChange> parseNodeChanges(List<NodeBookmarkChange> rawChanges) {
+		if (rawChanges.isEmpty()) {
+			throw new BusinessException(UserErrorCode.EMPTY_CHANGES);
+		}
+
+		Set<NodeReference> distinctNodes = new HashSet<>();
+		List<ParsedNodeChange> changes = rawChanges.stream()
+				.map(change -> new ParsedNodeChange(
+						resolveFavoriteNodeType(change.nodeType()),
+						change.nodeId().strip(),
+						change.bookmarked()))
+				.toList();
+		for (ParsedNodeChange change : changes) {
+			NodeReference node = new NodeReference(change.nodeType(), change.nodeId());
+			if (!distinctNodes.add(node)) {
+				throw new BusinessException(UserErrorCode.DUPLICATED_NODE_CHANGE);
+			}
+		}
+		return changes;
+	}
+
+	private void validateNodesExist(List<ParsedNodeChange> changes) {
+		Set<NodeReference> requestedNodes = changes.stream()
+				.map(change -> new NodeReference(change.nodeType(), change.nodeId()))
+				.collect(Collectors.toSet());
+		Map<NodeType, List<String>> idsByType = changes.stream()
+				.collect(Collectors.groupingBy(
+						ParsedNodeChange::nodeType,
+						() -> new java.util.EnumMap<>(NodeType.class),
+						Collectors.mapping(ParsedNodeChange::nodeId, Collectors.toList())));
+		Set<NodeReference> foundNodes = new HashSet<>();
+
+		try {
+			for (Map.Entry<NodeType, List<String>> entry : idsByType.entrySet()) {
+				for (NodeName node : nodeSnapshotRepository.findNames(entry.getKey(), entry.getValue())) {
+					foundNodes.add(new NodeReference(entry.getKey(), node.nodeId()));
+				}
+			}
+		} catch (RuntimeException exception) {
+			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED);
+		}
+
+		if (!foundNodes.equals(requestedNodes)) {
+			throw new BusinessException(UserErrorCode.NODE_NOT_FOUND);
+		}
 	}
 
 	private NodeBookmarkCursor decodeNodeCursor(String rawCursor) {
@@ -254,6 +349,9 @@ public class BookmarkService {
 	}
 
 	private record NodeReference(NodeType nodeType, String nodeId) {
+	}
+
+	private record ParsedNodeChange(NodeType nodeType, String nodeId, boolean bookmarked) {
 	}
 
 	private User findActiveUser(long userId) {
