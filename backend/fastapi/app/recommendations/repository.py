@@ -86,10 +86,8 @@ def find_consumed_events_with_embeddings(session: Session, user_id: int) -> list
         // 유저가 소비한 Event 중 임베딩 있는 것만
         MATCH (u:User {userId: $userId})-[r:CONSUMED]->(e:Event)
         WHERE e.embedding IS NOT NULL
-        
-        // 즐겨찾기 여부(=이 Event를 대상으로 한 INTERESTED_IN도 있는지) 같이 조회
         RETURN e.embedding AS embedding, r.count AS count, r.lastViewedAt AS lastViewedAt,
-               EXISTS { (u)-[:INTERESTED_IN]->(e) } AS isFavorited
+               coalesce(r.eventFavorited, false) AS isFavorited
         """,
         userId=user_id,
     )

@@ -15,6 +15,7 @@ class ConsumedEvent(CamelModel):
     event_id: str
     count: int
     last_viewed_at: datetime
+    event_favorited: bool
 
 
 class UserGraphSyncUser(CamelModel):
