@@ -3,7 +3,6 @@ package com.starlightnews.backend.domain.user.service;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.stream.Collectors;
 
 import com.starlightnews.backend.domain.graph.repository.GraphNeighborRepository;
 import com.starlightnews.backend.domain.graph.repository.NeighborEdge;
+import com.starlightnews.backend.domain.user.cache.ExploredNodeCountCache;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse;
 import com.starlightnews.backend.domain.user.dto.PersonalGraphMapResponse.Edge;
@@ -24,6 +24,7 @@ import com.starlightnews.backend.domain.user.exception.PersonalGraphErrorCode;
 import com.starlightnews.backend.domain.user.repository.ArticleReadRepository;
 import com.starlightnews.backend.domain.user.repository.ArticleReadRepository.TopicReadCount;
 import com.starlightnews.backend.domain.user.repository.UserKnowledgeNodeRepository;
+import com.starlightnews.backend.domain.user.repository.UserKnowledgeNodeRepository.TopicNodeCount;
 import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
@@ -50,18 +51,22 @@ public class PersonalGraphService {
 	private static final Set<NodeType> DISPLAY_TYPES =
 			EnumSet.of(NodeType.EVENT, NodeType.ENTITY, NodeType.STATEMENT);
 
-	/** Topic 별 대표 Node 최대 개수. (요약 조회용) */
-	private static final int REPRESENTATIVE_LIMIT = 5;
+	/** DISPLAY_TYPES 의 문자열 이름. 네이티브 쿼리(findTopRepresentatives)의 IN 절 바인딩용. */
+	private static final Set<String> DISPLAY_TYPE_NAMES = DISPLAY_TYPES.stream()
+			.map(Enum::name)
+			.collect(Collectors.toUnmodifiableSet());
 
-	/** 대표 Node 선정 순서: 중요도 DESC, 읽은 기사 수 DESC, nodeId ASC(동률 시 결과 고정). */
-	private static final Comparator<UserKnowledgeNode> REPRESENTATIVE_ORDER = Comparator
-			.comparingInt(PersonalGraphService::importance).reversed()
-			.thenComparing(Comparator.comparingInt(UserKnowledgeNode::getReadArticleCount).reversed())
-			.thenComparing(row -> row.getId().getNodeId());
+	/**
+	 * Topic 별 대표 Node 최대 개수. (요약 조회용)
+	 * 정렬 기준(중요도 DESC, 읽은 기사 수 DESC, nodeId ASC)은
+	 * {@link UserKnowledgeNodeRepository#findTopRepresentatives} 의 DB 쿼리가 담당한다.
+	 */
+	private static final int REPRESENTATIVE_LIMIT = 5;
 
 	private final UserKnowledgeNodeRepository userKnowledgeNodeRepository;
 	private final ArticleReadRepository articleReadRepository;
 	private final GraphNeighborRepository graphNeighborRepository;
+	private final ExploredNodeCountCache exploredNodeCountCache;
 
 	/**
 	 * 선택한 Topic 의 개인 Node·Edge 스냅샷을 반환한다.
@@ -90,16 +95,20 @@ public class PersonalGraphService {
 
 	/**
 	 * 내 읽기 최초 진입용 요약을 반환한다. 7개 Topic 전부를 Cluster 로 반환하며, 대표 Node(최대
-	 * {@value #REPRESENTATIVE_LIMIT}개)가 없는 Topic 도 sourceArticleCount·weight 0 인 빈 Cluster 로 나온다
+	 * {@value #REPRESENTATIVE_LIMIT}개)가 없는 Topic 도 sourceArticleCount·weight 0 인 빈 Cluster 로 나온다.
+	 * Topic 당 대표 Node 는 DB 에서 바로 상위 {@value #REPRESENTATIVE_LIMIT}개만 받는다 — 사용자의 전체
+	 * 개인 Node 를 애플리케이션으로 끌어와 자바에서 정렬·절단하면 노드가 많은 사용자에서 급격히 느려진다.
 	 */
 	@Transactional(readOnly = true)
 	public PersonalGraphSummaryResponse getSummary(Long userId) {
-		List<UserKnowledgeNode> rows = userKnowledgeNodeRepository.findByUserId(userId).stream()
-				.filter(row -> DISPLAY_TYPES.contains(row.getId().getNodeType()))
-				.filter(row -> row.getTopicCode() != null)
-				.toList();
-
-		Map<String, List<UserKnowledgeNode>> representativesByTopic = groupTopRepresentatives(rows);
+		Map<String, List<UserKnowledgeNode>> representativesByTopic = new LinkedHashMap<>();
+		for (TopicCode topic : TopicCode.values()) {
+			List<UserKnowledgeNode> top = userKnowledgeNodeRepository.findTopRepresentatives(
+					userId, topic.name(), DISPLAY_TYPE_NAMES, REPRESENTATIVE_LIMIT);
+			if (!top.isEmpty()) {
+				representativesByTopic.put(topic.name(), top);
+			}
+		}
 		List<UserKnowledgeNode> allRepresentatives = representativesByTopic.values().stream()
 				.flatMap(List::stream)
 				.toList();
@@ -107,9 +116,13 @@ public class PersonalGraphService {
 		Map<String, Long> readCountByTopic = toReadCountMap(
 				articleReadRepository.countReadArticlesByTopic(userId));
 
-		Map<String, Long> exploredNodeCountByTopic = rows.stream()
-				.filter(row -> row.getNodeClickCount() > 0)
-				.collect(Collectors.groupingBy(UserKnowledgeNode::getTopicCode, Collectors.counting()));
+		Map<String, Long> exploredNodeCountByTopic = exploredNodeCountCache.get(userId)
+				.orElseGet(() -> {
+					Map<String, Long> computed = toCountMap(
+							userKnowledgeNodeRepository.countExploredNodesByTopic(userId, DISPLAY_TYPES));
+					exploredNodeCountCache.put(userId, computed);
+					return computed;
+				});
 		Map<String, Long> engagementByTopic = new LinkedHashMap<>();
 		for (TopicCode topic : TopicCode.values()) {
 			String topicCode = topic.name();
@@ -169,24 +182,14 @@ public class PersonalGraphService {
 				.toList();
 	}
 
-	/** Topic 별로 묶고, 각 Topic 안에서 대표 Node 상위 {@value #REPRESENTATIVE_LIMIT}개만 남긴다. */
-	private Map<String, List<UserKnowledgeNode>> groupTopRepresentatives(List<UserKnowledgeNode> rows) {
-		Map<String, List<UserKnowledgeNode>> byTopic = rows.stream()
-				.collect(Collectors.groupingBy(UserKnowledgeNode::getTopicCode));
-
-		Map<String, List<UserKnowledgeNode>> result = new LinkedHashMap<>();
-		for (Map.Entry<String, List<UserKnowledgeNode>> entry : byTopic.entrySet()) {
-			result.put(entry.getKey(), entry.getValue().stream()
-					.sorted(REPRESENTATIVE_ORDER)
-					.limit(REPRESENTATIVE_LIMIT)
-					.toList());
-		}
-		return result;
-	}
-
 	private Map<String, Long> toReadCountMap(List<TopicReadCount> counts) {
 		return counts.stream()
 				.collect(Collectors.toMap(TopicReadCount::getTopicCode, TopicReadCount::getCount));
+	}
+
+	private Map<String, Long> toCountMap(List<TopicNodeCount> counts) {
+		return counts.stream()
+				.collect(Collectors.toMap(TopicNodeCount::getTopicCode, TopicNodeCount::getCount));
 	}
 
 	/** 주어진 Node 집합 안에서만 Neo4j Edge 를 조회한다. Node 가 없으면 빈 목록. */

@@ -3,6 +3,7 @@ package com.starlightnews.backend.domain.user.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.starlightnews.backend.domain.user.cache.ExploredNodeCountCache;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNodeId;
 import com.starlightnews.backend.domain.user.repository.NodeSnapshot;
@@ -26,6 +27,7 @@ public class GraphNodeClickService {
 
 	private final UserKnowledgeNodeRepository userKnowledgeNodeRepository;
 	private final NodeSnapshotRepository nodeSnapshotRepository;
+	private final ExploredNodeCountCache exploredNodeCountCache;
 
 	@Transactional
 	public void recordClick(Long userId, NodeType nodeType, String nodeKey) {
@@ -33,6 +35,7 @@ public class GraphNodeClickService {
 		LocalDateTime now = LocalDateTime.now();
 
 		if (userKnowledgeNodeRepository.incrementClick(id, now) == 1) {
+			exploredNodeCountCache.evict(userId);
 			return;
 		}
 
@@ -44,6 +47,8 @@ public class GraphNodeClickService {
 			// 동시 첫 클릭으로 다른 요청이 먼저 Row 를 만든 경우: 이제 존재하므로 갱신으로 되돌린다.
 			userKnowledgeNodeRepository.incrementClick(id, now);
 		}
+		// 클릭 수가 바뀌었으니(0→1 첫 클릭 포함) 캐시된 참여도 집계를 지운다. 다음 조회가 다시 계산한다.
+		exploredNodeCountCache.evict(userId);
 	}
 
 	private NodeSnapshot findSnapshotOrThrow(NodeType nodeType, String nodeKey) {
