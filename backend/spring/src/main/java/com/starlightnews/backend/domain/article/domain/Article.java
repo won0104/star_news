@@ -46,6 +46,8 @@ public class Article {
 	private String summary;
 
 	/** Neo4j Article Node 의 nodeId. AI 분석 전이면 null 이라 Neo4j 에 대응 Node 가 없다. */
+	// articles.node_id 는 CHAR(36) 이므로 CHAR 로 매핑한다 (기본 VARCHAR 이면 validate 실패).
+	@JdbcTypeCode(SqlTypes.CHAR)
 	@Column(name = "node_id", length = 36)
 	private String nodeId;
 
