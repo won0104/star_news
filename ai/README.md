@@ -105,15 +105,46 @@ sudo docker run --rm \
 운영 가정(15–30분 주기, 파이프라인 투입 &lt;200건)과도 맞는 편이다.
 긴 기사·동시 요청·KPF+KG 동시 상주는 peak가 더 커질 수 있으니 별도 측정이 필요하다.
 
+## FastAPI 연동 (계약)
+
+AI는 **`ai/` 코어만** 제공한다. FastAPI·Neo4j 적재·`PUBLISHED_BY`는 백엔드 담당.
+
+→ 입출력·역할 분담·체크리스트: **[`FASTAPI_연동.md`](FASTAPI_연동.md)**
+
+### 코어 패키지 (`starlight_ai/`)
+
+```text
+기사 1건
+  → 전처리 → KPF 분류(Topic) → HF KG → Event 임베딩
+  → 스키마형 JSON (nodes/edges + classification.topic + Event.embedding)
+```
+
+- import: `from starlight_ai import ArticleAnalyzer, process_article`
+- **서버는 CPU만** → `STARLIGHT_AI_DEVICE=cpu` (로컬만 `auto`/`cuda`)
+- 단위 테스트: `python -m pytest ai/tests -q` (모델 불필요)
+- 로컬 스모크 예:
+
+```powershell
+cd ai
+$env:STARLIGHT_AI_DEVICE="auto"   # 서버에서는 cpu
+$env:PYTHONPATH="."
+python -m starlight_ai.cli `
+  --kg-dir "C:\Users\SSAFY\Desktop\gnews_api_test\artifacts\kg-extractor" `
+  --hf-cache "C:\Users\SSAFY\Desktop\gnews_api_test\.cache\huggingface\hub" `
+  --input test_pipeline\article.json `
+  --output test_pipeline\starlight_result.json
+```
+
 ## 아직 하지 않은 것
 
 - 본편 `docker-compose.yml`에 AI 서비스 편입
-- Spring / FastAPI / MySQL / Neo4j 파이프라인 연결
-- DB 스키마·코드값 매핑 (KPF 한글 라벨 ↔ `TopicCode` 등)
+- FastAPI `articles/analyze` stub 연결 (FastAPI 담당)
+- Neo4j MERGE (적재 담당)
 - 모델 revision을 `cpu_settings` 수준으로 문서 외 추가 고정 관리
 
 ## 관련 파일
 
+- [`FASTAPI_연동.md`](FASTAPI_연동.md) — FastAPI 담당용 입출력 계약
 - [`Dockerfile`](Dockerfile) — CPU 런타임 이미지
 - [`requirements-cpu.txt`](requirements-cpu.txt) — torch 제외 pip 의존성
 - [`test_pipeline/`](test_pipeline/) — 최소 추론 확인 예제
