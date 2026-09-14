@@ -66,7 +66,7 @@ export function HistoryEventScene() {
 
   const { cluster, story } = context;
   const backTopic = searchParams.get('topic') ?? cluster.topicCode;
-  const backUrl = `/app?view=log&topic=${backTopic}&story=${story.id}`;
+  const backUrl = `/app?view=log&topic=${backTopic}`;
   const rawArticle = event.articles.find((article) => article.id === openArticleId);
   const panelArticle = rawArticle ? {
     id: rawArticle.id,
@@ -89,9 +89,9 @@ export function HistoryEventScene() {
         <section className={`${styles.stage} ${styles[TONE_CLASS[cluster.tone]]}`}>
           <header className={styles.topline}>
             <button type="button" className={styles.back} onClick={() => navigate(backUrl)}>
-              ← {story.title}
+              ← {cluster.topicName} 기록
             </button>
-            <p>{cluster.topicName} · {historyCopy.storyLabel} · {historyCopy.eventLabel}</p>
+            <p>{cluster.topicName} · {historyCopy.eventLabel}</p>
           </header>
 
           <div className={styles.detailGrid}>
@@ -149,8 +149,8 @@ export function HistoryEventScene() {
           <section className={styles.eventRail} aria-labelledby="story-events-title">
             <div className={styles.railHead}>
               <div>
-                <span>{historyCopy.storyLabel}</span>
-                <h2 id="story-events-title">{story.title}의 Event 작품</h2>
+                <span>RELATED EVENTS</span>
+                <h2 id="story-events-title">{cluster.topicName}에서 함께 읽은 Event</h2>
               </div>
               <p>{story.events.length}개 Event</p>
             </div>
