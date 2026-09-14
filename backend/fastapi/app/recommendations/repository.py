@@ -12,6 +12,9 @@ RECENCY_WINDOW_DAYS = 15
 # 콘텐츠 기반 추천(CBF)에서 최종적으로 반환할 유사 Event 개수
 CONTENT_SIMILAR_EVENT_LIMIT = 20
 
+# Cold Start 폴백에서 최종적으로 반환할 Event 개수
+FALLBACK_EVENT_LIMIT = 20
+
 
 # 1. 추천 후보 공통 필터링
 # - 미열람 필터: 본인이 이미 CONSUMED한 Event 제외
@@ -123,3 +126,51 @@ def find_similar_events_by_vector(session: Session, profile_vector: list[float],
         limit=CONTENT_SIMILAR_EVENT_LIMIT,
     )
     return [{"eventId": record["eventId"], "contentScore": record["contentScore"]} for record in result]
+
+
+# 4. Cold Start (CONSUMED 이력 없는 유저) 폴백
+# 판별 - 유저에게 CONSUMED 이력이 하나라도 있는지 확인
+def has_consumption_history(session: Session, user_id: int) -> bool:
+    result = session.run(
+        "MATCH (u:User {userId: $userId}) RETURN EXISTS { (u)-[:CONSUMED]->() } AS hasHistory",
+        userId=user_id,
+    ).single()
+    return bool(result["hasHistory"]) if result else False
+
+
+# 유저가 관심 등록(즐겨찾기)한 Topic 코드 목록 - Cold Start 폴백 범위를 좁히는 데 씀
+def find_user_interested_topics(session: Session, user_id: int) -> list[str]:
+    result = session.run(
+        "MATCH (:User {userId: $userId})-[:INTERESTED_IN]->(t:Topic) RETURN t.topicCode AS topicCode",
+        userId=user_id,
+    )
+    return [record["topicCode"] for record in result]
+
+
+# 인기도 폴백 후보 조회 - Event별 소비한 서로 다른 유저 수(인기도 재료)와 발생 시각.
+# topic_codes가 주어지면 그 Topic으로 분류된 Event만, 비어있으면(=관심 Topic 없음) 전체 Event 대상.
+def find_events_with_consumer_counts(session: Session, topic_codes: list[str]) -> list[dict]:
+    result = session.run(
+        """
+        MATCH (e:Event)
+        WHERE e.occurredAt IS NOT NULL
+          // topicCodes가 None이면 필터 없이 전체 통과, 아니면 그 Topic으로 분류된 Event만
+          AND ($topicCodes IS NULL OR EXISTS {
+              (e)-[:CLASSIFIED_AS]->(t:Topic) WHERE t.topicCode IN $topicCodes
+          })
+
+        // 소비한 유저 없는 Event도 인기도 0으로 포함시켜야 하니 OPTIONAL MATCH
+        OPTIONAL MATCH (e)<-[:CONSUMED]-(consumer:User)
+        RETURN e.nodeId AS eventId, count(DISTINCT consumer) AS uniqueConsumers, e.occurredAt AS occurredAt
+        """,
+        # 빈 리스트를 그대로 넘기면 Cypher의 `IN []`가 항상 거짓이라 아무것도 안 나옴 -> None으로 바꿔서 "필터 없음"으로 취급
+        topicCodes=topic_codes or None,
+    )
+    return [
+        {
+            "eventId": record["eventId"],
+            "uniqueConsumers": record["uniqueConsumers"],
+            "occurredAt": record["occurredAt"].to_native(),
+        }
+        for record in result
+    ]

@@ -5,13 +5,16 @@ from datetime import datetime, timedelta, timezone
 from neo4j import Session
 
 from app.recommendations import repository
-from app.recommendations.schemas import CBFCandidate, CFCandidate
+from app.recommendations.schemas import CBFCandidate, CFCandidate, ScoredEvent
 
 # 최근성 가중치 반감기(일). 이 날짜만큼 지나면 가중치가 절반으로 줄어듦.
 RECENCY_HALF_LIFE_DAYS = 14
 
 # 즐겨찾기한 Event는 가중치를 이만큼 배로 늘림.
 FAVORITE_WEIGHT_MULTIPLIER = 2.0
+
+# 인기도 점수의 최근성 감쇠 반감기(일).
+POPULARITY_HALF_LIFE_DAYS = 3
 
 
 # 관심 기반/관심 확장 추천 최종 계산
@@ -82,3 +85,34 @@ def calculate_cbf_scores(user_id: int, session: Session) -> list[CBFCandidate]:
     return [
         CBFCandidate(event_id=e["eventId"], content_score=e["contentScore"]) for e in similar_events
     ]
+
+
+# 4. Cold Start (CONSUMED 이력 없는 유저) 폴백
+# 인기도 점수 계산 - 많이 볼수록(로그 스케일), 최근 사건일수록(지수 감쇠) 점수 증가. CBF 가중치 계산과 같은 형태.
+def _calculate_popularity_score(unique_consumers: int, occurred_at: datetime, now: datetime) -> float:
+    days_since = max((now - occurred_at).total_seconds() / 86400, 0)
+    decay_rate = math.log(2) / POPULARITY_HALF_LIFE_DAYS
+    # score = log(1 + 소비한_유저수) × exp(-λ × 경과일수)
+    return math.log1p(unique_consumers) * math.exp(-decay_rate * days_since)
+
+
+# 관심 Topic 안에서(또는 없으면 전체에서) 인기도 순으로 Event를 뽑는 Cold Start 폴백
+def get_cold_start_fallback(user_id: int, session: Session) -> list[ScoredEvent]:
+    # 관심 Topic 조회
+    topic_codes = repository.find_user_interested_topics(session, user_id)
+    # 후보 조회 (아직 점수/정렬 없음)
+    candidates = repository.find_events_with_consumer_counts(session, topic_codes)
+
+    # 인기도 점수 계산
+    now = datetime.now(timezone.utc)
+    scored = [
+        ScoredEvent(
+            event_id=c["eventId"],
+            score=_calculate_popularity_score(c["uniqueConsumers"], c["occurredAt"], now),
+        )
+        for c in candidates
+    ]
+
+    # 점수 높은 순 정렬 후 상위 N개만
+    scored.sort(key=lambda s: s.score, reverse=True)
+    return scored[: repository.FALLBACK_EVENT_LIMIT]
