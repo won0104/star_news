@@ -32,13 +32,13 @@ def test_sync_user_graph_creates_user_and_relationships():
                 "consumedEvents": [
                     {
                         "eventId": event_ids[0],
-                        "count": 2,
+                        "eventClickCount": 2,
                         "lastViewedAt": "2024-05-25T05:30:00+09:00",
                         "eventFavorited": True,
                     },
                     {
                         "eventId": event_ids[1],
-                        "count": 1,
+                        "eventClickCount": 1,
                         "lastViewedAt": "2024-05-25T05:31:00+09:00",
                         "eventFavorited": False,
                     },

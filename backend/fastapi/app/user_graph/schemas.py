@@ -13,9 +13,8 @@ class InterestNode(CamelModel):
 # CONSUMED 관계로 반영할 Event별 소비 집계
 class ConsumedEvent(CamelModel):
     event_id: str
-    count: int
+    event_click_count: int
     last_viewed_at: datetime
-    # Spring이 아직 이 필드를 안 보내도 요청이 깨지지 않게 기본값을 둠 (모르면 즐겨찾기 안 한 것으로 취급)
     event_favorited: bool = False
 
 

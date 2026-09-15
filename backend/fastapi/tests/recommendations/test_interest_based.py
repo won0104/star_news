@@ -41,9 +41,9 @@ def _seed_fixture(session):
         MERGE (consumed:Event {nodeId: 'test-final-event-consumed'})
         SET consumed.embedding = $vector, consumed.occurredAt = $recent
         MERGE (target)-[r1:CONSUMED]->(consumed)
-        SET r1.count = 1, r1.lastViewedAt = $recent
+        SET r1.eventClickCount = 1, r1.lastViewedAt = $recent
         MERGE (similar)-[r2:CONSUMED]->(consumed)
-        SET r2.count = 1, r2.lastViewedAt = $recent
+        SET r2.eventClickCount = 1, r2.lastViewedAt = $recent
 
         // similar만 소비 + 비선호 Topic 아님 + 임베딩도 비슷함 -> CF 점수, CBF 점수 둘 다 받아야 함
         MERGE (both:Event {nodeId: 'test-final-event-both'})

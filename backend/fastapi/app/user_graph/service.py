@@ -40,7 +40,7 @@ def _sync_single_user(user, aggregated_at, session: Session) -> bool:
     consumed_payload = [
         {
             "eventId": event.event_id,
-            "count": event.count,
+            "eventClickCount": event.event_click_count,
             "lastViewedAt": event.last_viewed_at,
             "eventFavorited": event.event_favorited,
         }
