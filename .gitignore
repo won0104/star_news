@@ -86,3 +86,7 @@ temp/
 *.tmp
 *.bak
 *.orig
+
+
+# data Log & test Logs
+ai/outputs/
