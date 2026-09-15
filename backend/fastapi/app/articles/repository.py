@@ -3,7 +3,9 @@ from datetime import datetime
 
 from neo4j import Session
 
+from app.articles.support.entity_filter import is_noise_entity_name, normalize_entity_name
 
+# 1. Article
 # Article 노드를 생성하거나 이미 있으면 갱신한다
 def merge_article_node(
     session: Session,
@@ -93,7 +95,7 @@ def _merge_day_node(session: Session, day_key: str, month_key: str, created_at: 
     ).single()
     return result["nodeId"]
 
-
+# 2. Time
 # 모델에서 반환된 Time 하나(Year/Month/Day 중 하나의 granularity)를 반영하고, 그 nodeId를 반환한다.
 def merge_time_node(session: Session, time_key: str, granularity: str, created_at: datetime) -> str:
     # Day/Month/Year 계층(PART_OF)은 항상 끝까지 같이 보장한다
@@ -109,3 +111,53 @@ def merge_time_node(session: Session, time_key: str, granularity: str, created_a
         return month_node_id
 
     return _merge_day_node(session, time_key, month_key, created_at)
+
+# 3. Entity
+# 언론사(NewsOrganization) Entity를 생성하거나 갱신
+def merge_news_organization_entity(
+    session: Session, mysql_organization_id: int, name: str, created_at: datetime
+) -> str:
+    result = session.run(
+        """
+        // mysqlOrganizationId(자연키)로 MERGE
+        MERGE (o:Entity:NewsOrganization {mysqlOrganizationId: $mysqlOrganizationId})
+        ON CREATE SET o.nodeId = randomUUID(), o.createdAt = $createdAt
+        SET o.canonicalName = $name,
+            o.entityType = 'NEWS_ORGANIZATION',
+            o.updatedAt = $createdAt
+        RETURN o.nodeId AS nodeId
+        """,
+        mysqlOrganizationId=mysql_organization_id,
+        name=name,
+        createdAt=created_at,
+    ).single()
+    return result["nodeId"]
+
+
+# 기사 본문에서 뽑은 Entity를 생성하거나 이미 있으면 재사용
+def merge_extracted_entity(
+    session: Session, canonical_name: str, entity_type: str, created_at: datetime
+) -> str | None:
+
+    # 노이즈면 None
+    normalized_name = normalize_entity_name(canonical_name)
+    if is_noise_entity_name(normalized_name):
+        return None
+
+    result = session.run(
+        """
+        // canonicalName(정규화된 이름)으로 MERGE - 다른 기사에서 같은 이름이면 재사용, 다르면 새로 생성
+        MERGE (e:Entity {canonicalName: $canonicalName})
+        ON CREATE SET e.nodeId = randomUUID(), e.createdAt = $createdAt
+        // entityType은 처음 값으로 고정(coalesce)
+        SET e.entityType = coalesce(e.entityType, $entityType), e.updatedAt = $createdAt
+        FOREACH (_ IN CASE WHEN e.entityType = 'PERSON' THEN [1] ELSE [] END | SET e:Person)
+        FOREACH (_ IN CASE WHEN e.entityType = 'LOCATION' THEN [1] ELSE [] END | SET e:Location)
+        FOREACH (_ IN CASE WHEN e.entityType = 'ORGANIZATION' THEN [1] ELSE [] END | SET e:Organization)
+        RETURN e.nodeId AS nodeId
+        """,
+        canonicalName=normalized_name,
+        entityType=entity_type,
+        createdAt=created_at,
+    ).single()
+    return result["nodeId"]
