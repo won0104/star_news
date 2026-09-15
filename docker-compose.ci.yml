@@ -1,0 +1,46 @@
+# CI 전용 DB (MySQL + Neo4j). 프로덕션/로컬 compose 와 분리.
+# 데이터는 익명 볼륨, 잡 끝나면 down -v 로 삭제한다.
+#
+#   docker compose -p s15p21e206-ci -f docker-compose.ci.yml up -d --wait
+#   docker compose -p s15p21e206-ci -f docker-compose.ci.yml down -v
+
+name: s15p21e206-ci
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ci_mysqldb
+      MYSQL_USER: ci
+      MYSQL_PASSWORD: ci-secret
+      MYSQL_ROOT_PASSWORD: ci-root-secret
+    command:
+      [
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_0900_ai_ci",
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -uroot -pci-root-secret --silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  neo4j:
+    image: neo4j:5.26
+    environment:
+      NEO4J_AUTH: neo4j/ci-neo4j-secret
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://127.0.0.1:7474 || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
