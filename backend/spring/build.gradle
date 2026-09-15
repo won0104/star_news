@@ -38,8 +38,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'com.github.fppt:jedis-mock:1.1.5'
-	// 테스트 DB 를 실제 MySQL 컨테이너로 띄운다. 스키마를 엔티티가 아니라 Flyway 마이그레이션이 만들어
-	// 운영과 같은 타입·제약·기본값 위에서 검증한다. (jdbc:tc: URL 이 컨테이너를 자동으로 관리한다)
+	// 로컬: jdbc:tc: URL 이 Testcontainers MySQL 을 띄운다.
+	// CI: docker-compose.ci.yml MySQL 을 DB_URL 로 주입하므로 컨테이너 안에서는 tc 경로를 쓰지 않는다.
 	testImplementation 'org.testcontainers:mysql'
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
