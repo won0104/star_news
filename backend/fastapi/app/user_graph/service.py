@@ -3,18 +3,27 @@ from neo4j import Session
 
 from app.exceptions import AppException
 from app.user_graph import repository
-from app.user_graph.schemas import UserGraphSyncRequest, UserGraphSyncResult
+from app.user_graph.schemas import UserGraphSyncFailure, UserGraphSyncRequest, UserGraphSyncResult
 
 
 # 사용자별로 User/관심/비선호/소비 Event를 반영하고, Story Coverage를 재계산
+# 유저 한 명이 실패해도(존재하지 않는 참조 등) 나머지 유저는 계속 처리하고, 실패한 유저만 failed에 담아서 반환
 def sync_user_graph(request: UserGraphSyncRequest, session: Session) -> UserGraphSyncResult:
-    updated_count = sum(_sync_single_user(user, request.aggregated_at, session) for user in request.users)
+    updated_count = 0
+    failed: list[UserGraphSyncFailure] = []
 
-    # 요청받은 사용자 전원이 stale이라 아무도 반영 안 됐으면 이 회차 전체를 stale로 취급
-    if updated_count == 0 and request.users:
+    for user in request.users:
+        try:
+            if _sync_single_user(user, request.aggregated_at, session):
+                updated_count += 1
+        except AppException as exc:
+            failed.append(UserGraphSyncFailure(user_id=user.user_id, code=exc.code))
+
+    # 전원이 stale이고 실패한 사람도 없으면(순수 재전송) 이 회차 전체를 stale로 취급
+    if updated_count == 0 and not failed and request.users:
         raise AppException(409, "STALE_USER_GRAPH_SNAPSHOT", "더 최신 스냅샷이 이미 반영되어 있습니다.")
 
-    return UserGraphSyncResult(processed_users=len(request.users), updated_users=updated_count)
+    return UserGraphSyncResult(processed_users=len(request.users), updated_users=updated_count, failed=failed)
 
 
 # 사용자 한 명의 User Graph를 반영
@@ -40,7 +49,7 @@ def _sync_single_user(user, aggregated_at, session: Session) -> bool:
     consumed_payload = [
         {
             "eventId": event.event_id,
-            "count": event.count,
+            "eventClickCount": event.event_click_count,
             "lastViewedAt": event.last_viewed_at,
             "eventFavorited": event.event_favorited,
         }

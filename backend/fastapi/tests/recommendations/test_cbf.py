@@ -25,10 +25,10 @@ def _near_vector(index: int, noise_index: int) -> list[float]:
 def test_build_user_profile_vector_computes_weighted_average():
     now = datetime.now(timezone.utc)
     consumed_events = [
-        # 최근 + 많이 본 Event -> 가중치가 커서 프로필 벡터에 크게 반영돼야 함
-        {"embedding": [0.2, 0.5, 0.1, 0.3, 0.0, 0.4, 0.2, 0.1], "count": 5, "lastViewedAt": now, "isFavorited": False},
-        # 90일 전 + 1번만 본 Event -> 가중치가 작아 거의 영향 없어야 함
-        {"embedding": [0.1, 0.3, 0.4, 0.0, 0.2, 0.1, 0.3, 0.5], "count": 1, "lastViewedAt": now - timedelta(days=90), "isFavorited": False},
+        # 최근 + 많이 클릭한 Event -> 가중치가 커서 프로필 벡터에 크게 반영돼야 함
+        {"embedding": [0.2, 0.5, 0.1, 0.3, 0.0, 0.4, 0.2, 0.1], "eventClickCount": 5, "lastViewedAt": now, "isFavorited": False},
+        # 90일 전 + 1번만 클릭한 Event -> 가중치가 작아 거의 영향 없어야 함
+        {"embedding": [0.1, 0.3, 0.4, 0.0, 0.2, 0.1, 0.3, 0.5], "eventClickCount": 1, "lastViewedAt": now - timedelta(days=90), "isFavorited": False},
     ]
 
     profile_vector = service._build_user_profile_vector(consumed_events)
@@ -44,12 +44,12 @@ def test_build_user_profile_vector_returns_none_when_no_history():
     assert service._build_user_profile_vector([]) is None
 
 
-# 즐겨찾기 가중치 검증: count/최근성이 완전히 같아도 즐겨찾기한 쪽이 프로필 벡터에 더 크게 반영돼야 함
+# 즐겨찾기 가중치 검증: 클릭 수/최근성이 완전히 같아도 즐겨찾기한 쪽이 프로필 벡터에 더 크게 반영돼야 함
 def test_build_user_profile_vector_weighs_favorited_event_more():
     now = datetime.now(timezone.utc)
     favorited = [
-        {"embedding": _unit_vector(0), "count": 1, "lastViewedAt": now, "isFavorited": True},
-        {"embedding": _unit_vector(1), "count": 1, "lastViewedAt": now, "isFavorited": False},
+        {"embedding": _unit_vector(0), "eventClickCount": 1, "lastViewedAt": now, "isFavorited": True},
+        {"embedding": _unit_vector(1), "eventClickCount": 1, "lastViewedAt": now, "isFavorited": False},
     ]
 
     profile_vector = service._build_user_profile_vector(favorited)
@@ -73,7 +73,7 @@ def _seed_fixture(session):
         MERGE (consumed:Event {nodeId: 'test-cbf-event-consumed'})
         SET consumed.embedding = $consumedVector
         MERGE (u)-[r:CONSUMED]->(consumed)
-        SET r.count = 3, r.lastViewedAt = $now, r.eventFavorited = true
+        SET r.eventClickCount = 3, r.lastViewedAt = $now, r.eventFavorited = true
 
         // 취향 벡터랑 방향이 비슷한 미열람 Event -> 유사도 높게 나와야 함
         MERGE (similar:Event {nodeId: 'test-cbf-event-similar'})
