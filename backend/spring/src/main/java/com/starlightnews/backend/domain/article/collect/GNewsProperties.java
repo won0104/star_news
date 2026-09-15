@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
+import org.hibernate.validator.constraints.time.DurationMin;
 
 /**
  * GNews 기사 수집 설정. (<a href="https://docs.gnews.io">GNews API v4</a>)
@@ -25,14 +26,17 @@ public record GNewsProperties(
 		@NotBlank String country,
 		@Min(1) @Max(100) int max,
 		@NotEmpty List<@NotBlank String> categories,
-		Duration timeout
+		@DurationMin(millis = 1) Duration timeout,
+		@DurationMin(millis = 100) Duration retryDelay
 ) {
 
 	private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
+	private static final Duration DEFAULT_RETRY_DELAY = Duration.ofSeconds(1);
 
 	public GNewsProperties {
 		categories = categories == null ? List.of() : List.copyOf(categories);
 		timeout = timeout == null ? DEFAULT_TIMEOUT : timeout;
+		retryDelay = retryDelay == null ? DEFAULT_RETRY_DELAY : retryDelay;
 	}
 
 	/**

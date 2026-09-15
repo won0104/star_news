@@ -36,7 +36,7 @@ class GNewsClientTest {
 		server = MockRestServiceServer.bindTo(builder).build();
 		client = new GNewsClient(builder.baseUrl(BASE_URL).build(), new GNewsProperties(
 				BASE_URL, "test-api-key", "ko", "kr", 10,
-				List.of("business"), Duration.ofSeconds(5)));
+				List.of("business"), Duration.ofSeconds(5), null));
 	}
 
 	private ErrorCode errorCodeOf(Throwable thrown) {
@@ -114,7 +114,7 @@ class GNewsClientTest {
 	@Test
 	void 쿼터를_초과하면_QUOTA_EXCEEDED() {
 		server.expect(requestTo(org.hamcrest.Matchers.containsString("/top-headlines")))
-				.andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
+				.andRespond(withStatus(HttpStatus.FORBIDDEN));
 
 		Throwable thrown = catchThrowable(() -> client.fetchTopHeadlines("business"));
 
