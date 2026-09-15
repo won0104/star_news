@@ -38,10 +38,30 @@ public class UserGraphSyncClient {
 		try {
 			UserGraphSyncResponse response =
 					fastApiClient.post(SYNC_PATH, request, UserGraphSyncResponse.class);
-			return new UserGraphSyncResult(response.processedUsers(), response.updatedUsers(), 0);
+			logFailedUsers(response);
+			return new UserGraphSyncResult(
+					response.processedUsers(), response.updatedUsers(), response.failures().size());
 		} catch (BusinessException failure) {
 			return handle(failure, userCount);
 		}
+	}
+
+	/**
+	 * 요청은 성공했지만 일부 사용자가 반영되지 않은 경우를 남긴다.
+	 *
+	 * <p>대부분 참조가 끊긴 경우다. MySQL 에 남은 Node ID 가 Neo4j 에서 사라지면 그 사용자는 고치기
+	 * 전까지 계속 실패하므로, 누구인지 로그에 남겨야 추적할 수 있다.
+	 */
+	private void logFailedUsers(UserGraphSyncResponse response) {
+		if (response.failures().isEmpty()) {
+			return;
+		}
+
+		log.warn("User Graph 에 반영하지 못한 사용자가 있습니다. ({}명: {})",
+				response.failures().size(),
+				response.failures().stream()
+						.map(failure -> failure.userId() + "=" + failure.code())
+						.toList());
 	}
 
 	private UserGraphSyncResult handle(BusinessException failure, int userCount) {

@@ -37,11 +37,17 @@ public record UserGraphSyncRequest(
 	) {
 	}
 
-	/** {@code CONSUMED} 로 반영할 Event 별 소비 집계. */
+	/**
+	 * {@code CONSUMED} 로 반영할 Event 별 소비 집계.
+	 *
+	 * <p>{@code eventFavorited} 는 이 Event 를 즐겨찾기했는지다. Event 즐겨찾기는 {@code INTERESTED_IN}
+	 * 대상이 아니라 소비 관계의 속성으로 전달한다.
+	 */
 	public record ConsumedEvent(
 			String eventId,
 			Integer count,
-			OffsetDateTime lastViewedAt
+			OffsetDateTime lastViewedAt,
+			boolean eventFavorited
 	) {
 	}
 }

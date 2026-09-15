@@ -85,7 +85,8 @@ class UserGraphRequestAssemblerTest {
 		};
 	}
 
-	private ConsumedEventRow eventRow(long userId, String nodeId, int clickCount, LocalDateTime lastSeenAt) {
+	private ConsumedEventRow eventRow(long userId, String nodeId, int clickCount,
+			LocalDateTime lastSeenAt, Integer favorited) {
 		return new ConsumedEventRow() {
 			@Override
 			public Long getUserId() {
@@ -105,6 +106,11 @@ class UserGraphRequestAssemblerTest {
 			@Override
 			public LocalDateTime getLastSeenAt() {
 				return lastSeenAt;
+			}
+
+			@Override
+			public Integer getFavorited() {
+				return favorited;
 			}
 		};
 	}
@@ -154,11 +160,36 @@ class UserGraphRequestAssemblerTest {
 	void 소비_Event의_시각에_KST_오프셋을_붙인다() {
 		givenNothingStored();
 		given(aggregationRepository.findConsumedEvents(any()))
-				.willReturn(List.of(eventRow(1L, EVENT_ID, 3, LocalDateTime.of(2026, 9, 15, 4, 30))));
+				.willReturn(List.of(eventRow(1L, EVENT_ID, 3, LocalDateTime.of(2026, 9, 15, 4, 30), 0)));
 
 		assertThat(assembler.assemble(List.of(1L), AGGREGATED_AT).users().get(0).consumedEvents())
 				.containsExactly(new ConsumedEvent(EVENT_ID, 3,
-						OffsetDateTime.of(2026, 9, 15, 4, 30, 0, 0, ZoneOffset.ofHours(9))));
+						OffsetDateTime.of(2026, 9, 15, 4, 30, 0, 0, ZoneOffset.ofHours(9)), false));
+	}
+
+	@Test
+	void Event_즐겨찾기를_소비_관계의_속성으로_보낸다() {
+		// Event 즐겨찾기는 INTERESTED_IN 대상이 아니라 CONSUMED 의 속성이다.
+		givenNothingStored();
+		given(aggregationRepository.findConsumedEvents(any()))
+				.willReturn(List.of(eventRow(1L, EVENT_ID, 1, LocalDateTime.of(2026, 9, 15, 4, 30), 1)));
+
+		assertThat(assembler.assemble(List.of(1L), AGGREGATED_AT).users().get(0).consumedEvents())
+				.singleElement()
+				.extracting(ConsumedEvent::eventFavorited)
+				.isEqualTo(true);
+	}
+
+	@Test
+	void 즐겨찾기_여부를_모르면_안_한_것으로_본다() {
+		givenNothingStored();
+		given(aggregationRepository.findConsumedEvents(any()))
+				.willReturn(List.of(eventRow(1L, EVENT_ID, 1, LocalDateTime.of(2026, 9, 15, 4, 30), null)));
+
+		assertThat(assembler.assemble(List.of(1L), AGGREGATED_AT).users().get(0).consumedEvents())
+				.singleElement()
+				.extracting(ConsumedEvent::eventFavorited)
+				.isEqualTo(false);
 	}
 
 	@Test

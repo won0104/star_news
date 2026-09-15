@@ -119,7 +119,8 @@ public class UserGraphRequestAssembler {
 								row -> new ConsumedEvent(
 										row.getNodeId(),
 										row.getClickCount(),
-										withSeoulOffset(row.getLastSeenAt())),
+										withSeoulOffset(row.getLastSeenAt()),
+										row.getFavorited() != null && row.getFavorited() != 0),
 								Collectors.toList())));
 	}
 

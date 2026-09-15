@@ -7,6 +7,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.starlightnews.backend.domain.usergraph.dto.UserGraphSyncRequest;
+import com.starlightnews.backend.domain.usergraph.dto.UserGraphSyncRequest.ConsumedEvent;
 import com.starlightnews.backend.domain.usergraph.dto.UserGraphSyncRequest.InterestNode;
 import com.starlightnews.backend.domain.usergraph.dto.UserGraphSyncRequest.UserGraphSyncUser;
 import com.starlightnews.backend.domain.usergraph.dto.UserGraphSyncResponse;
@@ -87,7 +88,7 @@ class UserGraphSyncIntegrationTest {
 
 		given(topicNodeIdRepository.findAllTopicNodeIds()).willReturn(Map.of("ECONOMY", ECONOMY_NODE_ID));
 		given(fastApiClient.post(any(), any(), eq(UserGraphSyncResponse.class)))
-				.willReturn(new UserGraphSyncResponse(new UserGraphSyncResponse.Data(1, 1)));
+				.willReturn(new UserGraphSyncResponse(new UserGraphSyncResponse.Data(1, 1, java.util.List.of())));
 	}
 
 	private void insertUser(long userId, String loginId) {
@@ -170,8 +171,32 @@ class UserGraphSyncIntegrationTest {
 		assertThat(json.fieldNames()).toIterable().containsExactlyInAnyOrder("users", "aggregatedAt");
 		assertThat(json.get("users").get(0).fieldNames()).toIterable()
 				.containsExactlyInAnyOrder("userId", "interestNodes", "dislikeTopicCodes", "consumedEvents");
+		assertThat(json.get("users").get(0).get("consumedEvents").get(0).fieldNames()).toIterable()
+				.containsExactlyInAnyOrder("eventId", "count", "lastViewedAt", "eventFavorited");
 		// 오프셋이 없으면 FastAPI 가 UTC 로 읽어 9시간 어긋난다.
 		assertThat(json.get("aggregatedAt").asText()).contains("+09:00");
+	}
+
+	@Test
+	void 즐겨찾기한_Event는_클릭이_없어도_소비_관계로_나간다() {
+		// Event 즐겨찾기는 INTERESTED_IN 대상이 아니라 CONSUMED 의 속성으로 전달한다.
+		// 클릭 조건으로만 거르면 이 정보가 어디에도 실리지 않는다.
+		String favoritedEventId = "00000126-3004-4000-8000-000000000004";
+		nativeUpdate("INSERT INTO user_knowledge_nodes "
+						+ "(user_id, node_label, node_type, node_id, read_article_count, node_click_count, "
+						+ " first_seen_at, last_seen_at) "
+						+ "VALUES (?1, '즐겨찾은 이벤트', 'EVENT', ?2, 1, 0, ?3, ?3)",
+				USER_ID, favoritedEventId, LAST_SEEN_AT);
+		nativeUpdate("INSERT INTO user_node_favorites (user_id, node_type, node_id) VALUES (?1, 'EVENT', ?2)",
+				USER_ID, favoritedEventId);
+		entityManager.flush();
+
+		userGraphSyncService.sync();
+
+		assertThat(sentUser(USER_ID).consumedEvents())
+				.extracting(ConsumedEvent::eventId, ConsumedEvent::eventFavorited)
+				.contains(tuple(favoritedEventId, true))
+				.contains(tuple(EVENT_ID, false));
 	}
 
 	@Test

@@ -50,10 +50,30 @@ class UserGraphSyncClientTest {
 	@Test
 	void 성공하면_FastAPI가_알려준_건수를_그대로_돌려준다() {
 		given(fastApiClient.post(eq(SYNC_PATH), any(), eq(UserGraphSyncResponse.class)))
-				.willReturn(new UserGraphSyncResponse(new UserGraphSyncResponse.Data(3, 2)));
+				.willReturn(new UserGraphSyncResponse(new UserGraphSyncResponse.Data(3, 2, List.of())));
 
 		assertThat(syncClient.send(requestFor(1L, 2L, 3L)))
 				.isEqualTo(new UserGraphSyncResult(3, 2, 0));
+	}
+
+	@Test
+	void 일부_사용자가_반영되지_않으면_실패_건수로_센다() {
+		// 요청 자체는 200 이지만 그 안에 실패한 사용자가 섞여 있다.
+		given(fastApiClient.post(any(), any(), any()))
+				.willReturn(new UserGraphSyncResponse(new UserGraphSyncResponse.Data(3, 2,
+						List.of(new UserGraphSyncResponse.Failure(3L, "GRAPH_REFERENCE_NOT_FOUND")))));
+
+		assertThat(syncClient.send(requestFor(1L, 2L, 3L)))
+				.isEqualTo(new UserGraphSyncResult(3, 2, 1));
+	}
+
+	@Test
+	void 실패자_목록이_없어도_깨지지_않는다() {
+		// FastAPI 가 failed 를 생략할 수 있다.
+		given(fastApiClient.post(any(), any(), any()))
+				.willReturn(new UserGraphSyncResponse(new UserGraphSyncResponse.Data(1, 1, null)));
+
+		assertThat(syncClient.send(requestFor(1L))).isEqualTo(new UserGraphSyncResult(1, 1, 0));
 	}
 
 	@Test
@@ -95,7 +115,7 @@ class UserGraphSyncClientTest {
 	void 조립한_요청을_그대로_전달한다() {
 		UserGraphSyncRequest request = requestFor(1L);
 		given(fastApiClient.post(any(), any(), any()))
-				.willReturn(new UserGraphSyncResponse(new UserGraphSyncResponse.Data(1, 1)));
+				.willReturn(new UserGraphSyncResponse(new UserGraphSyncResponse.Data(1, 1, java.util.List.of())));
 
 		syncClient.send(request);
 

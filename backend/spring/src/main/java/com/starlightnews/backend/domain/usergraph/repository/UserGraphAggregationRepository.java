@@ -46,6 +46,13 @@ public interface UserGraphAggregationRepository extends Repository<User, Long> {
 		Integer getClickCount();
 
 		LocalDateTime getLastSeenAt();
+
+		/**
+		 * 이 Event 를 즐겨찾기했으면 1, 아니면 0. FastAPI 가 CONSUMED 관계의 속성으로 반영한다.
+		 *
+		 * <p>MySQL 에 boolean 타입이 없어 정수로 온다.
+		 */
+		Integer getFavorited();
 	}
 
 	/**
@@ -96,14 +103,22 @@ public interface UserGraphAggregationRepository extends Repository<User, Long> {
 	 * Event 소비 집계를 조회한다.
 	 *
 	 * <p>클릭한 적 없는 Node 는 보내지 않는다. 열람만으로도 행이 생기기 때문에, 거르지 않으면
-	 * 스쳐 지나간 Event 까지 소비로 올라간다.
+	 * 스쳐 지나간 Event 까지 소비로 올라간다. 다만 즐겨찾기한 Event 는 클릭이 없어도 보낸다.
+	 * 즐겨찾기 자체가 분명한 신호라 빠뜨리면 그 정보가 어디에도 전달되지 않는다.
 	 */
 	@Query(value = """
-			SELECT user_id AS userId, node_id AS nodeId,
-			       node_click_count AS clickCount, last_seen_at AS lastSeenAt
-			FROM user_knowledge_nodes
-			WHERE user_id IN (:userIds) AND node_type = 'EVENT' AND node_click_count > 0
-			ORDER BY user_id, node_id
+			SELECT node.user_id AS userId, node.node_id AS nodeId,
+			       node.node_click_count AS clickCount, node.last_seen_at AS lastSeenAt,
+			       CASE WHEN favorite.user_id IS NOT NULL THEN 1 ELSE 0 END AS favorited
+			FROM user_knowledge_nodes node
+			LEFT JOIN user_node_favorites favorite
+			       ON favorite.user_id = node.user_id
+			      AND favorite.node_type = 'EVENT'
+			      AND favorite.node_id = node.node_id
+			WHERE node.user_id IN (:userIds)
+			  AND node.node_type = 'EVENT'
+			  AND (node.node_click_count > 0 OR favorite.user_id IS NOT NULL)
+			ORDER BY node.user_id, node.node_id
 			""", nativeQuery = true)
 	List<ConsumedEventRow> findConsumedEvents(@Param("userIds") Collection<Long> userIds);
 }

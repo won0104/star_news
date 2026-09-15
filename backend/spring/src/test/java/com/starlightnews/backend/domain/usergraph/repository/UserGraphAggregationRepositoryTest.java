@@ -172,6 +172,39 @@ class UserGraphAggregationRepositoryTest {
 	}
 
 	@Test
+	void 즐겨찾기한_Event는_클릭이_없어도_보낸다() {
+		// 즐겨찾기는 분명한 신호다. 여기서 빠지면 그 정보가 어디에도 전달되지 않는다.
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, LocalDateTime.of(2026, 9, 15, 5, 30));
+		insertNodeFavorite(1L, "EVENT", EVENT_ID);
+
+		assertThat(repository.findConsumedEvents(List.of(1L)))
+				.singleElement()
+				.satisfies(row -> {
+					assertThat(row.getNodeId()).isEqualTo(EVENT_ID);
+					assertThat(row.getFavorited()).isEqualTo(1);
+				});
+	}
+
+	@Test
+	void 즐겨찾기하지_않은_Event는_favorited가_거짓이다() {
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 2, LocalDateTime.of(2026, 9, 15, 5, 30));
+
+		assertThat(repository.findConsumedEvents(List.of(1L)))
+				.singleElement()
+				.satisfies(row -> assertThat(row.getFavorited()).isEqualTo(0));
+	}
+
+	@Test
+	void 다른_사용자의_즐겨찾기는_섞이지_않는다() {
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 2, LocalDateTime.of(2026, 9, 15, 5, 30));
+		insertNodeFavorite(2L, "EVENT", EVENT_ID);
+
+		assertThat(repository.findConsumedEvents(List.of(1L)))
+				.singleElement()
+				.satisfies(row -> assertThat(row.getFavorited()).isEqualTo(0));
+	}
+
+	@Test
 	void Event가_아닌_Node는_소비에서_제외한다() {
 		insertKnowledgeNode(1L, "ENTITY", ENTITY_ID, 5, LocalDateTime.of(2026, 9, 15, 5, 30));
 
