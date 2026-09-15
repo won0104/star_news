@@ -30,6 +30,13 @@ class UserGraphSyncRequest(CamelModel):
     aggregated_at: datetime
 
 
+# 유저 한 명 동기화 실패 - Spring이 이 유저만 따로 추적/재시도할 수 있게 이유(code)를 같이 줌
+class UserGraphSyncFailure(CamelModel):
+    user_id: int
+    code: str
+
+
 class UserGraphSyncResult(CamelModel):
     processed_users: int
     updated_users: int
+    failed: list[UserGraphSyncFailure] = []
