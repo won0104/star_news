@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.domain.NewsOrganization;
+import com.starlightnews.backend.domain.article.support.ArticleUrls;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
+import com.starlightnews.backend.global.enums.ContentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -99,5 +101,97 @@ class ArticleRepositoryTest {
 	@Test
 	void findGraphRefByArticleId는_없는_기사면_빈_Optional이다() {
 		assertThat(articleRepository.findGraphRefByArticleId(999L)).isEmpty();
+	}
+
+	private static final String COLLECTED_URL = "https://www.yna.co.kr/view/AKR20260914";
+
+	private void insertCollected(Long orgId, String title, String url, String category) {
+		articleRepository.insertIfAbsent(orgId, title, url, ArticleUrls.hash(url),
+				LocalDateTime.of(2026, 9, 14, 14, 0), category, "본문입니다.",
+				ContentType.FULL_TEXT.name(), AnalysisStatus.PROCESSING.name());
+	}
+
+	@Test
+	void insertIfAbsent는_수집한_기사를_저장한다() {
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		entityManager.flush();
+
+		insertCollected(org.getId(), "기준금리 동결", COLLECTED_URL, "business");
+		entityManager.clear();
+
+		Long id = articleRepository.findIdByUrlHash(ArticleUrls.hash(COLLECTED_URL)).orElseThrow();
+		Article found = articleRepository.findAllWithOrganizationByArticleIdIn(List.of(id)).get(0);
+		assertThat(found.getTitle()).isEqualTo("기준금리 동결");
+		assertThat(found.getUrl()).isEqualTo(COLLECTED_URL);
+		assertThat(found.getContent()).isEqualTo("본문입니다.");
+		assertThat(found.getContentType()).isEqualTo(ContentType.FULL_TEXT);
+		assertThat(found.getSourceCategory()).isEqualTo("business");
+		assertThat(found.getOrganization().getName()).isEqualTo("연합뉴스");
+	}
+
+	@Test
+	void insertIfAbsent는_분류를_비워두고_분석_상태를_기본값으로_둔다() {
+		// topic_code 는 분석 단계가 채우고, analysis_status 는 컬럼 기본값(PROCESSING)을 쓴다.
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		entityManager.flush();
+
+		insertCollected(org.getId(), "기준금리 동결", COLLECTED_URL, "business");
+		entityManager.clear();
+
+		Long id = articleRepository.findIdByUrlHash(ArticleUrls.hash(COLLECTED_URL)).orElseThrow();
+		Article found = articleRepository.findAllWithOrganizationByArticleIdIn(List.of(id)).get(0);
+		assertThat(found.getTopicCode()).isNull();
+		assertThat(found.getAnalysisStatus()).isEqualTo(AnalysisStatus.PROCESSING);
+		assertThat(found.getNodeId()).isNull();
+	}
+
+	@Test
+	void insertIfAbsent는_같은_기사를_다시_수집하면_건너뛴다() {
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		entityManager.flush();
+		insertCollected(org.getId(), "기준금리 동결", COLLECTED_URL, "business");
+		entityManager.clear();
+
+		insertCollected(org.getId(), "제목이 바뀌어도", COLLECTED_URL, "general");
+		entityManager.clear();
+
+		Long id = articleRepository.findIdByUrlHash(ArticleUrls.hash(COLLECTED_URL)).orElseThrow();
+		Article found = articleRepository.findAllWithOrganizationByArticleIdIn(List.of(id)).get(0);
+		assertThat(found.getTitle()).isEqualTo("기준금리 동결"); // 기존 값을 덮어쓰지 않는다
+		assertThat(found.getSourceCategory()).isEqualTo("business");
+	}
+
+	@Test
+	void insertIfAbsent는_추적_파라미터만_다른_같은_기사도_건너뛴다() {
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		entityManager.flush();
+		insertCollected(org.getId(), "기준금리 동결", COLLECTED_URL, "business");
+		entityManager.clear();
+
+		insertCollected(org.getId(), "같은 기사", COLLECTED_URL + "?utm_source=gnews", "general");
+		entityManager.clear();
+
+		// url 정규화로 해시가 같아 중복으로 걸린다.
+		assertThat(articleRepository.findIdByUrlHash(
+				ArticleUrls.hash(COLLECTED_URL + "?utm_source=gnews"))).isPresent();
+	}
+
+	@Test
+	void insertIfAbsent는_다른_기사면_따로_저장한다() {
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		entityManager.flush();
+		String other = "https://www.yna.co.kr/view/AKR20260915";
+
+		insertCollected(org.getId(), "기사 1", COLLECTED_URL, "business");
+		insertCollected(org.getId(), "기사 2", other, "business");
+		entityManager.clear();
+
+		assertThat(articleRepository.findIdByUrlHash(ArticleUrls.hash(COLLECTED_URL)))
+				.isNotEqualTo(articleRepository.findIdByUrlHash(ArticleUrls.hash(other)));
+	}
+
+	@Test
+	void findIdByUrlHash는_저장되지_않은_기사면_빈_Optional이다() {
+		assertThat(articleRepository.findIdByUrlHash(ArticleUrls.hash("https://없는.기사/1"))).isEmpty();
 	}
 }
