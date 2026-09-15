@@ -91,6 +91,7 @@ def sync_consumed_events(
         MERGE (u)-[r:CONSUMED]->(e)
         SET r.count = event.count,
             r.lastViewedAt = event.lastViewedAt,
+            r.eventFavorited = event.eventFavorited,
             r.updatedAt = $aggregatedAt
         RETURN count(e) AS matchedCount
         """,
