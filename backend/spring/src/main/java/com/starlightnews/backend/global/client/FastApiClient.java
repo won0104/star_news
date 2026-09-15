@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 /**
  * FastAPI 내부 API(/internal/v1) 호출 창구.
@@ -31,6 +32,9 @@ public class FastApiClient {
 
 	/** FastAPI dependencies.verify_internal_service 가 읽는 헤더. */
 	public static final String INTERNAL_API_KEY_HEADER = "X-Internal-Api-Key";
+
+	/** FastAPI 헬스체크. /internal/v1 아래가 아니라 루트에 있고 인증이 없다. */
+	private static final String HEALTH_PATH = "/health";
 
 	private final RestClient restClient;
 	private final FastApiProperties properties;
@@ -71,6 +75,26 @@ public class FastApiClient {
 			// 연결 실패·타임아웃. 다음 주기에 다시 시도한다.
 			log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, networkFailure.getMessage());
 			throw new BusinessException(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
+		}
+	}
+
+	/**
+	 * FastAPI 가 응답하는지 확인한다. 인증이 필요 없는 헬스체크를 부르므로 키가 없어도 확인할 수 있다.
+	 *
+	 * <p>상태 확인용이라 실패를 예외로 올리지 않고 false 로 돌려준다.
+	 *
+	 * @return 정상 응답하면 true
+	 */
+	public boolean isReachable() {
+		try {
+			restClient.get()
+					.uri(HEALTH_PATH)
+					.retrieve()
+					.toBodilessEntity();
+			return true;
+		} catch (RestClientException unreachable) {
+			log.warn("FastAPI 헬스체크 실패 (원인={})", unreachable.getMessage());
+			return false;
 		}
 	}
 

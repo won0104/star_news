@@ -132,6 +132,33 @@ class FastApiClientTest {
 	}
 
 	@Test
+	void isReachable은_헬스체크가_성공하면_true다() {
+		// /health 는 /internal/v1 아래가 아니라 루트에 있고 인증이 없다.
+		server.expect(requestTo(BASE_URL + "/health"))
+				.andRespond(withSuccess("{\"status\":\"ok\"}", MediaType.APPLICATION_JSON));
+
+		assertThat(client("test-key").isReachable()).isTrue();
+		server.verify();
+	}
+
+	@Test
+	void isReachable은_실패해도_예외를_던지지_않고_false다() {
+		server.expect(requestTo(BASE_URL + "/health"))
+				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+
+		assertThat(client("test-key").isReachable()).isFalse();
+	}
+
+	@Test
+	void isReachable은_API_키가_없어도_확인한다() {
+		// 헬스체크는 인증이 필요 없어 키 없이도 연결 여부를 알 수 있다.
+		server.expect(requestTo(BASE_URL + "/health"))
+				.andRespond(withSuccess("{\"status\":\"ok\"}", MediaType.APPLICATION_JSON));
+
+		assertThat(client("").isReachable()).isTrue();
+	}
+
+	@Test
 	void 본문이_비어도_상태_코드로_판단한다() {
 		server.expect(requestTo(BASE_URL + PATH))
 				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
