@@ -66,7 +66,8 @@ export function HistoryEventScene() {
 
   const { cluster, story } = context;
   const backTopic = searchParams.get('topic') ?? cluster.topicCode;
-  const backUrl = `/app?view=log&topic=${backTopic}`;
+  const backView = 'log';
+  const backUrl = `/app?view=${backView}&topic=${backTopic}`;
   const rawArticle = event.articles.find((article) => article.id === openArticleId);
   const panelArticle = rawArticle ? {
     id: rawArticle.id,

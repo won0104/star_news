@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop';
 import { TopBar } from '../components/common/TopBar';
 import { useSettingsValues } from '../store/settings';
+import { SCREEN_TRANSITIONS } from '../utils/motion';
 
 /**
  * 메인 페이지 — the sunlit-room photograph edge to edge, with only the top bar over it.
@@ -27,7 +28,7 @@ export function MainScene() {
   const { reduceMotion } = useSettingsValues();
 
   return (
-    <PhotoBackdrop motion={!reduceMotion}>
+    <PhotoBackdrop motion={SCREEN_TRANSITIONS && !reduceMotion}>
       <TopBar
         onSelect={(id) => navigate(`/app?view=${id}`, { state: { from: 'home' } })}
         onBrand={() => navigate('/')}

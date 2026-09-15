@@ -40,7 +40,7 @@
 export const nightfall = {
   still: '/assets/trend/figma/attic-night.png',
   clip: { mp4: '/assets/trend/nightfall-v3.mp4' },
-};
+}
 
 /** Exact exported layers from Figma frame 870:2. The relation layer includes the
  * ambient stars, six authored edges, the centre sticker, the upper entity and the
@@ -56,7 +56,7 @@ export const trendFigmaAssets = {
   entitySticker: '/assets/trend/figma/entity-sticker.svg',
   statementGlow: '/assets/trend/figma/statement-glow.svg',
   statementSticker: '/assets/trend/figma/statement-sticker.svg',
-};
+}
 
 /**
  * Decorative stars from the Figma relation export, now represented as independent
@@ -64,27 +64,133 @@ export const trendFigmaAssets = {
  * exploration hover treatment is added.
  */
 export const ambientStars = [
-  { id: 'ambient-01', role: 'entity', at: [7.47, 29.83], size: 35, rotate: -8, events: ['increase', 'adopt'] },
-  { id: 'ambient-02', role: 'statement', at: [12.29, 16.72], size: 40, rotate: 4, events: ['adopt'] },
-  { id: 'ambient-03', role: 'event', at: [14.34, 36.5], size: 44, rotate: -4, events: ['adopt', 'increase'] },
-  { id: 'ambient-04', role: 'entity', at: [94.34, 65.5], size: 34, rotate: 8, opacity: 0.38, events: ['bonder', 'cowos'] },
-  { id: 'ambient-05', role: 'statement', at: [74.1, 62.83], size: 42, rotate: 3, events: ['bonder'] },
-  { id: 'ambient-06', role: 'event', at: [58.99, 75.83], size: 30, rotate: -2, events: ['bonder', 'cowos'] },
-  { id: 'ambient-07', role: 'entity', at: [35.31, 85.72], size: 34, rotate: -5, events: ['increase'] },
-  { id: 'ambient-08', role: 'statement', at: [62.22, 90.28], size: 42, rotate: 6, events: ['increase', 'cowos'] },
-  { id: 'ambient-09', role: 'statement', at: [39.44, 79.17], size: 42, rotate: -7, events: ['increase'] },
+  {
+    id: 'ambient-01',
+    role: 'entity',
+    at: [7.47, 29.83],
+    size: 35,
+    rotate: -8,
+    events: ['increase', 'adopt'],
+  },
+  {
+    id: 'ambient-02',
+    role: 'statement',
+    at: [12.29, 16.72],
+    size: 40,
+    rotate: 4,
+    events: ['adopt'],
+  },
+  {
+    id: 'ambient-03',
+    role: 'event',
+    at: [14.34, 36.5],
+    size: 44,
+    rotate: -4,
+    events: ['adopt', 'increase'],
+  },
+  {
+    id: 'ambient-04',
+    role: 'entity',
+    at: [94.34, 65.5],
+    size: 34,
+    rotate: 8,
+    opacity: 0.38,
+    events: ['bonder', 'cowos'],
+  },
+  {
+    id: 'ambient-05',
+    role: 'statement',
+    at: [74.1, 62.83],
+    size: 42,
+    rotate: 3,
+    events: ['bonder'],
+  },
+  {
+    id: 'ambient-06',
+    role: 'event',
+    at: [58.99, 75.83],
+    size: 30,
+    rotate: -2,
+    events: ['bonder', 'cowos'],
+  },
+  {
+    id: 'ambient-07',
+    role: 'entity',
+    at: [35.31, 85.72],
+    size: 34,
+    rotate: -5,
+    events: ['increase'],
+  },
+  {
+    id: 'ambient-08',
+    role: 'statement',
+    at: [62.22, 90.28],
+    size: 42,
+    rotate: 6,
+    events: ['increase', 'cowos'],
+  },
+  {
+    id: 'ambient-09',
+    role: 'statement',
+    at: [39.44, 79.17],
+    size: 42,
+    rotate: -7,
+    events: ['increase'],
+  },
   { id: 'ambient-10', role: 'event', at: [38.99, 94.17], size: 44, rotate: 5, events: ['cowos'] },
-  { id: 'ambient-11', role: 'entity', at: [64.41, 32.5], size: 34, rotate: -3, events: ['adopt', 'bonder'] },
-  { id: 'ambient-12', role: 'statement', at: [74.1, 26.94], size: 42, rotate: 7, events: ['adopt'] },
+  {
+    id: 'ambient-11',
+    role: 'entity',
+    at: [64.41, 32.5],
+    size: 34,
+    rotate: -3,
+    events: ['adopt', 'bonder'],
+  },
+  {
+    id: 'ambient-12',
+    role: 'statement',
+    at: [74.1, 26.94],
+    size: 42,
+    rotate: 7,
+    events: ['adopt'],
+  },
   { id: 'ambient-13', role: 'event', at: [87.71, 41.44], size: 38, rotate: -6, events: ['bonder'] },
-  { id: 'ambient-14', role: 'statement', at: [8.4, 73.94], size: 42, rotate: 2, events: ['increase'] },
-  { id: 'ambient-15', role: 'event', at: [18.16, 77.06], size: 44, rotate: -4, events: ['increase', 'adopt'] },
+  {
+    id: 'ambient-14',
+    role: 'statement',
+    at: [8.4, 73.94],
+    size: 42,
+    rotate: 2,
+    events: ['increase'],
+  },
+  {
+    id: 'ambient-15',
+    role: 'event',
+    at: [18.16, 77.06],
+    size: 44,
+    rotate: -4,
+    events: ['increase', 'adopt'],
+  },
   { id: 'ambient-16', role: 'event', at: [10.8, 57.39], size: 38, rotate: 5, events: ['increase'] },
   { id: 'ambient-17', role: 'event', at: [11.77, 86.17], size: 36, rotate: -5, events: ['cowos'] },
-  { id: 'ambient-18', role: 'statement', at: [55.27, 24.84], size: 42, rotate: 68, events: ['adopt'] },
-  { id: 'ambient-19', role: 'statement', at: [71.42, 13.03], size: 42, rotate: -3, events: ['bonder'] },
+  {
+    id: 'ambient-18',
+    role: 'statement',
+    at: [55.27, 24.84],
+    size: 42,
+    rotate: 68,
+    events: ['adopt'],
+  },
+  {
+    id: 'ambient-19',
+    role: 'statement',
+    at: [71.42, 13.03],
+    size: 42,
+    rotate: -3,
+    events: ['bonder'],
+  },
   { id: 'ambient-20', role: 'event', at: [53.06, 14.89], size: 44, rotate: 7, events: ['adopt'] },
-];
+]
 
 /**
  * The stars themselves. Three renders, each cropped to the same body-relative frame so
@@ -95,7 +201,7 @@ export const stars = {
   event: '/assets/trend/star-event.webp',
   statement: '/assets/trend/star-statement.webp',
   entity: '/assets/trend/star-entity.webp',
-};
+}
 
 /**
  * 주요 트렌드's constellation: one event at a time, taken apart into what it is made of,
@@ -125,6 +231,7 @@ export const stars = {
 export const constellationEvents = {
   increase: {
     id: 'increase',
+    layout: 'spread',
     label: '삼성전자, HBM4 생산라인 증설 완료',
     meta: '사건 · 9월 8일',
     related: ['adopt', 'bonder'],
@@ -138,6 +245,7 @@ export const constellationEvents = {
   },
   adopt: {
     id: 'adopt',
+    layout: 'orbit',
     label: '엔비디아, 차세대 가속기에 HBM4 채택',
     meta: '사건 · 9월 8일',
     related: ['increase', 'cowos'],
@@ -151,6 +259,7 @@ export const constellationEvents = {
   },
   bonder: {
     id: 'bonder',
+    layout: 'diagonal',
     label: '한미반도체, HBM 본더 수주 사상 최대',
     meta: '사건 · 9월 2일',
     related: ['increase', 'cowos'],
@@ -159,11 +268,16 @@ export const constellationEvents = {
       { id: 'bonder-tool', label: 'HBM 본더', meta: '장비' },
     ],
     statements: [
-      { id: 'bonder-say', label: '"수주 잔고가 사상 최대 수준이다"', meta: '발언 · 한미반도체 공시' },
+      {
+        id: 'bonder-say',
+        label: '"수주 잔고가 사상 최대 수준이다"',
+        meta: '발언 · 한미반도체 공시',
+      },
     ],
   },
   cowos: {
     id: 'cowos',
+    layout: 'crown',
     label: 'TSMC, CoWoS 생산능력 두 배 확대',
     meta: '사건 · 9월 4일',
     related: ['adopt', 'bonder'],
@@ -175,15 +289,10 @@ export const constellationEvents = {
       { id: 'cowos-say', label: '"패키징 생산능력을 두 배로 늘린다"', meta: '발언 · TSMC 발표' },
     ],
   },
-};
+}
 
 /** Where the walk starts. */
-export const constellationStart = 'increase';
-
-export const constellationCopy = {
-  caption: '한 사건을 이루는 것들',
-  hint: '큰 별이 사건, 가운데 별이 발언, 작은 별이 개체입니다. 둘레의 사건 별을 누르면 그 사건이 가운데로 옵니다.',
-};
+export const constellationStart = 'increase'
 
 /**
  * The slots a centre's nodes are dropped into, and the whole of the layout.
@@ -213,7 +322,136 @@ export const constellationSlots = [
   { role: 'entity', visual: 'entityLeft', at: [22.4, 61.56], hideNarrow: true },
   { role: 'entity', visual: 'entityTop', at: [65.38, 20.28], hideNarrow: true },
   { role: 'statement', visual: 'statement', at: [50, 78.11], atNarrow: [50, 76] },
-];
+]
+
+/** Decorative-star coordinates for each event composition. Keeping these near the
+ * perimeter leaves the event labels clear while letting every layout have its own sky. */
+export const ambientLayouts = {
+  spread: [
+    [4, 14],
+    [14, 7],
+    [28, 10],
+    [42, 5],
+    [58, 7],
+    [75, 6],
+    [91, 14],
+    [96, 27],
+    [94, 43],
+    [96, 60],
+    [91, 79],
+    [78, 91],
+    [64, 95],
+    [45, 94],
+    [29, 92],
+    [14, 88],
+    [5, 76],
+    [4, 59],
+    [5, 42],
+    [7, 27],
+  ],
+  orbit: [
+    [7, 12],
+    [22, 5],
+    [39, 8],
+    [58, 5],
+    [77, 8],
+    [92, 17],
+    [96, 34],
+    [93, 52],
+    [96, 70],
+    [87, 88],
+    [70, 94],
+    [52, 91],
+    [34, 95],
+    [16, 88],
+    [5, 73],
+    [8, 57],
+    [3, 39],
+    [11, 25],
+    [84, 25],
+    [82, 76],
+  ],
+  diagonal: [
+    [5, 11],
+    [20, 6],
+    [37, 7],
+    [54, 5],
+    [90, 9],
+    [96, 24],
+    [92, 39],
+    [97, 56],
+    [91, 75],
+    [96, 90],
+    [78, 94],
+    [62, 92],
+    [34, 95],
+    [16, 89],
+    [5, 78],
+    [8, 63],
+    [3, 47],
+    [8, 30],
+    [83, 15],
+    [70, 6],
+  ],
+  crown: [
+    [4, 10],
+    [16, 5],
+    [31, 8],
+    [68, 6],
+    [84, 5],
+    [96, 14],
+    [93, 29],
+    [97, 45],
+    [94, 58],
+    [96, 81],
+    [83, 93],
+    [66, 95],
+    [50, 93],
+    [34, 96],
+    [18, 91],
+    [5, 84],
+    [4, 48],
+    [7, 31],
+    [89, 44],
+    [11, 20],
+  ],
+}
+export const constellationLayouts = {
+  spread: { label: '펼침형', slots: constellationSlots },
+  orbit: {
+    label: '궤도형',
+    slots: [
+      { role: 'centre', visual: 'centre', at: [44, 51], atNarrow: [50, 43] },
+      { role: 'related', visual: 'relatedLeft', at: [18, 49], atNarrow: [25, 25] },
+      { role: 'related', visual: 'relatedRight', at: [78, 48], atNarrow: [75, 25] },
+      { role: 'entity', visual: 'entityLeft', at: [29, 21], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [69, 20], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [48, 80], atNarrow: [50, 74] },
+    ],
+  },
+  diagonal: {
+    label: '대각선형',
+    slots: [
+      { role: 'centre', visual: 'centre', at: [42, 53], atNarrow: [45, 43] },
+      { role: 'related', visual: 'relatedLeft', at: [19, 29], atNarrow: [24, 22] },
+      { role: 'related', visual: 'relatedRight', at: [71, 70], atNarrow: [76, 62] },
+      { role: 'entity', visual: 'entityLeft', at: [74, 19], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [20, 75], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [51, 84], atNarrow: [40, 78] },
+    ],
+  },
+  crown: {
+    label: '왕관형',
+    slots: [
+      { role: 'centre', visual: 'centre', at: [46, 64], atNarrow: [50, 55] },
+      { role: 'related', visual: 'relatedLeft', at: [25, 35], atNarrow: [25, 29] },
+      { role: 'related', visual: 'relatedRight', at: [72, 34], atNarrow: [75, 29] },
+      { role: 'entity', visual: 'entityLeft', at: [15, 68], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [84, 65], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [48, 18], atNarrow: [50, 81] },
+    ],
+  },
+}
 
 /**
  * What the right-hand panel shows for an event, keyed by the event's id. Structured after
@@ -350,7 +588,7 @@ export const eventPanels = {
       },
     ],
   },
-};
+}
 
 /** Copy for the panel's own furniture, which does not change with the event. */
 export const panelCopy = {
@@ -362,14 +600,16 @@ export const panelCopy = {
   save: '기사 저장',
   unsave: '저장 해제',
   fieldLabel: '사건 별자리',
-};
+  history: '나의 기록',
+}
 
 /** The coordinate space the component's slots are percentages of. */
-export const FIELD = { width: 1440, height: 960 };
+export const FIELD = { width: 1440, height: 960 }
 
 export const trendCopy = {
-  title: '주요 트렌드',
-  blurb: '사건 하나를 가운데 두고, 그 사건과 이어진 사건을 둘러 놓았습니다. 둘레의 별을 누르면 그 사건이 가운데로 옵니다.',
+  title: '오늘의 트렌드',
+  blurb:
+    '사건 하나를 가운데 두고, 그 사건과 이어진 사건을 둘러 놓았습니다. 둘레의 별을 누르면 그 사건이 가운데로 옵니다.',
   start: 'samsung',
   trailLabel: '지나온 사건',
   relatedLabel: (n) => `이어진 사건 ${n}개`,
@@ -378,7 +618,7 @@ export const trendCopy = {
   enterFull: '전체화면',
   exitFull: '전체화면 나가기',
   fullHint: 'Esc 로 나가기',
-};
+}
 
 /**
  * `lines` is what goes inside the star, broken where it should break — authored rather
@@ -471,7 +711,7 @@ export const events = [
     text: '원/달러 환율 상승이 반도체 수출 채산성을 끌어올렸다',
     date: '9월 6일',
   },
-];
+]
 
 /**
  * Undirected; `from`/`to` only say which end was written first. No event carries more
@@ -496,4 +736,4 @@ export const relations = [
   { from: 'micron', to: 'apple', label: '수요' },
   { from: 'commerce', to: 'asml', label: '규제' },
   { from: 'bok', to: 'won', label: '환율' },
-];
+]

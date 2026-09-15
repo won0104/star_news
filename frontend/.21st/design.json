@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "project": {
+    "name": "starlight-news-frontend",
+    "productType": null,
+    "stack": [
+      "react",
+      "vite"
+    ]
+  },
+  "sources": {
+    "tokens": [],
+    "components": [],
+    "assets": [
+      "public/assets",
+      "src/assets"
+    ],
+    "instructions": []
+  },
+  "design": {
+    "colorMode": "unknown",
+    "colors": {},
+    "typography": {},
+    "spacing": {},
+    "radius": {},
+    "shadows": {},
+    "motion": {},
+    "density": "unknown"
+  },
+  "components": {
+    "installed": [],
+    "preferredPrimitives": [],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [],
+    "avoid": []
+  },
+  "decisions": [
+    {
+      "scope": "foryou2",
+      "decision": "Use a warm-ivory editorial recommendation feed with border-separated rows, serif titles, navy actions, and a small gold star.",
+      "rationale": "Keeps the original cork-board recommendation page intact while providing the requested quiet magazine-style comparison view."
+    }
+  ],
+  "evidence": [
+    {
+      "fact": "project.stack:react",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:vite",
+      "source": "package.json"
+    }
+  ],
+  "generatedAt": "2026-09-15T16:19:44.201Z"
+}

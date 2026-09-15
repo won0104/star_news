@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { nightfall } from '../../data/trend';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { useSettingsValues } from '../../store/settings';
+import { SCREEN_TRANSITIONS } from '../../utils/motion';
 import { BackgroundVideo } from '../common/BackgroundVideo';
 import { TrendConstellation } from './TrendConstellation';
 import styles from './TrendStage.module.css';
@@ -37,13 +38,13 @@ import styles from './TrendStage.module.css';
  * undecoded frame, not a frame: seeking fires `seeked` before the decoder has produced
  * the picture, so anything measuring frames here has to wait for one.
  */
-export function TrendStage() {
+export function TrendStage({ playTransition = false }) {
   const [ready, setReady] = useState(false);
   const [ended, setEnded] = useState(false);
   const { reduceMotion } = useSettingsValues();
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const still = reduceMotion || prefersReducedMotion;
+  const still = !SCREEN_TRANSITIONS || !playTransition || reduceMotion || prefersReducedMotion;
   const settled = still || ended;
 
   return (
