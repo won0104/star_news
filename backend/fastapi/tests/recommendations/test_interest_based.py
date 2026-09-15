@@ -7,7 +7,7 @@ from app.recommendations import service
 
 TARGET_USER_ID = 8401
 SIMILAR_USER_ID = 8402
-EMBEDDING_DIMENSIONS = 768
+EMBEDDING_DIMENSIONS = 1024
 
 
 def _unit_vector(index: int) -> list[float]:

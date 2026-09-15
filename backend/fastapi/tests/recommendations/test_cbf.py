@@ -4,7 +4,7 @@ from app.database import _driver
 from app.recommendations import repository, service
 
 USER_ID = 8201
-EMBEDDING_DIMENSIONS = 768
+EMBEDDING_DIMENSIONS = 1024
 
 
 # 특정 인덱스만 1.0이고 나머지는 0인 단위벡터 (서로 직교 -> 코사인 유사도 0)
