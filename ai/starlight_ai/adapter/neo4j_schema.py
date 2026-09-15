@@ -5,6 +5,8 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
+from starlight_ai.entity_filter import is_noise_entity_name, normalize_entity_name
+
 ENTITY_TYPE_LABEL: dict[str, str] = {
     "PERSON": "Person",
     "LOCATION": "Location",
@@ -160,6 +162,11 @@ def adapt_to_schema(
         if kind in {"ENTITY", "LOCAL_ENTITY"}:
             et = props.get("entity_type") or props.get("entityType")
             et_str = str(et) if et else None
+            cname = _display_text(props, "canonical_name", "name", "text")
+            if is_noise_entity_name(cname):
+                warnings.append(f"dropped_noise_entity:{nid}:{cname!r}")
+                continue
+            cname = normalize_entity_name(cname) or cname
             if et_str and et_str.upper() == "ORGANIZATION":
                 warnings.append(f"entity_type_ORGANIZATION_unrefined:{nid}")
             nodes_out.append(
@@ -167,9 +174,7 @@ def adapt_to_schema(
                     "labels": _entity_labels(et_str),
                     "properties": {
                         "nodeId": nid,
-                        "canonicalName": _display_text(
-                            props, "canonical_name", "name", "text"
-                        ),
+                        "canonicalName": cname,
                         "entityType": et,
                     },
                 }
@@ -188,6 +193,11 @@ def adapt_to_schema(
                 label.upper() if label != "Entity" else None
             )
             et_str = str(et) if et else None
+            cname = _display_text(props, "canonical_name", "name", "text")
+            if is_noise_entity_name(cname):
+                warnings.append(f"dropped_noise_entity:{nid}:{cname!r}")
+                continue
+            cname = normalize_entity_name(cname) or cname
             if label == "Organization" and (not et_str or et_str.upper() == "ORGANIZATION"):
                 et_str = "ORGANIZATION"
                 warnings.append(f"entity_type_ORGANIZATION_unrefined:{nid}")
@@ -196,9 +206,7 @@ def adapt_to_schema(
                     "labels": _entity_labels(et_str),
                     "properties": {
                         "nodeId": nid,
-                        "canonicalName": _display_text(
-                            props, "canonical_name", "name", "text"
-                        ),
+                        "canonicalName": cname,
                         "entityType": et_str or et,
                     },
                 }

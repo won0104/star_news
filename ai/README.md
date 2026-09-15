@@ -113,29 +113,29 @@ AI는 **`ai/` 코어만** 제공한다. FastAPI·Neo4j 적재·`PUBLISHED_BY`는
 
 → 입출력·역할 분담·체크리스트: **[`FASTAPI_연동.md`](FASTAPI_연동.md)**
 
-### 코어 패키지 (`starlight_ai/`)
+### Neo4j 오프라인 번들 (로컬 GPU 배치)
 
-```text
-기사 1건
-  → 전처리 → KPF 분류(Topic) → HF KG → Event 임베딩
-  → 스키마형 JSON (nodes/edges + classification.topic + Event.embedding)
-```
-
-- import: `from starlight_ai import ArticleAnalyzer, process_article`
-- **서버는 CPU만** → `STARLIGHT_AI_DEVICE=cpu` (로컬만 `auto`/`cuda`)
-- 단위 테스트: `python -m pytest ai/tests -q` (모델 불필요)
-- 로컬 스모크 예:
+CSV 샘플 → 추론 → `nodes.jsonl` / `edges.jsonl` (서버 빈 DB 적재용):
 
 ```powershell
 cd ai
-$env:STARLIGHT_AI_DEVICE="auto"   # 서버에서는 cpu
 $env:PYTHONPATH="."
-python -m starlight_ai.cli `
+$env:STARLIGHT_AI_DEVICE="auto"
+python -m starlight_ai.cli_batch `
+  --csv "C:\Users\SSAFY\Desktop\ssafy_dataset_news_2024_1st_half.csv" `
+  --limit 1000 `
   --kg-dir "C:\Users\SSAFY\Desktop\gnews_api_test\artifacts\kg-extractor" `
   --hf-cache "C:\Users\SSAFY\Desktop\gnews_api_test\.cache\huggingface\hub" `
-  --input test_pipeline\article.json `
-  --output test_pipeline\starlight_result.json
+  --out "outputs\neo4j_bundle_1000"
+
+# 후처리 (Entity 노이즈·병합 + Event cosine dedup)
+python -m starlight_ai.cli_postprocess --bundle "outputs\neo4j_bundle_1000"
 ```
+
+**서버 업로드(약 109MB / 1000건 기준):** `nodes.jsonl`, `edges.jsonl`, `manifest.json`, `postprocess_report.json`  
+임베딩은 **KURE-v1 / 1024-d** (서버 V2 인덱스와 동일해야 함).
+
+배치만: `manifest.json`, `checkpoint.json`(재개용). `--save-raw`는 디버그용 per-article JSON(용량 큼, 서버 불필요).
 
 ## 아직 하지 않은 것
 

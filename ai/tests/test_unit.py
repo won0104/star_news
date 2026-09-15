@@ -10,8 +10,13 @@ import pytest
 AI_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AI_ROOT))
 
+import json
+from pathlib import Path
+
 from starlight_ai.adapter.neo4j_schema import adapt_to_schema
+from starlight_ai.batch.postprocess import postprocess_bundle
 from starlight_ai.device import resolve_device
+from starlight_ai.entity_filter import is_noise_entity_name
 from starlight_ai.preprocess import preprocess_content
 from starlight_ai.topic_map import topic_name_ko
 
@@ -21,6 +26,19 @@ def test_preprocess_keeps_sentence_lines():
     out = preprocess_content(raw)
     assert "서울시는" in out
     assert "@spam" not in out
+
+
+def test_noise_entity_filter():
+    assert is_noise_entity_name('"')
+    assert is_noise_entity_name('""')
+    assert is_noise_entity_name("그")
+    assert is_noise_entity_name("그녀")
+    assert is_noise_entity_name("형")
+    assert is_noise_entity_name("동생")
+    assert is_noise_entity_name(" 그 ")
+    assert not is_noise_entity_name("윤석열")
+    assert not is_noise_entity_name("더불어민주당")
+    assert not is_noise_entity_name("LG유플러스")
 
 
 def test_topic_name_ko_it_science():
@@ -71,6 +89,16 @@ def test_adapt_maps_v2_kinds_and_embedding():
                 "node_id": "ENT-2",
                 "kind": "ENTITY",
                 "properties": {"canonical_name": "김씨", "entity_type": "PERSON"},
+            },
+            {
+                "node_id": "ENT-NOISE-1",
+                "kind": "ENTITY",
+                "properties": {"canonical_name": '"', "entity_type": "PERSON"},
+            },
+            {
+                "node_id": "ENT-NOISE-2",
+                "kind": "ENTITY",
+                "properties": {"canonical_name": "그", "entity_type": "PERSON"},
             },
             {
                 "node_id": "TIME-1",
@@ -139,9 +167,62 @@ def test_adapt_maps_v2_kinds_and_embedding():
     assert org["properties"]["entityType"] == "ORGANIZATION"
     person = next(n for n in out["nodes"] if n["properties"].get("canonicalName") == "김씨")
     assert "Person" in person["labels"]
+    assert not any(n["properties"].get("canonicalName") in {'"', "그"} for n in out["nodes"])
+    assert any("dropped_noise_entity" in w for w in out["warnings"])
     time_n = next(n for n in out["nodes"] if "Time" in n["labels"])
     assert time_n["properties"]["timeKey"] == "2026-09-08"
     edge_types = {e["type"] for e in out["edges"]}
     assert "CONTAINS_STATEMENT" in edge_types
     assert "MEMBER_OF_EVENT" not in edge_types
     assert "PUBLISHED_BY" not in edge_types
+
+
+def test_postprocess_merges_entity_and_drops_noise(tmp_path: Path):
+    nodes = [
+        {"labels": ["Entity"], "properties": {"nodeId": "E1", "canonicalName": "그"}},
+        {"labels": ["Entity"], "properties": {"nodeId": "E2", "canonicalName": "민주당"}},
+        {"labels": ["Entity"], "properties": {"nodeId": "E3", "canonicalName": "민주당"}},
+        {"labels": ["Event"], "properties": {"nodeId": "V1", "title": "a"}},
+    ]
+    edges = [
+        {
+            "edgeId": "x1",
+            "type": "MENTIONS",
+            "startNodeId": "A1",
+            "endNodeId": "E1",
+            "properties": {},
+        },
+        {
+            "edgeId": "x2",
+            "type": "ACTOR",
+            "startNodeId": "V1",
+            "endNodeId": "E2",
+            "properties": {},
+        },
+        {
+            "edgeId": "x3",
+            "type": "ACTOR",
+            "startNodeId": "V1",
+            "endNodeId": "E3",
+            "properties": {},
+        },
+    ]
+    d = tmp_path
+    (d / "nodes.jsonl").write_text(
+        "\n".join(json.dumps(n, ensure_ascii=False) for n in nodes), encoding="utf-8"
+    )
+    (d / "edges.jsonl").write_text(
+        "\n".join(json.dumps(e, ensure_ascii=False) for e in edges), encoding="utf-8"
+    )
+    report = postprocess_bundle(d, backup=False)
+    out_nodes = [
+        json.loads(line)
+        for line in (d / "nodes.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    ent_ids = {n["properties"]["nodeId"] for n in out_nodes if "Entity" in n["labels"]}
+    assert "E1" not in ent_ids
+    assert len(ent_ids) == 1
+    assert ent_ids <= {"E2", "E3"}
+    assert report["noise_entities_dropped"] == 1
+    assert report["entity_merge"]["entities_merged_away"] == 1
