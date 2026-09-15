@@ -1,9 +1,14 @@
-# 로컬 개발용 DB 컨테이너 (MySQL / Redis / Neo4j).
+# 로컬 개발용 컨테이너 (MySQL / Redis / Neo4j / FastAPI).
 # 배포용 docker-compose.yml 과 별개. backend/spring/.env 의 터널 포트(13306/16379/17687)를 그대로 재사용한다.
+# Spring 은 IDE 에서 직접 띄우는 것을 전제로 여기에 두지 않았다.
 #
 #   실행:   docker compose -f docker-compose.local.yml up -d
+#   DB만:   docker compose -f docker-compose.local.yml up -d mysql redis neo4j
 #   중지:   docker compose -f docker-compose.local.yml down          (데이터 유지)
 #   초기화: docker compose -f docker-compose.local.yml down -v       (볼륨까지 삭제)
+#
+# FastAPI 는 backend/fastapi/.env 가 있어야 뜬다. 그 파일의 INTERNAL_API_KEY 는
+# backend/spring/.env 의 값과 같아야 하며, 다르면 Spring 의 모든 호출이 401 로 거절된다.
 
 name: s15p21e206-local
 
@@ -50,6 +55,24 @@ services:
       timeout: 5s
       retries: 10
       start_period: 40s
+
+  # AI 연동(기사 분석·User Graph 동기화)을 로컬에서 확인할 때 쓴다.
+  # Spring 이 app.fastapi.base-url 기본값으로 http://localhost:8000 을 보므로 같은 포트로 연다.
+  backend-fastapi:
+    build:
+      context: ./backend/fastapi
+    image: backend-fastapi:local
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - ./backend/fastapi/.env
+    environment:
+      # .env 의 NEO4J_URI 는 호스트에서 쓰는 터널 포트(17687)라 컨테이너 안에서는 닿지 않는다.
+      # 같은 compose 네트워크의 서비스명으로 덮어쓴다. environment 가 env_file 보다 우선한다.
+      NEO4J_URI: bolt://neo4j:7687
+    depends_on:
+      neo4j:
+        condition: service_healthy
 
 volumes:
   local_mysql_data:
