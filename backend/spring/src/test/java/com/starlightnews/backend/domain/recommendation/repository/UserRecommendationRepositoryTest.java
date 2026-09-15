@@ -152,6 +152,18 @@ class UserRecommendationRepositoryTest {
 	}
 
 	@Test
+	void 기준_시각과_정확히_같은_회차는_남긴다() {
+		// 경계에서 하루치가 통째로 사라지지 않도록 고정한다.
+		LocalDateTime threshold = AVAILABLE_AT.minusDays(7);
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, threshold));
+
+		assertThat(repository.deleteOlderThan(threshold)).isZero();
+		entityManager.clear();
+
+		assertThat(repository.findByUserIdAndAvailableAtOrderByRankAsc(1L, threshold)).hasSize(1);
+	}
+
+	@Test
 	void 보관_기간이_지난_회차를_지운다() {
 		LocalDateTime old = AVAILABLE_AT.minusDays(8);
 		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, old));
