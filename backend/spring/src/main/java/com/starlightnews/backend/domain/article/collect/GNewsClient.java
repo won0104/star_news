@@ -7,6 +7,7 @@ import com.starlightnews.backend.domain.article.dto.GNewsArticlesResponse;
 import com.starlightnews.backend.domain.article.exception.ArticleCollectErrorCode;
 import com.starlightnews.backend.domain.article.support.GNewsArticleMapper;
 import com.starlightnews.backend.global.error.BusinessException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -26,8 +27,9 @@ public class GNewsClient {
 	private final RestClient restClient;
 	private final GNewsProperties properties;
 
-	public GNewsClient(RestClient.Builder restClientBuilder, GNewsProperties properties) {
-		this.restClient = restClientBuilder.baseUrl(properties.baseUrl()).build();
+	public GNewsClient(@Qualifier("gNewsRestClient") RestClient gNewsRestClient,
+			GNewsProperties properties) {
+		this.restClient = gNewsRestClient;
 		this.properties = properties;
 	}
 

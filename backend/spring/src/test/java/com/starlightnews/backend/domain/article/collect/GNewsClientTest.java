@@ -34,7 +34,7 @@ class GNewsClientTest {
 	void setUp() {
 		RestClient.Builder builder = RestClient.builder();
 		server = MockRestServiceServer.bindTo(builder).build();
-		client = new GNewsClient(builder, new GNewsProperties(
+		client = new GNewsClient(builder.baseUrl(BASE_URL).build(), new GNewsProperties(
 				BASE_URL, "test-api-key", "ko", "kr", 10,
 				List.of("business"), Duration.ofSeconds(5)));
 	}

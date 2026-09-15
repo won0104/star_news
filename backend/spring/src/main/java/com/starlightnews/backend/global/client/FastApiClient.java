@@ -1,0 +1,115 @@
+package com.starlightnews.backend.global.client;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.starlightnews.backend.global.error.BusinessException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
+
+/**
+ * FastAPI 내부 API(/internal/v1) 호출 창구.
+ *
+ * <p>모든 요청에 내부 서비스 인증 헤더를 붙인다. FastAPI 는 이 값이 자신의 INTERNAL_API_KEY 와
+ * 정확히 일치하지 않으면 401 로 거절한다.
+ *
+ * <p>FastAPI 는 실패를 {@code {"code": ..., "message": ...}} 로 돌려준다. 그 code 를 로그에 남겨
+ * 분석 실패(EXTRACTION_FAILED)인지 Neo4j 장애(NEO4J_UNAVAILABLE)인지 구분할 수 있게 한다.
+ */
+@Slf4j
+@Component
+public class FastApiClient {
+
+	/** FastAPI dependencies.verify_internal_service 가 읽는 헤더. */
+	public static final String INTERNAL_API_KEY_HEADER = "X-Internal-Api-Key";
+
+	private final RestClient restClient;
+	private final FastApiProperties properties;
+	private final ObjectMapper objectMapper;
+
+	public FastApiClient(@Qualifier("fastApiRestClient") RestClient fastApiRestClient,
+			FastApiProperties properties, ObjectMapper objectMapper) {
+		this.restClient = fastApiRestClient;
+		this.properties = properties;
+		this.objectMapper = objectMapper;
+	}
+
+	/**
+	 * FastAPI 내부 API 에 POST 한다.
+	 *
+	 * @param path         /internal/v1 이후 경로 (예: {@code /internal/v1/articles/analyze})
+	 * @throws BusinessException 호출에 실패한 경우. 원인별로 {@link InternalApiErrorCode} 를 구분해 던진다
+	 */
+	public <T> T post(String path, Object body, Class<T> responseType) {
+		if (!properties.isConfigured()) {
+			// 키 없이 부르면 FastAPI 가 401 로 거절한다. 굳이 호출하지 않고 같은 이유로 끊는다.
+			log.warn("FastAPI 내부 API 키가 설정되지 않았습니다. (path={})", path);
+			throw new BusinessException(InternalApiErrorCode.INTERNAL_API_UNAUTHORIZED);
+		}
+
+		try {
+			return restClient.post()
+					.uri(path)
+					.header(INTERNAL_API_KEY_HEADER, properties.apiKey())
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(body)
+					.retrieve()
+					.onStatus(HttpStatusCode::isError, (request, response) -> {
+						throw new BusinessException(toErrorCode(path, response));
+					})
+					.body(responseType);
+		} catch (ResourceAccessException networkFailure) {
+			// 연결 실패·타임아웃. 다음 주기에 다시 시도한다.
+			log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, networkFailure.getMessage());
+			throw new BusinessException(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
+		}
+	}
+
+	private InternalApiErrorCode toErrorCode(String path, ClientHttpResponse response) {
+		HttpStatusCode status = readStatus(response);
+		log.warn("FastAPI 오류 응답 (path={}, status={}, code={})", path, status, readErrorCode(response));
+
+		if (status.value() == 401 || status.value() == 403) {
+			return InternalApiErrorCode.INTERNAL_API_UNAUTHORIZED;
+		}
+		if (status.value() == 503) {
+			return InternalApiErrorCode.INTERNAL_API_UNAVAILABLE;
+		}
+		if (status.is4xxClientError()) {
+			return InternalApiErrorCode.INTERNAL_API_BAD_REQUEST;
+		}
+		return InternalApiErrorCode.INTERNAL_API_FAILED;
+	}
+
+	private HttpStatusCode readStatus(ClientHttpResponse response) {
+		try {
+			return response.getStatusCode();
+		} catch (IOException unreadable) {
+			return HttpStatusCode.valueOf(500);
+		}
+	}
+
+	/** FastAPI 가 준 code 를 뽑는다. 읽을 수 없으면 null 을 돌려주고 상태 코드만으로 판단한다. */
+	private String readErrorCode(ClientHttpResponse response) {
+		try {
+			String body = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
+			if (body.isBlank()) {
+				return null;
+			}
+			JsonNode node = objectMapper.readTree(body);
+			// AppException 계열은 code, 인증 실패는 FastAPI 기본 형식이라 detail 로 온다.
+			return node.hasNonNull("code") ? node.get("code").asText() : node.path("detail").asText(null);
+		} catch (IOException unreadable) {
+			return null;
+		}
+	}
+}
