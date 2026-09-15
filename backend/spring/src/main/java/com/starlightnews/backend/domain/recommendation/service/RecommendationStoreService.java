@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.starlightnews.backend.domain.recommendation.domain.RecommendationCycleWindow;
 import com.starlightnews.backend.domain.recommendation.domain.UserRecommendation;
+import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateResponse;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateResponse.Item;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateResponse.UserResult;
 import com.starlightnews.backend.domain.recommendation.repository.RecommendationEventRepository;
@@ -39,6 +40,27 @@ public class RecommendationStoreService {
 	 * @param results 사용자별 추천 목록
 	 * @param window  이 회차의 시각 정보
 	 */
+	@Transactional
+	public RecommendationStoreResult store(RecommendationCalculateResponse response,
+			RecommendationCycleWindow window) {
+		verifyCycleMatches(response, window);
+		return store(response.results(), window);
+	}
+
+	/**
+	 * 응답에 실려 온 회차가 우리가 정한 회차와 같은지 본다.
+	 *
+	 * <p>회차는 우리가 계산 시각으로 정하고 요청에도 같은 값을 실어 보내므로 정상이라면 늘 일치한다.
+	 * 다르다면 요청과 응답이 어긋났다는 뜻이라, 저장은 우리 값으로 진행하되 흔적을 남긴다.
+	 */
+	private void verifyCycleMatches(RecommendationCalculateResponse response, RecommendationCycleWindow window) {
+		String answered = response.cycle();
+		if (answered != null && !answered.equalsIgnoreCase(window.cycle().name())) {
+			log.warn("응답의 회차가 요청과 다릅니다. 저장은 요청 기준으로 합니다. (요청={}, 응답={})",
+					window.cycle(), answered);
+		}
+	}
+
 	@Transactional
 	public RecommendationStoreResult store(List<UserResult> results, RecommendationCycleWindow window) {
 		if (results.isEmpty()) {

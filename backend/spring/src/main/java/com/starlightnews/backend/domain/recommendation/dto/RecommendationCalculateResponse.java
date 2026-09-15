@@ -47,4 +47,9 @@ public record RecommendationCalculateResponse(Data data) {
 	public List<UserResult> results() {
 		return data == null ? List.of() : data.results();
 	}
+
+	/** FastAPI 가 답한 회차. 요청에 실어 보낸 값과 같아야 한다. */
+	public String cycle() {
+		return data == null ? null : data.cycle();
+	}
 }
