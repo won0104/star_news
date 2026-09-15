@@ -105,6 +105,10 @@ public class FastApiClient {
 		if (status.value() == 401 || status.value() == 403) {
 			return InternalApiErrorCode.INTERNAL_API_UNAUTHORIZED;
 		}
+		if (status.value() == 409) {
+			// 이미 더 최신 상태가 반영돼 있다는 뜻이다. 다른 4xx 와 뭉뚱그리면 호출자가 못 가른다.
+			return InternalApiErrorCode.INTERNAL_API_CONFLICT;
+		}
 		if (status.value() == 503) {
 			return InternalApiErrorCode.INTERNAL_API_UNAVAILABLE;
 		}
