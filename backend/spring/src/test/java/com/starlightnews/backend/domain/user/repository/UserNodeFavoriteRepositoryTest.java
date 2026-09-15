@@ -6,6 +6,8 @@ import java.util.List;
 import com.starlightnews.backend.domain.user.domain.UserNodeFavorite;
 import com.starlightnews.backend.domain.user.domain.UserNodeFavoriteId;
 import com.starlightnews.backend.global.enums.NodeType;
+import com.starlightnews.backend.support.TestFixtures;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,11 @@ class UserNodeFavoriteRepositoryTest {
 
 	@Autowired
 	private TestEntityManager entityManager;
+
+	@BeforeEach
+	void insertReferencedRows() {
+		TestFixtures.insertUsers(entityManager, 1L, 2L);
+	}
 
 	private void saveFavorite(long userId, NodeType nodeType, String nodeId) {
 		saveFavorite(userId, nodeType, nodeId, LocalDateTime.now());

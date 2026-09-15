@@ -9,6 +9,8 @@ import com.starlightnews.backend.domain.user.domain.UserArticleFavorite;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository.ArticleBookmarkRow;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
+import com.starlightnews.backend.support.TestFixtures;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,12 @@ class UserArticleFavoriteRepositoryTest {
 
 	@Autowired
 	private TestEntityManager entityManager;
+
+	@BeforeEach
+	void insertReferencedRows() {
+		TestFixtures.insertUsers(entityManager, 1L, 2L);
+		TestFixtures.insertArticles(entityManager, 10L, 20L, 30L);
+	}
 
 	private void favorite(long userId, long articleId) {
 		favorite(userId, articleId, LocalDateTime.now());

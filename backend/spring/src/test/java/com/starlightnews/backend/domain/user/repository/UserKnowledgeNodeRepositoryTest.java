@@ -6,6 +6,8 @@ import java.util.List;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNodeId;
 import com.starlightnews.backend.global.enums.NodeType;
+import com.starlightnews.backend.support.TestFixtures;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -28,6 +30,11 @@ class UserKnowledgeNodeRepositoryTest {
 
 	@Autowired
 	private TestEntityManager entityManager;
+
+	@BeforeEach
+	void insertReferencedRows() {
+		TestFixtures.insertUsers(entityManager, 1L, 2L);
+	}
 
 	private UserKnowledgeNodeId id(long userId, NodeType nodeType, String nodeId) {
 		return new UserKnowledgeNodeId(userId, nodeType, nodeId);
