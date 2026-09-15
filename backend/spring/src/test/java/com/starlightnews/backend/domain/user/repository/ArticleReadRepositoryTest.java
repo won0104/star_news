@@ -7,6 +7,8 @@ import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.domain.NewsOrganization;
 import com.starlightnews.backend.domain.user.domain.ArticleRead;
 import com.starlightnews.backend.domain.user.domain.ArticleReadId;
+import com.starlightnews.backend.support.TestFixtures;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -29,6 +31,11 @@ class ArticleReadRepositoryTest {
 
 	@Autowired
 	private TestEntityManager entityManager;
+
+	@BeforeEach
+	void insertReferencedRows() {
+		TestFixtures.insertUsers(entityManager, 1L, 2L);
+	}
 
 	private Article article(NewsOrganization org, String title, String topicCode) {
 		return article(org, title, topicCode, null);
@@ -229,5 +236,62 @@ class ArticleReadRepositoryTest {
 
 		assertThat(page).extracting(ArticleReadRepository.HistoryRow::getArticleId)
 				.containsExactly(a1.getArticleId()); // SOCIETY(a3)는 필터로 제외, ECONOMY 중 t2 이전인 a1만
+	}
+
+	@Test
+	void upsertRead는_처음이면_click_count_1로_INSERT하고_1을_반환한다() {
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article article = article(org, "제목1", "ECONOMY");
+		LocalDateTime now = LocalDateTime.of(2026, 8, 29, 9, 0);
+		entityManager.flush();
+
+		int affected = articleReadRepository.upsertRead(1L, article.getArticleId(), now);
+		entityManager.clear();
+
+		assertThat(affected).isEqualTo(1); // INSERT
+		ArticleRead found = entityManager.find(ArticleRead.class,
+				new ArticleReadId(1L, article.getArticleId()));
+		assertThat(found.getClickCount()).isEqualTo(1);
+		assertThat(found.getFirstReadAt()).isEqualTo(now);
+		assertThat(found.getLastReadAt()).isEqualTo(now);
+	}
+
+	@Test
+	void upsertRead는_재열람이면_first_read_at을_유지하고_2를_반환한다() {
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article article = article(org, "제목1", "ECONOMY");
+		LocalDateTime first = LocalDateTime.of(2026, 8, 29, 9, 0);
+		LocalDateTime later = LocalDateTime.of(2026, 8, 31, 14, 30);
+		ArticleReadId id = new ArticleReadId(1L, article.getArticleId());
+		entityManager.persist(new ArticleRead(id, first, first, 1));
+		entityManager.flush();
+
+		int affected = articleReadRepository.upsertRead(1L, article.getArticleId(), later);
+		entityManager.clear();
+
+		assertThat(affected).isEqualTo(2); // 기존 행 갱신
+		ArticleRead reloaded = entityManager.find(ArticleRead.class, id);
+		assertThat(reloaded.getClickCount()).isEqualTo(2);
+		assertThat(reloaded.getLastReadAt()).isEqualTo(later);
+		assertThat(reloaded.getFirstReadAt()).isEqualTo(first);
+	}
+
+	@Test
+	void upsertRead는_같은_기사라도_다른_사용자의_Row는_건드리지_않는다() {
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article article = article(org, "제목1", "ECONOMY");
+		LocalDateTime first = LocalDateTime.of(2026, 8, 29, 9, 0);
+		LocalDateTime later = LocalDateTime.of(2026, 8, 31, 14, 30);
+		ArticleReadId others = new ArticleReadId(2L, article.getArticleId());
+		entityManager.persist(new ArticleRead(new ArticleReadId(1L, article.getArticleId()), first, first, 1));
+		entityManager.persist(new ArticleRead(others, first, first, 1));
+		entityManager.flush();
+
+		articleReadRepository.upsertRead(1L, article.getArticleId(), later);
+		entityManager.clear();
+
+		ArticleRead untouched = entityManager.find(ArticleRead.class, others);
+		assertThat(untouched.getClickCount()).isEqualTo(1);
+		assertThat(untouched.getLastReadAt()).isEqualTo(first);
 	}
 }

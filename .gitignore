@@ -42,6 +42,8 @@ coverage/
 *.tsbuildinfo
 
 # Python / AI
+# Offline Neo4j bundles (100MB+ JSONL) — upload to server via scp, not Git
+ai/outputs/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -86,3 +88,7 @@ temp/
 *.tmp
 *.bak
 *.orig
+
+
+# data Log & test Logs
+ai/outputs/

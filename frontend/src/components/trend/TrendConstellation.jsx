@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  ambientStars,
   constellationEvents,
   constellationSlots,
   constellationStart,
@@ -27,6 +28,12 @@ const ROLE_STAR = {
   related: stars.event,
   entity: stars.entity,
   statement: stars.statement,
+};
+
+const AMBIENT_ART = {
+  event: trendFigmaAssets.relatedLeftSticker,
+  entity: trendFigmaAssets.entitySticker,
+  statement: trendFigmaAssets.statementSticker,
 };
 
 const VISUAL_LAYERS = {
@@ -148,6 +155,26 @@ export function TrendConstellation() {
 
       <div className={styles.canvas}>
         <img className={styles.relations} src={trendFigmaAssets.relations} alt="" aria-hidden />
+
+        <div className={styles.ambientLayer} aria-hidden>
+          {ambientStars.map((star) => (
+            <span
+              key={star.id}
+              className={`${styles.ambientStar} ${styles[`ambient${star.role[0].toUpperCase()}${star.role.slice(1)}`]}`}
+              data-star-id={star.id}
+              data-related-events={star.events.join(' ')}
+              style={{
+                left: `${star.at[0]}%`,
+                top: `${star.at[1]}%`,
+                width: `${star.size / 14.4}cqw`,
+                opacity: star.opacity ?? 0.9,
+                transform: `translate(-50%, -50%) rotate(${star.rotate}deg)`,
+              }}
+            >
+              <img src={AMBIENT_ART[star.role]} alt="" />
+            </span>
+          ))}
+        </div>
 
         <svg className={styles.mobileLinks} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
           {nodes.slice(1).map((node) => (

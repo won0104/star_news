@@ -42,12 +42,13 @@ public class UserKnowledgeNode {
 	@Column(name = "last_seen_at", nullable = false)
 	private LocalDateTime lastSeenAt;
 
-	private UserKnowledgeNode(UserKnowledgeNodeId id, String nodeLabel, String topicCode, LocalDateTime now) {
+	private UserKnowledgeNode(UserKnowledgeNodeId id, String nodeLabel, String topicCode,
+			int readArticleCount, int nodeClickCount, LocalDateTime now) {
 		this.id = id;
 		this.nodeLabel = nodeLabel;
 		this.topicCode = topicCode;
-		this.readArticleCount = 0;
-		this.nodeClickCount = 1;
+		this.readArticleCount = readArticleCount;
+		this.nodeClickCount = nodeClickCount;
 		this.firstSeenAt = now;
 		this.lastSeenAt = now;
 	}
@@ -55,7 +56,17 @@ public class UserKnowledgeNode {
 	/** 개인 Node 가 아직 없을 때, 첫 클릭으로 새 Row 를 만든다. click_count=1, read_article_count=0. */
 	public static UserKnowledgeNode forFirstClick(UserKnowledgeNodeId id, String nodeLabel, String topicCode,
 			LocalDateTime now) {
-		return new UserKnowledgeNode(id, nodeLabel, topicCode, now);
+		return new UserKnowledgeNode(id, nodeLabel, topicCode, 0, 1, now);
+	}
+
+	/**
+	 * 개인 Node 가 아직 없을 때, 기사 열람으로 새 Row 를 만든다. read_article_count=1, click_count=0.
+	 * 이 기사가 해당 Node 를 건드린 첫 고유 기사이므로 재열람이더라도 1 로 시작한다.
+	 * (운영 경로는 UserKnowledgeNodeRepository#upsertRead 가 쓰고, 이 팩토리는 테스트 픽스처용이다)
+	 */
+	public static UserKnowledgeNode forFirstRead(UserKnowledgeNodeId id, String nodeLabel, String topicCode,
+			LocalDateTime now) {
+		return new UserKnowledgeNode(id, nodeLabel, topicCode, 1, 0, now);
 	}
 
 	/** 기존 Row 에 클릭 1회를 더한다. click_count +1, last_seen_at 갱신. 나머지 값은 유지. */

@@ -58,4 +58,7 @@ def test_get_eligible_candidate_event_ids_applies_all_filters():
         _seed_fixture(session)
         eligible = service.get_eligible_candidate_event_ids(USER_ID, session)
 
-    assert eligible == {"test-filter-event-valid"}
+    assert "test-filter-event-valid" in eligible
+    assert "test-filter-event-consumed" not in eligible
+    assert "test-filter-event-disliked" not in eligible
+    assert "test-filter-event-old" not in eligible

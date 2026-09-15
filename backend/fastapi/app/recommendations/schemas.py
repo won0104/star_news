@@ -10,3 +10,8 @@ class CFCandidate(BaseModel):
 class CBFCandidate(BaseModel):
     event_id: str
     content_score: float
+
+# 최종 추천 결과 하나 - 콘텐츠 점수/CF 점수를 가중합한 최종 점수
+class ScoredEvent(BaseModel):
+    event_id: str
+    score: float

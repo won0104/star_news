@@ -1,5 +1,6 @@
 import { paneNotes } from '../../data/world';
 import { TrendStage } from '../trend/TrendStage';
+import { HistoryPane } from './HistoryPane';
 import { RecommendPane } from './RecommendPane';
 import { ReportPane } from './ReportPane';
 import styles from './ViewPane.module.css';
@@ -24,8 +25,9 @@ export function ViewPane({ view, settled = true }) {
     <div className={styles.page}>
       {view === 'trend' && <TrendStage />}
       {view === 'foryou' && <RecommendPane settled={settled} />}
+      {view === 'log' && <HistoryPane />}
       {view === 'report' && <ReportPane />}
-      {paneNotes[view] && <p className={styles.stub}>{paneNotes[view]}</p>}
+      {view !== 'log' && paneNotes[view] && <p className={styles.stub}>{paneNotes[view]}</p>}
     </div>
   );
 }

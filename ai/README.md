@@ -19,16 +19,18 @@ GPU는 없다. 모델 가중치는 Git/이미지에 넣지 않고 volume에만 �
 
 ```text
 ai-cpu-models (/models)
-├── artifacts/kg-extractor/   # KG 번들 (config, runtime, weights…)
+├── artifacts/kg-extractor/   # 팀원 HF 번들 (sysy9292/… heads·config·runtime)
 └── cache/hub/                # HF hub 캐시 (models--*)
-    ├── models--kakaobank--kf-deberta-base
+    ├── models--kakaobank--kf-deberta-base   # 번들용 동결 backbone (번들에 미포함)
     ├── models--jinmang2--kpfbert
     ├── models--KPF--KPF-bert-cls1
     ├── models--KPF--KPF-bert-cls2
-    └── models--KPF--KPF-bert-cls3
+    ├── models--KPF--KPF-bert-cls3
+    └── models--nlpai-lab--KURE-v1           # Event 임베딩 (1024-d)
 ```
 
-디스크 합계 약 **6.1GB**. 추론은 `HF_HUB_OFFLINE=1` / `local_files_only`로 **재다운로드하지 않는다**.
+`kakaobank/kf-deberta-base`는 팀원 KG의 **베이스**이지, 기사 KG 추출기 자체가 아니다.  
+Event 임베딩 기본 모델은 **서버 volume의 `nlpai-lab/KURE-v1`(1024-d)** 이다.
 
 ### 이미지 빌드
 
@@ -105,15 +107,46 @@ sudo docker run --rm \
 운영 가정(15–30분 주기, 파이프라인 투입 &lt;200건)과도 맞는 편이다.
 긴 기사·동시 요청·KPF+KG 동시 상주는 peak가 더 커질 수 있으니 별도 측정이 필요하다.
 
+## FastAPI 연동 (계약)
+
+AI는 **`ai/` 코어만** 제공한다. FastAPI·Neo4j 적재·`PUBLISHED_BY`는 백엔드 담당.
+
+→ 입출력·역할 분담·체크리스트: **[`FASTAPI_연동.md`](FASTAPI_연동.md)**
+
+### Neo4j 오프라인 번들 (로컬 GPU 배치)
+
+CSV 샘플 → 추론 → `nodes.jsonl` / `edges.jsonl` (서버 빈 DB 적재용):
+
+```powershell
+cd ai
+$env:PYTHONPATH="."
+$env:STARLIGHT_AI_DEVICE="auto"
+python -m starlight_ai.cli_batch `
+  --csv "C:\Users\SSAFY\Desktop\ssafy_dataset_news_2024_1st_half.csv" `
+  --limit 1000 `
+  --kg-dir "C:\Users\SSAFY\Desktop\gnews_api_test\artifacts\kg-extractor" `
+  --hf-cache "C:\Users\SSAFY\Desktop\gnews_api_test\.cache\huggingface\hub" `
+  --out "outputs\neo4j_bundle_1000"
+
+# 후처리 (Entity 노이즈·병합 + Event cosine dedup)
+python -m starlight_ai.cli_postprocess --bundle "outputs\neo4j_bundle_1000"
+```
+
+**서버 업로드(약 109MB / 1000건 기준):** `nodes.jsonl`, `edges.jsonl`, `manifest.json`, `postprocess_report.json`  
+임베딩은 **KURE-v1 / 1024-d** (서버 V2 인덱스와 동일해야 함).
+
+배치만: `manifest.json`, `checkpoint.json`(재개용). `--save-raw`는 디버그용 per-article JSON(용량 큼, 서버 불필요).
+
 ## 아직 하지 않은 것
 
 - 본편 `docker-compose.yml`에 AI 서비스 편입
-- Spring / FastAPI / MySQL / Neo4j 파이프라인 연결
-- DB 스키마·코드값 매핑 (KPF 한글 라벨 ↔ `TopicCode` 등)
+- FastAPI `articles/analyze` stub 연결 (FastAPI 담당)
+- Neo4j MERGE (적재 담당)
 - 모델 revision을 `cpu_settings` 수준으로 문서 외 추가 고정 관리
 
 ## 관련 파일
 
+- [`FASTAPI_연동.md`](FASTAPI_연동.md) — FastAPI 담당용 입출력 계약
 - [`Dockerfile`](Dockerfile) — CPU 런타임 이미지
 - [`requirements-cpu.txt`](requirements-cpu.txt) — torch 제외 pip 의존성
 - [`test_pipeline/`](test_pipeline/) — 최소 추론 확인 예제
