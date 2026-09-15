@@ -1,9 +1,22 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-PROJECT_DIR="/var/lib/jenkins/workspace/S15P21E206-ci"
+# Jenkins workspace by default; local smoke: CI_PROJECT_DIR=/path/to/repo
+PROJECT_DIR="${CI_PROJECT_DIR:-/var/lib/jenkins/workspace/S15P21E206-ci}"
+COMPOSE_FILE="${PROJECT_DIR}/docker-compose.ci.yml"
+COMPOSE_PROJECT="s15p21e206-ci"
+
+# CI compose credentials (must match docker-compose.ci.yml)
+CI_MYSQL_DB="ci_mysqldb"
+CI_MYSQL_USER="ci"
+CI_MYSQL_PASSWORD="ci-secret"
+CI_MYSQL_ROOT_PASSWORD="ci-root-secret"
+CI_NEO4J_USER="neo4j"
+CI_NEO4J_PASSWORD="ci-neo4j-secret"
+CI_INTERNAL_API_KEY="ci-internal-api-key"
 
 echo "=== Starlight News CI Start ==="
+echo "PROJECT_DIR=${PROJECT_DIR}"
 
 cd "$PROJECT_DIR"
 
@@ -11,11 +24,23 @@ run_in_container() {
     local image="$1"
     local source_dir="$2"
     local inner_script="$3"
-
-    docker run --rm \
+    shift 3 || true
+    # remaining args: extra docker run flags (e.g. --network, -e)
+    docker run --rm "$@" \
         -v "${source_dir}:/src:ro" \
         "$image" \
         sh -c "$inner_script"
+}
+
+compose_ci() {
+    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" "$@"
+}
+
+cleanup_ci_db() {
+    echo "--- CI DB cleanup ---"
+    if [[ -f "$COMPOSE_FILE" ]]; then
+        compose_ci down -v --remove-orphans || true
+    fi
 }
 
 echo "--- Frontend CI (node:22-alpine) ---"
@@ -29,7 +54,7 @@ run_in_container "node:22-alpine" "${PROJECT_DIR}/frontend" '
     npm run build
 '
 
-echo "--- Spring Boot CI (eclipse-temurin:21-jdk) ---"
+echo "--- Spring Boot CI / Unit (eclipse-temurin:21-jdk, H2) ---"
 run_in_container "eclipse-temurin:21-jdk" "${PROJECT_DIR}/backend/spring" '
     set -Eeuo pipefail
     mkdir -p /tmp/app
@@ -39,19 +64,60 @@ run_in_container "eclipse-temurin:21-jdk" "${PROJECT_DIR}/backend/spring" '
     ./gradlew clean test build --no-daemon
 '
 
-echo "--- FastAPI CI (python:3.11-slim) ---"
+echo "--- FastAPI CI / Unit (python:3.11-slim, compileall) ---"
 run_in_container "python:3.11-slim" "${PROJECT_DIR}/backend/fastapi" '
     set -Eeuo pipefail
     mkdir -p /tmp/app
     cp -a /src/. /tmp/app/
     cd /tmp/app
     pip install --no-cache-dir -r requirements.txt
-
-    # Neo4j 연결이 필요한 통합 테스트는 CI에서 실행하지 않는다.
-    # pytest가 있고 test_*.py / *_test.py가 있으면:
-    #   python -m pytest
-    # 로 되돌릴 수 있다.
     python -m compileall app
 '
+
+# ----- Integration: ephemeral MySQL + Neo4j -----
+if [[ ! -f "$COMPOSE_FILE" ]]; then
+    echo "ERROR: missing ${COMPOSE_FILE}"
+    exit 1
+fi
+
+trap cleanup_ci_db EXIT
+
+echo "--- CI DB up (docker-compose.ci.yml) ---"
+compose_ci up -d --wait
+
+echo "--- MySQL schema (Flyway migrate) ---"
+docker run --rm \
+    --network "${COMPOSE_PROJECT}_default" \
+    -v "${PROJECT_DIR}/backend/spring/src/main/resources/db/migration:/flyway/sql:ro" \
+    flyway/flyway:10.22.0 \
+    -url="jdbc:mysql://mysql:3306/${CI_MYSQL_DB}?allowPublicKeyRetrieval=true&useSSL=false" \
+    -user="${CI_MYSQL_USER}" \
+    -password="${CI_MYSQL_PASSWORD}" \
+    -connectRetries=20 \
+    migrate
+
+echo "--- Neo4j schema (V1 + V2) ---"
+compose_ci exec -T neo4j \
+    cypher-shell -u "$CI_NEO4J_USER" -p "$CI_NEO4J_PASSWORD" \
+    < "${PROJECT_DIR}/backend/fastapi/migrations/neo4j/V1__initial_graph_schema.cypher"
+
+compose_ci exec -T neo4j \
+    cypher-shell -u "$CI_NEO4J_USER" -p "$CI_NEO4J_PASSWORD" \
+    < "${PROJECT_DIR}/backend/fastapi/migrations/neo4j/V2__event_vector_index.cypher"
+
+echo "--- FastAPI CI / Integration (pytest + Neo4j) ---"
+run_in_container "python:3.11-slim" "${PROJECT_DIR}/backend/fastapi" '
+    set -Eeuo pipefail
+    mkdir -p /tmp/app
+    cp -a /src/. /tmp/app/
+    cd /tmp/app
+    pip install --no-cache-dir -r requirements.txt
+    python -m pytest -q
+' \
+    --network "${COMPOSE_PROJECT}_default" \
+    -e "INTERNAL_API_KEY=${CI_INTERNAL_API_KEY}" \
+    -e "NEO4J_URI=bolt://neo4j:7687" \
+    -e "NEO4J_USERNAME=${CI_NEO4J_USER}" \
+    -e "NEO4J_PASSWORD=${CI_NEO4J_PASSWORD}"
 
 echo "=== Starlight News CI Complete ==="

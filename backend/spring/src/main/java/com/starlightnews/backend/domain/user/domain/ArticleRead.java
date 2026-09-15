@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 
 /**
  * 뉴스 카드 클릭 기준 기사 열람 기록. (article_reads)
- * 개인 그래프 조회에서 Topic 별 읽은 기사 수 집계·읽은 기사 판별에 사용하는 읽기 전용 엔티티.
+ * 기사 상세 화면 진입 1회를 한 번의 열람으로 기록하며, 재열람은 새 Row 를 만들지 않고 기존 Row 를 갱신한다.
+ * 개인 그래프 조회에서 Topic 별 읽은 기사 수 집계·읽은 기사 판별에도 사용한다.
  */
 @Entity
 @Table(name = "article_reads")
@@ -38,4 +39,5 @@ public class ArticleRead {
 		this.lastReadAt = lastReadAt;
 		this.clickCount = clickCount;
 	}
+
 }

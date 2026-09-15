@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
 from app.database import _driver
-from app.recommendations import service
+from app.recommendations import repository, service
 
 USER_ID = 8201
-EMBEDDING_DIMENSIONS = 768
+EMBEDDING_DIMENSIONS = 1024
 
 
 # 특정 인덱스만 1.0이고 나머지는 0인 단위벡터 (서로 직교 -> 코사인 유사도 0)
@@ -26,9 +26,9 @@ def test_build_user_profile_vector_computes_weighted_average():
     now = datetime.now(timezone.utc)
     consumed_events = [
         # 최근 + 많이 본 Event -> 가중치가 커서 프로필 벡터에 크게 반영돼야 함
-        {"embedding": [0.2, 0.5, 0.1, 0.3, 0.0, 0.4, 0.2, 0.1], "count": 5, "lastViewedAt": now},
+        {"embedding": [0.2, 0.5, 0.1, 0.3, 0.0, 0.4, 0.2, 0.1], "count": 5, "lastViewedAt": now, "isFavorited": False},
         # 90일 전 + 1번만 본 Event -> 가중치가 작아 거의 영향 없어야 함
-        {"embedding": [0.1, 0.3, 0.4, 0.0, 0.2, 0.1, 0.3, 0.5], "count": 1, "lastViewedAt": now - timedelta(days=90)},
+        {"embedding": [0.1, 0.3, 0.4, 0.0, 0.2, 0.1, 0.3, 0.5], "count": 1, "lastViewedAt": now - timedelta(days=90), "isFavorited": False},
     ]
 
     profile_vector = service._build_user_profile_vector(consumed_events)
@@ -42,6 +42,20 @@ def test_build_user_profile_vector_computes_weighted_average():
 # Cold Start 검증: CONSUMED 이력이 없으면 벡터를 만들 수 없으니 None 반환
 def test_build_user_profile_vector_returns_none_when_no_history():
     assert service._build_user_profile_vector([]) is None
+
+
+# 즐겨찾기 가중치 검증: count/최근성이 완전히 같아도 즐겨찾기한 쪽이 프로필 벡터에 더 크게 반영돼야 함
+def test_build_user_profile_vector_weighs_favorited_event_more():
+    now = datetime.now(timezone.utc)
+    favorited = [
+        {"embedding": _unit_vector(0), "count": 1, "lastViewedAt": now, "isFavorited": True},
+        {"embedding": _unit_vector(1), "count": 1, "lastViewedAt": now, "isFavorited": False},
+    ]
+
+    profile_vector = service._build_user_profile_vector(favorited)
+
+    # 즐겨찾기(index 0)가 FAVORITE_WEIGHT_MULTIPLIER배 더 크니까, 그 방향으로 더 쏠려야 함
+    assert profile_vector[0] > profile_vector[1]
 
 # 이전 테스트 실행에서 남은 데이터 정리 (재실행 시 누적 방지)
 def _reset_fixture(session):
@@ -59,7 +73,7 @@ def _seed_fixture(session):
         MERGE (consumed:Event {nodeId: 'test-cbf-event-consumed'})
         SET consumed.embedding = $consumedVector
         MERGE (u)-[r:CONSUMED]->(consumed)
-        SET r.count = 3, r.lastViewedAt = $now
+        SET r.count = 3, r.lastViewedAt = $now, r.eventFavorited = true
 
         // 취향 벡터랑 방향이 비슷한 미열람 Event -> 유사도 높게 나와야 함
         MERGE (similar:Event {nodeId: 'test-cbf-event-similar'})
@@ -75,6 +89,17 @@ def _seed_fixture(session):
         dissimilarVector=_unit_vector(767),
         now=now,
     )
+
+
+# 즐겨찾기 여부가 CONSUMED.eventFavorited에서 실제로 읽히는지 확인
+def test_find_consumed_events_with_embeddings_reads_event_favorited_from_consumed():
+    with _driver.session() as session:
+        _reset_fixture(session)
+        _seed_fixture(session)
+        consumed_events = repository.find_consumed_events_with_embeddings(session, USER_ID)
+
+    assert len(consumed_events) == 1
+    assert consumed_events[0]["isFavorited"] is True
 
 
 # 통합 테스트: 프로필 벡터 계산 -> Vector 인덱스 검색 -> 필터링까지

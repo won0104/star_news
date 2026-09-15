@@ -38,7 +38,12 @@ def _sync_single_user(user, aggregated_at, session: Session) -> bool:
 
     # 소비 Event 반영
     consumed_payload = [
-        {"eventId": event.event_id, "count": event.count, "lastViewedAt": event.last_viewed_at}
+        {
+            "eventId": event.event_id,
+            "count": event.count,
+            "lastViewedAt": event.last_viewed_at,
+            "eventFavorited": event.event_favorited,
+        }
         for event in user.consumed_events
     ]
     matched_events = repository.sync_consumed_events(session, user.user_id, consumed_payload, aggregated_at)

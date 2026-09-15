@@ -32,6 +32,11 @@ public enum ArticleRelation {
 		return nodeType.label();
 	}
 
+	/** 이 관계가 가리키는 Node 유형. */
+	public NodeType nodeType() {
+		return nodeType;
+	}
+
 	/** 해당 NodeType 의 관련 기사 관계. 지원하지 않는 유형이면 빈 Optional. */
 	public static Optional<ArticleRelation> forNodeType(NodeType nodeType) {
 		for (ArticleRelation relation : values()) {
