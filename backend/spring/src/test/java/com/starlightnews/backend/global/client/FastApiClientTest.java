@@ -109,6 +109,18 @@ class FastApiClientTest {
 	}
 
 	@Test
+	void 이미_최신_상태라_409면_CONFLICT() {
+		// 실패가 아니라 "할 일이 없었다"에 가깝다. 다른 4xx 와 섞이면 호출자가 구분할 수 없다.
+		server.expect(requestTo(BASE_URL + PATH))
+				.andRespond(withStatus(HttpStatus.CONFLICT)
+						.body(errorBody("STALE_USER_GRAPH_SNAPSHOT")).contentType(MediaType.APPLICATION_JSON));
+
+		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(InternalApiErrorCode.INTERNAL_API_CONFLICT);
+	}
+
+	@Test
 	void Neo4j_장애로_503이면_UNAVAILABLE() {
 		// 다음 주기에 다시 시도하면 되는 종류다.
 		server.expect(requestTo(BASE_URL + PATH))
