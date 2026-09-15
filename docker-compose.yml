@@ -58,6 +58,14 @@ services:
       REDIS_PORT: "6379"
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       APP_AUTH_STORE: redis
+      GNEWS_API_KEY: ${GNEWS_API_KEY:-}
+      GNEWS_MAX: ${GNEWS_MAX:-12}
+      GNEWS_COLLECT_CRON: "${GNEWS_COLLECT_CRON:-0 10 * * * *}"
+      GNEWS_RETRY_DELAY: ${GNEWS_RETRY_DELAY:-1s}
+      # FastAPI 내부 호출. 키는 backend-fastapi 와 같은 값이어야 하고,
+      # 주소는 compose 네트워크의 서비스명으로 접근한다(컨테이너 안에서 localhost 는 자기 자신이다).
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
+      FASTAPI_BASE_URL: ${FASTAPI_BASE_URL:-http://backend-fastapi:8000}
     depends_on:
       mysql:
         condition: service_healthy

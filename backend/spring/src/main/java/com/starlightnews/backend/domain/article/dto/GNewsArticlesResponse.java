@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public record GNewsArticlesResponse(int totalArticles, List<GNewsArticle> articles) {
 
 	public GNewsArticlesResponse {
-		articles = articles == null ? List.of() : List.copyOf(articles);
+		articles = articles == null ? List.of() : articles.stream()
+				.filter(java.util.Objects::nonNull).toList();
 	}
 
 	/** 기사 한 건. content 는 요금제·기사에 따라 null 이거나 잘려 올 수 있다. */

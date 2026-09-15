@@ -30,7 +30,7 @@ class ArticleCollectServiceTest {
 
 	private GNewsProperties properties(String apiKey) {
 		return new GNewsProperties("https://gnews.example.io/api/v4", apiKey, "ko", "kr", 10,
-				CATEGORIES, Duration.ofSeconds(5));
+				CATEGORIES, Duration.ofSeconds(5), null);
 	}
 
 	private ArticleCollectService service(String apiKey) {
