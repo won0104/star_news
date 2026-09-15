@@ -1,7 +1,10 @@
 package com.starlightnews.backend.domain.article.collect;
 
+import com.starlightnews.backend.global.client.HttpClients;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestClient;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -14,4 +17,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableConfigurationProperties(GNewsProperties.class)
 public class ArticleCollectConfig {
+
+	@Bean
+	public RestClient gNewsRestClient(RestClient.Builder builder, GNewsProperties properties) {
+		return HttpClients.create(builder, properties.baseUrl(), properties.timeout());
+	}
 }

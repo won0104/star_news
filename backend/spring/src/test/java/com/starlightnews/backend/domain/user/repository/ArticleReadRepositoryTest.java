@@ -7,6 +7,8 @@ import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.domain.NewsOrganization;
 import com.starlightnews.backend.domain.user.domain.ArticleRead;
 import com.starlightnews.backend.domain.user.domain.ArticleReadId;
+import com.starlightnews.backend.support.TestFixtures;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -29,6 +31,11 @@ class ArticleReadRepositoryTest {
 
 	@Autowired
 	private TestEntityManager entityManager;
+
+	@BeforeEach
+	void insertReferencedRows() {
+		TestFixtures.insertUsers(entityManager, 1L, 2L);
+	}
 
 	private Article article(NewsOrganization org, String title, String topicCode) {
 		return article(org, title, topicCode, null);

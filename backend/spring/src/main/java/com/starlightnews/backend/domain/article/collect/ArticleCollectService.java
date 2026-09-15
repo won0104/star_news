@@ -35,7 +35,7 @@ public class ArticleCollectService {
 
 		Map<String, CollectedArticle> byUrlHash = new LinkedHashMap<>();
 		for (String category : properties.categories()) {
-			if (!collectCategory(category, byUrlHash)) {
+			if (Thread.currentThread().isInterrupted() || !collectCategory(category, byUrlHash)) {
 				break;
 			}
 		}
@@ -61,6 +61,10 @@ public class ArticleCollectService {
 			log.info("카테고리 수집: category={}, 응답={}건", category, articles.size());
 			return true;
 		} catch (BusinessException failure) {
+			if (failure.getErrorCode() == ArticleCollectErrorCode.NEWS_SOURCE_UNAUTHORIZED) {
+				log.warn("GNews 인증 실패로 이번 회차 수집을 중단합니다. (category={})", category);
+				return false;
+			}
 			if (failure.getErrorCode() == ArticleCollectErrorCode.NEWS_SOURCE_QUOTA_EXCEEDED) {
 				// 쿼터가 바닥나면 남은 카테고리도 전부 실패한다. 요청을 더 태우지 않고 멈춘다.
 				log.warn("GNews 요청 한도 초과로 이번 회차 수집을 중단합니다. (category={})", category);
