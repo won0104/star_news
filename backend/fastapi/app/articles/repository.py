@@ -320,3 +320,133 @@ def create_statement_node(
         createdAt=created_at,
     ).single()
     return result["nodeId"]
+
+
+# 6. Edge
+# 엣지 타입별 Cypher 쿼리 모음 - merge_simple_edge가 여기서 타입에 맞는 쿼리를 찾아 실행
+_SIMPLE_EDGE_QUERIES: dict[str, str] = {
+    "MENTIONS": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:MENTIONS]->(b)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        """,
+    "ACTOR": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:ACTOR]->(b)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        """,
+    "TARGET": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:TARGET]->(b)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        """,
+    "PLACE": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:PLACE]->(b)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        """,
+    "OCCURRED_ON": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:OCCURRED_ON]->(b)
+        SET r.confidence = $confidence, r.extractedAt = coalesce(r.extractedAt, $createdAt)
+        """,
+    "CONTAINS_STATEMENT": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:CONTAINS_STATEMENT]->(b)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        """,
+    "ASSERTED_BY": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:ASSERTED_BY]->(b)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        """,
+    "ABOUT": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:ABOUT]->(b)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        """,
+    "CAUSES": """
+        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
+        MERGE (a)-[r:CAUSES]->(b)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt), r.updatedAt = $createdAt
+        """,
+}
+
+
+# AI 응답의 edges[] 하나를 그대로 반영 (지원 안 하는 타입은 무시)
+def merge_simple_edge(
+    session: Session, edge_type: str, start_node_id: str, end_node_id: str, confidence: float | None, created_at: datetime
+) -> None:
+    query = _SIMPLE_EDGE_QUERIES.get(edge_type)
+    if not query:
+        return
+    session.run(query, startId=start_node_id, endId=end_node_id, confidence=confidence, createdAt=created_at)
+
+
+# Article -> Event COVERS
+def merge_covers_edge(
+    session: Session,
+    article_node_id: str,
+    event_node_id: str,
+    confidence: float | None,
+    is_primary: bool | None,
+    created_at: datetime,
+) -> None:
+    session.run(
+        """
+        MATCH (a:Article {nodeId: $articleId}), (e:Event {nodeId: $eventId})
+        MERGE (a)-[r:COVERS]->(e)
+        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        FOREACH (_ IN CASE WHEN $isPrimary IS NOT NULL THEN [1] ELSE [] END | SET r.isPrimary = $isPrimary)
+        """,
+        articleId=article_node_id,
+        eventId=event_node_id,
+        confidence=confidence,
+        isPrimary=is_primary,
+        createdAt=created_at,
+    )
+
+
+# Article -> Topic CLASSIFIED_AS
+# 현재는 AI의 classification.topic 기준이라 source는 항상 AI_CLASSIFICATION
+def classify_article(session: Session, article_node_id: str, topic_code: str, classified_at: datetime) -> None:
+    session.run(
+        """
+        MATCH (a:Article {nodeId: $articleId}), (t:Topic {topicCode: $topicCode})
+        MERGE (a)-[r:CLASSIFIED_AS]->(t)
+        SET r.source = 'AI_CLASSIFICATION', r.classifiedAt = $classifiedAt
+        """,
+        articleId=article_node_id,
+        topicCode=topic_code,
+        classifiedAt=classified_at,
+    )
+
+
+# Event/Story/Statement -> Topic CLASSIFIED_AS
+# Article의 대분류를 그대로 상속(source=ARTICLE_INHERITANCE)
+def inherit_classification_from_article(session: Session, node_id: str, topic_code: str, classified_at: datetime) -> None:
+    session.run(
+        """
+        MATCH (n {nodeId: $nodeId}), (t:Topic {topicCode: $topicCode})
+        MERGE (n)-[r:CLASSIFIED_AS]->(t)
+        SET r.source = 'ARTICLE_INHERITANCE', r.classifiedAt = $classifiedAt
+        """,
+        nodeId=node_id,
+        topicCode=topic_code,
+        classifiedAt=classified_at,
+    )
+
+
+# Article -> NewsOrganization PUBLISHED_BY
+# spring 요청의 sourceId/sourceName을 반영
+def merge_published_by_edge(session: Session, article_node_id: str, news_org_node_id: str, created_at: datetime) -> None:
+    session.run(
+        """
+        MATCH (a:Article {nodeId: $articleId}), (o:Entity:NewsOrganization {nodeId: $orgId})
+        MERGE (a)-[r:PUBLISHED_BY]->(o)
+        SET r.createdAt = coalesce(r.createdAt, $createdAt)
+        """,
+        articleId=article_node_id,
+        orgId=news_org_node_id,
+        createdAt=created_at,
+    )
