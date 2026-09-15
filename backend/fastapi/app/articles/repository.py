@@ -298,3 +298,25 @@ def merge_event_node(
 
     # 후보가 하나도 없거나 전부 충돌 -> 매칭되는 기존 Event가 없는 것이므로 새로 생성
     return _create_new_event_node(session, title, embedding, embedding_model, created_at)
+
+
+# 5. Statement
+# Statement 노드를 생성
+# dedup 없이 매번 새로 생성 (기사별로 종속된 근거 텍스트라 합칠 대상이 아님)
+def create_statement_node(
+    session: Session, text: str, statement_type: str, confidence: float | None, created_at: datetime
+) -> str:
+    result = session.run(
+        """
+        CREATE (s:Statement {
+            nodeId: randomUUID(), text: $text, statementType: $statementType, confidence: $confidence,
+            createdAt: $createdAt, updatedAt: $createdAt
+        })
+        RETURN s.nodeId AS nodeId
+        """,
+        text=text,
+        statementType=statement_type,
+        confidence=confidence,
+        createdAt=created_at,
+    ).single()
+    return result["nodeId"]
