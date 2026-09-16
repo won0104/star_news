@@ -2,9 +2,12 @@
 import math
 from datetime import datetime
 
-from neo4j import Session
+from neo4j import ManagedTransaction, Session
 
 from app.articles.support.entity_filter import is_noise_entity_name, normalize_entity_name
+
+# 기사 분석 파이프라인 중간에 실패하면 그 전까지 만든 노드가 남지 않도록, 이 파일의 함수들을 전부 트랜잭션 하나로 묶어서 호출
+Neo4jRunner = Session | ManagedTransaction
 
 # Event dedup 벡터 유사도 임계값
 EVENT_SIMILARITY_THRESHOLD = 0.92
@@ -16,7 +19,7 @@ EVENT_EMBEDDING_EMA_WEIGHT = 0.15
 # 1. Article
 # Article 노드를 생성하거나 이미 있으면 갱신한다
 def merge_article_node(
-    session: Session,
+    session: Neo4jRunner,
     mysql_article_id: int,
     title: str,
     published_at: datetime,
@@ -45,7 +48,7 @@ def merge_article_node(
 
 
 # Year 노드를 생성하거나 갱신한다.
-def _merge_year_node(session: Session, year: str, created_at: datetime) -> str:
+def _merge_year_node(session: Neo4jRunner, year: str, created_at: datetime) -> str:
     result = session.run(
         """
         // timeKey는 "YYYY"
@@ -61,7 +64,7 @@ def _merge_year_node(session: Session, year: str, created_at: datetime) -> str:
 
 
 # Month 노드를 생성하거나 갱신하고 Year에 연결한다.
-def _merge_month_node(session: Session, month_key: str, year: str, created_at: datetime) -> str:
+def _merge_month_node(session: Neo4jRunner, month_key: str, year: str, created_at: datetime) -> str:
     result = session.run(
         """
         // timeKey는 "YYYY-MM"
@@ -81,7 +84,7 @@ def _merge_month_node(session: Session, month_key: str, year: str, created_at: d
 
 
 # Day 노드를 생성하거나 갱신하고 Month에 연결한다.
-def _merge_day_node(session: Session, day_key: str, month_key: str, created_at: datetime) -> str:
+def _merge_day_node(session: Neo4jRunner, day_key: str, month_key: str, created_at: datetime) -> str:
     year, month, day = day_key.split("-")
     result = session.run(
         """
@@ -105,7 +108,7 @@ def _merge_day_node(session: Session, day_key: str, month_key: str, created_at: 
 
 # 2. Time
 # 모델에서 반환된 Time 하나(Year/Month/Day 중 하나의 granularity)를 반영하고, 그 nodeId를 반환한다.
-def merge_time_node(session: Session, time_key: str, granularity: str, created_at: datetime) -> str:
+def merge_time_node(session: Neo4jRunner, time_key: str, granularity: str, created_at: datetime) -> str:
     # Day/Month/Year 계층(PART_OF)은 항상 끝까지 같이 보장한다
     # (예: DAY가 오면 Day/Month/Year 3개 노드 + PART_OF 2개를 다 만듦). time_key: "YYYY"/"YYYY-MM"/"YYYY-MM-DD"
     year = time_key[:4]
@@ -123,7 +126,7 @@ def merge_time_node(session: Session, time_key: str, granularity: str, created_a
 # 3. Entity
 # 언론사(NewsOrganization) Entity를 생성하거나 갱신
 def merge_news_organization_entity(
-    session: Session, mysql_organization_id: int, name: str, created_at: datetime
+    session: Neo4jRunner, mysql_organization_id: int, name: str, created_at: datetime
 ) -> str:
     result = session.run(
         """
@@ -144,7 +147,7 @@ def merge_news_organization_entity(
 
 # 기사 본문에서 뽑은 Entity를 생성하거나 이미 있으면 재사용
 def merge_extracted_entity(
-    session: Session, canonical_name: str, entity_type: str, created_at: datetime
+    session: Neo4jRunner, canonical_name: str, entity_type: str, created_at: datetime
 ) -> str | None:
 
     # 노이즈면 None
@@ -192,7 +195,7 @@ def _has_event_conflict(
 
 
 # 기존 Event 후보 하나의 dedup 판단 재료(임베딩/Actor/Target)를 한 번에 조회
-def _fetch_event_dedup_signals(session: Session, event_node_id: str) -> dict:
+def _fetch_event_dedup_signals(session: Neo4jRunner, event_node_id: str) -> dict:
     result = session.run(
         """
         MATCH (e:Event {nodeId: $nodeId})
@@ -221,7 +224,7 @@ def _ema_update_embedding(old_embedding: list[float], new_embedding: list[float]
 
 
 # 매칭된 기존 Event를 갱신 - 임베딩은 이미 EMA로 섞인 값을 받고, 제목은 새로운 표현이면 aliases에 추가
-def _update_matched_event(session: Session, node_id: str, title: str, blended_embedding: list[float], updated_at: datetime) -> str:
+def _update_matched_event(session: Neo4jRunner, node_id: str, title: str, blended_embedding: list[float], updated_at: datetime) -> str:
     result = session.run(
         """
         MATCH (e:Event {nodeId: $nodeId})
@@ -241,7 +244,7 @@ def _update_matched_event(session: Session, node_id: str, title: str, blended_em
 
 # 매칭되는 기존 Event가 없을 때 새로 생성
 def _create_new_event_node(
-    session: Session, title: str, embedding: list[float], embedding_model: str, created_at: datetime
+    session: Neo4jRunner, title: str, embedding: list[float], embedding_model: str, created_at: datetime
 ) -> str:
     result = session.run(
         """
@@ -262,7 +265,7 @@ def _create_new_event_node(
 # AI에서 추출된 Event 후보 하나를 기존 Event와 dedup 판단해서 재사용하거나 새로 생성
 # candidate_*는 이번 기사 쪽 Event가 가진 Actor/Target (아직 Neo4j에 없는, AI 응답에서 바로 파싱한 값)
 def merge_event_node(
-    session: Session,
+    session: Neo4jRunner,
     title: str,
     embedding: list[float],
     embedding_model: str,
@@ -301,19 +304,27 @@ def merge_event_node(
 
 
 # 5. Statement
-# Statement 노드를 생성
-# dedup 없이 매번 새로 생성 (기사별로 종속된 근거 텍스트라 합칠 대상이 아님)
-def create_statement_node(
-    session: Session, text: str, statement_type: str, confidence: float | None, created_at: datetime
+# Statement 노드를 생성한다
+def merge_statement_node(
+    session: Neo4jRunner,
+    article_node_id: str,
+    text: str,
+    statement_type: str,
+    confidence: float | None,
+    created_at: datetime,
 ) -> str:
     result = session.run(
         """
-        CREATE (s:Statement {
-            nodeId: randomUUID(), text: $text, statementType: $statementType, confidence: $confidence,
-            createdAt: $createdAt, updatedAt: $createdAt
-        })
+        MATCH (a:Article {nodeId: $articleId})
+        // 이미 존재할 시엔 MERGE - 같은 기사 재요청 시엔 중복 생성 안 되게 (멱등)
+        MERGE (a)-[r:CONTAINS_STATEMENT]->(s:Statement {text: $text})
+        // 처음 생성될 때만 CREATE 
+        ON CREATE SET s.nodeId = randomUUID(), s.createdAt = $createdAt
+        SET s.statementType = $statementType, s.updatedAt = $createdAt,
+            r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
         RETURN s.nodeId AS nodeId
         """,
+        articleId=article_node_id,
         text=text,
         statementType=statement_type,
         confidence=confidence,
@@ -350,11 +361,6 @@ _SIMPLE_EDGE_QUERIES: dict[str, str] = {
         MERGE (a)-[r:OCCURRED_ON]->(b)
         SET r.confidence = $confidence, r.extractedAt = coalesce(r.extractedAt, $createdAt)
         """,
-    "CONTAINS_STATEMENT": """
-        MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
-        MERGE (a)-[r:CONTAINS_STATEMENT]->(b)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
-        """,
     "ASSERTED_BY": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:ASSERTED_BY]->(b)
@@ -375,7 +381,7 @@ _SIMPLE_EDGE_QUERIES: dict[str, str] = {
 
 # AI 응답의 edges[] 하나를 그대로 반영 (지원 안 하는 타입은 무시)
 def merge_simple_edge(
-    session: Session, edge_type: str, start_node_id: str, end_node_id: str, confidence: float | None, created_at: datetime
+    session: Neo4jRunner, edge_type: str, start_node_id: str, end_node_id: str, confidence: float | None, created_at: datetime
 ) -> None:
     query = _SIMPLE_EDGE_QUERIES.get(edge_type)
     if not query:
@@ -385,7 +391,7 @@ def merge_simple_edge(
 
 # Article -> Event COVERS
 def merge_covers_edge(
-    session: Session,
+    session: Neo4jRunner,
     article_node_id: str,
     event_node_id: str,
     confidence: float | None,
@@ -409,7 +415,7 @@ def merge_covers_edge(
 
 # Article -> Topic CLASSIFIED_AS
 # 현재는 AI의 classification.topic 기준이라 source는 항상 AI_CLASSIFICATION
-def classify_article(session: Session, article_node_id: str, topic_code: str, classified_at: datetime) -> None:
+def classify_article(session: Neo4jRunner, article_node_id: str, topic_code: str, classified_at: datetime) -> None:
     session.run(
         """
         MATCH (a:Article {nodeId: $articleId}), (t:Topic {topicCode: $topicCode})
@@ -424,7 +430,7 @@ def classify_article(session: Session, article_node_id: str, topic_code: str, cl
 
 # Event/Story/Statement -> Topic CLASSIFIED_AS
 # Article의 대분류를 그대로 상속(source=ARTICLE_INHERITANCE)
-def inherit_classification_from_article(session: Session, node_id: str, topic_code: str, classified_at: datetime) -> None:
+def inherit_classification_from_article(session: Neo4jRunner, node_id: str, topic_code: str, classified_at: datetime) -> None:
     session.run(
         """
         MATCH (n {nodeId: $nodeId}), (t:Topic {topicCode: $topicCode})
@@ -439,7 +445,7 @@ def inherit_classification_from_article(session: Session, node_id: str, topic_co
 
 # Article -> NewsOrganization PUBLISHED_BY
 # spring 요청의 sourceId/sourceName을 반영
-def merge_published_by_edge(session: Session, article_node_id: str, news_org_node_id: str, created_at: datetime) -> None:
+def merge_published_by_edge(session: Neo4jRunner, article_node_id: str, news_org_node_id: str, created_at: datetime) -> None:
     session.run(
         """
         MATCH (a:Article {nodeId: $articleId}), (o:Entity:NewsOrganization {nodeId: $orgId})
