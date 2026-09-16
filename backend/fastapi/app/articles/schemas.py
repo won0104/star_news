@@ -14,25 +14,10 @@ class ArticleAnalyzeRequest(CamelModel):
     published_at: datetime
 
 
-# 이번 요청으로 생성/갱신된 Event/Story/Entity/Statement 노드 id 목록
-class ArticleAnalyzeNodeIds(CamelModel):
-    event_ids: list[str] = []
-    story_ids: list[str] = []
-    entity_ids: list[str] = []
-    statement_ids: list[str] = []
-
-
-# Spring의 Redis 그래프 캐시 무효화 대상 하나
-class AffectedNodeKey(CamelModel):
-    node_type: str
-    node_id: str
-
-
 # 기사 하나 분석 완료 결과
 class ArticleAnalyzeResult(CamelModel):
     article_id: int
+    article_node_id: str  # Neo4j Article.nodeId (MySQL articles.node_id에 채울 값)
     status: str
     primary_topic_code: str
     subtopic_code: str
-    node_ids: ArticleAnalyzeNodeIds
-    affected_node_keys: list[AffectedNodeKey]
