@@ -20,21 +20,20 @@ export const navItems = [
     label: '나를 위한 추천',
   },
   {
+    id: 'log',
+    label: '나의 기록',
+  },
+  {
     id: 'report',
     label: '나의 리포트',
   },
 ]
 
 /**
- * Screens that `?view=` can carry but the bar does not list. 나의 기록 is reached from
- * 오늘의 트렌드's constellation instead, so it needs to stay a legal view without taking
- * a fourth seat in the bar — see <AppScene>, which accepts both lists.
+ * Screens that `?view=` can carry but the bar does not list; see <AppScene>, which
+ * accepts both lists.
  */
 export const extraViews = [
-  {
-    id: 'log',
-    label: '나의 기록',
-  },
   {
     id: 'foryou2',
     label: '나를 위한 추천 비교안',

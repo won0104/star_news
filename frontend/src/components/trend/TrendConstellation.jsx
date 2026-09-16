@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
 import {
   ambientLayouts,
   ambientStars,
@@ -128,15 +127,6 @@ export function TrendConstellation() {
       <span className={styles.layoutBadge}>구도 · {layout.label}</span>
 
       <div className={styles.fieldActions}>
-        {/* Leaving the board is leaving the page, so this is only offered windowed —
-            in fullscreen it would navigate away with the browser still in fullscreen. */}
-        {!full && (
-          <Link className={styles.fieldAction} to="/app?view=log">
-            <span aria-hidden>✦</span>
-            {panelCopy.history}
-          </Link>
-        )}
-
         <button
           type="button"
           className={styles.fieldAction}
