@@ -1,0 +1,125 @@
+package com.starlightnews.backend.domain.recommendation.controller;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
+import com.starlightnews.backend.domain.recommendation.dto.RecommendationBoardResponse;
+import com.starlightnews.backend.domain.recommendation.service.RecommendationBoardService;
+import com.starlightnews.backend.global.config.SecurityConfig;
+import com.starlightnews.backend.global.enums.RecommendationCycle;
+import com.starlightnews.backend.global.enums.RecommendationType;
+import com.starlightnews.backend.global.enums.TopicCode;
+import com.starlightnews.backend.global.security.InMemoryTokenBlacklist;
+import com.starlightnews.backend.global.security.JwtProvider;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(RecommendationController.class)
+@Import({SecurityConfig.class, JwtProvider.class, InMemoryTokenBlacklist.class})
+@ActiveProfiles("test")
+class RecommendationControllerTest {
+
+	private static final String PATH = "/api/v1/recommendations";
+	private static final long USER_ID = 1L;
+
+	@Autowired
+	private MockMvc mockMvc;
+
+	@Autowired
+	private JwtProvider jwtProvider;
+
+	@MockitoBean
+	private RecommendationBoardService recommendationBoardService;
+
+	private String bearer() {
+		return "Bearer " + jwtProvider.createAccessToken(USER_ID);
+	}
+
+	private RecommendationBoardResponse board() {
+		OffsetDateTime availableAt = OffsetDateTime.of(2026, 9, 16, 18, 0, 0, 0, ZoneOffset.ofHours(9));
+		return new RecommendationBoardResponse(
+				RecommendationCycle.PM, availableAt.minusMinutes(30), availableAt,
+				List.of(new RecommendationBoardResponse.Item(10241L,
+						"00000020-0920-4000-8000-000000000001", "한국은행 1월 기준금리 동결",
+						TopicCode.ECONOMY, new BigDecimal("0.920000"), (short) 1,
+						RecommendationType.INTEREST_BASED, "관심 Story 에서 아직 접하지 않은 사건입니다.")));
+	}
+
+	@Test
+	void 추천_보드를_조회한다() throws Exception {
+		given(recommendationBoardService.getBoard(USER_ID)).willReturn(board());
+
+		mockMvc.perform(get(PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.cycle").value("PM"))
+				.andExpect(jsonPath("$.data.availableAt").value("2026-09-16T18:00:00+09:00"))
+				.andExpect(jsonPath("$.data.items[0].userRecommendationId").value(10241))
+				.andExpect(jsonPath("$.data.items[0].label").value("한국은행 1월 기준금리 동결"))
+				.andExpect(jsonPath("$.data.items[0].topicCode").value("ECONOMY"))
+				.andExpect(jsonPath("$.data.items[0].rank").value(1))
+				.andExpect(jsonPath("$.data.items[0].recommendationType").value("INTEREST_BASED"));
+	}
+
+	@Test
+	void 응답에_페이지네이션_필드가_없다() throws Exception {
+		given(recommendationBoardService.getBoard(USER_ID)).willReturn(board());
+
+		mockMvc.perform(get(PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.hasNext").doesNotExist())
+				.andExpect(jsonPath("$.data.nextCursor").doesNotExist());
+	}
+
+	@Test
+	void 토큰이_없으면_401이다() throws Exception {
+		mockMvc.perform(get(PATH)).andExpect(status().isUnauthorized());
+
+		verify(recommendationBoardService, never()).getBoard(anyLong());
+	}
+
+	@Test
+	void 로그인한_사용자의_추천만_조회한다() throws Exception {
+		given(recommendationBoardService.getBoard(USER_ID)).willReturn(board());
+
+		mockMvc.perform(get(PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk());
+
+		verify(recommendationBoardService).getBoard(USER_ID);
+	}
+
+	@Test
+	void 공개된_회차가_없으면_빈_목록을_200으로_돌려준다() throws Exception {
+		given(recommendationBoardService.getBoard(USER_ID))
+				.willReturn(RecommendationBoardResponse.empty());
+
+		mockMvc.perform(get(PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.items").isEmpty())
+				.andExpect(jsonPath("$.data.cycle").doesNotExist());
+	}
+
+	@Test
+	void 남는_쿼리_파라미터는_무시한다() throws Exception {
+		// 프론트가 예전 명세대로 size 를 붙여 보내도 그대로 동작해야 한다.
+		given(recommendationBoardService.getBoard(USER_ID)).willReturn(board());
+
+		mockMvc.perform(get(PATH).param("size", "10").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk());
+	}
+}
