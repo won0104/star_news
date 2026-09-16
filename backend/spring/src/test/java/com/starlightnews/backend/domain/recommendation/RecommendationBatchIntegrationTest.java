@@ -6,6 +6,7 @@ import java.util.List;
 import com.starlightnews.backend.domain.recommendation.domain.UserRecommendation;
 import com.starlightnews.backend.domain.recommendation.repository.UserRecommendationRepository;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationBatchResult;
+import com.starlightnews.backend.domain.recommendation.service.EventSummaryService;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationBatchService;
 import com.starlightnews.backend.global.client.FastApiClient;
 import com.starlightnews.backend.global.client.FastApiProperties;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -53,6 +55,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @Transactional
 @Import(RecommendationBatchIntegrationTest.MockFastApiConfig.class)
 class RecommendationBatchIntegrationTest {
+
+	/**
+	 * 요약 생성은 여기서 보지 않는다. 이 테스트는 배치가 FastAPI 와 주고받는 내용을 확인하는 것이고,
+	 * 요약은 Neo4j 와 GMS 를 타므로 {@code EventSummaryServiceTest} 가 따로 본다.
+	 */
+	@MockitoBean
+	private EventSummaryService eventSummaryService;
 
 	private static final String CALCULATE_URL = "/internal/v1/recommendations/calculate";
 	private static final String EVENT_ID = "3f2504e0-4f89-11d3-9a0c-0305e82c3301";

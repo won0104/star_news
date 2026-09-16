@@ -25,6 +25,7 @@ public class RecommendationBatchService {
 	private final RecommendationTargetRepository targetRepository;
 	private final RecommendationCalculateClient calculateClient;
 	private final RecommendationStoreService storeService;
+	private final EventSummaryService summaryService;
 	private final RecommendationRetentionService retentionService;
 	private final RecommendationProperties properties;
 
@@ -50,11 +51,15 @@ public class RecommendationBatchService {
 			total = process(userIds, window, total);
 		}
 
+		// 요약은 회차를 다 저장한 뒤에 만든다. 공개까지 30분이 남아 있고, Event 단위라 묶음마다
+		// 만들면 같은 Event 를 여러 번 부르게 된다.
+		int summaries = summaryService.generateForCycle(window.availableAt());
+
 		retentionService.purgeExpired(now);
 
-		log.info("추천 생성 회차 종료: 회차 {}, 공개 {}, 사용자 {}명, 추천 {}건, 건너뜀 {}건, 실패 {}명",
+		log.info("추천 생성 회차 종료: 회차 {}, 공개 {}, 사용자 {}명, 추천 {}건, 건너뜀 {}건, 실패 {}명, 요약 {}건",
 				window.cycle(), window.availableAt(), total.storedUsers(), total.storedItems(),
-				total.skippedItems(), total.failedUsers());
+				total.skippedItems(), total.failedUsers(), summaries);
 		return total;
 	}
 

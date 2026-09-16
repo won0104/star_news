@@ -42,6 +42,9 @@ class RecommendationBatchServiceTest {
 	private RecommendationStoreService storeService;
 
 	@Mock
+	private EventSummaryService summaryService;
+
+	@Mock
 	private RecommendationRetentionService retentionService;
 
 	private RecommendationBatchService service;
@@ -50,7 +53,7 @@ class RecommendationBatchServiceTest {
 	void setUp() {
 		// 보관 7일, 묶음 2명, 사용자별 10건
 		service = new RecommendationBatchService(targetRepository, calculateClient, storeService,
-				retentionService, new RecommendationProperties(7, 2, 10));
+				summaryService, retentionService, new RecommendationProperties(7, 2, 10));
 	}
 
 	private RecommendationCalculateResponse response() {
@@ -194,5 +197,28 @@ class RecommendationBatchServiceTest {
 				ArgumentCaptor.forClass(RecommendationCalculateRequest.class);
 		verify(calculateClient).calculate(captor.capture());
 		assertThat(captor.getValue().cycle()).isEqualTo(RecommendationCycle.PM);
+	}
+
+	@Test
+	void 회차를_저장한_뒤_요약을_만든다() {
+		// 공개까지 30분이 남아 있다. 그 사이에 만들어 둬야 조회가 요약을 기다리지 않는다.
+		givenUserPages(List.of(1L));
+		givenCalculateSucceeds();
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(RecommendationStoreResult.empty());
+
+		service.generate(MORNING_RUN);
+
+		verify(summaryService).generateForCycle(AVAILABLE_AT);
+	}
+
+	@Test
+	void 사용자가_없으면_요약도_만들_것이_없다() {
+		given(targetRepository.findTargetUserIds(any(Pageable.class))).willReturn(List.of());
+
+		service.generate(MORNING_RUN);
+
+		// 대상이 없으면 서비스가 스스로 빈 목록을 보고 끝낸다. 회차 시각은 그대로 넘긴다.
+		verify(summaryService).generateForCycle(AVAILABLE_AT);
 	}
 }
