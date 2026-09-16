@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.article.collect;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +38,8 @@ public class CollectedArticlePreprocessor {
 	private static final List<String> EXCLUDED_TITLE_KEYWORDS =
 			List.of("오늘의 운세", "띠별 운세");
 
-	/** 본문에서 꺼낸 줄을 제목으로 볼 수 있는 최대 길이. 실측한 정상 제목의 99%가 64자 이하다. */
-	private static final int MAX_TITLE_LENGTH = 70;
+	/** 본문에서 꺼낸 줄을 제목으로 볼 수 있는 최대 길이.  */
+	private static final int MAX_TITLE_LENGTH = 120;
 
 	/** 통신사 기사의 바이라인. */
 	private static final Pattern BYLINE = Pattern.compile("(기자|특파원|통신원)\\s*=");
@@ -52,7 +53,32 @@ public class CollectedArticlePreprocessor {
 	private static final Set<String> LEADING_NOISE = Set.of(
 			"AD", "기사 본문 영역", "AI 해설 기사", "크게보기", "기사 읽어주기", "세 줄 요약",
 			"정치", "경제", "사회", "세계", "문화", "스포츠", "국제", "IT", "연예", "공유하기",
-			"구글 검색 선호 출처로 추가");
+			"구글 검색 선호 출처로 추가",
+			"읽어주기 기능은 크롬기반의", "브라우저에서만 사용하실 수 있습니다.");
+
+	/**
+	 * 본문 끝에 붙는 UI 문구. 한 줄이 통째로 이것일 때만 지운다.
+	 */
+	private static final Set<String> TRAILING_NOISE_LINES = Set.of(
+			// KBS 반응 버튼
+			"이 기사가 좋으셨다면", "좋아요", "응원해요", "후속 원해요", "이슈",
+			// KBS 제보 안내
+			"■ 제보하기", "▷ 카카오톡 : 'KBS제보' 검색, 채널 추가",
+			"▷ 유튜브, 네이버, 다음에서도 KBS뉴스를 구독해주세요!",
+			// YTN 제보 안내
+			"※ '당신의 제보가 뉴스가 됩니다'", "[카카오톡] YTN 검색해 채널 추가",
+			"[전화] 02-398-8585", "[메일] social@ytn.co.kr",
+			// 이데일리 추천 위젯
+			"실시간", "급상승 뉴스", "오늘의", "포토", "당신을 위한", "맞춤 뉴스by Dable",
+			// 그 밖의 위젯·광고
+			"관련기사", "Advertisement", "관심 있을 수도 있어요", "사진", "한 줄 정리",
+			// 서울신문 AI 위젯
+			"UNMASK ]", "기사 반응 MBTI 확인",
+			"\"기사를 읽는 동안 깨어난 당신의 숨겨진 페르소나를 AI가 스캔합니다.\"",
+			"기사를 끝까지 읽으셨나요? 이제 AI 퀴즈로 기사의 핵심 내용을 점검해보세요.");
+
+	/** 줄이 통째로 같을 때 중복으로 볼 최소 길이. 짧은 줄은 대화체 기사에서 정상적으로 겹친다. */
+	private static final int REPEATED_LINE_MIN_LENGTH = 40;
 
 	/**
 	 * 본문 끝에 붙는 저작권·UI 문구.
@@ -62,7 +88,8 @@ public class CollectedArticlePreprocessor {
 	 */
 	private static final Pattern TRAILING_NOISE = Pattern.compile(
 			"저작권|무단\\s*전재|재배포|Copyright|ⓒ|©|소셜 댓글|더보기|공유하기"
-					+ "|실시간 뜨거운 관심|오늘의 숏뉴스|제보는|면책 조항|투자판단의 참고용|투자 참고용");
+					+ "|실시간 뜨거운 관심|오늘의 숏뉴스|제보는|면책 조항|투자판단의 참고용|투자 참고용"
+					+ "|위반 시 서비스 이용 제한|기사문의 및 제보|공감언론 뉴시스");
 
 	/** 조회수·댓글 수처럼 숫자만 남은 줄. */
 	private static final Pattern NUMBER_ONLY = Pattern.compile("\\d+");
@@ -182,11 +209,14 @@ public class CollectedArticlePreprocessor {
 			return article;
 		}
 
-		String cleaned = stripNoiseLines(original);
+		List<String> deduplicated = dropRepeatedLines(original.lines().map(String::strip).toList());
+		String body = String.join("\n", deduplicated);
+		String cleaned = stripNoiseLines(deduplicated, article.title());
+
 		if (cleaned.equals(original.strip())) {
 			return article;
 		}
-		if (isOverTrimmed(original, cleaned)) {
+		if (isOverTrimmed(body, cleaned)) {
 			log.warn("본문이 지나치게 줄어 원본을 유지합니다. ({}자 -> {}자, {})",
 					original.strip().length(), cleaned.length(), article.url());
 			return article;
@@ -197,11 +227,25 @@ public class CollectedArticlePreprocessor {
 				article.sourceCategory(), article.organizationName(), article.organizationDomain());
 	}
 
-	private String stripNoiseLines(String content) {
-		List<String> lines = new ArrayList<>(content.lines().map(String::strip).toList());
+	private List<String> dropRepeatedLines(List<String> lines) {
+		Set<String> seen = new HashSet<>();
+		List<String> kept = new ArrayList<>();
+		for (String line : lines) {
+			if (line.length() >= REPEATED_LINE_MIN_LENGTH && !seen.add(line)) {
+				continue;
+			}
+			kept.add(line);
+		}
+		return kept;
+	}
 
+	private String stripNoiseLines(List<String> lines, String title) {
 		int start = 0;
 		while (start < lines.size() && isLeadingNoise(lines.get(start))) {
+			start++;
+		}
+		// 제목을 본문 앞머리에서 가져왔으면 그 줄은 본문에 남을 이유가 없다.
+		if (start < lines.size() && title != null && lines.get(start).equals(title.strip())) {
 			start++;
 		}
 		int end = lines.size();
@@ -221,6 +265,7 @@ public class CollectedArticlePreprocessor {
 	private boolean isTrailingNoise(String line) {
 		return line.isEmpty()
 				|| NUMBER_ONLY.matcher(line).matches()
+				|| TRAILING_NOISE_LINES.contains(line)
 				|| TRAILING_NOISE.matcher(line).find();
 	}
 

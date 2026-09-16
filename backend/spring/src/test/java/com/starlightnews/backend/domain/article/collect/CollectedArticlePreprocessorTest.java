@@ -17,6 +17,7 @@ class CollectedArticlePreprocessorTest {
 
 	/** 실측한 정상 기사의 최소가 500자 안팎이라, 통과해야 하는 본문은 그 정도로 만든다. */
 	private static final String REAL_CONTENT = "본문입니다. ".repeat(100).strip();
+	private static final String REAL_CONTENT_2 = "이어지는 본문입니다. ".repeat(50).strip();
 
 	private CollectedArticle article(String title, String content) {
 		return new CollectedArticle(title, "https://news.test/" + title.hashCode(),
@@ -176,8 +177,9 @@ class CollectedArticlePreprocessorTest {
 
 	@Test
 	void 너무_긴_줄은_제목으로_쓰지_않는다() {
-		// 실측한 정상 제목의 99%가 64자 이하다.
-		String tooLong = "가".repeat(71);
+		// DB 의 title 이 VARCHAR(500) 이라 그 아래로만 막으면 된다. 실제로 걸러내는 일은
+		// 바이라인과 문장 종결이 한다.
+		String tooLong = "가".repeat(121);
 
 		assertThat(repairedTitle(fromOutlet("메디포뉴스", "메디포뉴스", tooLong + "\n" + REAL_CONTENT)))
 				.isEqualTo("메디포뉴스");
@@ -369,6 +371,107 @@ class CollectedArticlePreprocessorTest {
 				.isEmpty();
 	}
 
+	// --- 본문 중복·사이트 UI 제거 ---
+
+	private String contentAfter(CollectedArticle article) {
+		return preprocessor.process(List.of(article)).get(0).content();
+	}
+
+	@Test
+	void 본문이_두_번_실려_오면_뒤쪽을_버린다() {
+		// 제공처가 본문을 두 번 보내는 일이 있다. 실측 1,609건 중 194건이 그랬다.
+		String body = REAL_CONTENT + "\n" + REAL_CONTENT_2;
+
+		assertThat(contentAfter(article("정상 제목", body + "\n" + body)))
+				.isEqualTo(body);
+	}
+
+	@Test
+	void 본문이_두_번_실려도_과다_삭제로_보지_않는다() {
+		// 중복만 지워도 절반이 날아간다. 원본 길이와 견주면 늘 과다 삭제로 잡혀 되돌려진다.
+		String body = REAL_CONTENT + "\n" + REAL_CONTENT_2;
+
+		assertThat(contentAfter(article("정상 제목", body + "\n" + body)))
+				.doesNotContain(REAL_CONTENT + "\n" + REAL_CONTENT + "\n");
+	}
+
+	@Test
+	void 짧은_줄은_반복돼도_지우지_않는다() {
+		// 대담 기사에서 같은 말이 정상적으로 여러 번 나온다.
+		String body = REAL_CONTENT + "\n▶ 이용우 : 고맙습니다.\n" + REAL_CONTENT_2 + "\n▶ 이용우 : 고맙습니다.";
+
+		assertThat(contentAfter(article("정상 제목", body))).isEqualTo(body);
+	}
+
+	@Test
+	void 제목으로_쓴_첫_줄은_본문에서_지운다() {
+		String after = contentAfter(fromOutlet("KBS 뉴스", "KBS뉴스",
+				"한화, 19년 만에 한국시리즈 진출\n" + REAL_CONTENT));
+
+		assertThat(after).isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void 제목과_같은_첫_줄은_보정_없이도_지운다() {
+		// 제목이 멀쩡히 들어온 기사도 본문 첫 줄에 제목을 한 번 더 싣는다. 실측 197건.
+		assertThat(contentAfter(article("한화, 19년 만에 한국시리즈 진출",
+				"한화, 19년 만에 한국시리즈 진출\n" + REAL_CONTENT)))
+				.isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void KBS_읽어주기_안내를_지운다() {
+		String after = contentAfter(article("정상 제목",
+				"읽어주기 기능은 크롬기반의\n브라우저에서만 사용하실 수 있습니다.\n" + REAL_CONTENT));
+
+		assertThat(after).isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void KBS_반응_버튼과_제보_안내를_지운다() {
+		String after = contentAfter(article("정상 제목", REAL_CONTENT
+				+ "\n■ 제보하기\n▷ 카카오톡 : 'KBS제보' 검색, 채널 추가"
+				+ "\n이 기사가 좋으셨다면\n좋아요\n0\n응원해요\n0\n후속 원해요"));
+
+		assertThat(after).isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void YTN_제보_안내를_지운다() {
+		String after = contentAfter(article("정상 제목", REAL_CONTENT
+				+ "\n※ '당신의 제보가 뉴스가 됩니다'\n[카카오톡] YTN 검색해 채널 추가"
+				+ "\n[전화] 02-398-8585\n[메일] social@ytn.co.kr"));
+
+		assertThat(after).isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void 짧고_흔한_UI_문구가_본문_한가운데_있으면_두다() {
+		// 한 줄이 통째로 같을 때만 지운다. 포함만으로 지우면 멀쩡한 문장을 먹는다.
+		String body = "이 사진 좋아요\n" + REAL_CONTENT + "\n관련기사를 함께 보면 좋다";
+
+		assertThat(contentAfter(article("정상 제목", body))).isEqualTo(body);
+	}
+
+	@Test
+	void 여든자가_넘는_제목도_본문에서_보정한다() {
+		// 라디오 프로그램 기사의 제목이 84자였다. 70자 제한이 이걸 놓치고 있었다.
+		String longTitle = "[전격시사] '증인 0명', 김승원 '로비 의혹' 해소? (이용우) \"수사로 안 나온 것 재탕, 삼탕\" "
+				+ "vs (박충권) \"감성팔이, 막장 삼류 신파극\"";
+
+		assertThat(repairedTitle(fromOutlet("KBS 뉴스", "KBS뉴스", longTitle + "\n" + REAL_CONTENT)))
+				.isEqualTo(longTitle);
+	}
+
+	@Test
+	void 바이라인은_길이와_무관하게_제목으로_쓰지_않는다() {
+		String lede = "(도요타=연합뉴스) 최송아 기자 = 2026 아이치·나고야 아시안게임 금메달을 노리는 "
+				+ "23세 이하(U-23) 남자 축구 대표팀의 '캡틴'으로 와일드카드 이기혁(강원)이 낙점됐다.";
+
+		assertThat(repairedTitle(fromOutlet("연합뉴스 한민족센터", "연합뉴스 한민족센터",
+				lede + "\n" + REAL_CONTENT))).isEqualTo("연합뉴스 한민족센터");
+	}
+
 	@Test
 	void 보정해도_나머지_값은_그대로다() {
 		String content = "진짜 제목입니다\n" + REAL_CONTENT;
@@ -378,7 +481,8 @@ class CollectedArticlePreprocessorTest {
 
 		assertThat(after.url()).isEqualTo(before.url());
 		assertThat(after.urlHash()).isEqualTo(before.urlHash());
-		assertThat(after.content()).isEqualTo(before.content());
+		// 제목으로 가져간 첫 줄만 빠지고 본문은 그대로다.
+		assertThat(after.content()).isEqualTo(REAL_CONTENT);
 		assertThat(after.publishedAt()).isEqualTo(before.publishedAt());
 		assertThat(after.organizationName()).isEqualTo(before.organizationName());
 		assertThat(after.sourceCategory()).isEqualTo(before.sourceCategory());
