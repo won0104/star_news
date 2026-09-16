@@ -6,27 +6,37 @@
  * The stars are drawn inside it, positioned against this box - so it is the field the
  * constellation's percentages are percentages of.
  *
- * `fixed`, not `absolute`: <PhotoBackdrop>'s .root is the scroll container, and an
- * absolute child of a scroller is one viewport tall and scrolls away with the content.
- * Fixed makes this a stage, the same call .wash and .veil already make. Nothing here
- * depends on an ancestor's overflow: only transform, filter or contain would capture a
- * fixed descendant, and none of them is set on the way up.
+ * The stage floats inside the app's padded content frame so the daylight room remains
+ * visible around it. Its 8:5 ratio matches the authored constellation coordinate space;
+ * the constellation itself keeps responsibility for its portal-based fullscreen mode.
  */
 .stage {
-  position: fixed;
-  top: 76px;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border-top: 1px solid rgba(12, 9, 8, 0.7);
+  position: relative;
+  width: min(100%, calc((100vh - 100px) * 1.6), 1520px);
+  margin-inline: auto;
+  aspect-ratio: 8 / 5;
+  border: 1px solid rgba(225, 203, 165, 0.56);
+  border-radius: 16px;
   overflow: hidden;
-  /* Figma 870:2's night ceiling while its photograph is loading. */
   background: #302b29;
+  box-shadow:
+    0 24px 54px rgba(46, 29, 16, 0.3),
+    0 2px 6px rgba(46, 29, 16, 0.2),
+    inset 0 0 0 1px rgba(255, 238, 204, 0.08);
 }
 
 @media (max-width: 1023px) {
   .stage {
-    top: 60px;
+    width: min(100%, calc((100vh - 92px) * 1.6));
+    border-radius: 13px;
+  }
+}
+
+@media (max-width: 900px) {
+  .stage {
+    width: 100%;
+    min-height: calc(100vh - 124px);
+    aspect-ratio: auto;
   }
 }
 

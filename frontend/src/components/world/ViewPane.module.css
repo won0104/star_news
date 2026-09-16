@@ -8,8 +8,7 @@
  * full width at every size.
  *
  * `z-index: 1` lifts this above <PhotoBackdrop>'s veil. It also makes a stacking
- * context, which is why <TrendGraph> has to portal its fullscreen overlay to the body:
- * no z-index inside a stacking context can rise above what sits outside it.
+ * context, so fullscreen views portal their overlay to the body.
  */
 .page {
   position: relative;

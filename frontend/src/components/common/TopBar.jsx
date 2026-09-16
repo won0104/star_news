@@ -29,21 +29,15 @@ import styles from './TopBar.module.css';
  */
 export function TopBar({ activeId, onSelect, onBrand, onAuth }) {
   const account = useSession();
-  const attic = activeId === 'trend';
 
   return (
-    <header className={`${styles.bar} ${attic ? styles.barAttic : ''}`}>
+    <header className={styles.bar}>
       <button
         type="button"
         className={styles.brand}
         onClick={onBrand ?? (() => onSelect(navItems[0].id))}
       >
         <span className={styles.brandName}>{brand.name}</span>
-        {attic && (
-          <span className={styles.brandStar} aria-hidden>
-            ✦
-          </span>
-        )}
       </button>
 
       <nav className={styles.nav}>
