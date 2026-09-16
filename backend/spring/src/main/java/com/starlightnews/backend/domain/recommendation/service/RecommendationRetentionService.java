@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecommendationRetentionService {
 
 	private final UserRecommendationRepository userRecommendationRepository;
-	private final RecommendationRetentionProperties properties;
+	private final RecommendationProperties properties;
 
 	/**
 	 * 보관 기간을 넘긴 회차를 지운다.

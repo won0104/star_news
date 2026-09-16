@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
@@ -71,9 +70,10 @@ public class FastApiClient {
 						throw new BusinessException(toErrorCode(path, response));
 					})
 					.body(responseType);
-		} catch (ResourceAccessException networkFailure) {
-			// 연결 실패·타임아웃. 다음 주기에 다시 시도한다.
-			log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, networkFailure.getMessage());
+		} catch (RestClientException callFailure) {
+			// 연결 실패·타임아웃뿐 아니라 응답을 읽지 못한 경우도 여기서 막는다. 그냥 두면 호출한
+			// 배치의 회차 전체가 죽는다. 묶음 하나의 실패로 격리하려면 예외가 넘어가면 안 된다.
+			log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, callFailure.getMessage());
 			throw new BusinessException(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
 		}
 	}
@@ -104,6 +104,10 @@ public class FastApiClient {
 
 		if (status.value() == 401 || status.value() == 403) {
 			return InternalApiErrorCode.INTERNAL_API_UNAUTHORIZED;
+		}
+		if (status.value() == 404) {
+			// 그래프에 대상이 아직 없다는 뜻이다. 요청 형식이 틀린 400 과는 대응이 다르다.
+			return InternalApiErrorCode.INTERNAL_API_NOT_FOUND;
 		}
 		if (status.value() == 409) {
 			// 이미 더 최신 상태가 반영돼 있다는 뜻이다. 다른 4xx 와 뭉뚱그리면 호출자가 못 가른다.
