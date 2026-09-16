@@ -81,6 +81,15 @@ public class CollectedArticlePreprocessor {
 	private static final int REPEATED_LINE_MIN_LENGTH = 40;
 
 	/**
+	 * 본문이 여기서 끝난다는 표지. 이 줄과 그 뒤를 통째로 버린다.
+	 */
+	private static final Set<String> CONTENT_END_MARKERS = Set.of(
+			"■ 제보하기", "이 기사가 좋으셨다면", "※ '당신의 제보가 뉴스가 됩니다'");
+
+	/** 기사 하단의 입력·수정 시각. 본문에는 이런 줄이 없다. */
+	private static final Pattern TIMESTAMP_LINE = Pattern.compile("^(입력|수정)\\s?\\d{4}-\\d{2}-\\d{2}");
+
+	/**
 	 * 본문 끝에 붙는 저작권·UI 문구.
 	 *
 	 * <p>저작권 문구는 매체마다 표현이 전부 달라 목록으로는 끝이 없다. 실측에서만 스타뉴스·YTN·
@@ -209,14 +218,15 @@ public class CollectedArticlePreprocessor {
 			return article;
 		}
 
-		List<String> deduplicated = dropRepeatedLines(original.lines().map(String::strip).toList());
-		String body = String.join("\n", deduplicated);
-		String cleaned = stripNoiseLines(deduplicated, article.title());
+		List<String> body = cutAtContentEnd(
+				dropRepeatedLines(original.lines().map(String::strip).toList()));
+		String baseline = String.join("\n", body);
+		String cleaned = stripNoiseLines(body, article.title());
 
 		if (cleaned.equals(original.strip())) {
 			return article;
 		}
-		if (isOverTrimmed(body, cleaned)) {
+		if (isOverTrimmed(baseline, cleaned)) {
 			log.warn("본문이 지나치게 줄어 원본을 유지합니다. ({}자 -> {}자, {})",
 					original.strip().length(), cleaned.length(), article.url());
 			return article;
@@ -239,16 +249,37 @@ public class CollectedArticlePreprocessor {
 		return kept;
 	}
 
+	/**
+	 * 본문 끝 표지를 만나면 그 줄부터 잘라낸다.
+	 * <p>표지가 첫 줄이면 자르지 않는다. 본문이 통째로 사라진다.
+	 */
+	private List<String> cutAtContentEnd(List<String> lines) {
+		for (int index = 1; index < lines.size(); index++) {
+			String line = lines.get(index);
+			if (CONTENT_END_MARKERS.contains(line) || TIMESTAMP_LINE.matcher(line).find()) {
+				return lines.subList(0, index);
+			}
+		}
+		return lines;
+	}
+
 	private String stripNoiseLines(List<String> lines, String title) {
 		int start = 0;
-		while (start < lines.size() && isLeadingNoise(lines.get(start))) {
-			start++;
-		}
-		// 제목을 본문 앞머리에서 가져왔으면 그 줄은 본문에 남을 이유가 없다.
-		if (start < lines.size() && title != null && lines.get(start).equals(title.strip())) {
-			start++;
-		}
 		int end = lines.size();
+		boolean stripped = true;
+		while (stripped && start < end) {
+			stripped = false;
+			if (isLeadingNoise(lines.get(start))) {
+				start++;
+				stripped = true;
+				continue;
+			}
+			// 제목을 본문 앞머리에서 가져왔으면 그 줄은 본문에 남을 이유가 없다.
+			if (title != null && lines.get(start).equals(title.strip())) {
+				start++;
+				stripped = true;
+			}
+		}
 		while (end > start && isTrailingNoise(lines.get(end - 1))) {
 			end--;
 		}

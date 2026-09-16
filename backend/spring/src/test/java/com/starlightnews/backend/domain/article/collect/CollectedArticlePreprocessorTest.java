@@ -454,6 +454,69 @@ class CollectedArticlePreprocessorTest {
 	}
 
 	@Test
+	void 제목_줄_뒤에_또_사이트_문구가_있어도_끝까지_걷어낸다() {
+		// 한 번만 훑으면 제목 줄을 지운 자리에서 멈춘다. 그 뒤의 AD 가 그대로 남는다.
+		String after = contentAfter(article("정상 제목",
+				"AD\n정상 제목\n크게보기\n" + REAL_CONTENT));
+
+		assertThat(after).isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void 두_번_돌려도_결과가_같다() {
+		// 전처리 결과를 다시 전처리해도 더 바뀌면 안 된다. 수집 때 한 번만 도는데,
+		// 한 번에 수렴하지 않으면 정리가 덜 된 기사가 그대로 저장된다.
+		CollectedArticle messy = article("정상 제목",
+				"AD\n정상 제목\n기사 본문 영역\n" + REAL_CONTENT + "\n" + REAL_CONTENT
+						+ "\n■ 제보하기\n입력 2026-09-14 15:41:33\n사회");
+
+		String once = contentAfter(messy);
+		String twice = contentAfter(article("정상 제목", once));
+
+		assertThat(twice).isEqualTo(once);
+	}
+
+	@Test
+	void 본문_끝_표지를_만나면_그_뒤를_통째로_버린다() {
+		// KBS 는 기사 뒤에 제보 안내, 제목 재출력, 입력 시각, 기자 정보, 반응 버튼, 이슈 태그를
+		// 줄줄이 붙인다. 맨 끝의 이슈 태그가 그냥 낱말이라 뒤에서부터 걷어내면 거기서 막힌다.
+		String after = contentAfter(article("정상 제목", REAL_CONTENT
+				+ "\n■ 제보하기\n▷ 카카오톡 : 'KBS제보' 검색, 채널 추가\n▷ 전화 : 02-781-1234, 4444"
+				+ "\n정상 제목\n입력 2026-09-14 15:41:33\n사회\n박기원 기자 pray@kbs.co.kr"
+				+ "\n이 기사가 좋으셨다면\n좋아요\n0\n이슈\n호르무즈 확전 기로"));
+
+		assertThat(after).isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void 입력_시각_줄부터_버린다() {
+		String after = contentAfter(article("정상 제목",
+				REAL_CONTENT + "\n입력 2026-09-14 15:41:33\n수정2026-09-14 15:42:46\n사회"));
+
+		assertThat(after).isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void 꼬리를_자르느라_절반_아래로_줄어도_되돌리지_않는다() {
+		// 짧은 기사일수록 꼬리 비율이 크다. 실측 4건이 절반 아래로 줄었고 넷 다 잘린 쪽이 군더더기였다.
+		String shortBody = "오늘 낮 경남 함양군 대전통영고속도로에서 차량 8대가 잇따라 부딪혔습니다.\n"
+				+ "이 사고로 10명이 다쳐 병원으로 옮겨졌습니다.";
+		String after = contentAfter(article("함양 고속도로 추돌", shortBody
+				+ "\n■ 제보하기\n▷ 카카오톡 : 'KBS제보' 검색, 채널 추가\n▷ 전화 : 02-781-1234, 4444"
+				+ "\n함양 고속도로 추돌\n입력 2026-09-14 15:41:33\n사회\n박기원 기자 pray@kbs.co.kr"
+				+ "\n박기원 기자의 기사 모음"));
+
+		assertThat(after).isEqualTo(shortBody);
+	}
+
+	@Test
+	void 표지가_첫_줄이면_자르지_않는다() {
+		// 자르면 본문이 통째로 사라진다.
+		assertThat(contentAfter(article("정상 제목", "이 기사가 좋으셨다면\n" + REAL_CONTENT)))
+				.contains(REAL_CONTENT);
+	}
+
+	@Test
 	void 여든자가_넘는_제목도_본문에서_보정한다() {
 		// 라디오 프로그램 기사의 제목이 84자였다. 70자 제한이 이걸 놓치고 있었다.
 		String longTitle = "[전격시사] '증인 0명', 김승원 '로비 의혹' 해소? (이용우) \"수사로 안 나온 것 재탕, 삼탕\" "
