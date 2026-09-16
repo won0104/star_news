@@ -7,10 +7,10 @@ import { useSyncExternalStore } from 'react';
  * nothing has to be wrapped in a provider — the same shape as useIsCompact and
  * usePrefersReducedMotion, which is how this codebase already reads shared state.
  *
- * In memory only, deliberately: api/auth.js `signIn` is still a stub that resolves with
- * nothing, so there is no token to keep and a reload signs you out. When the real
- * endpoint lands, persist what it returns and rehydrate `account` here on module load —
- * that is the only change this file needs, and every screen keeps working unchanged.
+ * In memory only, deliberately. The refresh token lives in an HttpOnly cookie the page
+ * cannot read, so a reload signs you out here while the cookie survives — the fix is to
+ * call `POST /auth/refresh` on boot and start a session from what it returns, not to
+ * copy the access token into storage where a script could read it.
  */
 let account = null;
 const listeners = new Set();
@@ -24,10 +24,19 @@ const getSnapshot = () => account;
 
 const notify = () => listeners.forEach((listener) => listener());
 
-/** `next` is what the sign-in screens know about the user — `{ id }` for now. */
+/**
+ * `next` is the login response: `{ accessToken, tokenType, expiresIn, user }`. Stored
+ * whole so the access token is reachable for the Authorization header without a second
+ * place to keep it in sync.
+ */
 export function startSession(next) {
   account = next;
   notify();
+}
+
+/** The access token for the Authorization header, or null when nobody is signed in. */
+export function getAccessToken() {
+  return account?.accessToken ?? null;
 }
 
 export function endSession() {
