@@ -38,9 +38,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'com.github.fppt:jedis-mock:1.1.5'
+	// 로컬: jdbc:tc: URL 이 Testcontainers MySQL 을 띄운다.
+	// CI: docker-compose.ci.yml MySQL 을 DB_URL 로 주입하므로 컨테이너 안에서는 tc 경로를 쓰지 않는다.
+	testImplementation 'org.testcontainers:mysql'
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testRuntimeOnly 'com.h2database:h2'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 }
 

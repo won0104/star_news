@@ -1,21 +1,22 @@
-import { useCallback, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { backdrop, navItems } from '../data/home';
-import { arrivalScene } from '../data/recommend';
-import { PhotoBackdrop } from '../components/common/PhotoBackdrop';
-import { TopBar } from '../components/common/TopBar';
-import { ViewPane } from '../components/world/ViewPane';
-import { useSettingsValues } from '../store/settings';
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { backdrop, extraViews, navItems } from '../data/home'
+import { arrivalScene } from '../data/recommend'
+import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
+import { TopBar } from '../components/common/TopBar'
+import { ViewPane } from '../components/world/ViewPane'
+import { useSettingsValues } from '../store/settings'
+import { SCREEN_TRANSITIONS } from '../utils/motion'
 
 /** Falls back rather than rendering nothing when `?view=` is absent or unrecognised. */
-const DEFAULT_VIEW = 'trend';
-const VIEWS = new Set(navItems.map((item) => item.id));
+const DEFAULT_VIEW = 'trend'
+const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
 
 /**
  * The clip a destination is arrived on, by destination. A destination with no entry is
  * simply arrived on without one — which is every destination but 나를 위한 추천 today.
  */
-const ARRIVAL = { foryou: arrivalScene };
+const ARRIVAL = { foryou: arrivalScene }
 
 /**
  * /app — the sunlit room, the bar over it, and one of the bar's four destinations on top.
@@ -58,36 +59,52 @@ const ARRIVAL = { foryou: arrivalScene };
  * which is every case but an arrival.
  */
 export function AppScene() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { reduceMotion } = useSettingsValues();
-  const [params, setParams] = useSearchParams();
-  const [walked, setWalked] = useState(false);
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { reduceMotion } = useSettingsValues()
+  const [params, setParams] = useSearchParams()
+  const [walked, setWalked] = useState(false)
+  const [enteredFromHome] = useState(() => location.state?.from === 'home')
 
-  const asked = params.get('view');
-  const view = VIEWS.has(asked) ? asked : DEFAULT_VIEW;
+  const asked = params.get('view')
+  const view = asked === 'log2' ? 'log' : VIEWS.has(asked) ? asked : DEFAULT_VIEW
+
+  useEffect(() => {
+    if (asked !== 'log2') return
+    const canonicalParams = new URLSearchParams(params)
+    canonicalParams.set('view', 'log')
+    setParams(canonicalParams, { replace: true })
+  }, [asked, params, setParams])
+
+  useEffect(() => {
+    if (!enteredFromHome || location.state?.from !== 'home') return
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: location.hash },
+      { replace: true, state: null },
+    )
+  }, [enteredFromHome, location.hash, location.pathname, location.search, location.state, navigate])
 
   // `replace`, so walking the bar does not pile up history entries to back out of.
   const open = (id) => {
-    setWalked(true);
-    setParams(id === DEFAULT_VIEW ? {} : { view: id }, { replace: true });
-  };
+    setWalked(true)
+    setParams(id === DEFAULT_VIEW ? {} : { view: id }, { replace: true })
+  }
 
-  const arriving = !walked && location.state?.from === 'home';
-  const scene = (arriving && ARRIVAL[view]) || backdrop;
-  const motion = !reduceMotion && scene !== backdrop;
-  const [settled, setSettled] = useState(false);
-  const onSettled = useCallback(() => setSettled(true), []);
+  const arriving = !walked && enteredFromHome
+  const scene = (arriving && ARRIVAL[view]) || backdrop
+  const motion = SCREEN_TRANSITIONS && !reduceMotion && scene !== backdrop
+  const [settled, setSettled] = useState(false)
+  const onSettled = useCallback(() => setSettled(true), [])
 
   return (
     <PhotoBackdrop key={scene.id} scene={scene} motion={motion} onSettled={onSettled}>
       <TopBar
-        activeId={view}
+        activeId={view === 'foryou2' ? 'foryou' : view}
         onSelect={open}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
       />
-      <ViewPane view={view} settled={settled} />
+      <ViewPane view={view} settled={settled} playTrendTransition={arriving && view === 'trend'} />
     </PhotoBackdrop>
-  );
+  )
 }

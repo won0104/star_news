@@ -141,35 +141,35 @@
 /* Each Figma paper has a different top treatment. Text begins below its own
    pin or tape instead of sharing one generic inset. */
 .note1 .paperContent {
-  inset: 22% 12% 11%;
+  inset: 23% 13% 13%;
 }
 
 .note2 .paperContent {
-  inset: 25% 13% 11%;
+  inset: 21% 14% 14% 15%;
 }
 
 .note3 .paperContent {
-  inset: 24% 13% 10%;
+  inset: 18% 15% 13% 14%;
 }
 
 .note4 .paperContent {
-  inset: 24% 14% 12%;
+  inset: 28% 16% 15%;
 }
 
 .note5 .paperContent {
-  inset: 22% 12% 11%;
+  inset: 24% 15% 13% 13%;
 }
 
 .note6 .paperContent {
-  inset: 25% 14% 12%;
+  inset: 29% 17% 15% 16%;
 }
 
 .note7 .paperContent {
-  inset: 25% 12% 10%;
+  inset: 20% 15% 14% 14%;
 }
 
 .note8 .paperContent {
-  inset: 14% 12% 12%;
+  inset: 16% 17% 16% 13%;
 }
 
 .paperContent:hover {

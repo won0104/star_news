@@ -9,8 +9,11 @@ import org.springframework.http.HttpStatus;
  */
 public enum ArticleCollectErrorCode implements ErrorCode {
 
-	/** 제공처 요청 한도를 넘겼다. 다음 주기까지 기다려야 한다. */
+	/** 일일 요청 한도를 넘겼다. 다음 UTC 자정까지 기다린다. */
 	NEWS_SOURCE_QUOTA_EXCEEDED(HttpStatus.SERVICE_UNAVAILABLE, "기사 제공처 요청 한도를 초과했습니다."),
+
+	/** 초당 요청 제한. 짧게 대기한 뒤 제한된 횟수만 재시도한다. */
+	NEWS_SOURCE_RATE_LIMITED(HttpStatus.SERVICE_UNAVAILABLE, "기사 제공처 요청 속도 제한에 도달했습니다."),
 
 	/** API 키가 없거나 유효하지 않다. 설정을 고치기 전에는 재시도해도 소용없다. */
 	NEWS_SOURCE_UNAUTHORIZED(HttpStatus.SERVICE_UNAVAILABLE, "기사 제공처 인증에 실패했습니다."),

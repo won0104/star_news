@@ -89,7 +89,7 @@ def sync_consumed_events(
         UNWIND $events AS event
         MATCH (e:Event {nodeId: event.eventId})
         MERGE (u)-[r:CONSUMED]->(e)
-        SET r.count = event.count,
+        SET r.eventClickCount = event.eventClickCount,
             r.lastViewedAt = event.lastViewedAt,
             r.eventFavorited = event.eventFavorited,
             r.updatedAt = $aggregatedAt
