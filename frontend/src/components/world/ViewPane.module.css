@@ -35,3 +35,9 @@
     padding: 84px 20px 40px;
   }
 }
+
+@media (max-width: 420px) {
+  .page {
+    padding-top: 128px;
+  }
+}

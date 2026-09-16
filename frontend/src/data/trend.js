@@ -600,7 +600,6 @@ export const panelCopy = {
   save: '기사 저장',
   unsave: '저장 해제',
   fieldLabel: '사건 별자리',
-  history: '나의 기록',
 }
 
 /** The coordinate space the component's slots are percentages of. */

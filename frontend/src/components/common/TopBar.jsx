@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useLayoutEffect, useRef } from 'react';
 import { authActions, brand, navItems } from '../../data/home';
 import { useSession } from '../../store/session';
 import { UserMenu } from './UserMenu';
@@ -29,6 +29,21 @@ import styles from './TopBar.module.css';
  */
 export function TopBar({ activeId, onSelect, onBrand, onAuth }) {
   const account = useSession();
+  const navRef = useRef(null);
+
+  useLayoutEffect(() => {
+    // A direct link or narrower window can hide the selected tab beyond the scroll edge.
+    const showActive = () => {
+      navRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    };
+
+    showActive();
+    window.addEventListener('resize', showActive);
+    return () => window.removeEventListener('resize', showActive);
+  }, [activeId]);
 
   return (
     <header className={styles.bar}>
@@ -40,7 +55,7 @@ export function TopBar({ activeId, onSelect, onBrand, onAuth }) {
         <span className={styles.brandName}>{brand.name}</span>
       </button>
 
-      <nav className={styles.nav}>
+      <nav ref={navRef} className={styles.nav}>
         {navItems.map((item, index) => (
           <Fragment key={item.id}>
             {index > 0 && <span className={styles.navRule} aria-hidden />}

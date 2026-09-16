@@ -246,3 +246,9 @@
     padding: 22px 20px 24px 18px;
   }
 }
+
+@media (max-width: 420px) {
+  .page {
+    padding-top: 128px;
+  }
+}
