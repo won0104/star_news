@@ -339,6 +339,36 @@ class CollectedArticlePreprocessorTest {
 				.isEmpty();
 	}
 
+	/** 제목 보정이 실패하는 본문. 첫 줄이 바이라인이라 제목으로 쓸 수 없다. */
+	private static final String BYLINE_CONTENT = "(서울=연합뉴스) 홍길동 기자 = " + REAL_CONTENT;
+
+	@Test
+	void 한쪽_제목이_언론사명뿐이면_제대로_된_제목만_남긴다() {
+		// 연합뉴스 한민족센터가 제목 자리에 언론사명을 그대로 보낸다. 제목을 모르는 것이지
+		// 다른 제목인 것이 아니므로, 같은 기사를 제대로 된 제목으로 받은 쪽을 남긴다.
+		assertThat(titlesAfter(
+				fromOutlet("[아시안게임] 남자농구, 16일 요르단과 8강 격돌", "연합뉴스", BYLINE_CONTENT),
+				fromOutlet("연합뉴스 한민족센터", "연합뉴스 한민족센터", BYLINE_CONTENT)))
+				.containsExactly("[아시안게임] 남자농구, 16일 요르단과 8강 격돌");
+	}
+
+	@Test
+	void 언론사명뿐인_제목을_빼고도_제목이_둘이면_전부_버린다() {
+		assertThat(titlesAfter(
+				fromOutlet("김하성, 2타수 무안타", "뉴스핌", BYLINE_CONTENT),
+				fromOutlet("올림픽 대표팀 명단 발표", "뉴스핌", BYLINE_CONTENT),
+				fromOutlet("연합뉴스 한민족센터", "연합뉴스 한민족센터", BYLINE_CONTENT)))
+				.isEmpty();
+	}
+
+	@Test
+	void 전부_제목이_언론사명뿐이면_고를_수_없어_버린다() {
+		assertThat(titlesAfter(
+				fromOutlet("연합뉴스 한민족센터", "연합뉴스 한민족센터", BYLINE_CONTENT),
+				fromOutlet("KBS 뉴스", "KBS뉴스", BYLINE_CONTENT)))
+				.isEmpty();
+	}
+
 	@Test
 	void 보정해도_나머지_값은_그대로다() {
 		String content = "진짜 제목입니다\n" + REAL_CONTENT;

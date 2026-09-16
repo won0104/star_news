@@ -130,6 +130,8 @@ public class CollectedArticlePreprocessor {
 	 *
 	 * <p>제목까지 같으면 남긴다. 통신사 기사를 여러 매체가 받아쓴 것이라 정상이다. 실측에서
 	 * 중복 33그룹(67건)이 여기 해당했다.
+	 *
+	 * <p>제목이 언론사명뿐인 기사는 판정에서 빼고, 제대로 된 제목이 하나로 모이면 그쪽만 남긴다.
 	 */
 	private List<CollectedArticle> dropContentCollisions(List<CollectedArticle> articles) {
 		Map<String, List<CollectedArticle>> byContent = articles.stream()
@@ -139,15 +141,31 @@ public class CollectedArticlePreprocessor {
 
 		List<CollectedArticle> kept = new ArrayList<>();
 		for (List<CollectedArticle> sameContent : byContent.values()) {
-			if (hasConflictingTitles(sameContent)) {
+			List<CollectedArticle> candidates = titleKnown(sameContent);
+
+			if (hasConflictingTitles(candidates)) {
 				log.warn("본문이 같은데 제목이 달라 {}건을 제외합니다. ({})",
 						sameContent.size(), sameContent.get(0).organizationName());
 				sameContent.forEach(article -> log.info("  제외: {}", article.title()));
 				continue;
 			}
-			kept.addAll(sameContent);
+			if (candidates.size() < sameContent.size()) {
+				log.info("본문이 같고 제목이 언론사명뿐이라 {}건을 제외합니다. (남긴 제목: {})",
+						sameContent.size() - candidates.size(), candidates.get(0).title());
+			}
+			kept.addAll(candidates);
 		}
 		return kept;
+	}
+
+	/**
+	 * 제목을 아는 기사만 남긴다. 전부 언론사명뿐이면 걸러낼 기준이 없어 그대로 돌려준다.
+	 */
+	private List<CollectedArticle> titleKnown(List<CollectedArticle> sameContent) {
+		List<CollectedArticle> titled = sameContent.stream()
+				.filter(article -> !hasOutletNameAsTitle(article))
+				.toList();
+		return titled.isEmpty() ? sameContent : titled;
 	}
 
 	private boolean hasConflictingTitles(List<CollectedArticle> sameContent) {
