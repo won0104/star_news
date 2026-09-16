@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { historyGraph, historyOverview, historyStories } from '../../data/history'
 import { useSettingsValues } from '../../store/settings'
 import { HistoryPane } from './HistoryPane'
@@ -8,6 +8,7 @@ import styles from './DiaryHistoryPane.module.css'
 
 const HistoryPlanet = lazy(() => import('./HistoryPlanet'))
 const DIARY_FRAME_URL = '/assets/history/diary-observatory-window-transparent.png'
+const BOOKMARK_ASSET = '/assets/history/bookmarks'
 const EVENTS_PER_PAGE = 3
 
 const TONE_CLASS = {
@@ -96,6 +97,33 @@ export function DiaryHistoryPane() {
       <div className={styles.diaryStage}>
         <img className={styles.diaryFrame} src={DIARY_FRAME_URL} alt="" aria-hidden="true" />
 
+        <Link className={styles.reportBookmark} to="/app?view=report">
+          <img src={`${BOOKMARK_ASSET}/bookmark-report-blank.svg`} alt="" aria-hidden="true" />
+          <span>나의 리포트</span>
+        </Link>
+
+        <nav className={styles.categoryBookmarks} aria-label="뉴스 카테고리">
+          {historyStories.map((item) => {
+            const selected = item.topicCode === cluster.topicCode
+
+            return (
+              <button
+                type="button"
+                key={item.topicCode}
+                aria-current={selected ? 'true' : undefined}
+                onClick={() => selectTopic(item)}
+              >
+                <img
+                  src={`${BOOKMARK_ASSET}/tab-${selected ? 'selected' : 'default'}-blank.svg`}
+                  alt=""
+                  aria-hidden="true"
+                />
+                <span>{item.topicName}</span>
+              </button>
+            )
+          })}
+        </nav>
+
         <header className={styles.diaryTitle}>
           <span>MY CONSTELLATION ARCHIVE</span>
           <h1>나의 기록들</h1>
@@ -146,20 +174,6 @@ export function DiaryHistoryPane() {
               <h2>{selectedEvent ? '선택한 Event' : `${cluster.topicName} 기록`}</h2>
             </div>
           </header>
-
-          <nav className={styles.categoryTabs} aria-label="뉴스 카테고리">
-            {historyStories.map((item) => (
-              <button
-                type="button"
-                key={item.topicCode}
-                className={styles[TONE_CLASS[item.tone]]}
-                aria-current={item.topicCode === cluster.topicCode ? 'true' : undefined}
-                onClick={() => selectTopic(item)}
-              >
-                {item.topicName}
-              </button>
-            ))}
-          </nav>
 
           {clusterEvents.length > 0 ? (
             <div className={styles.eventPage}>
