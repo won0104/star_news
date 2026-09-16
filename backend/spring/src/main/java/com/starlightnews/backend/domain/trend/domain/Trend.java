@@ -19,7 +19,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 /**
- * 특정 집계 기준 시각의 트렌드 순위 항목. 집계 시점의 Node 제목과 기사 수를 함께 보존한다.
+ * 특정 공개 회차의 트렌드 순위 항목. snapshotAt은 기사 집계 기준이 아닌 홈 공개 시각이다.
  */
 @Entity
 @Table(name = "trends")
@@ -46,7 +46,7 @@ public class Trend {
 	@Column(name = "node_title", nullable = false, length = 500)
 	private String nodeTitle;
 
-	@Column(nullable = false)
+	@Column(name = "`rank`", nullable = false)
 	private int rank;
 
 	@Column(name = "article_count", nullable = false)

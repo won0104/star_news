@@ -28,35 +28,38 @@ public class TrendAggregationService {
 
 	private static final int TREND_LIMIT = 10;
 	private static final int AGGREGATION_WINDOW_HOURS = 24;
+	private static final int PUBLICATION_DELAY_HOURS = 1;
 	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
 	private final TrendAggregationRepository trendAggregationRepository;
 	private final TrendPersistenceService trendPersistenceService;
 
 	/**
-	 * 주어진 기준 시각 직전 24시간을 집계한다.
+	 * aggregationAt 직전 24시간을 집계하고 한 시간 뒤 공개할 결과를 저장한다.
+	 * 저장하는 snapshotAt은 aggregationAt과 달리 공개 회차 시각이다.
 	 *
 	 * @return 저장한 트렌드 항목 수. 후보가 없으면 기존 결과를 유지하고 0을 반환한다.
 	 */
-	public int aggregate(OffsetDateTime snapshotAt) {
-		Objects.requireNonNull(snapshotAt, "snapshotAt은 null일 수 없습니다.");
+	public int aggregate(OffsetDateTime aggregationAt) {
+		Objects.requireNonNull(aggregationAt, "aggregationAt은 null일 수 없습니다.");
 
 		long totalStartedAt = System.nanoTime();
 		long queryStartedAt = System.nanoTime();
 		List<TrendCandidate> candidates = trendAggregationRepository.findTopDistinctEvents(
-				snapshotAt.minusHours(AGGREGATION_WINDOW_HOURS), snapshotAt, TREND_LIMIT);
+				aggregationAt.minusHours(AGGREGATION_WINDOW_HOURS), aggregationAt, TREND_LIMIT);
 		long neo4jQueryDurationMs = elapsedMillis(queryStartedAt);
 
 		if (candidates.isEmpty()) {
-			log.warn("트렌드 집계 결과가 없어 기존 결과를 유지합니다: snapshotAt={}, neo4jQueryDurationMs={}",
-					snapshotAt, neo4jQueryDurationMs);
+			log.warn("트렌드 집계 결과가 없어 기존 결과를 유지합니다: aggregationAt={}, neo4jQueryDurationMs={}",
+					aggregationAt, neo4jQueryDurationMs);
 			return 0;
 		}
 		if (candidates.size() > TREND_LIMIT) {
 			throw new IllegalStateException("Neo4j 트렌드 집계 결과가 최대 개수를 초과했습니다.");
 		}
 
-		LocalDateTime storedSnapshotAt = snapshotAt.atZoneSameInstant(KST).toLocalDateTime();
+		LocalDateTime storedSnapshotAt = aggregationAt.plusHours(PUBLICATION_DELAY_HOURS)
+				.atZoneSameInstant(KST).toLocalDateTime();
 		List<Trend> trends = toTrends(candidates, storedSnapshotAt);
 
 		long writeStartedAt = System.nanoTime();
@@ -64,9 +67,10 @@ public class TrendAggregationService {
 		long mysqlWriteDurationMs = elapsedMillis(writeStartedAt);
 
 		log.info(
-				"트렌드 집계 완료: snapshotAt={}, selectedTrendCount={}, neo4jQueryDurationMs={}, "
+				"트렌드 집계 완료: aggregationAt={}, snapshotAt={}, selectedTrendCount={}, neo4jQueryDurationMs={}, "
 						+ "mysqlWriteDurationMs={}, totalDurationMs={}",
-				snapshotAt,
+				aggregationAt,
+				storedSnapshotAt,
 				trends.size(),
 				neo4jQueryDurationMs,
 				mysqlWriteDurationMs,

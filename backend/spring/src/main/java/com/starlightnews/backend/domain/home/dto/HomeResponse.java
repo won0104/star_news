@@ -7,11 +7,11 @@ import com.starlightnews.backend.global.enums.NodeType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * 최신 트렌드 집계 회차와 순위 목록. 그래프·개인화 정보는 포함하지 않는다.
+ * 공개된 최신 트렌드 집계 회차와 순위 목록. 그래프·개인화 정보는 포함하지 않는다.
  */
 public record HomeResponse(
 
-		@Schema(description = "트렌드 집계 기준 시각. 저장된 트렌드가 없으면 null",
+		@Schema(description = "트렌드 공개 회차 시각 (06:00/18:00 KST). 기사 집계 기준은 한 시간 전이며, 공개된 트렌드가 없으면 null",
 				example = "2026-09-15T18:00:00+09:00", nullable = true)
 		OffsetDateTime snapshotAt,
 
@@ -37,7 +37,7 @@ public record HomeResponse(
 			@Schema(description = "집계 시점에 저장한 Node 표시 이름", example = "한국은행 기준금리 동결")
 			String label,
 
-			@Schema(description = "직전 24시간의 고유 대표 기사 수", example = "23")
+			@Schema(description = "공개 시각 한 시간 전을 기준으로 직전 24시간의 고유 대표 기사 수", example = "23")
 			int articleCount
 	) {
 	}

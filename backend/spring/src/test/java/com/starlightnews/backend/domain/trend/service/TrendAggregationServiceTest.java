@@ -26,8 +26,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class TrendAggregationServiceTest {
 
-	private static final OffsetDateTime SNAPSHOT_AT = OffsetDateTime.of(
-			2026, 9, 15, 6, 0, 0, 0, ZoneOffset.ofHours(9));
+	private static final OffsetDateTime AGGREGATION_AT = OffsetDateTime.of(
+			2026, 9, 15, 5, 0, 0, 0, ZoneOffset.ofHours(9));
 
 	@Mock
 	private TrendAggregationRepository trendAggregationRepository;
@@ -44,9 +44,9 @@ class TrendAggregationServiceTest {
 				new TrendCandidate("event-1", "첫 번째 사건", 12),
 				new TrendCandidate("event-2", "두 번째 사건", 7));
 		given(trendAggregationRepository.findTopDistinctEvents(
-				SNAPSHOT_AT.minusHours(24), SNAPSHOT_AT, 10)).willReturn(candidates);
+				AGGREGATION_AT.minusHours(24), AGGREGATION_AT, 10)).willReturn(candidates);
 
-		int savedCount = trendAggregationService.aggregate(SNAPSHOT_AT);
+		int savedCount = trendAggregationService.aggregate(AGGREGATION_AT);
 
 		assertThat(savedCount).isEqualTo(2);
 		@SuppressWarnings("unchecked")
@@ -57,6 +57,7 @@ class TrendAggregationServiceTest {
 		List<Trend> saved = trendsCaptor.getValue();
 		assertThat(saved).extracting(Trend::getRank).containsExactly(1, 2);
 		assertThat(saved).extracting(Trend::getNodeType).containsOnly(NodeType.EVENT);
+		assertThat(saved).extracting(Trend::getSnapshotAt).containsOnly(LocalDateTime.of(2026, 9, 15, 6, 0));
 		assertThat(saved).extracting(Trend::getNodeId).containsExactly("event-1", "event-2");
 		assertThat(saved).extracting(Trend::getArticleCount).containsExactly(12, 7);
 		assertThat(saved).extracting(Trend::getTrendScore)
@@ -66,9 +67,9 @@ class TrendAggregationServiceTest {
 	@Test
 	void 후보가_없으면_기존_결과를_유지한다() {
 		given(trendAggregationRepository.findTopDistinctEvents(
-				SNAPSHOT_AT.minusHours(24), SNAPSHOT_AT, 10)).willReturn(List.of());
+				AGGREGATION_AT.minusHours(24), AGGREGATION_AT, 10)).willReturn(List.of());
 
-		int savedCount = trendAggregationService.aggregate(SNAPSHOT_AT);
+		int savedCount = trendAggregationService.aggregate(AGGREGATION_AT);
 
 		assertThat(savedCount).isZero();
 		verify(trendPersistenceService, never()).replaceSnapshot(
@@ -76,12 +77,29 @@ class TrendAggregationServiceTest {
 	}
 
 	@Test
+	void UTC_저녁_기준_시각도_KST_17시_집계와_18시_공개로_저장한다() {
+		OffsetDateTime utcAggregationAt = OffsetDateTime.parse("2026-09-15T08:00:00Z");
+		given(trendAggregationRepository.findTopDistinctEvents(
+				utcAggregationAt.minusHours(24), utcAggregationAt, 10))
+				.willReturn(List.of(new TrendCandidate("event-1", "저녁 사건", 3)));
+
+		trendAggregationService.aggregate(utcAggregationAt);
+
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<List<Trend>> trendsCaptor = ArgumentCaptor.forClass(List.class);
+		verify(trendPersistenceService).replaceSnapshot(
+				org.mockito.ArgumentMatchers.eq(LocalDateTime.of(2026, 9, 15, 18, 0)), trendsCaptor.capture());
+		assertThat(trendsCaptor.getValue()).extracting(Trend::getSnapshotAt)
+				.containsExactly(LocalDateTime.of(2026, 9, 15, 18, 0));
+	}
+
+	@Test
 	void 제목이_없는_후보는_저장하지_않는다() {
 		given(trendAggregationRepository.findTopDistinctEvents(
-				SNAPSHOT_AT.minusHours(24), SNAPSHOT_AT, 10))
+				AGGREGATION_AT.minusHours(24), AGGREGATION_AT, 10))
 				.willReturn(List.of(new TrendCandidate("event-1", " ", 3)));
 
-		assertThatThrownBy(() -> trendAggregationService.aggregate(SNAPSHOT_AT))
+		assertThatThrownBy(() -> trendAggregationService.aggregate(AGGREGATION_AT))
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessageContaining("nodeTitle");
 		verify(trendPersistenceService, never()).replaceSnapshot(
@@ -91,11 +109,11 @@ class TrendAggregationServiceTest {
 	@Test
 	void 기사_수가_INT_범위를_넘으면_저장하지_않는다() {
 		given(trendAggregationRepository.findTopDistinctEvents(
-				SNAPSHOT_AT.minusHours(24), SNAPSHOT_AT, 10))
+				AGGREGATION_AT.minusHours(24), AGGREGATION_AT, 10))
 				.willReturn(List.of(new TrendCandidate(
 						"event-1", "사건", (long)Integer.MAX_VALUE + 1)));
 
-		assertThatThrownBy(() -> trendAggregationService.aggregate(SNAPSHOT_AT))
+		assertThatThrownBy(() -> trendAggregationService.aggregate(AGGREGATION_AT))
 				.isInstanceOf(ArithmeticException.class);
 		verify(trendPersistenceService, never()).replaceSnapshot(
 				org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());

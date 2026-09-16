@@ -32,8 +32,11 @@ public class HomeController {
 	@Operation(
 			summary = "홈 오늘의 트렌드 조회",
 			description = """
-					로그인 여부와 관계없이 최신 집계 회차의 오늘의 트렌드를 순위순으로 최대 10개 반환한다.
-					저장된 트렌드가 없으면 snapshotAt은 null, trends는 빈 배열이다.
+					로그인 여부와 관계없이 공개된 최신 집계 회차의 오늘의 트렌드를 순위순으로 최대 10개 반환한다.
+					05:00/17:00 KST 기준으로 집계한 결과를 06:00/18:00부터 조회한다.
+					snapshotAt은 기사 집계 기준이 아닌 06:00/18:00 공개 회차 시각이다.
+					공개된 트렌드가 없으면 snapshotAt은 null, trends는 빈 배열이다.
+					이미 열린 화면은 공개 시각에 다시 요청해야 새 결과를 표시할 수 있다.
 					요청 시 트렌드를 계산하지 않으며 그래프·개인화 정보는 포함하지 않는다.""")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),

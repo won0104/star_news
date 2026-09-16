@@ -1,5 +1,8 @@
 package com.starlightnews.backend.domain.home.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 
@@ -8,19 +11,18 @@ import com.starlightnews.backend.domain.home.exception.HomeErrorCode;
 import com.starlightnews.backend.domain.trend.domain.Trend;
 import com.starlightnews.backend.domain.trend.repository.TrendRepository;
 import com.starlightnews.backend.global.error.BusinessException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * MySQL에 저장된 최신 트렌드를 홈 응답으로 변환한다.
+ * MySQL에 저장된 공개 시각이 지난 최신 트렌드를 홈 응답으로 변환한다.
  * 요청 시 집계하거나 Redis·Neo4j·사용자 데이터를 조회하지 않는다.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class HomeService {
 
 	private static final int TREND_LIMIT = 10;
@@ -29,11 +31,18 @@ public class HomeService {
 	private static final ZoneOffset KST = ZoneOffset.ofHours(9);
 
 	private final TrendRepository trendRepository;
+	private final Clock trendClock;
+
+	public HomeService(TrendRepository trendRepository, @Qualifier("trendClock") Clock trendClock) {
+		this.trendRepository = trendRepository;
+		this.trendClock = trendClock;
+	}
 
 	@Transactional(readOnly = true)
 	public HomeResponse getHome() {
 		try {
-			List<Trend> trends = trendRepository.findLatestTrends(PageRequest.of(0, TREND_LIMIT));
+			LocalDateTime now = LocalDateTime.ofInstant(trendClock.instant(), ZoneId.of("Asia/Seoul"));
+			List<Trend> trends = trendRepository.findLatestTrends(now, PageRequest.of(0, TREND_LIMIT));
 			if (trends.isEmpty()) {
 				return new HomeResponse(null, List.of());
 			}

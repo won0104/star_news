@@ -22,7 +22,7 @@ public class TrendPersistenceService {
 	private final TrendRepository trendRepository;
 
 	/**
-	 * 동일한 집계 기준 시각의 기존 결과를 새 결과로 교체한다.
+	 * 동일한 공개 회차(snapshotAt)의 기존 결과를 새 결과로 교체한다.
 	 * 빈 결과는 이전 트렌드를 유지해야 하므로 이 메서드의 입력으로 허용하지 않는다.
 	 */
 	@Transactional

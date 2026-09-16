@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 class TrendAggregationSchedulerTest {
 
 	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
-	private static final String CRON = "0 0 6,18 * * *";
+	private static final String CRON = "0 0 5,17 * * *";
 
 	@Mock
 	private TrendAggregationService trendAggregationService;
@@ -56,7 +56,7 @@ class TrendAggregationSchedulerTest {
 
 	@Test
 	void 실패_후_성공하면_동일한_집계_기준_시각으로_재시도한다() {
-		LocalDateTime currentTime = LocalDateTime.of(2026, 9, 15, 18, 2);
+		LocalDateTime currentTime = LocalDateTime.of(2026, 9, 15, 17, 2);
 		TrendAggregationScheduler scheduler = scheduler(currentTime, 3, Duration.ZERO);
 		given(trendAggregationService.aggregate(any(OffsetDateTime.class)))
 				.willThrow(new IllegalStateException("일시적 실패"))
@@ -68,14 +68,14 @@ class TrendAggregationSchedulerTest {
 		verify(trendAggregationService, times(2)).aggregate(snapshotAtCaptor.capture());
 		assertThat(snapshotAtCaptor.getAllValues())
 				.containsExactly(
-						OffsetDateTime.parse("2026-09-15T18:00:00+09:00"),
-						OffsetDateTime.parse("2026-09-15T18:00:00+09:00"));
+						OffsetDateTime.parse("2026-09-15T17:00:00+09:00"),
+						OffsetDateTime.parse("2026-09-15T17:00:00+09:00"));
 	}
 
 	@Test
 	void 계속_실패하면_최초_시도와_세_번의_재시도_후_종료한다() {
 		TrendAggregationScheduler scheduler = scheduler(
-				LocalDateTime.of(2026, 9, 15, 6, 0),
+				LocalDateTime.of(2026, 9, 15, 5, 0),
 				3,
 				Duration.ZERO);
 		given(trendAggregationService.aggregate(any(OffsetDateTime.class)))
@@ -84,13 +84,13 @@ class TrendAggregationSchedulerTest {
 		assertThatCode(scheduler::aggregateTrends).doesNotThrowAnyException();
 
 		verify(trendAggregationService, times(4))
-				.aggregate(OffsetDateTime.parse("2026-09-15T06:00:00+09:00"));
+				.aggregate(OffsetDateTime.parse("2026-09-15T05:00:00+09:00"));
 	}
 
 	@Test
 	void 재시도_대기가_인터럽트되면_추가_시도_없이_종료하고_상태를_복원한다() {
 		TrendAggregationScheduler scheduler = scheduler(
-				LocalDateTime.of(2026, 9, 15, 6, 0),
+				LocalDateTime.of(2026, 9, 15, 5, 0),
 				3,
 				Duration.ofMinutes(1));
 		given(trendAggregationService.aggregate(any(OffsetDateTime.class)))
@@ -99,7 +99,7 @@ class TrendAggregationSchedulerTest {
 
 		assertThatCode(scheduler::aggregateTrends).doesNotThrowAnyException();
 
-		verify(trendAggregationService).aggregate(OffsetDateTime.parse("2026-09-15T06:00:00+09:00"));
+		verify(trendAggregationService).aggregate(OffsetDateTime.parse("2026-09-15T05:00:00+09:00"));
 		assertThat(Thread.currentThread().isInterrupted()).isTrue();
 	}
 
@@ -116,20 +116,20 @@ class TrendAggregationSchedulerTest {
 	private static Stream<Arguments> snapshotAtCases() {
 		return Stream.of(
 				Arguments.of(
-						LocalDateTime.of(2026, 9, 15, 5, 59),
-						OffsetDateTime.parse("2026-09-14T18:00:00+09:00")),
+						LocalDateTime.of(2026, 9, 15, 4, 59),
+						OffsetDateTime.parse("2026-09-14T17:00:00+09:00")),
 				Arguments.of(
-						LocalDateTime.of(2026, 9, 15, 6, 0),
-						OffsetDateTime.parse("2026-09-15T06:00:00+09:00")),
+						LocalDateTime.of(2026, 9, 15, 5, 0),
+						OffsetDateTime.parse("2026-09-15T05:00:00+09:00")),
 				Arguments.of(
-						LocalDateTime.of(2026, 9, 15, 17, 59),
-						OffsetDateTime.parse("2026-09-15T06:00:00+09:00")),
+						LocalDateTime.of(2026, 9, 15, 16, 59),
+						OffsetDateTime.parse("2026-09-15T05:00:00+09:00")),
 				Arguments.of(
-						LocalDateTime.of(2026, 9, 15, 18, 0),
-						OffsetDateTime.parse("2026-09-15T18:00:00+09:00")),
+						LocalDateTime.of(2026, 9, 15, 17, 0),
+						OffsetDateTime.parse("2026-09-15T17:00:00+09:00")),
 				Arguments.of(
 						LocalDateTime.of(2026, 9, 15, 23, 59),
-						OffsetDateTime.parse("2026-09-15T18:00:00+09:00"))
+						OffsetDateTime.parse("2026-09-15T17:00:00+09:00"))
 		);
 	}
 }
