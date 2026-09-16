@@ -53,12 +53,12 @@ export function UserMenu({ account }) {
         aria-label={`${account.id} · ${accountMenu.label}`}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
       >
-        {account.id.trim().charAt(0).toUpperCase()}
+        {(account.user?.nickname ?? account.user?.loginId ?? '').trim().charAt(0).toUpperCase()}
       </button>
 
       {open && (
         <div className={styles.panel}>
-          <p className={styles.who}>{account.id}</p>
+          <p className={styles.who}>{account.user?.nickname ?? account.user?.loginId}</p>
 
           {accountMenu.items.map((item) => (
             <button
