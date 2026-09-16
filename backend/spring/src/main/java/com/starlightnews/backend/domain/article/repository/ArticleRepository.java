@@ -30,7 +30,7 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	 *
 	 * <p>analysis_status 는 컬럼 기본값에 맡기지 않고 명시한다. 기본값은 실제 스키마에만 있고
 	 * 엔티티에서 생성되는 테스트 DB 에는 없어서, 맡겨두면 두 환경의 동작이 갈린다.
-	 * 매핑하지 않은 summary_status·content_updated_at 은 실제 스키마의 기본값을 쓴다.
+	 * INSERT 문에서 생략한 summary_status·content_updated_at 은 실제 스키마의 기본값을 쓴다.
 	 */
 	@Modifying
 	@Query(value = "INSERT INTO articles "
@@ -53,6 +53,13 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	/** url 해시로 기사 ID 를 찾는다. 저장 여부 확인용. */
 	@Query("SELECT a.articleId FROM Article a WHERE a.urlHash = :urlHash")
 	Optional<Long> findIdByUrlHash(@Param("urlHash") byte[] urlHash);
+
+	/** 지정한 분석 상태의 기사 상세와 언론사를 한 번에 조회한다. */
+	@Query("SELECT a FROM Article a JOIN FETCH a.organization "
+			+ "WHERE a.articleId = :articleId AND a.analysisStatus = :analysisStatus")
+	Optional<Article> findDetailByArticleId(
+			@Param("articleId") Long articleId,
+			@Param("analysisStatus") AnalysisStatus analysisStatus);
 
 	/** 기사의 Neo4j 참조 한 행. */
 	interface ArticleGraphRef {

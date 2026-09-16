@@ -8,6 +8,7 @@ import com.starlightnews.backend.domain.article.domain.NewsOrganization;
 import com.starlightnews.backend.domain.article.support.ArticleUrls;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
 import com.starlightnews.backend.global.enums.ContentType;
+import com.starlightnews.backend.global.enums.SummaryStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -28,6 +29,48 @@ class ArticleRepositoryTest {
 
 	@Autowired
 	private TestEntityManager entityManager;
+
+	@Test
+	void articleId로_기사_상세와_언론사를_함께_조회한다() {
+		NewsOrganization organization = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article article = entityManager.persist(new Article(
+				"기사 제목",
+				LocalDateTime.of(2026, 8, 31, 10, 0),
+				organization,
+				"저장된 요약",
+				AnalysisStatus.COMPLETED));
+		entityManager.flush();
+		entityManager.clear();
+
+		Article found = articleRepository.findDetailByArticleId(
+				article.getArticleId(), AnalysisStatus.COMPLETED).orElseThrow();
+
+		assertThat(found.getTitle()).isEqualTo("기사 제목");
+		assertThat(found.getOrganization().getName()).isEqualTo("연합뉴스");
+		assertThat(found.getSummary()).isEqualTo("저장된 요약");
+		assertThat(found.getSummaryStatus()).isEqualTo(SummaryStatus.COMPLETED);
+	}
+
+	@Test
+	void 상세_조회시_없는_articleId면_빈_Optional이다() {
+		assertThat(articleRepository.findDetailByArticleId(999L, AnalysisStatus.COMPLETED)).isEmpty();
+	}
+
+	@Test
+	void 분석이_완료되지_않은_기사는_상세_조회에서_제외한다() {
+		NewsOrganization organization = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article article = entityManager.persist(new Article(
+				"분석 중인 기사",
+				LocalDateTime.of(2026, 8, 31, 10, 0),
+				organization,
+				null,
+				AnalysisStatus.PROCESSING));
+		entityManager.flush();
+		entityManager.clear();
+
+		assertThat(articleRepository.findDetailByArticleId(
+				article.getArticleId(), AnalysisStatus.COMPLETED)).isEmpty();
+	}
 
 	@Test
 	void articleId_목록으로_기사를_언론사와_함께_조회한다() {
@@ -142,6 +185,7 @@ class ArticleRepositoryTest {
 		Article found = articleRepository.findAllWithOrganizationByArticleIdIn(List.of(id)).get(0);
 		assertThat(found.getTopicCode()).isNull();
 		assertThat(found.getAnalysisStatus()).isEqualTo(AnalysisStatus.PROCESSING);
+		assertThat(found.getSummaryStatus()).isEqualTo(SummaryStatus.NOT_REQUESTED);
 		assertThat(found.getNodeId()).isNull();
 	}
 

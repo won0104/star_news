@@ -58,6 +58,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/v1/home").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/v1/articles/*").permitAll()
 						.requestMatchers(PUBLIC_PATHS).permitAll()
 						.anyRequest().authenticated())
 				.exceptionHandling(handler -> handler
