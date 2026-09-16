@@ -24,4 +24,10 @@ RUN pip install --no-cache-dir \
 COPY requirements-cpu.txt .
 RUN pip install --no-cache-dir -r requirements-cpu.txt
 
-CMD ["python", "-c", "import torch, transformers; print(torch.__version__); print('cuda', torch.cuda.is_available()); print('transformers', transformers.__version__)"]
+COPY starlight_ai ./starlight_ai
+
+EXPOSE 8100
+
+# 프로세스를 늘리면 프로세스마다 모델 전체가 RAM에 중복 적재된다.
+# 단일 worker 안에서 server.py의 analyzer 하나를 계속 재사용한다.
+CMD ["uvicorn", "starlight_ai.server:app", "--host", "0.0.0.0", "--port", "8100", "--workers", "1"]
