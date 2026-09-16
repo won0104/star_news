@@ -6,11 +6,15 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationBoardResponse;
+import com.starlightnews.backend.domain.recommendation.dto.RecommendationDetailResponse;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationBoardService;
+import com.starlightnews.backend.domain.recommendation.service.RecommendationDetailService;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.enums.RecommendationCycle;
 import com.starlightnews.backend.global.enums.RecommendationType;
 import com.starlightnews.backend.global.enums.TopicCode;
+import com.starlightnews.backend.global.error.BusinessException;
+import com.starlightnews.backend.global.error.CommonErrorCode;
 import com.starlightnews.backend.global.security.InMemoryTokenBlacklist;
 import com.starlightnews.backend.global.security.JwtProvider;
 import org.junit.jupiter.api.Test;
@@ -46,6 +50,9 @@ class RecommendationControllerTest {
 
 	@MockitoBean
 	private RecommendationBoardService recommendationBoardService;
+
+	@MockitoBean
+	private RecommendationDetailService recommendationDetailService;
 
 	private String bearer() {
 		return "Bearer " + jwtProvider.createAccessToken(USER_ID);
@@ -121,5 +128,68 @@ class RecommendationControllerTest {
 
 		mockMvc.perform(get(PATH).param("size", "10").header(HttpHeaders.AUTHORIZATION, bearer()))
 				.andExpect(status().isOk());
+	}
+
+	// --- 추천 Event 상세 ---
+
+	private RecommendationDetailResponse detail() {
+		return new RecommendationDetailResponse(10241L,
+				"00000020-0920-4000-8000-000000000001", "한국은행 1월 기준금리 동결",
+				TopicCode.ECONOMY, "금통위가 기준금리를 동결했다.",
+				List.of(new RecommendationDetailResponse.Article(930001L, "한국은행 기준금리 동결",
+						"연합뉴스", OffsetDateTime.of(2024, 1, 11, 9, 52, 15, 0, ZoneOffset.ofHours(9)),
+						"ECONOMY", "https://www.yna.co.kr/view/AKR20240111")));
+	}
+
+	@Test
+	void 추천_상세를_조회한다() throws Exception {
+		given(recommendationDetailService.getDetail(USER_ID, 10241L)).willReturn(detail());
+
+		mockMvc.perform(get(PATH + "/10241").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.userRecommendationId").value(10241))
+				.andExpect(jsonPath("$.data.label").value("한국은행 1월 기준금리 동결"))
+				.andExpect(jsonPath("$.data.contextSummary").value("금통위가 기준금리를 동결했다."))
+				.andExpect(jsonPath("$.data.articles[0].articleId").value(930001))
+				.andExpect(jsonPath("$.data.articles[0].organizationName").value("연합뉴스"))
+				.andExpect(jsonPath("$.data.articles[0].originalUrl")
+						.value("https://www.yna.co.kr/view/AKR20240111"));
+	}
+
+	@Test
+	void 없거나_남의_추천이면_404다() throws Exception {
+		given(recommendationDetailService.getDetail(USER_ID, 10241L))
+				.willThrow(new BusinessException(CommonErrorCode.RESOURCE_NOT_FOUND));
+
+		mockMvc.perform(get(PATH + "/10241").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+	}
+
+	@Test
+	void 상세도_토큰이_없으면_401이다() throws Exception {
+		mockMvc.perform(get(PATH + "/10241")).andExpect(status().isUnauthorized());
+
+		verify(recommendationDetailService, never()).getDetail(anyLong(), anyLong());
+	}
+
+	@Test
+	void 상세_ID가_숫자가_아니면_400이다() throws Exception {
+		mockMvc.perform(get(PATH + "/abc").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest());
+
+		verify(recommendationDetailService, never()).getDetail(anyLong(), anyLong());
+	}
+
+	@Test
+	void 요약이_없으면_null_로_내려간다() throws Exception {
+		given(recommendationDetailService.getDetail(USER_ID, 10241L)).willReturn(
+				new RecommendationDetailResponse(10241L, "00000020-0920-4000-8000-000000000001",
+						"한국은행 1월 기준금리 동결", TopicCode.ECONOMY, null, List.of()));
+
+		mockMvc.perform(get(PATH + "/10241").header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.contextSummary").doesNotExist())
+				.andExpect(jsonPath("$.data.articles").isEmpty());
 	}
 }
