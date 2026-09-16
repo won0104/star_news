@@ -63,4 +63,12 @@ public interface UserRecommendationRepository extends JpaRepository<UserRecommen
 			+ "ORDER BY r.rank ASC, r.userRecommendationId ASC")
 	List<UserRecommendation> findCycle(@Param("userId") Long userId,
 			@Param("availableAt") LocalDateTime availableAt);
+
+	/**
+	 * 한 회차에 실제로 추천된 Event 를 중복 없이 조회한다.
+	 *
+	 * <p>Event 는 사용자 사이에 공유되므로 사용자 수보다 훨씬 적다. 요약 생성 대상을 고를 때 쓴다.
+	 */
+	@Query("SELECT DISTINCT r.eventId FROM UserRecommendation r WHERE r.availableAt = :availableAt")
+	List<String> findEventIdsByAvailableAt(@Param("availableAt") LocalDateTime availableAt);
 }
