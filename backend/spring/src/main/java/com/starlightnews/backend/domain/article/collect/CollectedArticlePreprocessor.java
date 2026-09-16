@@ -1,9 +1,11 @@
 package com.starlightnews.backend.domain.article.collect;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.starlightnews.backend.domain.article.dto.CollectedArticle;
 import lombok.extern.slf4j.Slf4j;
@@ -44,10 +46,32 @@ public class CollectedArticlePreprocessor {
 	 */
 	private static final Pattern SENTENCE_END = Pattern.compile("[다요]\\.$");
 
-	/** 본문 앞머리에 붙는 사이트 UI·분류 문구. 제목을 찾을 때 건너뛴다. */
+	/** 본문 앞머리에 붙는 사이트 UI·분류 문구. 제목을 찾을 때 건너뛰고, 본문에서도 지운다. */
 	private static final Set<String> LEADING_NOISE = Set.of(
 			"AD", "기사 본문 영역", "AI 해설 기사", "크게보기", "기사 읽어주기", "세 줄 요약",
-			"정치", "경제", "사회", "세계", "문화", "스포츠", "국제", "IT", "연예", "공유하기");
+			"정치", "경제", "사회", "세계", "문화", "스포츠", "국제", "IT", "연예", "공유하기",
+			"구글 검색 선호 출처로 추가");
+
+	/**
+	 * 본문 끝에 붙는 저작권·UI 문구.
+	 *
+	 * <p>저작권 문구는 매체마다 표현이 전부 달라 목록으로는 끝이 없다. 실측에서만 스타뉴스·YTN·
+	 * 세계일보·연합인포맥스·SBS·아주경제 등 십수 가지가 나왔다.
+	 */
+	private static final Pattern TRAILING_NOISE = Pattern.compile(
+			"저작권|무단\\s*전재|재배포|Copyright|ⓒ|©|소셜 댓글|더보기|공유하기"
+					+ "|실시간 뜨거운 관심|오늘의 숏뉴스|제보는|면책 조항|투자판단의 참고용|투자 참고용");
+
+	/** 조회수·댓글 수처럼 숫자만 남은 줄. */
+	private static final Pattern NUMBER_ONLY = Pattern.compile("\\d+");
+
+	/**
+	 * 정리 후 남아야 하는 최소 비율.
+	 *
+	 * <p>실측 2,000건에서 가장 많이 깎인 경우가 81% 였다. 절반 아래로 떨어지면 규칙이 본문을
+	 * 잘못 먹은 것으로 보고 원본을 쓴다.
+	 */
+	private static final double MIN_KEPT_RATIO = 0.5;
 
 	/**
 	 * 저장할 기사만 남기고, 고칠 수 있는 것은 고친다.
@@ -59,9 +83,11 @@ public class CollectedArticlePreprocessor {
 			return List.of();
 		}
 
+		// 제목 보정이 본문 정리보다 먼저다. 제목을 본문 앞머리에서 찾으므로 아직 원본이어야 한다.
 		List<CollectedArticle> kept = articles.stream()
 				.filter(this::isAnalyzable)
 				.map(this::repairTitle)
+				.map(this::cleanContent)
 				.toList();
 
 		int dropped = articles.size() - kept.size();
@@ -91,6 +117,63 @@ public class CollectedArticlePreprocessor {
 		return new CollectedArticle(candidate, article.url(), article.urlHash(),
 				article.publishedAt(), article.content(), article.contentType(),
 				article.sourceCategory(), article.organizationName(), article.organizationDomain());
+	}
+
+	/**
+	 * 본문 앞뒤에 붙은 사이트 문구를 걷어낸다.
+	 * <p>줄 단위로만 걷어낸다.
+	 */
+	private CollectedArticle cleanContent(CollectedArticle article) {
+		String original = article.content();
+		if (original == null || original.isBlank()) {
+			return article;
+		}
+
+		String cleaned = stripNoiseLines(original);
+		if (cleaned.equals(original.strip())) {
+			return article;
+		}
+		if (isOverTrimmed(original, cleaned)) {
+			log.warn("본문이 지나치게 줄어 원본을 유지합니다. ({}자 -> {}자, {})",
+					original.strip().length(), cleaned.length(), article.url());
+			return article;
+		}
+
+		return new CollectedArticle(article.title(), article.url(), article.urlHash(),
+				article.publishedAt(), cleaned, article.contentType(),
+				article.sourceCategory(), article.organizationName(), article.organizationDomain());
+	}
+
+	private String stripNoiseLines(String content) {
+		List<String> lines = new ArrayList<>(content.lines().map(String::strip).toList());
+
+		int start = 0;
+		while (start < lines.size() && isLeadingNoise(lines.get(start))) {
+			start++;
+		}
+		int end = lines.size();
+		while (end > start && isTrailingNoise(lines.get(end - 1))) {
+			end--;
+		}
+
+		return lines.subList(start, end).stream()
+				.filter(line -> !line.isEmpty())
+				.collect(Collectors.joining("\n"));
+	}
+
+	private boolean isLeadingNoise(String line) {
+		return line.isEmpty() || LEADING_NOISE.contains(line);
+	}
+
+	private boolean isTrailingNoise(String line) {
+		return line.isEmpty()
+				|| NUMBER_ONLY.matcher(line).matches()
+				|| TRAILING_NOISE.matcher(line).find();
+	}
+
+	/** 규칙이 본문까지 먹었는지. 실측에서 가장 많이 깎인 경우가 81% 였다. */
+	private boolean isOverTrimmed(String original, String cleaned) {
+		return cleaned.length() < original.strip().length() * MIN_KEPT_RATIO;
 	}
 
 	/**

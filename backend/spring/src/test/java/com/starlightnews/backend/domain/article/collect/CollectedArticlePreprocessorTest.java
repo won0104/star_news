@@ -16,7 +16,7 @@ class CollectedArticlePreprocessorTest {
 	private final CollectedArticlePreprocessor preprocessor = new CollectedArticlePreprocessor();
 
 	/** 실측한 정상 기사의 최소가 500자 안팎이라, 통과해야 하는 본문은 그 정도로 만든다. */
-	private static final String REAL_CONTENT = "본문입니다. ".repeat(100);
+	private static final String REAL_CONTENT = "본문입니다. ".repeat(100).strip();
 
 	private CollectedArticle article(String title, String content) {
 		return new CollectedArticle(title, "https://news.test/" + title.hashCode(),
@@ -197,6 +197,91 @@ class CollectedArticlePreprocessorTest {
 
 		assertThat(repairedTitle(fromOutlet("기준금리 동결", "연합뉴스", content)))
 				.isEqualTo("기준금리 동결");
+	}
+
+	// --- 본문 정리 ---
+
+	private String cleanedContent(String content) {
+		return preprocessor.process(List.of(article("제목", content))).get(0).content();
+	}
+
+	@Test
+	void 앞머리_사이트_문구를_지운다() {
+		String content = "AD\n기사 본문 영역\n정치\n" + REAL_CONTENT;
+
+		assertThat(cleanedContent(content)).isEqualTo(REAL_CONTENT.strip());
+	}
+
+	@Test
+	void 꼬리의_저작권_문구를_지운다() {
+		// 저작권 표현은 매체마다 달라 목록이 아니라 패턴으로 잡는다.
+		String content = REAL_CONTENT + "\n<저작권자 © 스타뉴스, 무단전재 및 재배포 금지>";
+
+		assertThat(cleanedContent(content)).isEqualTo(REAL_CONTENT.strip());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"[저작권자(c) YTN 무단전재, 재배포 및 AI 데이터 활용 금지]",
+			"Copyright ⓒ 세계일보. 무단 전재 및 재배포 금지",
+			"※ 저작권자 ⓒ 파이낸셜뉴스, 무단전재-재배포 금지",
+			"▶제보는 카톡 okjebo",
+			"소셜 댓글",
+			"더보기",
+			"공유하기",
+			"0",
+			"*면책 조항: 이 기사는 투자 참고용으로 손실 책임을 지지 않습니다."
+	})
+	void 매체마다_다른_꼬리_문구를_지운다(String tail) {
+		assertThat(cleanedContent(REAL_CONTENT + "\n" + tail)).isEqualTo(REAL_CONTENT.strip());
+	}
+
+	@Test
+	void 꼬리가_여러_줄이어도_끝까지_지운다() {
+		// 실측에서 저작권 문구 뒤에 댓글 수와 UI 문구가 더 붙는 경우가 있었다.
+		String content = REAL_CONTENT + "\n공유하기\n0\n<저작권자 © 스타뉴스, 무단전재 금지>";
+
+		assertThat(cleanedContent(content)).isEqualTo(REAL_CONTENT.strip());
+	}
+
+	@Test
+	void 본문_가운데의_같은_문구는_건드리지_않는다() {
+		// 앞뒤에서만 걷어낸다. 가운데를 지우면 문맥이 끊긴다.
+		String content = "첫 문단입니다. " + "가".repeat(150) + "\n저작권 소송이 제기됐다.\n" + "나".repeat(150);
+
+		assertThat(cleanedContent(content)).contains("저작권 소송이 제기됐다.");
+	}
+
+	@Test
+	void 지나치게_많이_줄면_원본을_유지한다() {
+		// 규칙이 본문까지 먹은 경우다. 실측에서 가장 많이 깎인 것도 81% 였다.
+		String content = "짧은 본문입니다. " + "가".repeat(190) + "\n" + "저작권 ".repeat(60);
+
+		assertThat(cleanedContent(content)).isEqualTo(content);
+	}
+
+	@Test
+	void 줄바꿈이_없으면_손대지_않는다() {
+		// 실측에 줄바꿈 없는 기사가 있었다. 문장 중간을 자르려다 본문을 훼손하지 않는다.
+		String content = REAL_CONTENT.replace("\n", " ");
+
+		assertThat(cleanedContent(content)).isEqualTo(content);
+	}
+
+	@Test
+	void 정리할_것이_없으면_원본_그대로다() {
+		assertThat(cleanedContent(REAL_CONTENT)).isEqualTo(REAL_CONTENT.strip());
+	}
+
+	@Test
+	void 제목_보정이_본문_정리보다_먼저다() {
+		// 본문 정리가 "기사 본문 영역" 을 먼저 지우면 제목을 찾을 단서가 사라진다.
+		String content = "기사 본문 영역\n한화, 19년 만에 한국시리즈 진출\n" + REAL_CONTENT;
+		CollectedArticle after = preprocessor.process(
+				List.of(fromOutlet("KBS 뉴스", "KBS뉴스", content))).get(0);
+
+		assertThat(after.title()).isEqualTo("한화, 19년 만에 한국시리즈 진출");
+		assertThat(after.content()).doesNotContain("기사 본문 영역");
 	}
 
 	@Test
