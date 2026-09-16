@@ -1,6 +1,6 @@
-# FastAPI 연동 가이드 (AI 코어)
+# FastAPI 연동 가이드 (상주 AI 워커)
 
-이 문서는 **FastAPI 담당자**가 `ai/` 코어를 `/internal/v1/articles/analyze` 등에 붙일 때 쓰는 계약서다.  
+이 문서는 **FastAPI 담당자**가 상주 `ai-worker`의 `/internal/v1/articles/analyze`를 호출할 때 쓰는 계약서다.
 AI 쪽은 **Neo4j MERGE / Spring API를 구현하지 않는다.** 스키마에 가까운 JSON만 반환한다.
 
 ---
@@ -22,7 +22,7 @@ AI가 **하지 않는 것**
 
 ---
 
-## 2. 목표 디렉터리 구조 (구현 예정)
+## 2. 디렉터리 구조
 
 ```text
 ai/
@@ -30,32 +30,28 @@ ai/
 ├── FASTAPI_연동.md           # 본 문서
 ├── requirements-cpu.txt
 ├── Dockerfile
-├── starlight_ai/             # ★ import 가능한 코어 패키지 (예정)
-│   ├── __init__.py           # process_article, ArticleAnalyzeResult 등 export
+├── starlight_ai/             # import 가능한 코어 패키지
+│   ├── __init__.py           # process_article, ArticleAnalyzer export
+│   ├── server.py             # 상주 HTTP 워커와 readiness
 │   ├── pipeline.py           # 단건 오케스트레이션
-│   ├── preprocess/           # 본문 전처리
+│   ├── preprocess.py         # 본문 전처리
 │   ├── models/               # 래퍼만 (로드/추론)
 │   │   ├── kpf_classifier.py # Topic용 대/소/지역 분류
 │   │   ├── kg_extractor.py   # ArticleLocalKGPipeline (HF 번들)
 │   │   └── event_embedder.py # nlpai-lab/KURE-v1 (server volume, 1024-d)
 │   ├── adapter/
 │   │   └── neo4j_schema.py   # V2 KG + Topic + embedding → 서비스 스키마 JSON
-│   └── contracts/
-│       └── types.py          # 입출력 TypedDict / Pydantic(선택)
 └── test_pipeline/            # 단건 스모크 (기존 → 코어 호출로 이행)
 ```
 
-FastAPI에서는 **도메인 서비스만** 코어를 부른다. 모델 로드 코드를 `app/`에 복제하지 않는다.
+FastAPI는 코어를 직접 import하지 않고 **같은 Compose 네트워크의 AI 워커를 HTTP로 호출**한다.
+따라서 FastAPI 이미지에 torch, 모델 가중치, `starlight_ai` 패키지를 넣지 않는다.
 
 ```text
-# 개념 예시 (FastAPI 쪽 — AI가 구현하지 않음)
-from starlight_ai import process_article
-
-result = process_article(article_dict)
-return result  # 또는 AnalyzeResponse.model_validate(result)
+Spring → backend-fastapi:8000/internal/v1/articles/analyze
+       → ai-worker:8100/internal/v1/articles/analyze
+       → backend-fastapi가 결과를 Neo4j에 반영
 ```
-
-패키지명 `starlight_ai`는 구현 시 확정한다. 변경되면 본 문서와 `__init__.py`를 같이 수정한다.
 
 ---
 
@@ -199,10 +195,10 @@ FastAPI → AI 코어로 넘길 최소 필드.
 
 ## 6. FastAPI에서 붙이는 방법 (체크리스트)
 
-1. **런타임**: AI와 동일 이미지/volume 또는 동일 의존성 + `ai-cpu-models` 마운트.  
-2. **import 경로**: 컨테이너/`PYTHONPATH`에 레포 `ai/` 부모 또는 패키지 설치 경로 포함.  
-3. **워커 상주 권장**: 요청마다 모델 로드 금지. 프로세스 기동 시 1회 로드.  
-4. **호출**: `process_article(article) -> dict` (이름 확정 후 본 문서 갱신).  
+1. **런타임 분리**: `ai-worker`만 AI 이미지와 `ai-cpu-models:/models:ro`를 사용한다.
+2. **직접 import 금지**: FastAPI는 `AI_BASE_URL`을 통해 내부 HTTP로 호출한다.
+3. **워커 상주**: AI 프로세스 기동 시 모델을 1회 로드하고 같은 `ArticleAnalyzer`를 재사용한다.
+4. **호출**: `POST {AI_BASE_URL}/internal/v1/articles/analyze`.
 5. **응답**: 위 JSON을 그대로 반환하거나, FastAPI `response_model`로 감싼다.  
 6. **에러**  
    - 입력 불량 → `INVALID_ARTICLE` (기존 exceptions 경로와 맞춤)  
@@ -210,22 +206,22 @@ FastAPI → AI 코어로 넘길 최소 필드.
 7. **적재**: nodes/edges(+ topic, embedding)를 Neo4j MERGE하는 코드는 FastAPI/적재 담당.  
 8. **PUBLISHED_BY**: AI 응답에 없어도 Spring 메타로 별도 MERGE.
 
-### analyze stub 연결 위치 (참고)
+### 연결 위치
 
 ```text
 backend/fastapi/app/articles/
   router.py   → POST /articles/analyze
-  service.py  → 현재 NotImplementedError ← 여기서 process_article 호출
-  schemas.py  → 요청/응답을 본 문서 계약에 맞게 채움
+  service.py  → AI 워커 HTTP 호출 후 repository 적재
+  schemas.py  → Spring 요청/최종 응답 계약
 ```
-
-AI 코어 완성 전에도 schemas만 먼저 맞춰 두면 연동이 수월하다.
 
 ---
 
-## 7. 환경 변수 (예정)
+## 7. 환경 변수
 
-| 변수 | 의미 | 기본(컨테이너) |
+### AI 워커
+
+| 변수 | 의미 | 기본 |
 |------|------|----------------|
 | `KG_MODEL_DIR` | KG 번들 루트 | `/models/artifacts/kg-extractor` |
 | `ARTICLELOCAL_HF_CACHE` / HF cache | 베이스·임베딩 캐시 | `/models/cache/hub` |
@@ -233,6 +229,14 @@ AI 코어 완성 전에도 schemas만 먼저 맞춰 두면 연동이 수월하�
 | `STARLIGHT_AI_DEVICE` | `cpu` / `cuda` / `auto` | 서버는 `cpu` |
 
 임베딩 모델은 volume의 `nlpai-lab/KURE-v1`을 쓴다. 오버라이드: `STARLIGHT_EMBEDDING_MODEL`.
+
+### Backend FastAPI
+
+| 변수 | 의미 | 기본 |
+|------|------|------|
+| `AI_BASE_URL` | 상주 AI 워커 주소 | `http://ai-worker:8100` |
+| `AI_CONNECT_TIMEOUT_SECONDS` | 연결 제한 | `3` |
+| `AI_REQUEST_TIMEOUT_SECONDS` | 기사 1건 추론 제한 | `150` |
 
 
 ---
@@ -246,35 +250,20 @@ AI 코어 완성 전에도 schemas만 먼저 맞춰 두면 연동이 수월하�
 | Event 임베딩 단계 | ✅ |
 | Neo4j 스키마 어댑터 | ✅ |
 | Topic(`nameKo`) 정규화 | ✅ (`IT_과학`→`IT·과학`) |
-| FastAPI stub 실제 연결 | FastAPI 담당 |
-| Neo4j MERGE | 적재 담당 |
+| 상주 AI HTTP 워커 | ✅ `starlight_ai/server.py` |
+| FastAPI HTTP 연결 | ✅ `backend/fastapi/app/articles/service.py` |
+| Neo4j MERGE | ✅ `backend/fastapi/app/articles/repository.py` |
 
-### 호출 예시
+### AI 워커 직접 확인
 
-```python
-import sys
-sys.path.insert(0, "/path/to/repo/ai")  # 또는 패키지 설치
-
-from starlight_ai import ArticleAnalyzer, process_article
-
-# 서버: device는 반드시 cpu (또는 STARLIGHT_AI_DEVICE=cpu)
-analyzer = ArticleAnalyzer(
-    device="cpu",  # 로컬 개발만 "auto"/"cuda" 허용
-    kg_dir="/models/artifacts/kg-extractor",
-    hf_cache="/models/cache/hub",
-    local_files_only=True,
-)
-result = analyzer.process({
-    "article_id": "930001",
-    "mysql_article_id": 930001,
-    "title": "...",
-    "content": "...",
-    "published_at": "2026-09-08T09:00:00+09:00",
-})
-# result["schema_version"] == "starlight-article-analyze-v1"
+```bash
+curl http://127.0.0.1:8100/ready
+curl -X POST http://127.0.0.1:8100/internal/v1/articles/analyze \
+  -H 'Content-Type: application/json' \
+  -d '{"article_id":"930001","mysql_article_id":930001,"title":"...","content":"...","published_at":"2026-09-08T09:00:00+09:00"}'
 ```
 
-워커 프로세스에서는 **`ArticleAnalyzer` 인스턴스를 재사용**한다 (매 요청 모델 로드 금지).
+운영 Compose에서는 8100 포트를 호스트에 공개하지 않으므로 컨테이너 네트워크 안에서 확인한다.
 
 ### 디바이스 주의
 

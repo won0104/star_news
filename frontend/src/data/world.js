@@ -52,6 +52,18 @@ export const report = {
   summary: '최근 3개월 동안 126개의 기사에서 24개 주제와 18개 출처를 접했어요.',
   summaryAside: '새 주제 4개',
 
+  /**
+   * The three figures `summary` states, pulled out so the diary can set them as numbers
+   * rather than re-parsing a sentence. Same values, no new claims: `articles` is also
+   * what the twelve weekly columns sum to, while `topics` and `sources` are the frame's
+   * own counts and are not broken down anywhere below.
+   */
+  totals: [
+    { id: 'articles', label: '읽은 기사', value: 126 },
+    { id: 'topics', label: '만난 주제', value: 24 },
+    { id: 'sources', label: '접한 출처', value: 18 },
+  ],
+
   fields: {
     label: '분야별 읽은 기사',
     hint: '읽은 기록을 큰 분야별로 집계했어요.',

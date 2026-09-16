@@ -25,18 +25,14 @@ export function LoginScreen() {
     setSubmitting(true);
     setFormError(null);
     try {
-      await signIn({
+      const session = await signIn({
         id: id.trim(),
         password
       });
-      // The id is all the stub tells us about the account; the top bar needs only that
-      // much to show the mark. Widen this when signIn starts returning a real user.
-      startSession({
-        id: id.trim()
-      });
+      startSession(session);
       navigate('/app');
-    } catch {
-      setFormError(authMessages.loginFailed);
+    } catch (error) {
+      setFormError(error?.code === 'USER_DELETED' ? authMessages.loginDeleted : error?.code === 'NETWORK_ERROR' ? authMessages.networkFailed : authMessages.loginFailed);
     } finally {
       setSubmitting(false);
     }
