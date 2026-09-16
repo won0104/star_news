@@ -10,9 +10,9 @@ from app.main import app
 
 client = TestClient(app)
 
-# AI 실제 모델을 돌려서 만든 응답 예시. starlight_ai 없이 목업으로
+# AI 실제 모델을 돌려서 만든 응답 예시(ai/test_pipeline에서 복사해옴). starlight_ai 없이 목업으로
 # 오케스트레이션 로직(_apply_analysis)을 검증한다 - _call_ai만 이 값을 리턴하게 바꿔치기한다.
-MOCK_AI_RESULT_PATH = Path(__file__).resolve().parents[4] / "ai" / "test_pipeline" / "starlight_result_server.json"
+MOCK_AI_RESULT_PATH = Path(__file__).resolve().parents[1] / "fixtures" / "starlight_result_server.json"
 
 
 def _mock_ai_result() -> dict:
