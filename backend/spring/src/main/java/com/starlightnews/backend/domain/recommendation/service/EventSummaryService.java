@@ -48,16 +48,21 @@ public class EventSummaryService {
 	 * <p>다만 그 순서를 강제하지는 않는다. Topic 이 일곱이고 스포츠 경기 결과나 공연 소식처럼
 	 * 배경과 파장이 아예 없는 사건이 있다. 빈 칸을 만들어 두면 모델이 채우려 들어 없는 말을
 	 * 지어낸다. 무엇을 담을지는 기사에 있는 것에 맡기고, 여기서는 목적만 준다.
+	 *
+	 * <p>사건 이름을 기준으로 삼으라고 못박는다. 기사 하나가 Event 하나만 다루지 않기 때문이다.
+	 * 실측에서 `SK하이닉스 주가 20만원 돌파` 의 근거 기사가 반도체 장비주 기사였는데, 기준을
+	 * 주지 않으니 기사 주제를 따라가 다른 장비업체 이야기로 샜다.
 	 */
 	private static final String INSTRUCTION = """
 			너는 뉴스 사건을 설명하는 편집자다. 주어진 기사들은 모두 같은 사건을 다룬다.
 			이 사건을 처음 접하는 독자가 맥락까지 이해하도록 한국어로 설명하라.
 
+			- 주어진 "사건 이름"이 무엇을 요약할지 정한다. 기사에는 이 사건 말고 다른 이야기도
+			  섞여 있으니, 사건 이름에 해당하는 부분만 골라 쓴다. 기사 전체를 요약하지 않는다.
 			- 3문장 이내, 전체 300자 이내로 쓴다.
 			- 이 사건을 처음 보는 독자가 "왜 이게 뉴스인지" 알 수 있게 쓴다.
 			- 기사에 배경이나 파장이 나와 있으면 함께 담고, 나와 있지 않으면 사건 자체만 쓴다.
 			  빈 곳을 채우려고 추측하지 않는다.
-			- 이 사건에 직접 관련된 내용만 쓴다. 기사에 딸려 나온 다른 회사·제품·통계는 넣지 않는다.
 			- 사건을 나열하지 말고 인과로 잇는다.
 			- 언론사 이름, 기자 이름, 기사 제목은 언급하지 않는다.
 			- "이 기사는", "요약하면" 같은 말로 시작하지 않고 사건 내용부터 바로 쓴다.""";
@@ -122,7 +127,7 @@ public class EventSummaryService {
 
 			writer.markProcessing(eventId);
 			String summary = gmsClient.generate(INSTRUCTION,
-					"사건 이름: %s%n%n%s".formatted(event.getTitle(), sources));
+					"사건 이름: %s%n%n[근거 기사]%n%s".formatted(event.getTitle(), sources));
 			writer.saveSummary(eventId, summary);
 			return true;
 		} catch (BusinessException generationFailure) {
