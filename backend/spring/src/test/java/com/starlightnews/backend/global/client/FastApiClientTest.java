@@ -121,6 +121,19 @@ class FastApiClientTest {
 	}
 
 	@Test
+	void 대상을_찾지_못해_404면_NOT_FOUND() {
+		// 그래프에 자리가 아직 없다는 뜻이다. 요청 형식이 틀린 400 과는 대응이 다르다.
+		server.expect(requestTo(BASE_URL + PATH))
+				.andRespond(withStatus(HttpStatus.NOT_FOUND)
+						.body(errorBody("USER_RECOMMENDATION_CONTEXT_NOT_FOUND"))
+						.contentType(MediaType.APPLICATION_JSON));
+
+		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(InternalApiErrorCode.INTERNAL_API_NOT_FOUND);
+	}
+
+	@Test
 	void Neo4j_장애로_503이면_UNAVAILABLE() {
 		// 다음 주기에 다시 시도하면 되는 종류다.
 		server.expect(requestTo(BASE_URL + PATH))
