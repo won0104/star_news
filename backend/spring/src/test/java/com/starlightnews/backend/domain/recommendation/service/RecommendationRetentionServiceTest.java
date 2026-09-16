@@ -24,7 +24,7 @@ class RecommendationRetentionServiceTest {
 
 	private RecommendationRetentionService service(int retentionDays) {
 		return new RecommendationRetentionService(repository,
-				new RecommendationRetentionProperties(retentionDays));
+				new RecommendationProperties(retentionDays, 100, 10));
 	}
 
 	private LocalDateTime capturedThreshold() {
