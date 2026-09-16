@@ -14,8 +14,8 @@ import styles from './ViewPane.module.css'
  * there is one level of navigation and no tab strip: a plain switch on the selected id.
  *
  * 오늘의 트렌드 is <TrendStage> — the clip, the still it settles on, and the constellation
- * drawn over it. 나를 위한 추천, 나의 기록 and 나의 리포트 are each their own pane; 나의 기록
- * is the one the bar does not list, reached from the constellation instead.
+ * drawn over it. 나를 위한 추천, 나의 기록 and 나의 리포트 are each their own pane; 나의 리포트
+ * is reached from the bookmark attached to 나의 기록 instead of the bar.
  *
  * 나를 위한 추천's board waits for `settled` — the arrival clip reaching its end — and then
  * comes in, so it does not appear over a room that is still moving.

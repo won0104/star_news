@@ -23,10 +23,6 @@ export const navItems = [
     id: 'log',
     label: '나의 기록',
   },
-  {
-    id: 'report',
-    label: '나의 리포트',
-  },
 ]
 
 /**
@@ -34,6 +30,10 @@ export const navItems = [
  * accepts both lists.
  */
 export const extraViews = [
+  {
+    id: 'report',
+    label: '나의 리포트',
+  },
   {
     id: 'foryou2',
     label: '나를 위한 추천 비교안',
