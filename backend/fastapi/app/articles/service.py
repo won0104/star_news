@@ -1,10 +1,13 @@
 # 기사 분석 비즈니스 로직 - AI 분석 결과를 파싱해서 Neo4j에 반영
 from datetime import datetime, timezone
 
+import httpx
+
 from app.articles import repository
 from app.articles.schemas import ArticleAnalyzeRequest, ArticleAnalyzeResult
 from app.articles.support.entity_filter import normalize_entity_name
 from app.articles.support.topic_map import subtopic_code_from_name, topic_code_from_name
+from app.config import settings
 from app.exceptions import AppException
 
 
@@ -31,23 +34,68 @@ def analyze_article(request: ArticleAnalyzeRequest, session) -> ArticleAnalyzeRe
     )
 
 
-# 요청을 AI 입력 형식으로 바꿔서 starlight_ai를 호출하고, 분석 결과(dict)를 그대로 받아온다
-# (numpy/torch 등 무거운 의존성이 있어서 실제로 호출하는 시점에만 임포트)
+# FastAPI 컨테이너는 torch/모델을 갖지 않는다.
+# 여기서는 기사 정보를 AI 워커에 보내고 분석 JSON만 받아온다. 덕분에 FastAPI가
+# 재배포되어도 AI 워커의 프로세스와 메모리에 올라간 모델은 그대로 유지된다.
 def _call_ai(request: ArticleAnalyzeRequest) -> dict:
-    from starlight_ai import process_article
-
-    return process_article(
-        {
-            "article_id": str(request.article_id),
-            "mysql_article_id": request.article_id,
-            "title": request.title,
-            "content": request.content,
-            "published_at": request.published_at.isoformat(),
-        }
+    payload = {
+        "article_id": str(request.article_id),
+        "mysql_article_id": request.article_id,
+        "title": request.title,
+        "content": request.content,
+        "published_at": request.published_at.isoformat(),
+    }
+    endpoint = f"{settings.ai_base_url.rstrip('/')}/internal/v1/articles/analyze"
+    # 연결 실패는 빠르게 감지하되, CPU 추론 시간은 별도의 긴 read timeout으로 허용한다.
+    timeout = httpx.Timeout(
+        settings.ai_request_timeout_seconds,
+        connect=settings.ai_connect_timeout_seconds,
     )
 
+    try:
+        response = httpx.post(endpoint, json=payload, timeout=timeout)
+    except httpx.TimeoutException as exc:
+        # 연결에는 성공했지만 정해진 시간 안에 기사 분석이 끝나지 않은 경우다.
+        raise AppException(504, "EXTRACTION_FAILED", "AI 분석 시간이 초과되었습니다.") from exc
+    except httpx.RequestError as exc:
+        # DNS, 연결 거절 등 AI 워커 자체에 도달하지 못한 경우다.
+        raise AppException(503, "EXTRACTION_FAILED", "AI 분석 서비스에 연결할 수 없습니다.") from exc
 
-# AI에서 반환된 nodes[]/edges[]를 순서대로 반영하고 최종 결과를 만든다
+    # AI가 기사 입력 자체를 거부한 경우만 사용자의 요청 오류로 돌려준다.
+    # 그 밖의 AI 오류는 FastAPI 뒤쪽 서비스의 실패이므로 502로 구분한다.
+    if response.status_code == 400:
+        raise AppException(400, "INVALID_ARTICLE", _ai_error_message(response))
+    if response.status_code >= 400:
+        raise AppException(502, "EXTRACTION_FAILED", "AI 분석 서비스가 추론에 실패했습니다.")
+
+    try:
+        result = response.json()
+    except ValueError as exc:
+        raise AppException(502, "EXTRACTION_FAILED", "AI 분석 응답을 읽을 수 없습니다.") from exc
+
+    # 저장 로직이 요구하는 최소 계약을 입구에서 검증해 부분 적재를 방지한다.
+    if (
+        not isinstance(result, dict)
+        or not isinstance(result.get("classification"), dict)
+        or not isinstance(result.get("nodes"), list)
+        or not isinstance(result.get("edges"), list)
+    ):
+        raise AppException(502, "EXTRACTION_FAILED", "AI 분석 응답 형식이 올바르지 않습니다.")
+    return result
+
+
+def _ai_error_message(response: httpx.Response) -> str:
+    """Read the worker's safe validation message without trusting its body shape."""
+    try:
+        detail = response.json().get("detail")
+    except (ValueError, AttributeError):
+        detail = None
+    return str(detail) if detail else "분석할 기사 내용이 올바르지 않습니다."
+
+
+# AI의 임시 그래프를 실제 Neo4j 그래프로 옮기는 함수다.
+# 노드를 먼저 생성해야 엣지 양 끝의 실제 ID를 알 수 있음.
+# Article → Time/Entity → Event → Statement → Edge 순서를 꼭 지키셈.
 def _apply_analysis(
     tx,
     request: ArticleAnalyzeRequest,
@@ -59,7 +107,8 @@ def _apply_analysis(
     nodes = ai_result.get("nodes", [])
     edges = ai_result.get("edges", [])
 
-    # AI가 이번 응답 안에서만 쓰는 임시 nodeId -> 실제로 반영된 Neo4j nodeId
+    # AI 응답의 nodeId는 이번 응답 안에서만 유효하다.
+    # 각 노드를 MERGE하면서 얻은 실제 Neo4j nodeId를 저장해 두었다가 엣지 생성 때 사용한다.
     id_map: dict[str, str | None] = {}
 
     # Article 노드 반영
@@ -119,7 +168,7 @@ def _apply_analysis(
                 # merge_statement_node가 이 엣지를 이미 만들었으니, 아래 엣지 루프에서 또 안 만들게 표시
                 consumed_edge_ids.add(edge["edgeId"])
 
-    # Edge 반영
+    # Edge 반영: 앞 단계에서 노드들의 실제 ID가 모두 id_map에 등록된 뒤 실행한다.
     for edge in edges:
         # consumed면 위에서 이미 반영됨, CLASSIFIED_AS는 classification.topic으로 별도 반영하므로 여기선 건너뜀
         if edge["edgeId"] in consumed_edge_ids or edge["type"] == "CLASSIFIED_AS":
@@ -127,7 +176,8 @@ def _apply_analysis(
         start_id = id_map.get(edge["startNodeId"])
         end_id = id_map.get(edge["endNodeId"])
 
-        # 노이즈로 걸러진 Entity 등 실제로 안 만들어진 노드를 참조하는 엣지는 연결할 대상이 없으니 건너뜀
+        # 노이즈 Entity처럼 저장 단계에서 제외된 노드는 실제 ID가 없다.
+        # 이 노드를 가리키는 엣지도 연결할 대상이 없으므로 함께 건너뛴다.
         if start_id is None or end_id is None:
             continue
 

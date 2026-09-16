@@ -57,6 +57,23 @@ class ArticleAnalyzer:
         self._kg: KGExtractor | None = None
         self._embedder: EventEmbedder | None = None
 
+    @property
+    def is_loaded(self) -> bool:
+        """Return whether every enabled model has been loaded."""
+        classifier_loaded = not self.enable_classification or self._classifier is not None
+        embedding_loaded = not self.enable_embedding or self._embedder is not None
+        return classifier_loaded and self._kg is not None and embedding_loaded
+
+    def load(self) -> None:
+        """Eagerly load enabled models for a long-lived worker."""
+        # 기존의 지연 로딩은 CLI 단건 실행에는 편하지만 첫 HTTP 요청을 오래 기다리게 한다.
+        # 상주 워커는 startup에서 이 메서드를 호출해 readiness 전에 필요한 모델을 모두 준비한다.
+        if self.enable_classification:
+            self._ensure_classifier()
+        self._ensure_kg()
+        if self.enable_embedding:
+            self._ensure_embedder()
+
     def _ensure_classifier(self) -> KPFClassifier:
         if self._classifier is None:
             self._classifier = KPFClassifier(
