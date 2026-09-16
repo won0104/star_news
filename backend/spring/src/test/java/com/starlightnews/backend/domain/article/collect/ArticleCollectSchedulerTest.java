@@ -7,9 +7,9 @@ import com.starlightnews.backend.domain.article.dto.CollectedArticle;
 import com.starlightnews.backend.domain.article.service.ArticleStoreService;
 import com.starlightnews.backend.domain.article.support.ArticleUrls;
 import com.starlightnews.backend.global.enums.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -27,17 +27,23 @@ class ArticleCollectSchedulerTest {
 	@Mock
 	private ArticleStoreService articleStoreService;
 
-	@InjectMocks
+	/** 전처리는 실물을 쓴다. 스케줄러가 수집·전처리·저장을 잇는지 보는 테스트다. */
 	private ArticleCollectScheduler scheduler;
+
+	@BeforeEach
+	void setUp() {
+		scheduler = new ArticleCollectScheduler(
+				articleCollectService, new CollectedArticlePreprocessor(), articleStoreService);
+	}
 
 	private CollectedArticle article(String url) {
 		return new CollectedArticle("제목", url, ArticleUrls.hash(url),
-				LocalDateTime.of(2026, 9, 14, 14, 0), "본문", ContentType.FULL_TEXT,
+				LocalDateTime.of(2026, 9, 14, 14, 0), "본문입니다. ".repeat(40), ContentType.FULL_TEXT,
 				"business", "연합뉴스", "www.yna.co.kr");
 	}
 
 	@Test
-	void 수집한_기사를_그대로_저장에_넘긴다() {
+	void 수집한_기사를_전처리해_저장에_넘긴다() {
 		List<CollectedArticle> collected = List.of(
 				article("https://news.test/1"), article("https://news.test/2"));
 		given(articleCollectService.collectAll()).willReturn(collected);
@@ -45,6 +51,19 @@ class ArticleCollectSchedulerTest {
 		scheduler.collect();
 
 		verify(articleStoreService).store(eq(collected));
+	}
+
+	@Test
+	void 전처리에서_걸러진_기사는_저장에_넘기지_않는다() {
+		CollectedArticle kept = article("https://news.test/1");
+		CollectedArticle dropped = new CollectedArticle("[인사] 보건복지부", "https://news.test/2",
+				ArticleUrls.hash("https://news.test/2"), LocalDateTime.of(2026, 9, 14, 14, 0),
+				"본문입니다. ".repeat(40), ContentType.FULL_TEXT, "business", "연합뉴스", "www.yna.co.kr");
+		given(articleCollectService.collectAll()).willReturn(List.of(kept, dropped));
+
+		scheduler.collect();
+
+		verify(articleStoreService).store(eq(List.of(kept)));
 	}
 
 	@Test

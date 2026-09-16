@@ -44,17 +44,17 @@ class ArticleCollectionIntegrationTest {
             server.expect(queryParam("category", "business")).andRespond(withSuccess("{bad-json", MediaType.APPLICATION_JSON));
             server.expect(queryParam("category", "sports")).andRespond(withSuccess(GNewsResilienceTest.body("3"), MediaType.APPLICATION_JSON));
         }
-        var scheduler = new ArticleCollectScheduler(collector, store);
+        var scheduler = new ArticleCollectScheduler(collector, new CollectedArticlePreprocessor(), store);
         scheduler.collect();
         Long firstId = repository.findIdByUrlHash(ArticleUrls.hash("https://crawl-test.example/1")).orElseThrow();
         Long thirdId = repository.findIdByUrlHash(ArticleUrls.hash("https://crawl-test.example/3")).orElseThrow();
         var saved = repository.findAllWithOrganizationByArticleIdIn(List.of(firstId, thirdId));
         assertThat(saved).hasSize(2).allSatisfy(article -> {
             assertThat(article.getPublishedAt()).isEqualTo(LocalDateTime.of(2026, 9, 15, 10, 0));
-            assertThat(article.getContent()).isEqualTo("전문 본문입니다.");
+            assertThat(article.getContent()).isEqualTo(GNewsResilienceTest.CONTENT);
             assertThat(article.getContentType()).isEqualTo(ContentType.FULL_TEXT);
         });
-        assertThat(store.store(collector.collectAll())).isZero();
+        assertThat(store.store(new CollectedArticlePreprocessor().process(collector.collectAll()))).isZero();
         assertThat(repository.findIdByUrlHash(ArticleUrls.hash("https://crawl-test.example/1"))).contains(firstId);
         server.verify();
     }
