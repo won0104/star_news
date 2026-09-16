@@ -32,7 +32,9 @@
   object-fit: cover;
   object-position: center bottom;
   opacity: 0;
-  transition: opacity 400ms ease;
+  /* 화면 전환 애니메이션 정지 중이라 즉시 나타난다. 원래 값은 400ms ease —
+     styles/global.css와 utils/motion.js를 되돌릴 때 함께 복구한다. */
+  transition: opacity 0ms;
 }
 
 .photoReady {

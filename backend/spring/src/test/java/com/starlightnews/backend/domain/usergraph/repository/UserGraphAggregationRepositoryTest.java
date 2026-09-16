@@ -63,16 +63,22 @@ class UserGraphAggregationRepositoryTest {
 
 	private void insertKnowledgeNode(long userId, String nodeType, String nodeId,
 			int clickCount, LocalDateTime lastSeenAt) {
+		insertKnowledgeNode(userId, nodeType, nodeId, clickCount, 1, lastSeenAt);
+	}
+
+	private void insertKnowledgeNode(long userId, String nodeType, String nodeId,
+			int clickCount, int readArticleCount, LocalDateTime lastSeenAt) {
 		entityManager.getEntityManager()
 				.createNativeQuery("INSERT INTO user_knowledge_nodes "
 						+ "(user_id, node_label, node_type, node_id, read_article_count, "
 						+ " node_click_count, first_seen_at, last_seen_at) "
-						+ "VALUES (?1, '노드', ?2, ?3, 1, ?4, ?5, ?5)")
+						+ "VALUES (?1, '노드', ?2, ?3, ?4, ?5, ?6, ?6)")
 				.setParameter(1, userId)
 				.setParameter(2, nodeType)
 				.setParameter(3, nodeId)
-				.setParameter(4, clickCount)
-				.setParameter(5, lastSeenAt)
+				.setParameter(4, readArticleCount)
+				.setParameter(5, clickCount)
+				.setParameter(6, lastSeenAt)
 				.executeUpdate();
 		entityManager.flush();
 	}
@@ -164,17 +170,31 @@ class UserGraphAggregationRepositoryTest {
 	}
 
 	@Test
-	void 클릭하지_않은_Event는_소비로_보지_않는다() {
-		// 기사를 읽기만 해도 행이 생긴다. 거르지 않으면 스쳐 간 Event 까지 소비가 된다.
-		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, LocalDateTime.of(2026, 9, 15, 5, 30));
+	void 클릭도_열람도_없는_Event는_소비로_보지_않는다() {
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, 0, LocalDateTime.of(2026, 9, 15, 5, 30));
 
 		assertThat(repository.findConsumedEvents(List.of(1L))).isEmpty();
 	}
 
 	@Test
-	void 즐겨찾기한_Event는_클릭이_없어도_보낸다() {
+	void 기사를_읽기만_해도_소비로_본다() {
+		// FastAPI 는 이 관계로 "이미 본 Event" 를 추천에서 뺀다. 클릭만 보면 읽은 내용을 다시 추천한다.
+		// 기사를 목록에서 눌러 읽는 쪽이 그래프에서 노드를 클릭하는 것보다 훨씬 흔하다.
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, 3, LocalDateTime.of(2026, 9, 15, 5, 30));
+
+		assertThat(repository.findConsumedEvents(List.of(1L)))
+				.singleElement()
+				.satisfies(row -> {
+					assertThat(row.getNodeId()).isEqualTo(EVENT_ID);
+					// 보내는 값은 그대로 클릭 수다. 0 이면 취향 벡터 가중치가 0 이라 영향이 없다.
+					assertThat(row.getClickCount()).isZero();
+				});
+	}
+
+	@Test
+	void 즐겨찾기한_Event는_클릭도_열람도_없어도_보낸다() {
 		// 즐겨찾기는 분명한 신호다. 여기서 빠지면 그 정보가 어디에도 전달되지 않는다.
-		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, LocalDateTime.of(2026, 9, 15, 5, 30));
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, 0, LocalDateTime.of(2026, 9, 15, 5, 30));
 		insertNodeFavorite(1L, "EVENT", EVENT_ID);
 
 		assertThat(repository.findConsumedEvents(List.of(1L)))

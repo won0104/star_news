@@ -13,21 +13,6 @@
   box-shadow: var(--topbar-shadow);
 }
 
-/* Figma 870:2 — the navigation is part of the night attic rather than pale chrome
-   floating over it. This variant is scoped to 주요 트렌드 so the paper screens keep
-   their existing daylight bar. */
-.barAttic {
-  height: 76px;
-  gap: 0;
-  padding: 0 42px 0 50px;
-  border-bottom-color: rgba(231, 204, 157, 0.56);
-  background: #3b3531;
-  backdrop-filter: none;
-  box-shadow:
-    0 1px 0 rgba(255, 237, 204, 0.08) inset,
-    0 7px 18px rgba(8, 5, 5, 0.34);
-}
-
 .brand {
   display: flex;
   align-items: baseline;
@@ -45,21 +30,6 @@
   font-weight: 700;
   font-size: 17px;
   color: var(--nav-ink-active);
-}
-
-.brandStar {
-  font-size: 15px;
-  line-height: 1;
-  color: rgba(246, 223, 178, 0.98);
-}
-
-.barAttic .brand {
-  gap: 8px;
-}
-
-.barAttic .brandName {
-  font-size: 19px;
-  color: rgba(246, 223, 178, 0.98);
 }
 
 /* No gap: the hairlines are the spacing now, and the buttons' own padding keeps the
@@ -117,36 +87,6 @@
   color: var(--ink-on-dark);
 }
 
-.barAttic .nav {
-  margin-left: 34px;
-}
-
-.barAttic .navRule {
-  display: none;
-}
-
-.barAttic .navItem {
-  min-height: 46px;
-  padding: 0 24px;
-  border-radius: 23px;
-  font-size: 15px;
-  color: rgba(224, 209, 189, 0.92);
-}
-
-.barAttic .navItem:hover {
-  color: rgba(246, 223, 178, 0.98);
-  background: rgba(14, 13, 12, 0.38);
-}
-
-.barAttic .navItemActive,
-.barAttic .navItemActive:hover {
-  min-width: 128px;
-  border: 1px solid rgba(224, 196, 150, 0.34);
-  background: rgba(14, 13, 12, 0.72);
-  color: rgba(246, 223, 178, 0.98);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-}
-
 .spacer {
   flex: 1;
 }
@@ -188,55 +128,11 @@
   box-shadow: var(--pill-dark-shadow), var(--pill-dark-inner);
 }
 
-.barAttic .signIn {
-  font-size: 15px;
-  color: rgba(224, 209, 189, 0.92);
-}
-
-.barAttic .signIn:hover {
-  color: rgba(246, 223, 178, 0.98);
-  background: rgba(14, 13, 12, 0.38);
-}
-
-.barAttic .signUp {
-  min-width: 110px;
-  min-height: 46px;
-  border-color: rgba(224, 196, 150, 0.34);
-  border-radius: 23px;
-  background: rgba(14, 13, 12, 0.72);
-  font-size: 15px;
-  color: rgba(246, 223, 178, 0.98);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-}
-
 @media (max-width: 1023px) {
   .bar {
     height: 60px;
     gap: 12px;
     padding: 0 16px;
-  }
-
-  .barAttic {
-    height: 60px;
-    padding: 0 16px;
-  }
-
-  .barAttic .brandName {
-    font-size: 17px;
-  }
-
-  .barAttic .nav {
-    margin-left: 12px;
-  }
-
-  .barAttic .navItem {
-    min-height: 38px;
-    padding: 0 14px;
-    font-size: 13.5px;
-  }
-
-  .barAttic .navItemActive {
-    min-width: auto;
   }
 
   /*
@@ -269,5 +165,32 @@
   .navItem {
     padding: 8px 12px;
     font-size: 13.5px;
+  }
+}
+
+@media (max-width: 420px) {
+  .bar {
+    height: 104px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 48px 48px;
+    column-gap: 8px;
+    padding: 0 12px 8px;
+  }
+
+  .brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .auth {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
   }
 }

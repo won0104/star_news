@@ -134,7 +134,7 @@ class UserGraphSyncIntegrationTest {
 		assertThat(user.dislikeTopicCodes()).containsExactly("SPORTS");
 		assertThat(user.consumedEvents()).singleElement().satisfies(event -> {
 			assertThat(event.eventId()).isEqualTo(EVENT_ID);
-			assertThat(event.count()).isEqualTo(2);
+			assertThat(event.eventClickCount()).isEqualTo(2);
 		});
 	}
 
@@ -172,7 +172,7 @@ class UserGraphSyncIntegrationTest {
 		assertThat(json.get("users").get(0).fieldNames()).toIterable()
 				.containsExactlyInAnyOrder("userId", "interestNodes", "dislikeTopicCodes", "consumedEvents");
 		assertThat(json.get("users").get(0).get("consumedEvents").get(0).fieldNames()).toIterable()
-				.containsExactlyInAnyOrder("eventId", "count", "lastViewedAt", "eventFavorited");
+				.containsExactlyInAnyOrder("eventId", "eventClickCount", "lastViewedAt", "eventFavorited");
 		// 오프셋이 없으면 FastAPI 가 UTC 로 읽어 9시간 어긋난다.
 		assertThat(json.get("aggregatedAt").asText()).contains("+09:00");
 	}

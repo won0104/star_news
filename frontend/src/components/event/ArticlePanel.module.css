@@ -168,6 +168,12 @@
   }
 }
 
+@media (max-width: 420px) {
+  .panel {
+    top: 104px;
+  }
+}
+
 /* Below this width a 430px column would leave the article list nothing, so it covers. */
 @media (max-width: 900px) {
   .panel {

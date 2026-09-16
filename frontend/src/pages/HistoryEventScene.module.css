@@ -435,3 +435,10 @@
     grid-auto-columns: 78%;
   }
 }
+
+@media (max-width: 420px) {
+  .page,
+  .missingPage {
+    padding-top: 128px;
+  }
+}

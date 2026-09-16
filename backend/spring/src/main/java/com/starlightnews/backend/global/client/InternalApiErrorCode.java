@@ -24,6 +24,14 @@ public enum InternalApiErrorCode implements ErrorCode {
 	 */
 	INTERNAL_API_CONFLICT(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버에 더 최신 상태가 반영되어 있습니다."),
 
+	/**
+	 * 요청에 실린 대상을 FastAPI 가 찾지 못했다.
+	 *
+	 * <p>그래프에 아직 자리가 없는 경우다. 설정 문제도 장애도 아니라서 재시도가 아니라 앞 단계
+	 * (사용자 그래프 동기화·기사 분석)가 먼저 돌아야 풀린다. 잘못된 요청과 섞이면 구분할 수 없어 따로 둔다.
+	 */
+	INTERNAL_API_NOT_FOUND(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버가 대상을 찾지 못했습니다."),
+
 	/** FastAPI 또는 그 뒤의 Neo4j 가 일시적으로 응답하지 못한다. 다음 주기에 다시 시도한다. */
 	INTERNAL_API_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버를 호출할 수 없습니다."),
 

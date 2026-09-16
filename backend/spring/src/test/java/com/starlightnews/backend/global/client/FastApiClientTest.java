@@ -21,6 +21,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 
 class FastApiClientTest {
 
@@ -121,6 +122,19 @@ class FastApiClientTest {
 	}
 
 	@Test
+	void 대상을_찾지_못해_404면_NOT_FOUND() {
+		// 그래프에 자리가 아직 없다는 뜻이다. 요청 형식이 틀린 400 과는 대응이 다르다.
+		server.expect(requestTo(BASE_URL + PATH))
+				.andRespond(withStatus(HttpStatus.NOT_FOUND)
+						.body(errorBody("USER_RECOMMENDATION_CONTEXT_NOT_FOUND"))
+						.contentType(MediaType.APPLICATION_JSON));
+
+		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(InternalApiErrorCode.INTERNAL_API_NOT_FOUND);
+	}
+
+	@Test
 	void Neo4j_장애로_503이면_UNAVAILABLE() {
 		// 다음 주기에 다시 시도하면 되는 종류다.
 		server.expect(requestTo(BASE_URL + PATH))
@@ -141,6 +155,28 @@ class FastApiClientTest {
 		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(InternalApiErrorCode.INTERNAL_API_FAILED);
+	}
+
+	@Test
+	void 응답을_읽지_못해도_예외가_새어_나가지_않는다() {
+		// 본문이 깨졌거나 Content-Type 이 이상하면 RestClient 가 RestClientException 을 던진다.
+		// 그냥 두면 호출한 배치의 회차 전체가 죽는다. 묶음 하나의 실패로 격리돼야 한다.
+		server.expect(requestTo(BASE_URL + PATH))
+				.andRespond(withSuccess("깨진 본문", MediaType.APPLICATION_OCTET_STREAM));
+
+		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
+	}
+
+	@Test
+	void 연결이_끊겨도_예외가_새어_나가지_않는다() {
+		server.expect(requestTo(BASE_URL + PATH))
+				.andRespond(withException(new java.io.IOException("connection reset")));
+
+		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
 	}
 
 	@Test

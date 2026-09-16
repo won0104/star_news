@@ -2,6 +2,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  container-type: size;
 }
 
 .fieldFull {
@@ -10,11 +11,33 @@
   background: #302b29 url('/assets/trend/figma/attic-night.png') center / cover no-repeat;
 }
 
-.fullToggle {
+.layoutBadge {
+  position: absolute;
+  z-index: 5;
+  top: 20px;
+  left: 24px;
+  padding: 7px 11px;
+  border: 1px solid rgba(226, 197, 126, 0.28);
+  border-radius: 999px;
+  background: rgba(20, 18, 18, 0.58);
+  color: rgba(229, 209, 171, 0.82);
+  font: 600 11px var(--font-sans);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+.fieldActions {
   position: absolute;
   z-index: 5;
   top: 20px;
   right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fieldAction {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -28,16 +51,18 @@
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
   backdrop-filter: blur(10px);
 }
 
-.fullToggle:hover {
+.fieldAction:hover {
   border-color: rgba(238, 207, 132, 0.72);
   background: rgba(33, 29, 27, 0.82);
 }
 
-.fullToggle:focus-visible {
+.fieldAction:focus-visible {
   outline: 2px solid #e4c679;
   outline-offset: 3px;
 }
@@ -48,7 +73,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: max(100vw, 160vh);
+  width: max(100cqw, 160cqh);
   aspect-ratio: 8 / 5;
   transform: translate(-50%, -50%);
   container-type: inline-size;
@@ -101,6 +126,22 @@
 
 .mobileLinks {
   display: none;
+}
+
+.variantLinks {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.variantLinks line {
+  stroke: rgba(228, 198, 121, 0.38);
+  stroke-width: 1.05;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .node {
@@ -207,13 +248,43 @@
   display: none;
 }
 
+.portableArt .layer {
+  display: none;
+}
+
+.portableArt .mobileStar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  width: var(--hit-size);
+  height: var(--hit-size);
+  transform: translate(-50%, -50%);
+}
+
 .text {
   position: absolute;
+  z-index: 2;
   width: var(--text-width);
   font-family: var(--font-sans);
   color: rgba(229, 209, 171, 0.86);
   word-break: keep-all;
   pointer-events: none;
+  isolation: isolate;
+}
+
+.text::before {
+  position: absolute;
+  z-index: -1;
+  inset: -0.8cqw -1.4cqw;
+  content: '';
+  background: radial-gradient(
+    ellipse at center,
+    rgba(8, 11, 21, 0.82) 0%,
+    rgba(8, 11, 21, 0.58) 52%,
+    rgba(8, 11, 21, 0) 76%
+  );
+  filter: blur(2px);
 }
 
 .label,
@@ -332,9 +403,19 @@
     transform: none;
   }
 
-  .fullToggle {
+  .fieldActions {
     top: 14px;
     right: 14px;
+    gap: 6px;
+  }
+
+  .layoutBadge {
+    top: 14px;
+    left: 14px;
+    font-size: 10px;
+  }
+
+  .fieldAction {
     min-height: 36px;
     padding: 7px 11px;
     font-size: 12px;

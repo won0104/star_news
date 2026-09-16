@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { eventCopy, events } from '../data/events';
-import { PhotoBackdrop } from '../components/common/PhotoBackdrop';
-import { TopBar } from '../components/common/TopBar';
-import { ArticlePanel } from '../components/event/ArticlePanel';
-import { useSettingsValues } from '../store/settings';
-import styles from './EventScene.module.css';
+import { useState } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { eventCopy, events } from '../data/events'
+import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
+import { TopBar } from '../components/common/TopBar'
+import { ArticlePanel } from '../components/event/ArticlePanel'
+import { useSettingsValues } from '../store/settings'
+import { SCREEN_TRANSITIONS } from '../utils/motion'
+import styles from './EventScene.module.css'
 
-const PANEL_ID = 'article-detail';
+const PANEL_ID = 'article-detail'
 
 /**
  * /event/:id — one event: its title, summary and hashtags, with the articles that covered
@@ -25,15 +26,17 @@ const PANEL_ID = 'article-detail';
  * it is a page underneath one, so its bar navigates into /app the way the attic's does.
  */
 export function EventScene() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { reduceMotion } = useSettingsValues();
-  const event = events[id];
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const { reduceMotion } = useSettingsValues()
+  const recommendationView = params.get('from') === 'foryou2' ? 'foryou2' : 'foryou'
+  const event = events[id]
 
-  const [openId, setOpenId] = useState(null);
+  const [openId, setOpenId] = useState(null)
   const [saved, setSaved] = useState(() =>
     Object.fromEntries((event?.articles ?? []).map((a) => [a.id, a.saved])),
-  );
+  )
 
   const bar = (
     <TopBar
@@ -41,7 +44,7 @@ export function EventScene() {
       onBrand={() => navigate('/')}
       onAuth={(kind) => navigate(`/${kind}`)}
     />
-  );
+  )
 
   // An id with no event behind it says so rather than crashing on a missing key.
   if (!event) {
@@ -50,7 +53,7 @@ export function EventScene() {
         {bar}
         <div className={styles.page}>
           <div className={styles.column}>
-            <Link className={styles.back} to="/app?view=foryou">
+            <Link className={styles.back} to={`/app?view=${recommendationView}`}>
               {eventCopy.back}
             </Link>
             <div className={styles.articles}>
@@ -59,19 +62,19 @@ export function EventScene() {
           </div>
         </div>
       </PhotoBackdrop>
-    );
+    )
   }
 
-  const article = event.articles.find((a) => a.id === openId);
-  const shown = article ? { ...article, saved: !!saved[article.id] } : null;
+  const article = event.articles.find((a) => a.id === openId)
+  const shown = article ? { ...article, saved: !!saved[article.id] } : null
 
   return (
-    <PhotoBackdrop motion={!reduceMotion}>
+    <PhotoBackdrop motion={SCREEN_TRANSITIONS && !reduceMotion}>
       {bar}
 
       <div className={styles.page}>
         <div className={styles.column}>
-          <Link className={styles.back} to="/app?view=foryou">
+          <Link className={styles.back} to={`/app?view=${recommendationView}`}>
             {eventCopy.back}
           </Link>
 
@@ -106,9 +109,7 @@ export function EventScene() {
                 <li key={entry.id} className={styles.row}>
                   <button
                     type="button"
-                    className={`${styles.rowButton} ${
-                      entry.id === openId ? styles.rowActive : ''
-                    }`}
+                    className={`${styles.rowButton} ${entry.id === openId ? styles.rowActive : ''}`}
                     aria-expanded={entry.id === openId}
                     aria-controls={PANEL_ID}
                     onClick={() => setOpenId(entry.id === openId ? null : entry.id)}
@@ -138,10 +139,8 @@ export function EventScene() {
         article={shown}
         open={!!shown}
         onClose={() => setOpenId(null)}
-        onToggleSave={(articleId) =>
-          setSaved((was) => ({ ...was, [articleId]: !was[articleId] }))
-        }
+        onToggleSave={(articleId) => setSaved((was) => ({ ...was, [articleId]: !was[articleId] }))}
       />
     </PhotoBackdrop>
-  );
+  )
 }
