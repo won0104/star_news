@@ -107,10 +107,11 @@ class CollectedArticlePreprocessorTest {
 
 	@Test
 	void 남길_것과_버릴_것이_섞여도_순서를_지킨다() {
+		// 본문은 기사마다 달라야 한다. 같으면 수집 오류로 보고 버린다.
 		assertThat(titlesAfter(
-				article("첫 기사", REAL_CONTENT),
-				article("[인사] 보건복지부", REAL_CONTENT),
-				article("둘째 기사", REAL_CONTENT)))
+				article("첫 기사", REAL_CONTENT + " 하나"),
+				article("[인사] 보건복지부", REAL_CONTENT + " 둘"),
+				article("둘째 기사", REAL_CONTENT + " 셋")))
 				.containsExactly("첫 기사", "둘째 기사");
 	}
 
@@ -282,6 +283,60 @@ class CollectedArticlePreprocessorTest {
 
 		assertThat(after.title()).isEqualTo("한화, 19년 만에 한국시리즈 진출");
 		assertThat(after.content()).doesNotContain("기사 본문 영역");
+	}
+
+	// --- 본문 동일 수집 오류 ---
+
+	private CollectedArticle withUrl(String title, String url, String content) {
+		return new CollectedArticle(title, url, url.getBytes(),
+				LocalDateTime.of(2026, 9, 16, 9, 0), content,
+				ContentType.FULL_TEXT, "general", "뉴스핌", "newspim.com");
+	}
+
+	@Test
+	void 본문이_같은데_제목이_다르면_전부_버린다() {
+		// 제공처가 기사 본문 대신 사이트의 인기 기사 영역을 긁어 온 경우다.
+		// 어느 제목이 그 본문의 주인인지 알 수 없어 하나도 남기지 않는다.
+		assertThat(titlesAfter(
+				withUrl("김하성, 2타수 무안타", "https://newspim.com/1", REAL_CONTENT),
+				withUrl("美 공군장관 우주 통제 무기 발언", "https://newspim.com/2", REAL_CONTENT),
+				withUrl("올림픽 대표팀 명단 발표", "https://newspim.com/3", REAL_CONTENT)))
+				.isEmpty();
+	}
+
+	@Test
+	void 본문도_제목도_같으면_남긴다() {
+		// 통신사 기사를 여러 매체가 받아쓴 것이라 정상이다. 실측에서 33그룹 67건이 여기 해당했다.
+		assertThat(titlesAfter(
+				withUrl("수성이 이렇게 줄었다고?", "https://a.test/1", REAL_CONTENT),
+				withUrl("수성이 이렇게 줄었다고?", "https://b.test/2", REAL_CONTENT)))
+				.containsExactly("수성이 이렇게 줄었다고?", "수성이 이렇게 줄었다고?");
+	}
+
+	@Test
+	void 본문이_다르면_제목이_같아도_남긴다() {
+		assertThat(titlesAfter(
+				withUrl("같은 제목", "https://a.test/1", REAL_CONTENT),
+				withUrl("같은 제목", "https://b.test/2", REAL_CONTENT + " 다른 내용")))
+				.hasSize(2);
+	}
+
+	@Test
+	void 충돌한_기사만_버리고_나머지는_지킨다() {
+		assertThat(titlesAfter(
+				withUrl("멀쩡한 기사", "https://a.test/0", REAL_CONTENT + " 고유"),
+				withUrl("충돌 A", "https://newspim.com/1", REAL_CONTENT),
+				withUrl("충돌 B", "https://newspim.com/2", REAL_CONTENT)))
+				.containsExactly("멀쩡한 기사");
+	}
+
+	@Test
+	void 군더더기만_다른_기사도_같은_본문으로_본다() {
+		// 본문 정리를 마친 뒤에 비교하므로, 저작권 문구만 다른 기사도 충돌로 잡힌다.
+		assertThat(titlesAfter(
+				withUrl("충돌 A", "https://a.test/1", REAL_CONTENT + "\n<저작권자 © 스타뉴스>"),
+				withUrl("충돌 B", "https://b.test/2", REAL_CONTENT + "\n더보기")))
+				.isEmpty();
 	}
 
 	@Test

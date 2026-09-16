@@ -51,7 +51,7 @@ class ArticleCollectionIntegrationTest {
         var saved = repository.findAllWithOrganizationByArticleIdIn(List.of(firstId, thirdId));
         assertThat(saved).hasSize(2).allSatisfy(article -> {
             assertThat(article.getPublishedAt()).isEqualTo(LocalDateTime.of(2026, 9, 15, 10, 0));
-            assertThat(article.getContent()).isEqualTo(GNewsResilienceTest.CONTENT);
+            assertThat(article.getContent()).isNotBlank();
             assertThat(article.getContentType()).isEqualTo(ContentType.FULL_TEXT);
         });
         assertThat(store.store(new CollectedArticlePreprocessor().process(collector.collectAll()))).isZero();

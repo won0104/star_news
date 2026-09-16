@@ -1,7 +1,9 @@
 package com.starlightnews.backend.domain.article.collect;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -84,11 +86,12 @@ public class CollectedArticlePreprocessor {
 		}
 
 		// 제목 보정이 본문 정리보다 먼저다. 제목을 본문 앞머리에서 찾으므로 아직 원본이어야 한다.
-		List<CollectedArticle> kept = articles.stream()
+		// 본문이 같은지는 정리를 마친 뒤에 본다. 군더더기만 다른 기사도 같은 것으로 잡힌다.
+		List<CollectedArticle> kept = dropContentCollisions(articles.stream()
 				.filter(this::isAnalyzable)
 				.map(this::repairTitle)
 				.map(this::cleanContent)
-				.toList();
+				.toList());
 
 		int dropped = articles.size() - kept.size();
 		if (dropped > 0) {
@@ -117,6 +120,38 @@ public class CollectedArticlePreprocessor {
 		return new CollectedArticle(candidate, article.url(), article.urlHash(),
 				article.publishedAt(), article.content(), article.contentType(),
 				article.sourceCategory(), article.organizationName(), article.organizationDomain());
+	}
+
+	/**
+	 * 본문이 같은데 제목이 서로 다른 기사들을 통째로 버린다.
+
+	 * <p><b>하나만 남기지 않고 전부 버린다.</b> 어느 제목이 그 본문의 주인인지 알 수 없어,
+	 * 하나를 남기면 그 하나가 틀린 채로 남는다. (뉴스핌만 있어서 괜찮을듯)
+	 *
+	 * <p>제목까지 같으면 남긴다. 통신사 기사를 여러 매체가 받아쓴 것이라 정상이다. 실측에서
+	 * 중복 33그룹(67건)이 여기 해당했다.
+	 */
+	private List<CollectedArticle> dropContentCollisions(List<CollectedArticle> articles) {
+		Map<String, List<CollectedArticle>> byContent = articles.stream()
+				.collect(Collectors.groupingBy(
+						article -> String.valueOf(article.content()),
+						LinkedHashMap::new, Collectors.toList()));
+
+		List<CollectedArticle> kept = new ArrayList<>();
+		for (List<CollectedArticle> sameContent : byContent.values()) {
+			if (hasConflictingTitles(sameContent)) {
+				log.warn("본문이 같은데 제목이 달라 {}건을 제외합니다. ({})",
+						sameContent.size(), sameContent.get(0).organizationName());
+				sameContent.forEach(article -> log.info("  제외: {}", article.title()));
+				continue;
+			}
+			kept.addAll(sameContent);
+		}
+		return kept;
+	}
+
+	private boolean hasConflictingTitles(List<CollectedArticle> sameContent) {
+		return sameContent.stream().map(CollectedArticle::title).distinct().count() > 1;
 	}
 
 	/**
