@@ -5,7 +5,8 @@
 
 .board {
   position: relative;
-  width: 100%;
+  width: min(100%, calc((100vh - 152px) * 1446.576 / 814));
+  margin-inline: auto;
   aspect-ratio: 1446.576 / 814;
   overflow: hidden;
   isolation: isolate;
@@ -132,44 +133,44 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: clamp(2px, 1.2cqw, 7px);
+  padding: clamp(6px, 2cqw, 9px);
   border-radius: 3px;
   color: inherit;
   text-decoration: none;
 }
 
-/* Each Figma paper has a different top treatment. Text begins below its own
-   pin or tape instead of sharing one generic inset. */
+/* The paper exports have different transparent edges and top treatments.
+   Keep text inside the visible sheet and below each pin or tape. */
 .note1 .paperContent {
-  inset: 22% 12% 11%;
+  inset: 18% 16% 13%;
 }
 
 .note2 .paperContent {
-  inset: 25% 13% 11%;
+  inset: 21% 14% 14% 15%;
 }
 
 .note3 .paperContent {
-  inset: 24% 13% 10%;
+  inset: 27% 16% 13% 17%;
 }
 
 .note4 .paperContent {
-  inset: 24% 14% 12%;
+  inset: 28% 16% 15%;
 }
 
 .note5 .paperContent {
-  inset: 22% 12% 11%;
+  inset: 20% 17% 13%;
 }
 
 .note6 .paperContent {
-  inset: 25% 14% 12%;
+  inset: 29% 17% 15% 16%;
 }
 
 .note7 .paperContent {
-  inset: 25% 12% 10%;
+  inset: 20% 15% 14% 14%;
 }
 
 .note8 .paperContent {
-  inset: 14% 12% 12%;
+  inset: 16% 17% 16% 13%;
 }
 
 .paperContent:hover {
@@ -182,16 +183,10 @@
 }
 
 .reason {
-  align-self: flex-start;
-  max-width: 100%;
-  margin: 0;
-  padding: 3px 8px;
-  border: 1px solid rgba(130, 101, 62, 0.2);
-  border-radius: 999px;
-  background: rgba(255, 251, 240, 0.5);
+  margin: clamp(8px, 3cqh, 12px) 0 0;
   font-family: var(--font-sans);
   font-size: clamp(8px, 4.2cqw, 12px);
-  line-height: 1.35;
+  line-height: 1.4;
   color: #625646;
   word-break: keep-all;
 }
@@ -264,16 +259,6 @@
   display: none;
 }
 
-.note3 .reason,
-.note8 .reason {
-  display: none;
-}
-
-.note4 .noteSummary,
-.note6 .noteSummary {
-  display: none;
-}
-
 .decorations {
   position: absolute;
   inset: 0;
@@ -301,6 +286,7 @@
 
 @media (max-width: 900px) {
   .board {
+    width: 100%;
     aspect-ratio: auto;
     overflow: visible;
   }
@@ -344,6 +330,26 @@
     inset: 15% 11% 10%;
   }
 
+  .note1 .paperContent {
+    inset: 15% 16% 10%;
+  }
+
+  .note3 .paperContent {
+    inset: 25% 16% 10% 17%;
+  }
+
+  .note5 .paperContent {
+    inset: 15% 17% 10%;
+  }
+
+  .note7 .paperContent {
+    inset: 15% 13% 10%;
+  }
+
+  .note8 .paperContent {
+    inset: 15% 13% 10%;
+  }
+
   .reason {
     font-size: 11px;
   }
@@ -366,14 +372,27 @@
     display: flex;
   }
 
-  .note3 .reason,
-  .note8 .reason {
-    display: inline-block;
-  }
-
   .noteTags,
   .noteGo {
     font-size: 11px;
+  }
+}
+
+@media (max-width: 420px) {
+  .note3 {
+    min-height: 300px;
+  }
+
+  .note3 .paperContent {
+    inset: 25% 16% 16% 17%;
+  }
+
+  .note5 .noteSummary {
+    -webkit-line-clamp: 3;
+  }
+
+  .note8 .paperContent {
+    inset: 15% 13% 16%;
   }
 }
 

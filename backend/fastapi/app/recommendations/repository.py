@@ -79,14 +79,14 @@ def find_cf_candidate_events(session: Session, user_id: int) -> list[dict]:
 
 
 # 3. 콘텐츠 기반 필터링(CBF)
-# 유저 프로필 벡터 계산에 쓸 CONSUMED Event 임베딩 조회 (count/lastViewedAt은 가중치 계산용)
+# 유저 프로필 벡터 계산에 쓸 CONSUMED Event 임베딩 조회 (eventClickCount/lastViewedAt은 가중치 계산용)
 def find_consumed_events_with_embeddings(session: Session, user_id: int) -> list[dict]:
     result = session.run(
         """
         // 유저가 소비한 Event 중 임베딩 있는 것만
         MATCH (u:User {userId: $userId})-[r:CONSUMED]->(e:Event)
         WHERE e.embedding IS NOT NULL
-        RETURN e.embedding AS embedding, r.count AS count, r.lastViewedAt AS lastViewedAt,
+        RETURN e.embedding AS embedding, r.eventClickCount AS eventClickCount, r.lastViewedAt AS lastViewedAt,
                coalesce(r.eventFavorited, false) AS isFavorited
         """,
         userId=user_id,
@@ -94,7 +94,7 @@ def find_consumed_events_with_embeddings(session: Session, user_id: int) -> list
     return [
         {
             "embedding": record["embedding"],
-            "count": record["count"],
+            "eventClickCount": record["eventClickCount"],
             # neo4j.time.DateTime -> 파이썬 기본 datetime 변환 (그대로 두면 service.py에서 뺄셈 시 에러남)
             "lastViewedAt": record["lastViewedAt"].to_native(),
             "isFavorited": record["isFavorited"],

@@ -35,12 +35,20 @@ class GNewsResilienceTest {
         client = new GNewsClient(restClient, properties, sleeper);
     }
 
+    /**
+     * 실측한 정상 기사의 최소 길이가 500자 안팎이라 픽스처도 그만큼 길게 둔다.
+     * 기사마다 본문이 달라야 한다. 같으면 전처리가 수집 오류로 보고 버린다.
+     */
+    static String content(String id) {
+        return "%s번 기사 본문입니다.".formatted(id).repeat(30);
+    }
+
     static String body(String id) {
         return """
-            {"articles":[null,{"title":"기사 %s","content":"전문 본문입니다.",
+            {"articles":[null,{"title":"기사 %s","content":"%s",
             "url":"https://crawl-test.example/%s","publishedAt":"2026-09-15T01:00:00Z",
             "source":{"name":"수집 통합 테스트 언론사","url":"https://crawl-test.example"}},null]}
-            """.formatted(id, id);
+            """.formatted(id, content(id), id);
     }
 
     @Test void 속도_제한은_두_번까지_재시도해서_복구한다() {

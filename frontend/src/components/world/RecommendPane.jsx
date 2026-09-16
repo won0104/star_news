@@ -136,12 +136,12 @@ export function RecommendPane({ settled = true }) {
                 <img className={styles.paperImage} src={`${ASSET}/${note.paper}`} alt="" draggable="false" />
 
                 <Link className={styles.paperContent} to={`/event/${event.id}`} aria-label={`${event.title}. ${card.reason}`}>
+                  <h3 className={styles.noteTitle}>{event.title}</h3>
+                  <p className={styles.noteSummary}>{event.summary}</p>
                   <p className={styles.reason}>
                     <span className={styles.reasonKey}>{recommend.reasonLabel} · </span>
                     {card.reason}
                   </p>
-                  <h3 className={styles.noteTitle}>{event.title}</h3>
-                  <p className={styles.noteSummary}>{event.summary}</p>
                   <span className={styles.noteFoot}>
                     <span className={styles.noteTags}>{event.hashtags.slice(0, 2).join('  ')}</span>
                     <span className={styles.noteGo} aria-hidden>자세히 →</span>

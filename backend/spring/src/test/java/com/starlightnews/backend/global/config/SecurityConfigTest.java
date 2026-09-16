@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,6 +29,24 @@ class SecurityConfigTest {
 
 	@Autowired
 	private JwtProvider jwtProvider;
+
+	@Test
+	void 홈_GET_요청은_토큰_없이_접근할_수_있다() throws Exception {
+		mockMvc.perform(get("/api/v1/home"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void 홈_POST_요청은_공개하지_않는다() throws Exception {
+		mockMvc.perform(post("/api/v1/home"))
+				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void 홈_하위_경로는_공개하지_않는다() throws Exception {
+		mockMvc.perform(get("/api/v1/home/private"))
+				.andExpect(status().isUnauthorized());
+	}
 
 	@Test
 	void 공개_경로가_아닌_요청에_토큰이_없으면_401_UNAUTHORIZED_JSON을_응답한다() throws Exception {
@@ -57,6 +76,11 @@ class SecurityConfigTest {
 
 	@RestController
 	static class ProtectedController {
+
+		@GetMapping("/api/v1/home")
+		String home() {
+			return "home";
+		}
 
 		@GetMapping(PROTECTED_PATH)
 		String ping() {

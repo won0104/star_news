@@ -25,12 +25,15 @@ import org.springframework.stereotype.Component;
 public class ArticleCollectScheduler {
 
 	private final ArticleCollectService articleCollectService;
+	private final CollectedArticlePreprocessor preprocessor;
 	private final ArticleStoreService articleStoreService;
 
 	@Scheduled(cron = "${app.gnews.collect-cron:0 10 * * * *}", zone = "Asia/Seoul")
 	public void collect() {
 		List<CollectedArticle> collected = articleCollectService.collectAll();
-		int newlyStored = articleStoreService.store(collected);
-		log.info("수집 회차 종료: 수집 {}건, 신규 저장 {}건", collected.size(), newlyStored);
+		List<CollectedArticle> prepared = preprocessor.process(collected);
+		int newlyStored = articleStoreService.store(prepared);
+		log.info("수집 회차 종료: 수집 {}건, 전처리 후 {}건, 신규 저장 {}건",
+				collected.size(), prepared.size(), newlyStored);
 	}
 }

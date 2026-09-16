@@ -36,14 +36,16 @@ def calculate_cf_scores(user_id: int, session: Session) -> list[CFCandidate]:
     return [CFCandidate(event_id=c["eventId"], cf_score=c["cfScore"]) for c in candidates]
 
 # 3. 콘텐츠 기반 필터링(CBF) 공용 모듈
-# CONSUMED 이력 하나의 가중치 계산 - 많이 볼수록(로그 스케일), 최근에 볼수록(지수 감쇠) 가중치 증가
-def _calculate_consumption_weight(count: int, last_viewed_at: datetime, now: datetime, is_favorited: bool) -> float:
+# CONSUMED 이력 하나의 가중치 계산 - 많이 클릭할수록(로그 스케일), 최근에 볼수록(지수 감쇠) 가중치 증가
+def _calculate_consumption_weight(
+    event_click_count: int, last_viewed_at: datetime, now: datetime, is_favorited: bool
+) -> float:
     days_since = max((now - last_viewed_at).total_seconds() / 86400, 0)
     # 반감기(RECENCY_HALF_LIFE_DAYS)를 감쇠 속도(λ)로 변환
     decay_rate = math.log(2) / RECENCY_HALF_LIFE_DAYS
     favorite_multiplier = FAVORITE_WEIGHT_MULTIPLIER if is_favorited else 1.0
-    # weight = log(1 + count) × exp(-λ × 경과일수) × favorite_multiplier
-    return math.log1p(count) * math.exp(-decay_rate * days_since) * favorite_multiplier
+    # weight = log(1 + eventClickCount) × exp(-λ × 경과일수) × favorite_multiplier
+    return math.log1p(event_click_count) * math.exp(-decay_rate * days_since) * favorite_multiplier
 
 
 # CONSUMED Event 임베딩들을 가중평균해서 유저 프로필 벡터 생성
@@ -58,7 +60,9 @@ def _build_user_profile_vector(consumed_events: list[dict]) -> list[float] | Non
     total_weight = 0.0  # Σ(weight)
 
     for event in consumed_events:
-        weight = _calculate_consumption_weight(event["count"], event["lastViewedAt"], now, event["isFavorited"])
+        weight = _calculate_consumption_weight(
+            event["eventClickCount"], event["lastViewedAt"], now, event["isFavorited"]
+        )
         embedding = event["embedding"]
         if weighted_sum is None:
             weighted_sum = [0.0] * len(embedding)

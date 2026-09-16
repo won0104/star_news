@@ -29,3 +29,21 @@ img {
 p {
   margin: 0;
 }
+
+/*
+ * 화면 전환 애니메이션 일시 정지 — utils/motion.js의 SCREEN_TRANSITIONS와 짝을 이룬다.
+ * 그쪽이 전환 영상을, 이쪽이 패널이 떠오르는 등장 애니메이션을 담당한다.
+ *
+ * Duration rather than `animation: none`, because every entrance here starts from
+ * opacity 0 and runs `forwards` — cancelling the animation would leave those panels
+ * invisible, while collapsing its duration lands them on the finished frame at once.
+ * Transitions are left alone: hover and focus feedback is not a screen transition.
+ *
+ * 다시 켜려면 이 블록을 지우고 SCREEN_TRANSITIONS를 true로 되돌리면 된다.
+ */
+*,
+*::before,
+*::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+}

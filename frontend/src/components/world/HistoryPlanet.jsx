@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import ConstellationCanvas from './ConstellationCanvas';
 import styles from './HistoryPane.module.css';
 
 /**
@@ -8,11 +9,11 @@ import styles from './HistoryPane.module.css';
  * picking을 맡고, DOM 라벨·선택 패널은 키보드와 스크린 리더 접근성을 보완한다.
  */
 const PLANET_RADIUS = 5;
-const CAMERA_MIN = 8.4;
-const CAMERA_MAX = 14.2;
-const DEFAULT_CAMERA_Z = 11.4;
+const STANDARD_CAMERA = { minimum: 8.4, maximum: 14.2, defaultZ: 11.4 };
+const DIARY_CAMERA = { minimum: 19.5, maximum: 28.2, defaultZ: 23.4 };
 const LABEL_LIMIT = 12;
 const MOBILE_LABEL_LIMIT = 8;
+const EVENT_CARD_STAR_SCALE = 0.3;
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const FRONT = new THREE.Vector3(0, 0, 1);
 const MODEL_FRONT = new THREE.Vector3(1, 0, 0);
@@ -161,26 +162,6 @@ function makeArc(start, end, weight) {
   return points;
 }
 
-function makeStarField() {
-  let seed = 92821;
-  const random = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-  const positions = [];
-  for (let index = 0; index < 720; index += 1) {
-    const point = fallbackTopicPoint(index, 720);
-    const radius = 17 + random() * 16;
-    positions.push(point.x * radius, point.y * radius, point.z * radius);
-  }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  return new THREE.Points(
-    geometry,
-    new THREE.PointsMaterial({ color: 0xdce9f2, size: 0.035, transparent: true, opacity: 0.58 }),
-  );
-}
-
 function nodeKind(node) {
   return node.kind === 'TOPIC_CLUSTER' ? 'TOPIC_CLUSTER' : (node.nodeType ?? 'EVENT');
 }
@@ -210,9 +191,15 @@ export default function HistoryPlanet({
   activeTopic,
   reduceMotion,
   selectedNode,
+  selectedEvent,
   onSelectNode,
   onOpenEvent,
+  variant = 'default',
+  eventDisplay = 'star',
 }) {
+  const isDiary = variant === 'diary';
+  const useEventCards = eventDisplay === 'card';
+  const cameraConfig = isDiary ? DIARY_CAMERA : STANDARD_CAMERA;
   const layout = useMemo(() => buildLayout(graph), [graph]);
   const mountRef = useRef(null);
   const labelRefs = useRef(new Map());
@@ -225,7 +212,7 @@ export default function HistoryPlanet({
   const focusRef = useRef(null);
   const focusTopicRef = useRef(() => {});
   const focusNodeRef = useRef(() => {});
-  const targetCameraZRef = useRef(DEFAULT_CAMERA_Z);
+  const targetCameraZRef = useRef(cameraConfig.defaultZ);
   const manualPauseUntilRef = useRef(0);
   const styleDirtyRef = useRef(true);
   const [zoomPercent, setZoomPercent] = useState(100);
@@ -319,7 +306,6 @@ export default function HistoryPlanet({
     const rimLight = new THREE.PointLight(0x6ba9d0, 18, 28, 2);
     rimLight.position.set(7, -4, 7);
     scene.add(rimLight);
-    scene.add(makeStarField());
 
     let disposed = false;
     const nodeEntries = new Map();
@@ -402,10 +388,11 @@ export default function HistoryPlanet({
       nodeEntries.forEach((entry) => {
         const color = colorForNode(entry.node);
         const isTopic = entry.node.kind === 'TOPIC_CLUSTER';
+        const isCompactEvent = useEventCards && !isTopic;
         const material = new THREE.MeshStandardMaterial({
           color,
           emissive: color,
-          emissiveIntensity: isTopic ? 0.42 : 0.24,
+          emissiveIntensity: isTopic ? 0.42 : (isCompactEvent ? 0.48 : 0.24),
           roughness: 0.4,
           metalness: 0.1,
           transparent: true,
@@ -415,7 +402,8 @@ export default function HistoryPlanet({
         model.traverse((child) => {
           if (child.isMesh) child.material = material;
         });
-        const modelScale = entry.baseModelSize / maximumDimension;
+        const modelScale = (entry.baseModelSize / maximumDimension)
+          * (isCompactEvent ? EVENT_CARD_STAR_SCALE : 1);
         model.scale.setScalar(modelScale);
         entry.modelHolder.add(model);
         entry.model = model;
@@ -495,7 +483,7 @@ export default function HistoryPlanet({
           sizeMultiplier = isTopic || inTopic ? 1 : 0.92;
         }
         entry.model?.scale.setScalar(entry.baseModelScale * sizeMultiplier);
-        entry.selectionRing.visible = isSelected;
+        entry.selectionRing.visible = isSelected && (!useEventCards || isTopic);
       });
       edgeEntries.forEach((entry) => {
         const connected = entry.edge.sourceId === currentSelection || entry.edge.targetId === currentSelection;
@@ -615,8 +603,8 @@ export default function HistoryPlanet({
     };
 
     const setCameraDistance = (nextDistance) => {
-      targetCameraZRef.current = clamp(nextDistance, CAMERA_MIN, CAMERA_MAX);
-      const percent = Math.round((DEFAULT_CAMERA_Z / targetCameraZRef.current) * 100);
+      targetCameraZRef.current = clamp(nextDistance, cameraConfig.minimum, cameraConfig.maximum);
+      const percent = Math.round((cameraConfig.defaultZ / targetCameraZRef.current) * 100);
       setZoomPercent(percent);
     };
 
@@ -700,11 +688,12 @@ export default function HistoryPlanet({
       const isMiddleDistance = camera.position.z > 11.8;
       const candidates = [];
       nodeEntries.forEach((entry) => {
+        const isTopic = entry.node.kind === 'TOPIC_CLUSTER';
+        if (useEventCards && !isTopic) entry.modelHolder.visible = true;
         const element = labelRefs.current.get(entry.node.id);
         if (!element) return;
         entry.holder.getWorldPosition(worldPosition);
         projected.copy(worldPosition).project(camera);
-        const isTopic = entry.node.kind === 'TOPIC_CLUSTER';
         const inTopic = entry.node.topicCode === activeTopicRef.current;
         const isSelected = entry.node.id === selectedId;
         const isNeighbor = neighbors.has(entry.node.id);
@@ -717,6 +706,8 @@ export default function HistoryPlanet({
         if (onFront && inViewport && passesLevelOfDetail) {
           candidates.push({
             id: entry.node.id,
+            entry,
+            isTopic,
             element,
             x: clamp((projected.x * 0.5 + 0.5) * width, horizontalInset, width - horizontalInset),
             y: clamp((-projected.y * 0.5 + 0.5) * height, topInset, height - bottomInset),
@@ -761,6 +752,7 @@ export default function HistoryPlanet({
         candidate.element.style.pointerEvents = 'auto';
         candidate.element.tabIndex = 0;
         candidate.element.setAttribute('aria-hidden', 'false');
+        if (useEventCards && !candidate.isTopic) candidate.entry.modelHolder.visible = false;
         occupied.push(bounds);
         visibleCount += 1;
       });
@@ -817,7 +809,7 @@ export default function HistoryPlanet({
       focusTopicRef.current = () => {};
       focusNodeRef.current = () => {};
     };
-  }, [layout, reduceMotion]);
+  }, [cameraConfig, layout, reduceMotion, useEventCards]);
 
   useEffect(() => {
     focusTopicRef.current(activeTopic);
@@ -835,8 +827,12 @@ export default function HistoryPlanet({
 
   const changeZoom = (amount) => {
     if (!cameraRef.current) return;
-    targetCameraZRef.current = clamp(targetCameraZRef.current + amount, CAMERA_MIN, CAMERA_MAX);
-    setZoomPercent(Math.round((DEFAULT_CAMERA_Z / targetCameraZRef.current) * 100));
+    targetCameraZRef.current = clamp(
+      targetCameraZRef.current + amount,
+      cameraConfig.minimum,
+      cameraConfig.maximum,
+    );
+    setZoomPercent(Math.round((cameraConfig.defaultZ / targetCameraZRef.current) * 100));
   };
 
   const selectedRelations = selectedNode
@@ -855,17 +851,17 @@ export default function HistoryPlanet({
     : [];
 
   return (
-    <div className={styles.planetFrame}>
-      <div className={styles.planetLegend} aria-label="노드 범례">
+    <div className={`${styles.planetFrame} ${isDiary ? styles.diaryPlanetFrame : ''} ${useEventCards ? styles.eventCardMode : ''}`}>
+      {!isDiary && <div className={styles.planetLegend} aria-label="노드 범례">
         {Object.entries(NODE_STYLE).map(([kind, item]) => (
           <span key={kind} className={styles.legendItem}>
             <i data-node-kind={kind} aria-hidden="true" />
             {item.label}
           </span>
         ))}
-      </div>
+      </div>}
 
-      <div
+      {!isDiary && !useEventCards && <div
         className={styles.planetScale}
         aria-label="이벤트 별 크기. 읽은 기사 1에서 3개, 4에서 6개, 7에서 9개, 10개 이상 순으로 커집니다."
       >
@@ -876,15 +872,17 @@ export default function HistoryPlanet({
             {step.label}
           </span>
         ))}
-      </div>
+      </div>}
 
       <div
         ref={mountRef}
-        className={styles.planetViewport}
+        className={`${styles.planetViewport} ${isDiary ? styles.diaryPlanetViewport : ''}`}
         role="application"
         tabIndex={0}
         aria-label="나의 기록 3D 행성. 드래그하거나 방향키로 회전하고, 마우스 휠이나 더하기와 빼기 키로 확대할 수 있습니다."
       >
+        <ConstellationCanvas reduceMotion={reduceMotion} />
+
         {!webglUnavailable && (
           <div className={styles.planetLabels}>
             {layout.nodes.map((node) => (
@@ -922,20 +920,61 @@ export default function HistoryPlanet({
           </div>
         )}
 
-        <div className={styles.planetControls} aria-label="지도 확대/축소">
+        {!isDiary && <div className={styles.planetControls} aria-label="지도 확대/축소">
           <button type="button" onClick={() => changeZoom(0.65)} aria-label="축소">−</button>
           <span>{zoomPercent}%</span>
           <button type="button" onClick={() => changeZoom(-0.65)} aria-label="확대">＋</button>
-        </div>
+        </div>}
 
-        <p className={styles.planetHint}>
+        {!isDiary && <p className={styles.planetHint}>
           구면을 잡아 돌리기 · 휠 확대 · 빈 곳을 누르면 선택 해제
           {!reduceMotion && (selectedNode
             ? ' · 선택 중 자동 회전 정지'
             : ` · SPACE ${autoRotating ? 'PAUSE' : 'PLAY'}`)}
-        </p>
+        </p>}
 
-        {selectedNode && (
+        {!isDiary && selectedNode && selectedEvent && (
+          <aside className={styles.eventArticlesPanel} aria-live="polite" aria-labelledby="selected-event-title">
+            <div className={styles.eventArticlesHead}>
+              <div>
+                <span>RELATED ARTICLES</span>
+                <h3 id="selected-event-title">{selectedEvent.title}</h3>
+              </div>
+              <button
+                type="button"
+                className={styles.clearSelection}
+                aria-label="이벤트 기사 창 닫기"
+                onClick={() => onSelectNode(null)}
+              >
+                ×
+              </button>
+            </div>
+            <p className={styles.eventArticlesMeta}>
+              관련 기사 {selectedEvent.articles.length}개 · 마지막 열람 {selectedEvent.lastReadAt}
+            </p>
+            <ul className={styles.eventArticleList}>
+              {selectedEvent.articles.map((article, index) => (
+                <li key={article.id}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <div>
+                    <small>{article.source} · {article.readAt}</small>
+                    <strong>{article.title}</strong>
+                    <p>{article.summary}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              className={styles.openEventButton}
+              onClick={() => onOpenEvent(selectedNode)}
+            >
+              이벤트 상세에서 기사 보기 →
+            </button>
+          </aside>
+        )}
+
+        {!isDiary && selectedNode && !selectedEvent && (
           <aside className={styles.nodeInspector} aria-live="polite">
             <div className={styles.nodeInspectorHead}>
               <span>

@@ -13,7 +13,7 @@ GPU는 없다. 모델 가중치는 Git/이미지에 넣지 않고 volume에만 �
 | 주요 패키지 | torch **2.6.0+cpu**, transformers **4.51.3**, huggingface-hub **0.30.2** |
 | 모델 volume | `ai-cpu-models` → 컨테이너 `/models` |
 | 코드 | Git `ai/` (가중치 제외) |
-| Compose 본편 | **아직 미편입** (단독 `docker run`으로 검증) |
+| Compose 서비스 | `ai-worker` (내부 포트 8100, readiness `/ready`) |
 
 ### volume 레이아웃
 
@@ -42,9 +42,30 @@ sudo docker build -t ai-cpu:dev .
 ### 설계 의도
 
 - **코드 = Git**, **환경 = 이미지**, **모델 = volume**
-- master CD의 앱 재시작과 AI 모델 수명 주기를 분리 (본편 compose 편입은 추후)
+- master CD의 앱 재시작과 AI 모델 수명 주기를 분리
 - 컨테이너 삭제·이미지 재빌드해도 volume만 유지하면 모델을 다시 받을 필요 없음
-- `down -v`로 volume을 지우면 모델도 삭제되므로 주의
+- `ai-cpu-models`는 Compose 외부 volume이라 일반 `down -v`의 삭제 대상이 아님
+- AI 코드·의존성이 바뀔 때만 `infra/scripts/deploy-ai.sh`로 워커를 교체
+
+### 상주 워커 운영
+
+최초 기동 또는 AI 변경 배포:
+
+```bash
+sudo bash infra/scripts/deploy-ai.sh
+```
+
+일반 앱 배포의 `infra/scripts/deploy.sh`는 AI readiness만 확인하고
+`ai-worker`를 빌드하거나 재기동하지 않는다. 모델 초기화 중에는 `/ready`가 성공하지 않으며,
+초기화가 끝난 뒤 동일 `ArticleAnalyzer` 인스턴스를 모든 요청에서 재사용한다.
+
+로컬에서 실모델을 함께 띄울 때:
+
+```bash
+docker compose -f docker-compose.local.yml --profile ai up -d --build ai-worker backend-fastapi
+```
+
+로컬에도 `ai-cpu-models` 외부 volume과 `backend/fastapi/.env`가 미리 있어야 한다.
 
 ## 테스트 (`test_pipeline/`)
 
@@ -110,6 +131,7 @@ sudo docker run --rm \
 ## FastAPI 연동 (계약)
 
 AI는 **`ai/` 코어만** 제공한다. FastAPI·Neo4j 적재·`PUBLISHED_BY`는 백엔드 담당.
+운영에서는 FastAPI가 코어를 직접 import하지 않고 상주 `ai-worker`를 내부 HTTP로 호출한다.
 
 → 입출력·역할 분담·체크리스트: **[`FASTAPI_연동.md`](FASTAPI_연동.md)**
 
@@ -139,9 +161,6 @@ python -m starlight_ai.cli_postprocess --bundle "outputs\neo4j_bundle_1000"
 
 ## 아직 하지 않은 것
 
-- 본편 `docker-compose.yml`에 AI 서비스 편입
-- FastAPI `articles/analyze` stub 연결 (FastAPI 담당)
-- Neo4j MERGE (적재 담당)
 - 모델 revision을 `cpu_settings` 수준으로 문서 외 추가 고정 관리
 
 ## 관련 파일

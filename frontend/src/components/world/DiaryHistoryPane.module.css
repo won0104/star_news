@@ -1,0 +1,795 @@
+.page {
+  --tone: 236, 141, 157;
+  width: 100%;
+  max-width: 1500px;
+  margin-inline: auto;
+}
+
+.toneGold {
+  --tone: 231, 188, 91;
+}
+.toneRose {
+  --tone: 236, 141, 157;
+}
+.tonePeach {
+  --tone: 239, 180, 132;
+}
+.toneBlue {
+  --tone: 122, 164, 255;
+}
+.toneCyan {
+  --tone: 111, 205, 226;
+}
+.toneViolet {
+  --tone: 192, 155, 244;
+}
+.toneMint {
+  --tone: 128, 215, 193;
+}
+
+.diaryStage {
+  position: relative;
+  width: 100%;
+  margin-inline: auto;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  isolation: isolate;
+  background: transparent;
+  filter: drop-shadow(0 24px 42px rgba(42, 25, 12, 0.3));
+}
+
+.diaryFrame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.reportBookmark {
+  position: absolute;
+  z-index: 6;
+  top: 10%;
+  left: 5.6%;
+  width: 6.35%;
+  aspect-ratio: 92 / 260;
+  clip-path: inset(0 28% 0 0);
+  color: #faf7ef;
+  text-decoration: none;
+  transition: filter 160ms ease;
+}
+
+.reportBookmark img,
+.categoryBookmarks img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.reportBookmark span {
+  position: absolute;
+  inset: 25% 27% 24% 19%;
+  display: grid;
+  font: 700 clamp(10px, 1.05vw, 17px)/1.05 var(--font-sans);
+  letter-spacing: 0.08em;
+  text-orientation: upright;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  place-items: center;
+}
+
+.reportBookmark:hover {
+  filter: brightness(1.08);
+}
+
+.categoryBookmarks {
+  position: absolute;
+  z-index: 6;
+  top: 9.5%;
+  right: 6.8%;
+  display: flex;
+  width: 6.6%;
+  flex-direction: column;
+  clip-path: inset(0 0 0 40%);
+}
+
+.categoryBookmarks button {
+  position: relative;
+  display: block;
+  width: 100%;
+  flex: 0 0 auto;
+  aspect-ratio: 96 / 112;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #44392f;
+  cursor: pointer;
+  transition: transform 160ms ease;
+}
+
+.categoryBookmarks button + button {
+  margin-top: -8%;
+}
+
+.categoryBookmarks button:hover {
+  transform: translateX(3px);
+}
+
+.categoryBookmarks button[aria-current='true'] {
+  z-index: 1;
+  color: #faf7ef;
+  transform: translateX(5px);
+}
+
+.categoryBookmarks span {
+  position: absolute;
+  inset: 15% 30%;
+  display: grid;
+  font: 700 clamp(7px, 0.78vw, 13px)/1 var(--font-sans);
+  letter-spacing: 0.04em;
+  text-orientation: upright;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  place-items: center;
+  pointer-events: none;
+}
+
+.diaryTitle {
+  position: absolute;
+  z-index: 4;
+  top: 7.4%;
+  left: 14.5%;
+  width: 34%;
+  color: #2d2721;
+  pointer-events: none;
+}
+
+.diaryTitle span,
+.recordHeader span,
+.eventIntro > span {
+  font: 700 clamp(9px, 0.72vw, 12px) var(--font-sans);
+  letter-spacing: 0.13em;
+  color: #866b52;
+}
+
+.diaryTitle h1 {
+  margin: 3px 0 0;
+  font: 700 clamp(22px, 2.3vw, 39px)/1.2 var(--font-serif-kr);
+}
+
+.diaryTitle p {
+  margin: 4px 0 0;
+  font: clamp(10px, 0.86vw, 14px)/1.5 var(--font-serif-kr);
+  color: #725d49;
+}
+
+.planetPortal {
+  position: absolute;
+  z-index: 3;
+  top: 18.6%;
+  left: 13.75%;
+  width: 34.45%;
+  height: 59.4%;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #071524;
+  box-shadow: inset 0 0 32px rgba(0, 0, 0, 0.7);
+}
+
+.planetPortal:fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  border-radius: 0;
+  background: #081018;
+  box-shadow: none;
+}
+
+.planetLoading {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: #bdcbd5;
+  font: 10px var(--font-sans);
+}
+
+.planetActions {
+  position: absolute;
+  z-index: 4;
+  bottom: 17.6%;
+  left: 16.95%;
+  display: flex;
+  width: 27.85%;
+  justify-content: center;
+  gap: 5px;
+}
+
+.planetCaption {
+  position: absolute;
+  z-index: 4;
+  bottom: 13.7%;
+  left: 16.95%;
+  width: 27.85%;
+  margin: 0;
+  color: #725d49;
+  font: clamp(9px, 0.78vw, 13px)/1.5 var(--font-serif-kr);
+  text-align: center;
+  pointer-events: none;
+}
+
+.recordPage {
+  position: absolute;
+  z-index: 4;
+  top: 7.2%;
+  right: 14.2%;
+  bottom: 8.2%;
+  left: 52.8%;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  color: #3f3024;
+}
+
+.recordHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(91, 67, 48, 0.28);
+}
+
+.recordHeader h2 {
+  margin: 4px 0 0;
+  font: 700 clamp(19px, 1.75vw, 29px)/1.25 var(--font-serif-kr);
+}
+
+.pageActions {
+  display: flex;
+  gap: 5px;
+}
+
+.pageActions button,
+.planetActions button,
+.eventIntro button {
+  border: 1px solid rgba(100, 74, 53, 0.32);
+  border-radius: 5px;
+  background: rgba(255, 250, 238, 0.48);
+  color: #66503d;
+  font: 600 clamp(9px, 0.72vw, 12px) var(--font-sans);
+  cursor: pointer;
+}
+
+.pageActions button {
+  min-height: 27px;
+  padding: 0 8px;
+}
+
+/* Standing on its own over the torn page, it needs more presence than it did tucked
+   into the record header, and an opaque fill so the paper texture stays out of it. */
+.planetActions button {
+  min-height: 35px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(252, 246, 233, 0.9);
+  font-size: clamp(10px, 0.82vw, 14px);
+}
+
+.planetActions button:hover {
+  border-color: rgba(100, 74, 53, 0.55);
+  background: rgb(255, 251, 242);
+}
+
+.reportBookmark:focus-visible,
+.categoryBookmarks button:focus-visible,
+.pageActions button:focus-visible,
+.planetActions button:focus-visible,
+.eventIntro button:focus-visible,
+.openEvent:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.eventPage {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding-top: 14px;
+}
+
+.eventIntro {
+  position: relative;
+  padding-right: 30px;
+}
+
+.eventIntro h3 {
+  margin: 5px 0 0;
+  font: 700 clamp(17px, 1.58vw, 26px)/1.38 var(--font-serif-kr);
+  word-break: keep-all;
+}
+
+.eventIntro p {
+  margin: 6px 0 0;
+  font: clamp(9px, 0.8vw, 13px) var(--font-sans);
+  color: #806a56;
+}
+
+.eventIntro button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 25px;
+  height: 25px;
+  font-size: 15px;
+}
+
+.articleList {
+  display: grid;
+  gap: 7px;
+  min-height: 0;
+  margin: 13px -4px 0 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+/* Same photographed plaque as the category tabs, but a card grows with its text so the
+   picture cannot simply be stretched to fit — a nine-slice keeps the notched corners at
+   their own size and stretches only the flat edges and centre. */
+.articleList li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 8px;
+  padding: clamp(12px, 1.03vw, 16px) 4px;
+  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
+}
+
+.articleList > li > span {
+  color: rgb(var(--tone));
+  font: 700 9px var(--font-sans);
+}
+
+.articleList small,
+.articleList strong,
+.articleList p {
+  display: block;
+  margin: 0;
+}
+
+.articleList small {
+  font: clamp(8px, 0.66vw, 11px) var(--font-sans);
+  color: #8d745e;
+}
+
+.articleList strong {
+  margin-top: 3px;
+  font: 700 clamp(11px, 0.94vw, 15px)/1.4 var(--font-serif-kr);
+  word-break: keep-all;
+}
+
+.articleList p {
+  margin-top: 3px;
+  font: clamp(9px, 0.74vw, 12px)/1.45 var(--font-sans);
+  color: #77624f;
+  word-break: keep-all;
+}
+
+/* The category's events, on the same plaque as the article cards below them — one list
+   leads to the other, so they are the same object at two depths. */
+.eventList {
+  display: grid;
+  gap: 0;
+  min-height: 0;
+  margin: 13px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.eventList button {
+  position: relative;
+  display: grid;
+  width: 100%;
+  padding: clamp(11px, 1vw, 15px) 28px clamp(11px, 1vw, 15px) 4px;
+  border: 0;
+  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
+  background: transparent;
+  color: #372f27;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.eventList button::after {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  content: '›';
+  color: #756554;
+  font: 18px/1 var(--font-serif-kr);
+  transform: translateY(-50%);
+}
+
+.eventList button:hover {
+  color: #193248;
+  transform: translateX(2px);
+}
+
+.eventList button:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.eventList small {
+  font: clamp(8px, 0.66vw, 11px) var(--font-sans);
+  color: #8d745e;
+}
+
+.eventList strong {
+  margin-top: 3px;
+  font: 700 clamp(12px, 1.03vw, 16px)/1.4 var(--font-serif-kr);
+  word-break: keep-all;
+}
+
+.eventList p {
+  margin: 3px 0 0;
+  font: clamp(9px, 0.74vw, 12px) var(--font-sans);
+  color: rgb(var(--tone));
+  filter: brightness(0.72);
+}
+
+.eventPager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.eventPager button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(69, 57, 45, 0.3);
+  border-radius: 50%;
+  background: transparent;
+  color: #193248;
+  font: 18px/1 var(--font-serif-kr);
+  place-items: center;
+  cursor: pointer;
+}
+
+.eventPager button:hover:not(:disabled) {
+  border-color: #193248;
+  background: rgba(25, 50, 72, 0.06);
+}
+
+.eventPager button:disabled {
+  color: rgba(69, 57, 45, 0.28);
+  cursor: default;
+  opacity: 0.55;
+}
+
+.eventPager button:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.eventPager span {
+  min-width: 38px;
+  color: #756554;
+  font: 600 clamp(9px, 0.76vw, 12px) var(--font-sans);
+  text-align: center;
+}
+/* The article window. Follows the settings overlay's scrim so the two read as the same
+   kind of thing, but the panel itself is diary paper rather than the product's white
+   card — it belongs to the book it opens over. */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(43, 33, 22, 0.44);
+  backdrop-filter: blur(3px);
+}
+
+.popup {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 680px;
+  max-height: 86vh;
+  flex-direction: column;
+  padding: clamp(24px, 2.6vw, 34px);
+  border: 1px solid rgba(69, 57, 45, 0.3);
+  border-radius: 3px;
+  background: #f6f0e3;
+  color: #372f27;
+  box-shadow: 0 22px 40px rgba(28, 16, 6, 0.34);
+}
+
+.popupClose {
+  position: absolute;
+  top: clamp(10px, 1.1vw, 15px);
+  right: clamp(10px, 1.1vw, 15px);
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(100, 74, 53, 0.34);
+  border-radius: 50%;
+  background: rgba(252, 246, 233, 0.82);
+  color: #66503d;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.popupClose:hover {
+  border-color: rgba(100, 74, 53, 0.6);
+  background: rgb(255, 251, 242);
+}
+
+.popupClose:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.popupHead {
+  padding-right: 34px;
+}
+
+.popupHead > span {
+  font: 700 clamp(9px, 0.72vw, 12px) var(--font-sans);
+  letter-spacing: 0.13em;
+  color: #866b52;
+}
+
+.popupHead h3 {
+  margin: 5px 0 0;
+  font: 700 clamp(17px, 1.58vw, 26px)/1.38 var(--font-serif-kr);
+  word-break: keep-all;
+}
+
+.popupHead p {
+  margin: 6px 0 0;
+  font: clamp(9px, 0.8vw, 13px) var(--font-sans);
+  color: #806a56;
+}
+
+.articleDetail {
+  margin-top: 7px;
+  padding: 4px 10px;
+  border: 1px solid rgba(100, 74, 53, 0.34);
+  border-radius: 999px;
+  background: rgba(252, 246, 233, 0.72);
+  color: #6a543f;
+  font: 600 clamp(9px, 0.7vw, 12px) var(--font-sans);
+  cursor: pointer;
+}
+
+.articleDetail:hover {
+  border-color: rgba(100, 74, 53, 0.6);
+  background: rgb(255, 251, 242);
+  color: #4b392a;
+}
+
+.articleDetail:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.openEvent {
+  min-height: 32px;
+  margin-top: 9px;
+  border: 1px solid rgba(var(--tone), 0.48);
+  border-radius: 5px;
+  background: rgba(var(--tone), 0.14);
+  color: #4b392a;
+  font: 700 clamp(9px, 0.76vw, 12px) var(--font-sans);
+  cursor: pointer;
+}
+
+.emptyPage {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  justify-items: center;
+  padding-bottom: 5%;
+  text-align: center;
+}
+
+.emptyPage > span {
+  color: rgb(var(--tone));
+  font-size: clamp(22px, 2.5vw, 38px);
+}
+
+.emptyPage h3 {
+  margin: 8px 0 0;
+  font: 700 clamp(15px, 1.35vw, 22px) var(--font-serif-kr);
+}
+
+.emptyPage > p {
+  margin: 9px 0 0;
+  font: clamp(8px, 0.73vw, 11px)/1.65 var(--font-serif-kr);
+  color: #77624f;
+}
+
+.emptyPage dl {
+  display: flex;
+  gap: clamp(16px, 2.3vw, 36px);
+  margin: 22px 0 0;
+}
+
+.emptyPage dl div {
+  display: grid;
+  gap: 3px;
+}
+
+.emptyPage dt {
+  font: clamp(7px, 0.62vw, 9px) var(--font-sans);
+  color: #8d745e;
+}
+
+.emptyPage dd {
+  margin: 0;
+  font: 700 clamp(16px, 1.6vw, 25px) var(--font-serif-kr);
+}
+
+@media (max-width: 850px) {
+  .diaryStage {
+    display: grid;
+    width: 100%;
+    height: auto;
+    min-height: calc(100vh - 116px);
+    aspect-ratio: auto;
+    grid-template-rows: auto;
+    gap: 18px;
+    padding: 24px 18px 30px;
+    overflow: visible;
+    background: #ead8b9;
+    filter: drop-shadow(0 18px 32px rgba(42, 25, 12, 0.24));
+  }
+
+  .diaryFrame {
+    display: none;
+  }
+
+  .diaryTitle,
+  .reportBookmark,
+  .categoryBookmarks,
+  .planetPortal,
+  .planetActions,
+  .planetCaption,
+  .recordPage {
+    position: relative;
+    inset: auto;
+    width: auto;
+  }
+
+  .diaryTitle {
+    order: 1;
+  }
+
+  .planetPortal {
+    order: 2;
+  }
+
+  .planetActions {
+    order: 3;
+  }
+
+  .reportBookmark {
+    width: 58px;
+    order: 4;
+    justify-self: start;
+    margin-left: 6px;
+    clip-path: none;
+  }
+
+  .categoryBookmarks {
+    display: flex;
+    width: 100%;
+    order: 5;
+    flex-direction: row;
+    clip-path: none;
+    overflow-x: auto;
+    padding: 2px 0 5px;
+    scrollbar-width: thin;
+  }
+
+  .categoryBookmarks button {
+    width: 84px;
+  }
+
+  .categoryBookmarks button + button {
+    margin-top: 0;
+    margin-left: -5px;
+  }
+
+  .categoryBookmarks span {
+    inset: 15% 26% 15% 9%;
+    font-size: 10px;
+    letter-spacing: 0;
+    text-orientation: mixed;
+    writing-mode: horizontal-tb;
+  }
+
+  .recordPage {
+    order: 6;
+  }
+
+  /* No torn-paper photograph in this layout, so nothing to lift the heading off. */
+  .diaryTitle::before {
+    display: none;
+  }
+
+  .planetActions {
+    justify-content: center;
+  }
+
+  .diaryTitle {
+    padding: 2px 6px 0;
+  }
+
+  .diaryTitle span {
+    font-size: 9px;
+  }
+
+  .diaryTitle h1 {
+    font-size: 29px;
+  }
+
+  .planetPortal {
+    width: min(82vw, 460px);
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    justify-self: center;
+  }
+
+  .planetCaption {
+    display: none;
+  }
+
+  .recordPage {
+    min-height: 520px;
+    padding: 22px 18px;
+    border: 1px solid rgba(99, 73, 51, 0.2);
+    border-radius: 4px;
+    background: #f3e6cf;
+    box-shadow: 0 12px 24px rgba(67, 43, 25, 0.14);
+  }
+
+  .recordHeader span,
+  .eventIntro > span {
+    font-size: 9px;
+  }
+
+  .recordHeader h2,
+  .eventIntro h3 {
+    font-size: 22px;
+  }
+
+  .articleList small,
+  .articleList p {
+    font-size: 10px;
+  }
+
+  .articleList strong {
+    font-size: 13px;
+  }
+}
