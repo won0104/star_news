@@ -118,4 +118,99 @@ class CollectedArticlePreprocessorTest {
 	void 빈_목록이면_빈_목록이다() {
 		assertThat(preprocessor.process(List.of())).isEmpty();
 	}
+
+	// --- 제목 보정 ---
+
+	private CollectedArticle fromOutlet(String title, String outlet, String content) {
+		return new CollectedArticle(title, "https://news.test/" + title.hashCode(),
+				new byte[] {1}, LocalDateTime.of(2026, 9, 16, 9, 0), content,
+				ContentType.FULL_TEXT, "general", outlet, "news.test");
+	}
+
+	private String repairedTitle(CollectedArticle article) {
+		return preprocessor.process(List.of(article)).get(0).title();
+	}
+
+	@Test
+	void 제목이_언론사명이면_본문에서_찾아_채운다() {
+		String content = "한화, 19년 만에 한국시리즈 진출…문동주 PO MVP\n" + REAL_CONTENT;
+
+		assertThat(repairedTitle(fromOutlet("KBS 뉴스", "KBS뉴스", content)))
+				.isEqualTo("한화, 19년 만에 한국시리즈 진출…문동주 PO MVP");
+	}
+
+	@Test
+	void 공백만_다른_언론사명도_같은_것으로_본다() {
+		// KBS뉴스 vs KBS 뉴스. 그대로 비교하면 실측 171건 중 하나도 안 걸린다.
+		String content = "손흥민 프리킥 데뷔골 ‘MLS 올해의 골’ 선정\n" + REAL_CONTENT;
+
+		assertThat(repairedTitle(fromOutlet("KBS 뉴스", "KBS뉴스", content)))
+				.isEqualTo("손흥민 프리킥 데뷔골 ‘MLS 올해의 골’ 선정");
+	}
+
+	@Test
+	void 사이트_문구를_건너뛰고_제목을_찾는다() {
+		String content = "AD\n기사 본문 영역\n정치\n트럼프·젠슨황에 가렸지만…APEC 진짜 주인공 ‘AI’\n" + REAL_CONTENT;
+
+		assertThat(repairedTitle(fromOutlet("KBS 뉴스", "KBS뉴스", content)))
+				.isEqualTo("트럼프·젠슨황에 가렸지만…APEC 진짜 주인공 ‘AI’");
+	}
+
+	@Test
+	void 바이라인으로_시작하면_보정하지_않는다() {
+		// 통신사 기사는 본문에 제목이 없다. 리드 문장을 제목으로 쓰면 분석이 잘못된 신호를 받는다.
+		String content = "(서울=연합뉴스) 이주영 기자 = 당뇨병 전단계에 있는 사람들이 생활습관을 개선하면\n" + REAL_CONTENT;
+
+		assertThat(repairedTitle(fromOutlet("연합뉴스 한민족센터", "연합뉴스 한민족센터", content)))
+				.isEqualTo("연합뉴스 한민족센터");
+	}
+
+	@Test
+	void 본문_문장으로_시작하면_보정하지_않는다() {
+		String content = "국립암센터는 지난 12월 27일 중국 시안국제의학센터와 협약을 체결했다.\n" + REAL_CONTENT;
+
+		assertThat(repairedTitle(fromOutlet("메디포뉴스", "메디포뉴스", content)))
+				.isEqualTo("메디포뉴스");
+	}
+
+	@Test
+	void 너무_긴_줄은_제목으로_쓰지_않는다() {
+		// 실측한 정상 제목의 99%가 64자 이하다.
+		String tooLong = "가".repeat(71);
+
+		assertThat(repairedTitle(fromOutlet("메디포뉴스", "메디포뉴스", tooLong + "\n" + REAL_CONTENT)))
+				.isEqualTo("메디포뉴스");
+	}
+
+	@Test
+	void 물음표로_끝나는_제목은_살린다() {
+		// "…과제는?" 처럼 끝나는 제목이 흔하다. 평서문 종결만 본문으로 본다.
+		String content = "TK신공항 ‘2조 원 선투입’ 제안…실현 가능성과 과제는?\n" + REAL_CONTENT;
+
+		assertThat(repairedTitle(fromOutlet("KBS 뉴스", "KBS뉴스", content)))
+				.isEqualTo("TK신공항 ‘2조 원 선투입’ 제안…실현 가능성과 과제는?");
+	}
+
+	@Test
+	void 제목이_정상이면_건드리지_않는다() {
+		String content = "엉뚱한 첫 줄\n" + REAL_CONTENT;
+
+		assertThat(repairedTitle(fromOutlet("기준금리 동결", "연합뉴스", content)))
+				.isEqualTo("기준금리 동결");
+	}
+
+	@Test
+	void 보정해도_나머지_값은_그대로다() {
+		String content = "진짜 제목입니다\n" + REAL_CONTENT;
+		CollectedArticle before = fromOutlet("KBS 뉴스", "KBS뉴스", content);
+
+		CollectedArticle after = preprocessor.process(List.of(before)).get(0);
+
+		assertThat(after.url()).isEqualTo(before.url());
+		assertThat(after.urlHash()).isEqualTo(before.urlHash());
+		assertThat(after.content()).isEqualTo(before.content());
+		assertThat(after.publishedAt()).isEqualTo(before.publishedAt());
+		assertThat(after.organizationName()).isEqualTo(before.organizationName());
+		assertThat(after.sourceCategory()).isEqualTo(before.sourceCategory());
+	}
 }
