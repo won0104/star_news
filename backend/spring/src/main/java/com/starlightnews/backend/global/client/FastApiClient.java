@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
@@ -71,9 +70,10 @@ public class FastApiClient {
 						throw new BusinessException(toErrorCode(path, response));
 					})
 					.body(responseType);
-		} catch (ResourceAccessException networkFailure) {
-			// 연결 실패·타임아웃. 다음 주기에 다시 시도한다.
-			log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, networkFailure.getMessage());
+		} catch (RestClientException callFailure) {
+			// 연결 실패·타임아웃뿐 아니라 응답을 읽지 못한 경우도 여기서 막는다. 그냥 두면 호출한
+			// 배치의 회차 전체가 죽는다. 묶음 하나의 실패로 격리하려면 예외가 넘어가면 안 된다.
+			log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, callFailure.getMessage());
 			throw new BusinessException(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
 		}
 	}
