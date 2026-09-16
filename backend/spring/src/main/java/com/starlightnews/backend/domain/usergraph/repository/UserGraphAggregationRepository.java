@@ -102,9 +102,13 @@ public interface UserGraphAggregationRepository extends Repository<User, Long> {
 	/**
 	 * Event 소비 집계를 조회한다.
 	 *
-	 * <p>클릭한 적 없는 Node 는 보내지 않는다. 열람만으로도 행이 생기기 때문에, 거르지 않으면
-	 * 스쳐 지나간 Event 까지 소비로 올라간다. 다만 즐겨찾기한 Event 는 클릭이 없어도 보낸다.
-	 * 즐겨찾기 자체가 분명한 신호라 빠뜨리면 그 정보가 어디에도 전달되지 않는다.
+	 * <p>클릭·열람·즐겨찾기 중 하나라도 있으면 보낸다. FastAPI 는 이 관계를 두 가지로 쓰는데,
+	 * 하나는 "이미 본 Event 를 추천에서 빼는" 미열람 필터이고 다른 하나는 취향 벡터 가중치다.
+	 * 앞쪽 기준으로는 기사를 읽은 것만으로도 본 것이므로, 클릭만 보면 읽은 내용을 다시 추천한다.
+	 * 기사를 목록에서 눌러 읽는 쪽이 그래프에서 노드를 클릭하는 것보다 훨씬 흔하다.
+	 *
+	 * <p>{@code eventClickCount} 로 보내는 값은 그대로 클릭 수다. 클릭이 0 이면 가중치가
+	 * {@code log(1+0)=0} 이라 취향 벡터에는 영향이 없고 미열람 필터에만 걸린다.
 	 */
 	@Query(value = """
 			SELECT node.user_id AS userId, node.node_id AS nodeId,
@@ -117,7 +121,9 @@ public interface UserGraphAggregationRepository extends Repository<User, Long> {
 			      AND favorite.node_id = node.node_id
 			WHERE node.user_id IN (:userIds)
 			  AND node.node_type = 'EVENT'
-			  AND (node.node_click_count > 0 OR favorite.user_id IS NOT NULL)
+			  AND (node.node_click_count > 0
+			       OR node.read_article_count > 0
+			       OR favorite.user_id IS NOT NULL)
 			ORDER BY node.user_id, node.node_id
 			""", nativeQuery = true)
 	List<ConsumedEventRow> findConsumedEvents(@Param("userIds") Collection<Long> userIds);
