@@ -171,10 +171,84 @@ def test_adapt_maps_v2_kinds_and_embedding():
     assert any("dropped_noise_entity" in w for w in out["warnings"])
     time_n = next(n for n in out["nodes"] if "Time" in n["labels"])
     assert time_n["properties"]["timeKey"] == "2026-09-08"
+    statement = next(n for n in out["nodes"] if "Statement" in n["labels"])
+    assert statement["properties"]["text"] == "효과가 클 것이다"
+    assert statement["properties"]["statementType"] == "FORECAST"
     edge_types = {e["type"] for e in out["edges"]}
     assert "CONTAINS_STATEMENT" in edge_types
     assert "MEMBER_OF_EVENT" not in edge_types
     assert "PUBLISHED_BY" not in edge_types
+
+
+def test_adapt_maps_v23_compact_statement_fields():
+    """2.3 compact PUBLIC은 Statement에 canonical_text / statement_type_value를 쓴다."""
+    article = {
+        "article_id": "a23",
+        "title": "테스트",
+        "published_at": "2026-09-08T09:00:00+09:00",
+        "mysql_article_id": 23,
+        "content": "x",
+    }
+    kg = {
+        "schema_version": "articlelocal-kg-public-v2.2",
+        "status": "PARTIAL",
+        "validation": {"status": "PASS"},
+        "nodes": [
+            {
+                "node_id": "ARTICLE-1",
+                "kind": "ARTICLE",
+                "properties": {"title": "테스트", "published_at": "2026-09-08T09:00:00+09:00"},
+            },
+            {
+                "node_id": "EVENT-1",
+                "kind": "EVENT",
+                "properties": {"canonical_text": "서울시가 주거 지원을 확대했다"},
+            },
+            {
+                "node_id": "STATEMENT-1",
+                "kind": "STATEMENT",
+                "properties": {
+                    "canonical_text": "다음 달부터 신청을 받는다고 말했다",
+                    "statement_type_value": "FORECAST",
+                    "statement_type_status": "EXECUTED",
+                },
+            },
+            {
+                "node_id": "ENTITY-1",
+                "kind": "ENTITY",
+                "properties": {"canonical_name": "서울시", "entity_type": "ORGANIZATION"},
+            },
+        ],
+        "edges": [
+            {
+                "edge_id": "EDGE-1",
+                "edge_type": "COVERS",
+                "source_id": "ARTICLE-1",
+                "target_id": "EVENT-1",
+                "confidence": 1.0,
+            },
+            {
+                "edge_id": "EDGE-2",
+                "edge_type": "CONTAINS_STATEMENT",
+                "source_id": "ARTICLE-1",
+                "target_id": "STATEMENT-1",
+                "confidence": 1.0,
+            },
+        ],
+    }
+    out = adapt_to_schema(
+        article=article,
+        kg=kg,
+        classification={"big_cls": "경제", "small_cls": "x", "region_cls": "y", "topic": "경제"},
+        event_embeddings={},
+        embedding_model="nlpai-lab/KURE-v1",
+        embedding_dim=3,
+    )
+    statement = next(n for n in out["nodes"] if "Statement" in n["labels"])
+    assert statement["properties"]["text"] == "다음 달부터 신청을 받는다고 말했다"
+    assert statement["properties"]["statementType"] == "FORECAST"
+    event = next(n for n in out["nodes"] if "Event" in n["labels"])
+    assert event["properties"]["title"] == "서울시가 주거 지원을 확대했다"
 
 
 def test_postprocess_merges_entity_and_drops_noise(tmp_path: Path):
