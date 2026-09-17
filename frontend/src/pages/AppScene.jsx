@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { backdrop, extraViews, navItems } from '../data/home'
 import { arrivalScene } from '../data/recommend'
+import { nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
 import { TopBar } from '../components/common/TopBar'
 import { ViewPane } from '../components/world/ViewPane'
@@ -17,6 +18,7 @@ const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
  * simply arrived on without one — which is every destination but 나를 위한 추천 today.
  */
 const ARRIVAL = { foryou: arrivalScene }
+const TREND_BACKDROP = { id: 'trend', src: nightfall.still, loop: null }
 
 /**
  * /app — the sunlit room, the bar over it, and one of the bar's four destinations on top.
@@ -91,15 +93,22 @@ export function AppScene() {
   }
 
   const arriving = !walked && enteredFromHome
-  const scene = (arriving && ARRIVAL[view]) || backdrop
+  const scene = (arriving && ARRIVAL[view]) || (view === 'trend' ? TREND_BACKDROP : backdrop)
   const motion = SCREEN_TRANSITIONS && !reduceMotion && scene !== backdrop
   const [settled, setSettled] = useState(false)
   const onSettled = useCallback(() => setSettled(true), [])
 
   return (
-    <PhotoBackdrop key={scene.id} scene={scene} motion={motion} onSettled={onSettled}>
+    <PhotoBackdrop
+      key={scene.id}
+      scene={scene}
+      motion={motion}
+      hideScrollbar={view === 'trend'}
+      onSettled={onSettled}
+    >
       <TopBar
         activeId={view === 'foryou2' ? 'foryou' : view}
+        nightGlass={view === 'trend'}
         onSelect={open}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}

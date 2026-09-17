@@ -101,6 +101,7 @@
   --topbar-bg: rgba(250, 246, 238, 0.5);
   --topbar-border: rgba(120, 102, 82, 0.12);
   --topbar-shadow: 0 1px 14px rgba(43, 33, 22, 0.07);
+  --desktop-nav-width: clamp(176px, 13.5vw, 208px);
   --nav-ink: #5c554b;
   --nav-ink-active: #2f2b25;
 

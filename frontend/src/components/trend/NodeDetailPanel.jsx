@@ -1,5 +1,6 @@
 import { subtypeLabels, trendSkyExpandCopy } from '../../data/trendNeighbors'
 import { nodeTypeLabels } from '../../data/trendNeighbors'
+import { useDraggableCard } from '../../hooks/useDraggableCard'
 import styles from './NodeDetailPanel.module.css'
 
 /**
@@ -13,11 +14,22 @@ import styles from './NodeDetailPanel.module.css'
  * `type` and `time` are nullable by contract, so each line only appears when its value
  * came back; a card with one line is a valid answer rather than a broken one.
  */
-export function NodeDetailPanel({ node, state, onClose }) {
+export function NodeDetailPanel({ id, node, state, onClose }) {
+  const { cardRef, cardStyle, dragging, handleProps } = useDraggableCard()
+
   if (!node && state === 'idle') return null
 
   return (
-    <aside className={styles.card} aria-live="polite">
+    <aside
+      ref={cardRef}
+      id={id}
+      className={styles.card}
+      style={cardStyle}
+      data-dragging={dragging}
+      aria-live="polite"
+      title="드래그하여 이동"
+      {...handleProps}
+    >
       <button type="button" className={styles.close} onClick={onClose} aria-label={trendSkyExpandCopy.close}>
         ✕
       </button>
