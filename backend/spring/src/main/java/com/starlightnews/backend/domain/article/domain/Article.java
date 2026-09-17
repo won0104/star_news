@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.starlightnews.backend.domain.article.support.ArticleUrls;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
 import com.starlightnews.backend.global.enums.ContentType;
+import com.starlightnews.backend.global.enums.SummaryStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -83,6 +84,13 @@ public class Article {
 	@Column(name = "summary")
 	private String summary;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "summary_status", nullable = false, length = 32)
+	private SummaryStatus summaryStatus;
+
+	@Column(name = "summary_generated_at")
+	private LocalDateTime summaryGeneratedAt;
+
 	/** Neo4j Article Node 의 nodeId. AI 분석 전이면 null 이라 Neo4j 에 대응 Node 가 없다. */
 	// articles.node_id 는 CHAR(36) 이므로 CHAR 로 매핑한다 (기본 VARCHAR 이면 validate 실패).
 	@JdbcTypeCode(SqlTypes.CHAR)
@@ -112,6 +120,7 @@ public class Article {
 		this.publishedAt = publishedAt;
 		this.organization = organization;
 		this.summary = summary;
+		this.summaryStatus = summary == null ? SummaryStatus.NOT_REQUESTED : SummaryStatus.COMPLETED;
 		this.analysisStatus = analysisStatus;
 		this.url = FIXTURE_URL_PREFIX + title;
 		this.urlHash = ArticleUrls.hash(this.url);

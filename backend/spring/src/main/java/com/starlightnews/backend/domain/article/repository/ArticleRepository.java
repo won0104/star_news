@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
+import com.starlightnews.backend.global.enums.SummaryStatus;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
@@ -30,7 +31,7 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	 *
 	 * <p>analysis_status 는 컬럼 기본값에 맡기지 않고 명시한다. 기본값은 실제 스키마에만 있고
 	 * 엔티티에서 생성되는 테스트 DB 에는 없어서, 맡겨두면 두 환경의 동작이 갈린다.
-	 * 매핑하지 않은 summary_status·content_updated_at 은 실제 스키마의 기본값을 쓴다.
+	 * INSERT 문에서 생략한 summary_status·content_updated_at 은 실제 스키마의 기본값을 쓴다.
 	 */
 	@Modifying
 	@Query(value = "INSERT INTO articles "
@@ -53,6 +54,63 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	/** url 해시로 기사 ID 를 찾는다. 저장 여부 확인용. */
 	@Query("SELECT a.articleId FROM Article a WHERE a.urlHash = :urlHash")
 	Optional<Long> findIdByUrlHash(@Param("urlHash") byte[] urlHash);
+
+	/** 지정한 분석 상태의 기사 상세와 언론사를 한 번에 조회한다. */
+	@Query("SELECT a FROM Article a JOIN FETCH a.organization "
+			+ "WHERE a.articleId = :articleId AND a.analysisStatus = :analysisStatus")
+	Optional<Article> findDetailByArticleId(
+			@Param("articleId") Long articleId,
+			@Param("analysisStatus") AnalysisStatus analysisStatus);
+
+	/** 기사 요약 생성 판단과 GMS 입력에 필요한 필드만 조회한다. */
+	interface ArticleSummaryTarget {
+		Long getArticleId();
+
+		String getTitle();
+
+		String getContent();
+
+		String getSummary();
+
+		SummaryStatus getSummaryStatus();
+	}
+
+	/** 분석이 완료된 기사만 요약 생성 대상으로 조회한다. */
+	Optional<ArticleSummaryTarget> findSummaryTargetByArticleIdAndAnalysisStatus(
+			Long articleId, AnalysisStatus analysisStatus);
+
+	/** NOT_REQUESTED 또는 FAILED 상태를 PROCESSING 으로 바꿔 요약 생성 권한을 선점한다. */
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("UPDATE Article a SET a.summaryStatus = :processingStatus "
+			+ "WHERE a.articleId = :articleId "
+			+ "AND a.analysisStatus = :analysisStatus "
+			+ "AND a.summaryStatus IN :claimableStatuses")
+	int claimSummaryGeneration(
+			@Param("articleId") Long articleId,
+			@Param("analysisStatus") AnalysisStatus analysisStatus,
+			@Param("processingStatus") SummaryStatus processingStatus,
+			@Param("claimableStatuses") Collection<SummaryStatus> claimableStatuses);
+
+	/** PROCESSING 상태인 기사에 생성된 요약을 저장한다. */
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("UPDATE Article a SET a.summary = :summary, a.summaryStatus = :completedStatus, "
+			+ "a.summaryGeneratedAt = :generatedAt "
+			+ "WHERE a.articleId = :articleId AND a.summaryStatus = :processingStatus")
+	int completeSummaryGeneration(
+			@Param("articleId") Long articleId,
+			@Param("summary") String summary,
+			@Param("generatedAt") LocalDateTime generatedAt,
+			@Param("processingStatus") SummaryStatus processingStatus,
+			@Param("completedStatus") SummaryStatus completedStatus);
+
+	/** PROCESSING 상태인 기사의 요약 생성 실패를 기록한다. */
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("UPDATE Article a SET a.summaryStatus = :failedStatus "
+			+ "WHERE a.articleId = :articleId AND a.summaryStatus = :processingStatus")
+	int failSummaryGeneration(
+			@Param("articleId") Long articleId,
+			@Param("processingStatus") SummaryStatus processingStatus,
+			@Param("failedStatus") SummaryStatus failedStatus);
 
 	/** 기사의 Neo4j 참조 한 행. */
 	interface ArticleGraphRef {
