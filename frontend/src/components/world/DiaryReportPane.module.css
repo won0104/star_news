@@ -67,6 +67,75 @@
   outline-offset: 3px;
 }
 
+/* 오른쪽 가장자리 책갈피 — 이 책 안의 세 페이지.
+   나의 기록의 카테고리 책갈피와 같은 에셋·같은 치수라, 두 화면이 한 권으로 읽힌다.
+   `clip-path` 는 책 밖으로 나가는 왼쪽 절반을 잘라 책등에 꽂힌 것처럼 보이게 한다. */
+.pageBookmarks {
+  position: absolute;
+  z-index: 6;
+  top: 11%;
+  right: 6.8%;
+  display: flex;
+  width: 6.6%;
+  flex-direction: column;
+  clip-path: inset(0 0 0 40%);
+}
+
+.pageBookmarks button {
+  position: relative;
+  display: block;
+  width: 100%;
+  flex: 0 0 auto;
+  aspect-ratio: 96 / 112;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #44392f;
+  cursor: pointer;
+  transition: transform 160ms ease;
+}
+
+.pageBookmarks button + button {
+  margin-top: -8%;
+}
+
+.pageBookmarks button:hover {
+  transform: translateX(3px);
+}
+
+.pageBookmarks button[aria-current='true'] {
+  z-index: 1;
+  color: #faf7ef;
+  transform: translateX(5px);
+}
+
+.pageBookmarks button:focus-visible {
+  outline: 2px solid #eec376;
+  outline-offset: 2px;
+}
+
+.pageBookmarks img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.pageBookmarks span {
+  position: absolute;
+  inset: 15% 30%;
+  display: grid;
+  font: 700 clamp(7px, 0.78vw, 13px)/1 var(--font-sans);
+  letter-spacing: 0.04em;
+  text-orientation: upright;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  place-items: center;
+  pointer-events: none;
+}
+
 /* ---- 페이지 ---------------------------------------------------------------- */
 
 /* Measured off the photograph: cream runs 9.8%–49.6% on the left leaf and 50.1%–90.1%
@@ -156,6 +225,12 @@
   flex-direction: column;
 }
 
+/* 내용이 짧아 남은 높이를 가져갈 이유가 없는 블록. 출처 비중이 그렇다 — 막대 한 줄과
+   범례 다섯 줄이 전부라, 페이지의 절반을 받으면 그 안이 빈칸으로 남는다. */
+.blockTight {
+  flex: none;
+}
+
 .block h2 {
   margin: 0;
   font: 700 clamp(10px, 0.95vw, 15px) var(--font-serif-kr);
@@ -191,50 +266,7 @@
   flex: none;
 }
 
-/* ---- ① 분야별 읽은 기사 ----------------------------------------------------- */
-
-.bars {
-  display: grid;
-  flex: 1;
-  align-content: center;
-  gap: 8%;
-  margin-top: 7%;
-}
-
-.barRow {
-  display: grid;
-  grid-template-columns: 17% minmax(0, 1fr) 9%;
-  align-items: center;
-  gap: 3%;
-}
-
-.barLabel {
-  font: clamp(7px, 0.65vw, 11px) var(--font-serif-kr);
-  color: #5d4b38;
-  white-space: nowrap;
-}
-
-.barTrack {
-  height: clamp(6px, 0.62vw, 10px);
-  border-radius: 999px;
-  background: rgba(94, 74, 51, 0.12);
-}
-
-.barFill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #2e415b, #4a5f7d);
-}
-
-.barValue {
-  font: 700 clamp(7px, 0.65vw, 11px) var(--font-sans);
-  font-variant-numeric: tabular-nums;
-  color: #44392f;
-  text-align: right;
-}
-
-/* ---- ② 출처별 읽기 비중 ----------------------------------------------------- */
+/* ---- ② 출처별 읽기 비중 (오른쪽) ----------------------------------------------------- */
 
 .shareBar {
   display: flex;
@@ -274,13 +306,13 @@
 }
 
 .footnote {
-  margin: auto 0 0;
+  margin: 5% 0 0;
   font: clamp(7px, 0.58vw, 10px)/1.5 var(--font-serif-kr);
   color: #8b7355;
   word-break: keep-all;
 }
 
-/* ---- ③ 최근 12주의 흐름 ----------------------------------------------------- */
+/* ---- ① 최근 12주의 흐름 (왼쪽) ----------------------------------------------------- */
 
 .seriesLegend {
   display: grid;
@@ -363,7 +395,7 @@
   white-space: nowrap;
 }
 
-/* ---- ④ 최근 주제 지형 ------------------------------------------------------- */
+/* ---- ③ 최근 주제 지형 (오른쪽) ------------------------------------------------------- */
 
 .terrain {
   position: relative;
