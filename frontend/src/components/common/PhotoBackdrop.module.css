@@ -52,6 +52,37 @@
   opacity: 1;
 }
 
+/*
+ * 장면이 `frame` 을 준 경우. cover 와 같은 "화면을 덮는 최소 크기"에서 시작해 zoom 배 키우고,
+ * 사진의 focus 지점(세로 비율)을 화면 세로 가운데에 맞춘다. 가로는 가운데.
+ *
+ * 크기가 `max(뷰포트 너비, 뷰포트 높이 × 비율) × zoom` 이라 어떤 화면 비율에서도 사진이
+ * 뷰포트를 다 덮고, focus 가 0.5 에서 멀지 않은 한 위아래도 비지 않는다(zoom 1.1 에 focus
+ * 0.47 이면 위로 1.6vh 여유). object-fit 은 fill — 이미 사진 비율의 상자라 왜곡이 없다.
+ *
+ * 위에 얹히는 화면(RecommendPane.module.css .photoBox)이 이 식을 그대로 되풀이한다. 한쪽만
+ * 바꾸면 글자가 종이에서 벗어난다.
+ */
+.photoFramed {
+  --anchor-x: 50%;
+  inset: auto;
+  top: 50%;
+  left: var(--anchor-x);
+  width: calc(max(100%, 100vh * var(--frame-w) / var(--frame-h)) * var(--frame-zoom));
+  height: auto;
+  aspect-ratio: var(--frame-w) / var(--frame-h);
+  object-fit: fill;
+  object-position: center;
+  transform: translate(calc(-100% * var(--frame-focus-x)), calc(-100% * var(--frame-focus-y)));
+}
+
+/* 데스크톱에서는 왼쪽 내비가 화면을 가리므로, 초점을 내비를 뺀 영역의 가운데에 건다. */
+@media (min-width: 1024px) {
+  .photoFramed {
+    --anchor-x: calc(var(--desktop-nav-width) + (100% - var(--desktop-nav-width)) / 2);
+  }
+}
+
 /* Optional soft dark veil so light-on-photo chrome (a form card, a headline) stays
    readable. Fixed for the same reason as .wash — it has to stay registered with the
    photo it is shading, including on a sign-up form long enough to scroll. */

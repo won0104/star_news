@@ -1,409 +1,503 @@
-.page {
-  width: 100%;
-  max-width: 1680px;
-}
+/*
+ * 나를 위한 추천 — 벽 사진 위에 글자를 쓴다.
+ *
+ * 사진은 <PhotoBackdrop> 이 화면 전체에 `object-fit: cover; object-position: center bottom`
+ * 으로 깐다. 이 층은 그 사진과 같은 사각형을 다시 계산해(.photoBox) 그 안에 % 좌표로
+ * 글자를 놓는다 — 그래서 뷰포트가 어떤 비율이어도 글자가 사진의 종이 위에 머무른다.
+ *
+ * 종이·핀·테이프·낙서는 전부 사진 안에 있다. 여기서 그리는 것은 글자, 마우스를 올렸을 때의
+ * 얇은 테두리, 카드를 눌렀을 때 올라오는 종이 한 장이 전부다.
+ *
+ * 글자 크기는 cqw — .photoBox(사진 너비)의 백분율. 사진이 커지고 작아져도 글자가 종이 안에
+ * 같은 비율로 남는다. 종이 밖의 것(요약 종이·상태 문구·표본 표시)은 .stage(뷰포트)를 기준으로
+ * 잡아 화면 밖으로 밀리지 않게 한다.
+ *
+ * 색은 사진의 온기를 따른다: 잉크 #3b3128, 흐린 잉크 #7a6a5a, 종이 #fbf6ea.
+ */
 
-.board {
-  position: relative;
-  width: min(100%, calc((100vh - 152px) * 1446.576 / 814));
-  margin-inline: auto;
-  aspect-ratio: 1446.576 / 814;
-  overflow: hidden;
-  isolation: isolate;
-}
+/* ---- 층 ------------------------------------------------------------------------ */
 
-.boardBase {
-  position: absolute;
+.stage {
+  position: fixed;
   inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-  user-select: none;
-}
-
-.boardWaiting {
-  opacity: 0;
-  transform: scale(1.06);
-}
-
-.boardIn {
-  animation: boardArrive 620ms cubic-bezier(0.22, 0.68, 0.32, 1) forwards;
-}
-
-@keyframes boardArrive {
-  from { opacity: 0; transform: scale(1.06); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.titleTag {
-  position: absolute;
-  z-index: 18;
+  z-index: 1;
+  overflow: hidden;
+  container-type: inline-size;
+  color: #3b3128;
+  /* 사진은 아래 층이 그린다. 이 층은 글자만 받으므로 빈 곳은 아래로 통과시킨다. */
   pointer-events: none;
 }
 
-.titleTag img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
+.stage > * {
+  pointer-events: auto;
 }
 
-.titleTag span {
+.stageWaiting {
+  opacity: 0;
+}
+
+.stageIn {
+  animation: stageArrive 480ms ease-out forwards;
+}
+
+@keyframes stageArrive {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/*
+ * <PhotoBackdrop> 의 .photoFramed 를 그대로 재현한다 (PhotoBackdrop.module.css 참고).
+ *   - 너비: 뷰포트를 덮는 최소 크기 max(뷰포트 너비, 뷰포트 높이 × 사진 비율) × zoom
+ *   - 위치: 가로 가운데, 사진의 focus 지점(세로 비율)이 화면 세로 가운데
+ * 사진이 뷰포트보다 커지면 가장자리가 잘리는데, 그것도 사진과 똑같이 잘린다.
+ * 한쪽만 바꾸면 글자가 종이에서 벗어난다 — 두 식은 늘 같아야 한다.
+ */
+.photoBox {
+  --anchor-x: 50%;
+  position: absolute;
+  top: 50%;
+  left: var(--anchor-x);
+  width: calc(max(100%, 100vh * var(--photo-w) / var(--photo-h)) * var(--photo-zoom));
+  aspect-ratio: var(--photo-w) / var(--photo-h);
+  container-type: inline-size;
+  transform: translate(calc(-100% * var(--photo-focus-x)), calc(-100% * var(--photo-focus-y)));
+  pointer-events: none;
+}
+
+/* 데스크톱에서는 왼쪽 내비를 뺀 영역의 가운데에 초점을 건다 — .photoFramed 와 동일. */
+@media (min-width: 1024px) {
+  .photoBox {
+    --anchor-x: calc(var(--desktop-nav-width) + (100% - var(--desktop-nav-width)) / 2);
+  }
+}
+
+.photoBox > * {
+  pointer-events: auto;
+}
+
+/* ---- 제목 (분홍 테이프 위) ---------------------------------------------------- */
+
+.banner {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.15cqw;
+  padding: 0 4%;
+  text-align: center;
+  pointer-events: none !important;
+}
+
+.eyebrow {
+  font: 700 0.55cqw var(--font-sans);
+  letter-spacing: 0.18em;
+  color: #9b7a63;
+}
+
+.banner h1 {
+  margin: 0;
+  font: 700 1.55cqw/1.15 var(--font-serif-kr);
+  color: #3b3128;
+  letter-spacing: -0.01em;
+}
+
+.cycle {
+  margin: 0;
+  min-height: 1em;
+  font: 500 0.62cqw var(--font-sans);
+  color: #8a6f5c;
+}
+
+/* ---- 종이 열 장 --------------------------------------------------------------- */
+
+.slots {
   position: absolute;
   inset: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none !important;
+}
+
+.slot {
+  position: absolute;
+  --tone-rgb: 214 133 150;
+}
+
+.slot[data-tone='rose'] { --tone-rgb: 222 128 150; }
+.slot[data-tone='sky'] { --tone-rgb: 120 168 224; }
+.slot[data-tone='mint'] { --tone-rgb: 108 178 140; }
+.slot[data-tone='sand'] { --tone-rgb: 218 168 84; }
+.slot[data-tone='lilac'] { --tone-rgb: 160 130 214; }
+.slot[data-tone='coral'] { --tone-rgb: 232 130 90; }
+
+/* 종이 위에는 이제 핀만 남았다(위 가장자리 ~7%). 글자는 그 바로 아래, 13% 에서 시작한다. */
+.card {
+  position: absolute;
+  inset: 13% 7% 7%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4cqw;
+  padding: 0.45cqw 0.5cqw;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 140ms ease, background 140ms ease, transform 170ms ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  border-color: rgb(var(--tone-rgb) / 0.55);
+  background: rgb(255 255 255 / 0.28);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.card[aria-pressed='true'] {
+  border-color: rgb(var(--tone-rgb) / 0.9);
+  background: rgb(255 255 255 / 0.36);
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4cqw;
+}
+
+.rank {
+  font: 700 0.74cqw var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: rgb(var(--tone-rgb));
+}
+
+.topic {
+  font: 600 0.6cqw var(--font-sans);
+  letter-spacing: 0.08em;
+  color: #9b7a63;
+}
+
+.label {
+  display: -webkit-box;
+  overflow: hidden;
+  font: 700 1.12cqw/1.32 var(--font-serif-kr);
+  color: #3b3128;
+  word-break: keep-all;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.reason {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: auto;
+  font: 0.8cqw/1.42 var(--font-serif-kr);
+  color: #7a6a5a;
+  word-break: keep-all;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.blank {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ---- 상태 문구 · 표본 표시 (뷰포트 기준) ------------------------------------- */
+
+/* 보드 한가운데. 종이 한 장 크기의 종이. */
+.notice {
+  position: absolute;
+  z-index: 4;
+  top: 46%;
+  left: 50%;
   display: grid;
-  place-items: center;
-  padding-bottom: 2%;
-  font-family: var(--font-serif-kr);
-  font-weight: 700;
-  font-size: clamp(11px, 1.5vw, var(--title-size));
-  color: #3b362e;
+  gap: 0.35cqw;
+  width: min(32cqw, 460px);
+  padding: 1.3cqw 1.5cqw;
+  border-radius: 6px;
+  background: rgb(251 246 234 / 0.94);
+  box-shadow: 0 10px 28px rgb(60 38 20 / 0.28);
   text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.notice p {
+  margin: 0;
+  font: 700 clamp(13px, 1.05cqw, 20px)/1.5 var(--font-serif-kr);
+  color: #3b3128;
+}
+
+.noticeHint {
+  font: 400 clamp(11px, 0.75cqw, 14px)/1.5 var(--font-sans) !important;
+  color: #8a6f5c !important;
+}
+
+.sampleNote {
+  position: absolute;
+  z-index: 4;
+  right: 20px;
+  bottom: 18px;
+  margin: 0;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgb(59 49 40 / 0.72);
+  font: 600 11px var(--font-sans);
+  color: #fbf6ea;
+}
+
+/* ---- 요약 · 기사 종이 (뷰포트 기준) ------------------------------------------- */
+
+/* 오른쪽 벽에 종이 한 장이 새로 꽂힌 것처럼. */
+.sheet {
+  position: absolute;
+  z-index: 6;
+  top: 14%;
+  right: 3%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55cqw;
+  width: min(30cqw, 440px);
+  max-height: 72%;
+  padding: 1.5cqw 1.5cqw 1.3cqw;
+  overflow-y: auto;
+  border-radius: 3px;
+  background: #fbf6ea;
+  box-shadow: 0 16px 34px rgb(50 30 14 / 0.36), 0 2px 6px rgb(50 30 14 / 0.18);
+  color: #3b3128;
+  scrollbar-width: thin;
+}
+
+.sheetClose {
+  position: absolute;
+  top: 0.55cqw;
+  right: 0.65cqw;
+  width: 1.5cqw;
+  height: 1.5cqw;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font: 1cqw var(--font-sans);
+  color: #8a6f5c;
+  cursor: pointer;
+}
+
+.sheetClose:hover { background: rgb(59 49 40 / 0.08); }
+.sheetClose:focus-visible { outline: 2px solid #3b3128; outline-offset: 2px; }
+
+.sheetKind {
+  font: 700 0.6cqw var(--font-sans);
+  letter-spacing: 0.12em;
+  color: #9b7a63;
+}
+
+.sheet h2 {
+  margin: 0;
+  padding-right: 1.7cqw;
+  font: 700 1.2cqw/1.35 var(--font-serif-kr);
   word-break: keep-all;
 }
 
-.notes {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
+.sheetReason {
   margin: 0;
+  padding: 0.55cqw 0.75cqw;
+  border-left: 2px solid #d9a765;
+  background: rgb(217 167 101 / 0.12);
+  font: 0.7cqw/1.5 var(--font-serif-kr);
+  color: #6b5a4a;
+  word-break: keep-all;
+}
+
+.sheetReason b {
+  margin-right: 0.3cqw;
+  font: 700 0.58cqw var(--font-sans);
+  color: #9b7a63;
+}
+
+.summary {
+  margin: 0;
+  font: 0.78cqw/1.7 var(--font-serif-kr);
+  color: #4a3d32;
+  word-break: keep-all;
+}
+
+.sheetNote {
+  margin: 0;
+  font: italic 0.72cqw/1.6 var(--font-serif-kr);
+  color: #9b8672;
+}
+
+.articles h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0.4cqw 0 0;
+  padding-top: 0.65cqw;
+  border-top: 1px solid rgb(59 49 40 / 0.16);
+  font: 700 0.78cqw var(--font-serif-kr);
+}
+
+.articles h3 b {
+  font: 600 0.64cqw var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #9b7a63;
+}
+
+.articles ul {
+  display: grid;
+  gap: 0.65cqw;
+  margin: 0.55cqw 0 0;
   padding: 0;
   list-style: none;
 }
 
-.note {
-  position: absolute;
-  container-type: size;
-  transform-origin: 50% 8%;
-  transition: transform 170ms ease, filter 170ms ease;
+.articles small {
+  display: block;
+  font: 0.58cqw var(--font-sans);
+  color: #9b8672;
 }
 
-.note:hover,
-.note:focus-within {
-  z-index: 25;
-  transform: translateY(-4px) scale(1.012);
-  filter: drop-shadow(0 13px 9px rgba(51, 34, 19, 0.16));
-}
-
-.paperShadow,
-.paperImage,
-.fastener {
-  position: absolute;
-  max-width: none;
-  user-select: none;
-  pointer-events: none;
-}
-
-.paperShadow {
-  z-index: 0;
-  object-fit: fill;
-  opacity: 0.35;
-}
-
-.paperImage {
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.fastener {
-  z-index: 4;
-  overflow: hidden;
-  filter: drop-shadow(-4px 6px 4px rgba(69, 51, 38, 0.22));
-}
-
-.fastener img {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  max-width: none;
-  object-fit: fill;
-}
-
-.paperContent {
-  position: absolute;
-  inset: 20% 12% 10%;
-  z-index: 3;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: clamp(6px, 2cqw, 9px);
-  border-radius: 3px;
-  color: inherit;
-  text-decoration: none;
-}
-
-/* The paper exports have different transparent edges and top treatments.
-   Keep text inside the visible sheet and below each pin or tape. */
-.note1 .paperContent {
-  inset: 18% 16% 13%;
-}
-
-.note2 .paperContent {
-  inset: 21% 14% 14% 15%;
-}
-
-.note3 .paperContent {
-  inset: 27% 16% 13% 17%;
-}
-
-.note4 .paperContent {
-  inset: 28% 16% 15%;
-}
-
-.note5 .paperContent {
-  inset: 20% 17% 13%;
-}
-
-.note6 .paperContent {
-  inset: 29% 17% 15% 16%;
-}
-
-.note7 .paperContent {
-  inset: 20% 15% 14% 14%;
-}
-
-.note8 .paperContent {
-  inset: 16% 17% 16% 13%;
-}
-
-.paperContent:hover {
-  background: rgba(255, 252, 241, 0.16);
-}
-
-.paperContent:focus-visible {
-  outline: 3px solid var(--brass-b);
-  outline-offset: 3px;
-}
-
-.reason {
-  margin: clamp(8px, 3cqh, 12px) 0 0;
-  font-family: var(--font-sans);
-  font-size: clamp(8px, 4.2cqw, 12px);
-  line-height: 1.4;
-  color: #625646;
+.articles p {
+  margin: 0.15cqw 0 0;
+  font: 0.74cqw/1.45 var(--font-serif-kr);
+  color: #3b3128;
   word-break: keep-all;
 }
 
-.reasonKey {
-  color: #8c7961;
+.articles a {
+  display: inline-block;
+  margin-top: 0.2cqw;
+  font: 600 0.62cqw var(--font-sans);
+  color: #2e415b;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.noteTitle {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-  margin: clamp(5px, 3.5cqh, 11px) 0 0;
-  font-family: var(--font-serif-kr);
-  font-weight: 700;
-  font-size: clamp(11px, 6.1cqw, 20px);
-  line-height: 1.35;
-  color: #352f28;
-  word-break: keep-all;
-}
-
-.noteSummary {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  margin: clamp(4px, 2.5cqh, 8px) 0 0;
-  font-family: var(--font-sans);
-  font-size: clamp(8px, 4cqw, 13px);
-  line-height: 1.5;
-  color: #665b4c;
-  word-break: keep-all;
-}
-
-.noteFoot {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px;
-  margin-top: auto;
-  padding-top: 5px;
-}
-
-.noteTags,
-.noteGo {
-  font-family: var(--font-sans);
-  font-size: clamp(8px, 3.7cqw, 11px);
-}
-
-.noteTags {
-  min-width: 0;
-  overflow: hidden;
-  color: #7d6e5b;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.noteGo {
-  flex: none;
-  font-weight: 600;
-  color: #8b5e24;
-}
-
-.note2 .noteFoot,
-.note3 .noteFoot,
-.note4 .noteFoot,
-.note6 .noteFoot,
-.note8 .noteFoot {
-  display: none;
-}
-
-.decorations {
-  position: absolute;
-  inset: 0;
-  z-index: 14;
-  pointer-events: none;
-}
-
-.decoration {
-  position: absolute;
-  max-width: none;
-  object-fit: fill;
-  transform: rotate(var(--decor-rotate));
-  user-select: none;
-}
-
-.treeShadow {
-  position: absolute;
-  z-index: 30;
-  max-width: none;
-  object-fit: fill;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  user-select: none;
-}
+/* ---- 좁은 화면: 고정 층을 풀고 목록으로 --------------------------------------- */
 
 @media (max-width: 900px) {
-  .board {
-    width: 100%;
-    aspect-ratio: auto;
-    overflow: visible;
-  }
-
-  .boardBase,
-  .titleTag,
-  .decorations,
-  .treeShadow {
-    display: none;
-  }
-
-  .notes {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 24px 18px;
-  }
-
-  .note {
+  .stage {
     position: relative;
-    left: auto !important;
-    top: auto !important;
-    width: auto !important;
-    height: auto !important;
-    min-height: 270px;
+    inset: auto;
+    overflow: visible;
+    padding: 18px 16px 28px;
+    container-type: normal;
+    pointer-events: auto;
+  }
+
+  .photoBox {
+    position: static;
+    width: auto;
+    aspect-ratio: auto;
+    transform: none;
     container-type: normal;
   }
 
-  .paperContent {
-    inset: 15% 11% 10%;
+  .banner {
+    position: static;
+    padding: 6px 0 16px;
   }
 
-  .note1 .paperContent,
-  .note2 .paperContent,
-  .note3 .paperContent,
-  .note4 .paperContent,
-  .note5 .paperContent,
-  .note6 .paperContent,
-  .note7 .paperContent,
-  .note8 .paperContent {
-    inset: 15% 11% 10%;
+  .eyebrow { font-size: 10px; }
+  .banner h1 { font-size: 24px; color: #fbf6ea; text-shadow: 0 1px 8px rgb(40 24 10 / 0.6); }
+  .cycle { font-size: 12px; color: #f2e2cf; }
+
+  .slots {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    pointer-events: auto !important;
   }
 
-  .note1 .paperContent {
-    inset: 15% 16% 10%;
+  .slot {
+    position: relative;
+    inset: auto !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 150px;
+    border-radius: 4px;
+    background: #fbf6ea;
+    box-shadow: 0 6px 16px rgb(50 30 14 / 0.28);
   }
 
-  .note3 .paperContent {
-    inset: 25% 16% 10% 17%;
+  /* 사진 속 테이프 대신 같은 색 띠 하나. */
+  .slot::before {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    width: 46px;
+    height: 12px;
+    border-radius: 2px;
+    background: rgb(var(--tone-rgb) / 0.55);
+    content: '';
   }
 
-  .note5 .paperContent {
-    inset: 15% 17% 10%;
+  .card {
+    position: relative;
+    inset: auto;
+    gap: 6px;
+    padding: 30px 14px 14px;
   }
 
-  .note7 .paperContent {
-    inset: 15% 13% 10%;
-  }
+  .rank { font-size: 12px; }
+  .topic { font-size: 10px; }
+  .label { font-size: 16px; }
+  .reason { font-size: 12px; }
 
-  .note8 .paperContent {
-    inset: 15% 13% 10%;
-  }
-
-  .reason {
-    font-size: 11px;
-  }
-
-  .noteTitle {
-    font-size: 18px;
-  }
-
-  .noteSummary {
-    display: -webkit-box;
-    font-size: 13px;
-  }
-
-  .noteFoot,
-  .note2 .noteFoot,
-  .note3 .noteFoot,
-  .note4 .noteFoot,
-  .note6 .noteFoot,
-  .note8 .noteFoot {
-    display: flex;
-  }
-
-  .noteTags,
-  .noteGo {
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 420px) {
-  .note3 {
-    min-height: 300px;
-  }
-
-  .note3 .paperContent {
-    inset: 25% 16% 16% 17%;
-  }
-
-  .note5 .noteSummary {
-    -webkit-line-clamp: 3;
-  }
-
-  .note8 .paperContent {
-    inset: 15% 13% 16%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .boardIn {
-    animation: none;
-    opacity: 1;
+  .notice {
+    position: static;
+    width: auto;
+    margin: 12px 0;
+    padding: 20px;
     transform: none;
   }
 
-  .note {
-    transition: none;
+  .sampleNote {
+    position: static;
+    display: inline-block;
+    margin-top: 12px;
   }
+
+  .sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    width: auto;
+    max-height: 72vh;
+    padding: 20px 18px 24px;
+    border-radius: 14px 14px 0 0;
+    gap: 10px;
+  }
+
+  .sheetClose { top: 10px; right: 12px; width: 28px; height: 28px; font-size: 20px; }
+  .sheetKind { font-size: 11px; }
+  .sheet h2 { font-size: 19px; padding-right: 30px; }
+  .sheetReason { font-size: 12px; padding: 8px 10px; }
+  .sheetReason b { font-size: 10px; }
+  .summary { font-size: 14px; }
+  .sheetNote { font-size: 13px; }
+  .articles h3 { font-size: 14px; margin-top: 6px; padding-top: 10px; }
+  .articles h3 b { font-size: 12px; }
+  .articles ul { gap: 10px; margin-top: 8px; }
+  .articles small { font-size: 11px; }
+  .articles p { font-size: 13px; }
+  .articles a { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stageIn {
+    animation: none;
+    opacity: 1;
+  }
+
+  .card { transition: none; }
 }
