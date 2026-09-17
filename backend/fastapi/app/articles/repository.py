@@ -282,7 +282,7 @@ def merge_event_node(
     created_at: datetime,
     candidate_actor_names: list[str],
     candidate_target_names: list[str],
-) -> str:
+) -> tuple[str, bool]:
     candidates = session.run(
         """
         CALL db.index.vector.queryNodes('event_embedding_index', $topK, $embedding)
@@ -307,10 +307,10 @@ def merge_event_node(
 
         # 매칭 확정 - 기존 Event를 재사용하고 대표 벡터(centroid)만 갱신
         blended_embedding = _ema_update_embedding(signals["embedding"], embedding, EVENT_EMBEDDING_EMA_WEIGHT)
-        return _update_matched_event(session, row["nodeId"], title, blended_embedding, created_at)
+        return _update_matched_event(session, row["nodeId"], title, blended_embedding, created_at), False
 
     # 후보가 하나도 없거나 전부 충돌 -> 매칭되는 기존 Event가 없는 것이므로 새로 생성
-    return _create_new_event_node(session, title, embedding, embedding_model, created_at)
+    return _create_new_event_node(session, title, embedding, embedding_model, created_at), True
 
 
 # 5. Story
