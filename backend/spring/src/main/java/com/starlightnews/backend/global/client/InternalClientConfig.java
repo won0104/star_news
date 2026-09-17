@@ -12,11 +12,16 @@ import org.springframework.web.client.RestClient;
  * 테스트에서 MockRestServiceServer 가 걸어둔 요청 가로채기가 덮어써져 실제 네트워크를 타게 된다.
  */
 @Configuration
-@EnableConfigurationProperties(FastApiProperties.class)
+@EnableConfigurationProperties({FastApiProperties.class, GmsProperties.class})
 public class InternalClientConfig {
 
 	@Bean
 	public RestClient fastApiRestClient(RestClient.Builder builder, FastApiProperties properties) {
+		return HttpClients.create(builder, properties.baseUrl(), properties.timeout());
+	}
+
+	@Bean
+	public RestClient gmsRestClient(RestClient.Builder builder, GmsProperties properties) {
 		return HttpClients.create(builder, properties.baseUrl(), properties.timeout());
 	}
 }
