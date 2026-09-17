@@ -54,31 +54,28 @@
   }
 }
 
-.ambientLayer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.ambientStar {
-  position: absolute;
-  display: block;
-}
-
-.ambientStar img {
-  width: 100%;
-  height: auto;
-}
-
 /* ---- 별 ---------------------------------------------------------------------- */
 
 .node {
   position: absolute;
+  left: var(--x);
+  top: var(--y);
   display: flex;
   width: min(26cqw, 360px);
   flex-direction: column;
   align-items: center;
   transform: translate(-50%, -50%);
+}
+
+/* The viewport can still be wide while the window opening is narrow (for example beside
+   the desktop rail). Choose the compact slots from the space the stars actually receive,
+   so edge labels never depend on the browser width or get clipped by the wooden frame. */
+@container (max-width: 1100px) {
+  .node {
+    left: var(--narrow-x);
+    top: var(--narrow-y);
+    width: min(38cqw, 360px);
+  }
 }
 
 .star {
@@ -223,22 +220,6 @@
 
 /* ---- 화면 설명 ---------------------------------------------------------------- */
 
-.blurb {
-  position: absolute;
-  z-index: 5;
-  left: 50%;
-  bottom: 4.5%;
-  width: min(62%, 720px);
-  margin: 0;
-  transform: translateX(-50%);
-  font: clamp(10px, 0.95vw, 14px)/1.6 var(--font-serif-kr);
-  color: rgba(226, 212, 186, 0.6);
-  text-align: center;
-  text-shadow: 0 1px 6px rgba(8, 10, 18, 0.7);
-  word-break: keep-all;
-  pointer-events: none;
-}
-
 .snapshot {
   position: absolute;
   z-index: 5;
@@ -283,13 +264,8 @@
 
 /* ---- 좁은 화면 --------------------------------------------------------------- */
 
-/* Compact landscape panes do not have enough quiet space below the last row for the
-   desktop-length explanation. Keep the data note, but lift it out of the labels' row. */
-@media (max-width: 900px) {
-  .blurb {
-    display: none;
-  }
-
+/* When live data is available, lift its snapshot time above the labels in compact panes. */
+@container (max-width: 900px) {
   .snapshot {
     top: 10px;
     right: 10px;
@@ -316,7 +292,7 @@
   }
 
   .node {
-    width: 38cqw;
+    width: min(38cqw, 360px);
   }
 
   .aroundNode {
@@ -341,10 +317,6 @@
 
   .meta {
     font-size: clamp(8px, 1.5cqw, 12px);
-  }
-
-  .blurb {
-    display: none;
   }
 
   .snapshot {

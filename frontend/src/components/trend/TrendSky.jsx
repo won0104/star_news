@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchHomeTrends, fetchNeighbors } from '../../api/trend'
-import { stars, trendFigmaAssets } from '../../data/trend'
+import { stars } from '../../data/trend'
 import {
   trendNeighbors,
   trendNodeArticles,
@@ -8,7 +8,6 @@ import {
   trendSkyExpandCopy,
 } from '../../data/trendNeighbors'
 import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlots } from '../../data/trendTop'
-import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { TrendConstellation } from './TrendConstellation'
 import styles from './TrendSky.module.css'
 
@@ -39,8 +38,7 @@ import styles from './TrendSky.module.css'
  * rounds are landing.
  */
 const SAMPLE_WHEN_EMPTY = true
-export function TrendSky({ data: given, neighbors: givenNeighbors }) {
-  const narrow = useIsNarrow()
+export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }) {
   const [home, setHome] = useState(given ?? null)
   const [homeState, setHomeState] = useState(given ? 'ready' : 'loading')
   const [openKey, setOpenKey] = useState(null)
@@ -145,6 +143,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
         onWalk={(node) => open({ nodeType: node.nodeType ?? 'EVENT', nodeKey: node.id })}
         details={sample ? trendNodeDetails : undefined}
         articleSamples={sample ? trendNodeArticles : undefined}
+        overlayRoot={overlayRoot}
       />
     )
   }
@@ -166,11 +165,10 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
   return (
     <div className={styles.field} role="group" aria-label={trendSkyCopy.fieldLabel}>
       <div className={styles.canvas}>
-        <AmbientStars />
-
         {ranked.map((trend, index) => {
           const slot = trendSlots[index]
-          const [x, y] = (narrow && slot.atNarrow) || slot.at
+          const [x, y] = slot.at
+          const [narrowX, narrowY] = slot.atNarrow || slot.at
           // Area, not diameter, carries the count — a star twice as wide should not read
           // as four times the news.
           const scale =
@@ -180,7 +178,13 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
             <div
               key={trend.nodeKey}
               className={styles.node}
-              style={{ left: `${x}%`, top: `${y}%`, '--scale': scale }}
+              style={{
+                '--x': `${x}%`,
+                '--y': `${y}%`,
+                '--narrow-x': `${narrowX}%`,
+                '--narrow-y': `${narrowY}%`,
+                '--scale': scale,
+              }}
             >
               <button
                 type="button"
@@ -203,15 +207,11 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
         })}
       </div>
 
-      <p className={styles.blurb}>{trendSkyCopy.blurb}</p>
-
-      <p className={styles.snapshot}>
-        {sample
-          ? trendSkyCopy.sampleNote
-          : source?.snapshotAt
-            ? trendSkyCopy.snapshot(formatSnapshot(source.snapshotAt))
-            : ''}
-      </p>
+      {!sample && source?.snapshotAt && (
+        <p className={styles.snapshot}>
+          {trendSkyCopy.snapshot(formatSnapshot(source.snapshotAt))}
+        </p>
+      )}
     </div>
   )
 }
@@ -234,40 +234,6 @@ function Notice({ mark, title, hint, onBack }) {
     </div>
   )
 }
-
-function AmbientStars() {
-  return (
-    <div className={styles.ambientLayer} aria-hidden>
-      {ambient.map((star) => (
-        <span
-          key={star.id}
-          className={styles.ambientStar}
-          style={{
-            left: `${star.at[0]}%`,
-            top: `${star.at[1]}%`,
-            width: `${star.size / 14.4}cqw`,
-            opacity: star.opacity,
-            transform: `translate(-50%, -50%) rotate(${star.rotate}deg)`,
-          }}
-        >
-          <img src={trendFigmaAssets.relatedLeftSticker} alt="" />
-        </span>
-      ))}
-    </div>
-  )
-}
-
-/** Decorative stars, kept near the perimeter so no label lands on one. */
-const ambient = [
-  { id: 'a1', at: [7, 20], size: 30, rotate: -8, opacity: 0.5 },
-  { id: 'a2', at: [93, 22], size: 26, rotate: 6, opacity: 0.42 },
-  { id: 'a3', at: [31, 12], size: 22, rotate: 3, opacity: 0.38 },
-  { id: 'a4', at: [8, 82], size: 28, rotate: -5, opacity: 0.45 },
-  { id: 'a5', at: [92, 86], size: 24, rotate: 9, opacity: 0.4 },
-  { id: 'a6', at: [64, 90], size: 20, rotate: -3, opacity: 0.34 },
-  { id: 'a7', at: [45, 88], size: 26, rotate: 5, opacity: 0.4 },
-  { id: 'a8', at: [96, 40], size: 20, rotate: -6, opacity: 0.32 },
-]
 
 /** `2026-09-17T06:00:00+09:00` → `9월 17일 06시`. The offset is the server's, so it is read
  *  out of the string rather than through a Date, which would shift it to this machine's

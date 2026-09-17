@@ -95,7 +95,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1600px) {
   .sidebarExtension {
     position: absolute;
     top: 0;
@@ -124,13 +124,36 @@
 
 .windowGlass::before {
   position: absolute;
-  z-index: 0;
+  z-index: 1;
   inset: 0;
   content: '';
-  background:
-    linear-gradient(180deg, rgba(4, 10, 28, 0.08), rgba(4, 8, 20, 0.18)),
-    radial-gradient(circle at 52% 42%, transparent 42%, rgba(2, 7, 18, 0.12) 100%);
+  background: radial-gradient(
+    ellipse closest-side at 50% 46%,
+    rgba(2, 7, 18, 0.62) 0%,
+    rgba(2, 7, 18, 0.54) 58%,
+    rgba(2, 7, 18, 0.26) 82%,
+    transparent 100%
+  );
   pointer-events: none;
+}
+
+.windowGlass > :last-child {
+  z-index: 2;
+}
+
+/* Cards and drawers belong to the room UI, not to the night outside. They are portalled
+   here so they can sit over the wall and wooden frame while the stars remain clipped to
+   the glass opening. The layer itself is inert; only rendered controls receive input. */
+.sceneOverlay {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sceneOverlay > * {
+  pointer-events: auto;
 }
 
 @media (max-aspect-ratio: 4/3) {

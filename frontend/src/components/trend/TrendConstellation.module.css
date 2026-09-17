@@ -11,27 +11,12 @@
   background: #302b29 url('/assets/trend/figma/attic-night.png') center / cover no-repeat;
 }
 
-.layoutBadge {
-  position: absolute;
-  z-index: 5;
-  top: 20px;
-  left: 24px;
-  padding: 7px 11px;
-  border: 1px solid rgba(226, 197, 126, 0.28);
-  border-radius: 999px;
-  background: rgba(20, 18, 18, 0.58);
-  color: rgba(229, 209, 171, 0.82);
-  font: 600 11px var(--font-sans);
-  letter-spacing: 0.06em;
-  pointer-events: none;
-  backdrop-filter: blur(8px);
-}
-
 .fieldActions {
   position: absolute;
   z-index: 5;
   top: 20px;
-  right: 24px;
+  right: auto;
+  left: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -395,10 +380,6 @@
 }
 
 @media (max-width: 900px) {
-  .layoutBadge {
-    display: none;
-  }
-
   .canvas {
     inset: 0;
     width: 100%;
@@ -409,14 +390,9 @@
 
   .fieldActions {
     top: 14px;
-    right: 14px;
-    gap: 6px;
-  }
-
-  .layoutBadge {
-    top: 14px;
+    right: auto;
     left: 14px;
-    font-size: 10px;
+    gap: 6px;
   }
 
   .fieldAction {

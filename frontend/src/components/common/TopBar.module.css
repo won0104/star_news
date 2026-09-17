@@ -198,7 +198,7 @@
 /* Wide screens have horizontal room but limited vertical room above the window. Moving
    the same translucent chrome into a rail spends that surplus width and leaves the
    photograph's top edge unobstructed. Narrow screens keep the familiar top bar. */
-@media (min-width: 1200px) {
+@media (min-width: 1600px) {
   .bar {
     inset: 0 auto 0 0;
     width: 208px;

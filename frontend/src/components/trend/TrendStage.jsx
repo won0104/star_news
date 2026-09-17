@@ -22,6 +22,7 @@ import styles from './TrendStage.module.css';
 export function TrendStage({ playTransition = false }) {
   const [ready, setReady] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [overlayRoot, setOverlayRoot] = useState(null);
   const { reduceMotion } = useSettingsValues();
   const prefersReducedMotion = usePrefersReducedMotion();
 
@@ -72,9 +73,11 @@ export function TrendStage({ playTransition = false }) {
 
         {settled && (
           <div className={styles.windowGlass}>
-            <TrendSky />
+            <TrendSky overlayRoot={overlayRoot} />
           </div>
         )}
+
+        <div ref={setOverlayRoot} className={styles.sceneOverlay} />
       </div>
     </div>
   );
