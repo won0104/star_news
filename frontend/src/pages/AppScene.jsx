@@ -19,6 +19,12 @@ const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
  */
 const ARRIVAL = { foryou: arrivalScene }
 const TREND_BACKDROP = { id: 'trend', src: nightfall.still, loop: null }
+const HISTORY_BACKDROP = {
+  id: 'history',
+  src: '/assets/history/history-desk-background.png',
+  loop: null,
+}
+const VIEW_BACKDROPS = { trend: TREND_BACKDROP, log: HISTORY_BACKDROP }
 
 /**
  * /app — the sunlit room, the bar over it, and one of the bar's four destinations on top.
@@ -93,7 +99,7 @@ export function AppScene() {
   }
 
   const arriving = !walked && enteredFromHome
-  const scene = (arriving && ARRIVAL[view]) || (view === 'trend' ? TREND_BACKDROP : backdrop)
+  const scene = (arriving && ARRIVAL[view]) || VIEW_BACKDROPS[view] || backdrop
   const motion = SCREEN_TRANSITIONS && !reduceMotion && scene !== backdrop
   const [settled, setSettled] = useState(false)
   const onSettled = useCallback(() => setSettled(true), [])
