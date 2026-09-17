@@ -36,3 +36,25 @@ def test_is_noise_entity_name_accepts_real_names():
     assert is_noise_entity_name("삼성전자") is False
     assert is_noise_entity_name("서울시청") is False
     assert is_noise_entity_name("김민수") is False
+
+
+# "해당 국가들은", "이들 기업"처럼 지시 표현이 첫 단어면, 뒤에 명사/조사가 붙어도 노이즈여야 함
+def test_is_noise_entity_name_rejects_referential_prefix_phrases():
+    assert is_noise_entity_name("해당 국가들은") is True
+    assert is_noise_entity_name("이들 기업") is True
+    assert is_noise_entity_name("그들 회사") is True
+
+
+# 지시 표현 단어가 "첫 단어"가 아니라 이름 일부로 포함된 경우엔 노이즈가 아니어야 함 (오탐 방지)
+def test_is_noise_entity_name_accepts_names_containing_referential_word_not_as_first_word():
+    assert is_noise_entity_name("해당화 축제") is False  # "해당"이 아니라 "해당화"라 다른 단어
+    assert is_noise_entity_name("국가정보원") is False
+
+
+# 대명사에 조사만 붙은 형태("그는", "그를", "제가")도 노이즈여야 함
+def test_is_noise_entity_name_rejects_pronoun_with_particle():
+    assert is_noise_entity_name("그는") is True
+    assert is_noise_entity_name("그를") is True
+    assert is_noise_entity_name("제가") is True
+    # 대명사가 아닌 이름이 우연히 조사로 끝나는 경우는 노이즈가 아니어야 함
+    assert is_noise_entity_name("삼성전자는") is False
