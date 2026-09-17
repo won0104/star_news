@@ -11,6 +11,7 @@ import {
   sampleDetail,
 } from '../../data/recommendBoard'
 import { topicName } from '../../data/topics'
+import { useDraggableCard } from '../../hooks/useDraggableCard'
 import styles from './RecommendPane.module.css'
 
 /**
@@ -167,6 +168,7 @@ export function RecommendPane({ settled = true }) {
 function DetailSheet({ item, sample, onClose }) {
   const [detail, setDetail] = useState(sample ? sampleDetail(item) : null)
   const [state, setState] = useState(sample ? 'ready' : 'loading')
+  const { cardRef, cardStyle, dragging, handleProps } = useDraggableCard()
 
   useEffect(() => {
     if (sample) return undefined
@@ -194,15 +196,23 @@ function DetailSheet({ item, sample, onClose }) {
   const articles = detail?.articles ?? []
 
   return (
-    <aside className={styles.sheet} aria-labelledby="recommend-sheet-title">
+    <aside
+      ref={cardRef}
+      className={styles.sheet}
+      style={cardStyle}
+      data-dragging={dragging}
+      aria-labelledby="recommend-sheet-title"
+    >
       <button type="button" className={styles.sheetClose} aria-label={boardCopy.close} onClick={onClose}>
         ×
       </button>
 
-      <span className={styles.sheetKind}>
-        {String(item.rank).padStart(2, '0')} · {topicName(item.topicCode)}
-      </span>
-      <h2 id="recommend-sheet-title">{item.label}</h2>
+      <header className={styles.sheetHead} {...handleProps}>
+        <span className={styles.sheetKind}>
+          {String(item.rank).padStart(2, '0')} · {topicName(item.topicCode)}
+        </span>
+        <h2 id="recommend-sheet-title">{item.label}</h2>
+      </header>
       {item.reason && (
         <p className={styles.sheetReason}>
           <b>{boardCopy.reasonLabel}</b> {item.reason}
