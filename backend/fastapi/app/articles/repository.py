@@ -1,6 +1,6 @@
 # 기사 분석 도메인의 Neo4j 쿼리 (Node/Edge 생성·조회).
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from neo4j import ManagedTransaction, Session
 
@@ -15,6 +15,16 @@ EVENT_SIMILARITY_THRESHOLD = 0.92
 EVENT_CANDIDATE_TOP_K = 8
 # 대표 벡터(centroid) 갱신 시 새 임베딩을 반영하는 비율 (지수이동평균)
 EVENT_EMBEDDING_EMA_WEIGHT = 0.15
+
+# Story dedup 벡터 유사도 임계값 - Event(0.92)보다 낮음: "같은 사건"이 아니라 "같은 흐름"이라는 느슨한 기준
+STORY_SIMILARITY_THRESHOLD = 0.80
+# 벡터 검색 시 후보로 가져올 최대 개수
+STORY_CANDIDATE_TOP_K = 8
+# 대표 벡터(centroid) 갱신 시 새 임베딩을 반영하는 비율 (지수이동평균) - Event와 동일 가중치 재사용
+STORY_EMBEDDING_EMA_WEIGHT = 0.15
+# 이보다 오래 새 Event가 안 붙은 Story/외톨이 Event는 후보에서 제외 (죽은 흐름으로 간주)
+STORY_STALE_DAYS = 30
+
 
 # 1. Article
 # Article 노드를 생성하거나 이미 있으면 갱신한다
@@ -303,7 +313,152 @@ def merge_event_node(
     return _create_new_event_node(session, title, embedding, embedding_model, created_at)
 
 
-# 5. Statement
+# 5. Story
+# Event가 확정될 때마다 이 함수로 어느 Story에 속할지 직접 판단
+# 기존 Story 후보 하나 검색 - Topic이 같고, 너무 오래 방치되지 않은(죽지 않은) Story 중 유사도 1등 반환
+def _find_story_candidate(
+    session: Neo4jRunner, embedding: list[float], topic_code: str, stale_cutoff: datetime
+) -> dict | None:
+    result = session.run(
+        """
+        CALL db.index.vector.queryNodes('story_embedding_index', $topK, $embedding)
+        YIELD node, score
+        WHERE score >= $threshold
+        MATCH (node)-[:CLASSIFIED_AS]->(:Topic {topicCode: $topicCode})
+        WHERE node.lastEventAddedAt >= $staleCutoff
+        RETURN node.nodeId AS nodeId, node.embedding AS embedding, score
+        ORDER BY score DESC
+        LIMIT 1
+        """,
+        topK=STORY_CANDIDATE_TOP_K,
+        embedding=embedding,
+        threshold=STORY_SIMILARITY_THRESHOLD,
+        topicCode=topic_code,
+        staleCutoff=stale_cutoff,
+    ).single()
+    return dict(result) if result else None
+
+
+# 아직 어떤 Story에도 안 속한 "외톨이" Event 후보 중 유사도 1등 반환
+def _find_orphan_event_candidate(
+    session: Neo4jRunner, embedding: list[float], topic_code: str, stale_cutoff: datetime, exclude_event_id: str
+) -> dict | None:
+    result = session.run(
+        """
+        CALL db.index.vector.queryNodes('event_embedding_index', $topK, $embedding)
+        YIELD node, score
+        WHERE score >= $threshold AND node.nodeId <> $excludeEventId AND NOT (node)-[:PART_OF]->(:Story)
+        MATCH (node)-[:CLASSIFIED_AS]->(:Topic {topicCode: $topicCode})
+        WHERE node.updatedAt >= $staleCutoff
+        RETURN node.nodeId AS nodeId, node.title AS title, node.embedding AS embedding, score
+        ORDER BY score DESC
+        LIMIT 1
+        """,
+        topK=STORY_CANDIDATE_TOP_K,
+        embedding=embedding,
+        threshold=STORY_SIMILARITY_THRESHOLD,
+        topicCode=topic_code,
+        staleCutoff=stale_cutoff,
+        excludeEventId=exclude_event_id,
+    ).single()
+    return dict(result) if result else None
+
+
+# 새 Story 생성
+def _create_new_story_node(
+    session: Neo4jRunner, title: str, embedding: list[float], embedding_model: str, occurred_at: datetime, added_at: datetime
+) -> str:
+    result = session.run(
+        """
+        CREATE (s:Story {
+            nodeId: randomUUID(), title: $title, embedding: $embedding, embeddingModel: $embeddingModel,
+            startedAt: $occurredAt, lastEventAt: $occurredAt, lastEventAddedAt: $addedAt
+        })
+        RETURN s.nodeId AS nodeId
+        """,
+        title=title,
+        embedding=embedding,
+        embeddingModel=embedding_model,
+        occurredAt=occurred_at,
+        addedAt=added_at,
+    ).single()
+    return result["nodeId"]
+
+
+# 기존 Story에 새 Event가 편입될 때 대표 벡터(centroid)와 최신 시각들을 갱신
+def _update_matched_story(
+    session: Neo4jRunner, node_id: str, blended_embedding: list[float], occurred_at: datetime, added_at: datetime
+) -> str:
+    result = session.run(
+        """
+        MATCH (s:Story {nodeId: $nodeId})
+        SET s.embedding = $embedding,
+            s.lastEventAt = CASE WHEN $occurredAt > s.lastEventAt THEN $occurredAt ELSE s.lastEventAt END,
+            s.lastEventAddedAt = $addedAt
+        RETURN s.nodeId AS nodeId
+        """,
+        nodeId=node_id,
+        embedding=blended_embedding,
+        occurredAt=occurred_at,
+        addedAt=added_at,
+    ).single()
+    return result["nodeId"]
+
+
+# Event -> Story PART_OF edge 연결
+def merge_part_of_edge(session: Neo4jRunner, event_node_id: str, story_node_id: str, relevance: float, assigned_at: datetime) -> None:
+    session.run(
+        """
+        MATCH (e:Event {nodeId: $eventId}), (s:Story {nodeId: $storyId})
+        MERGE (e)-[r:PART_OF]->(s)
+        SET r.relevance = $relevance, r.assignedAt = coalesce(r.assignedAt, $assignedAt)
+        """,
+        eventId=event_node_id,
+        storyId=story_node_id,
+        relevance=relevance,
+        assignedAt=assigned_at,
+    )
+
+
+# Event 하나를 Story에 배정한다
+def assign_event_to_story(
+    session: Neo4jRunner,
+    event_node_id: str,
+    event_title: str,
+    event_embedding: list[float],
+    embedding_model: str,
+    topic_code: str,
+    occurred_at: datetime,
+    now: datetime,
+) -> str | None:
+    stale_cutoff = now - timedelta(days=STORY_STALE_DAYS)
+
+    # 기존 Story 후보와 외톨이 Event 후보를 둘 다 검색해서, 유사도 점수가 더 높은 쪽을 선택
+    story_candidate = _find_story_candidate(session, event_embedding, topic_code, stale_cutoff)
+    orphan_candidate = _find_orphan_event_candidate(session, event_embedding, topic_code, stale_cutoff, event_node_id)
+
+    if story_candidate and (not orphan_candidate or story_candidate["score"] >= orphan_candidate["score"]):
+        # 기존 Story 편입 - 대표 벡터만 갱신
+        blended_embedding = _ema_update_embedding(story_candidate["embedding"], event_embedding, STORY_EMBEDDING_EMA_WEIGHT)
+        story_node_id = _update_matched_story(session, story_candidate["nodeId"], blended_embedding, occurred_at, now)
+        merge_part_of_edge(session, event_node_id, story_node_id, story_candidate["score"], now)
+        return story_node_id
+
+    if orphan_candidate:
+        # 외톨이 Event 둘을 묶어 새 Story로 승격 - 먼저 있던 Event의 title을 시작점으로 사용
+        blended_embedding = _ema_update_embedding(orphan_candidate["embedding"], event_embedding, STORY_EMBEDDING_EMA_WEIGHT)
+        story_node_id = _create_new_story_node(
+            session, orphan_candidate["title"], blended_embedding, embedding_model, occurred_at, now
+        )
+        merge_part_of_edge(session, orphan_candidate["nodeId"], story_node_id, 1.0, now)
+        merge_part_of_edge(session, event_node_id, story_node_id, orphan_candidate["score"], now)
+        return story_node_id
+
+    # 후보가 하나도 없음 - 아직은 외톨이 Event로 남김
+    return None
+
+
+# 6. Statement
 # Statement 노드를 생성한다
 def merge_statement_node(
     session: Neo4jRunner,
@@ -333,7 +488,7 @@ def merge_statement_node(
     return result["nodeId"]
 
 
-# 6. Edge
+# 7. Edge
 # 엣지 타입별 Cypher 쿼리 모음 - merge_simple_edge가 여기서 타입에 맞는 쿼리를 찾아 실행
 _SIMPLE_EDGE_QUERIES: dict[str, str] = {
     "MENTIONS": """
