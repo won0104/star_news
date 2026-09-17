@@ -12,6 +12,8 @@
  * the contract (LOGIN_ID_ALREADY_EXISTS, INVALID_CREDENTIALS, …).
  */
 
+import { getAccessToken } from '../store/session';
+
 const BASE = '/api/v1';
 
 export class ApiError extends Error {
@@ -25,6 +27,19 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * The access token rides on every request that has one, so a screen never has to remember
+ * to attach it. Public endpoints ignore the header, and a signed-out reader simply sends
+ * none — which is how `/home` and the graph reads stay open to everyone.
+ */
+function authHeaders(body) {
+  const token = getAccessToken();
+  const headers = {};
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return Object.keys(headers).length > 0 ? headers : undefined;
+}
+
 /** A request that never reached the API — offline, DNS, the proxy being down. */
 const NETWORK_ERROR = { status: 0, code: 'NETWORK_ERROR', message: '서버에 연결하지 못했습니다.' };
 
@@ -35,7 +50,7 @@ export async function request(path, { method = 'GET', body, signal } = {}) {
       method,
       signal,
       credentials: 'include',
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+      headers: authHeaders(body),
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch (cause) {

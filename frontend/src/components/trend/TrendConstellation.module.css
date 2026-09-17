@@ -11,27 +11,12 @@
   background: #302b29 url('/assets/trend/figma/attic-night.png') center / cover no-repeat;
 }
 
-.layoutBadge {
-  position: absolute;
-  z-index: 5;
-  top: 20px;
-  left: 24px;
-  padding: 7px 11px;
-  border: 1px solid rgba(226, 197, 126, 0.28);
-  border-radius: 999px;
-  background: rgba(20, 18, 18, 0.58);
-  color: rgba(229, 209, 171, 0.82);
-  font: 600 11px var(--font-sans);
-  letter-spacing: 0.06em;
-  pointer-events: none;
-  backdrop-filter: blur(8px);
-}
-
 .fieldActions {
   position: absolute;
   z-index: 5;
   top: 20px;
-  right: 24px;
+  right: auto;
+  left: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -89,39 +74,82 @@
   animation: appear 850ms ease 300ms forwards;
 }
 
-.ambientLayer {
+.previewCluster {
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  width: 1px;
+  height: 1px;
   pointer-events: none;
+  opacity: 0;
+  animation: preview-appear 520ms ease 360ms forwards;
 }
 
-.ambientStar {
+.previewStar {
   position: absolute;
-  z-index: 0;
+  z-index: 1;
+  left: var(--preview-x);
+  top: var(--preview-y);
   aspect-ratio: 1;
+  opacity: 0.42;
+  transform: translate(-50%, -50%) rotate(var(--preview-rotate));
   transition:
     opacity 240ms ease,
     filter 240ms ease,
     transform 240ms ease;
+  transition-delay: var(--preview-delay);
 }
 
-.ambientStar img {
+.previewLink {
+  position: absolute;
+  z-index: 0;
+  left: var(--preview-x);
+  top: var(--preview-y);
+  width: var(--preview-line-length);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(228, 198, 121, 0.24), rgba(228, 198, 121, 0.04));
+  opacity: 0.34;
+  transform: rotate(var(--preview-line-angle));
+  transform-origin: 0 50%;
+  transition: opacity 240ms ease;
+}
+
+.previewStar img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.ambientEvent {
+.previewEvent {
+  width: 3.2cqw;
+  color: #eed082;
   filter: drop-shadow(0 0 8px rgba(255, 199, 87, 0.24));
 }
 
-.ambientEntity {
-  filter: drop-shadow(0 0 8px rgba(87, 134, 255, 0.2));
+.previewEntity {
+  width: 2.7cqw;
+  color: #b0bcfd;
+  filter: drop-shadow(0 0 8px rgba(176, 188, 253, 0.22));
 }
 
-.ambientStatement {
+.previewStatement {
+  width: 2.9cqw;
+  color: #b0ebf2;
   filter: drop-shadow(0 0 8px rgba(176, 235, 242, 0.2));
+}
+
+.relatedNode:hover .previewStar,
+.relatedNode:focus-within .previewStar {
+  opacity: 0.88;
+  filter: brightness(1.18) drop-shadow(0 0 10px currentColor);
+  transform: translate(-50%, -50%) rotate(var(--preview-rotate)) scale(1.08);
+}
+
+.relatedNode:hover .previewLink,
+.relatedNode:focus-within .previewLink {
+  opacity: 0.72;
 }
 
 .mobileLinks {
@@ -394,6 +422,26 @@
   }
 }
 
+@keyframes preview-appear {
+  to {
+    opacity: 1;
+  }
+}
+
+/* 세로가 긴 데스크톱에서는 cover canvas의 좌우가 잘린다. 후보 군집을 Event 쪽으로
+   모아 1024px 폭에서도 유형별 미리보기가 창 안에 남도록 한다. */
+@media (min-width: 901px) and (max-width: 1279px) {
+  .relatedLeftPreview {
+    transform: translateX(5cqw) scale(0.66);
+    transform-origin: 0 0;
+  }
+
+  .relatedRightPreview {
+    transform: translateX(-5cqw) scale(0.66);
+    transform-origin: 0 0;
+  }
+}
+
 @media (max-width: 900px) {
   .canvas {
     inset: 0;
@@ -405,14 +453,9 @@
 
   .fieldActions {
     top: 14px;
-    right: 14px;
-    gap: 6px;
-  }
-
-  .layoutBadge {
-    top: 14px;
+    right: auto;
     left: 14px;
-    font-size: 10px;
+    gap: 6px;
   }
 
   .fieldAction {
@@ -425,7 +468,7 @@
     display: none;
   }
 
-  .ambientLayer {
+  .previewCluster {
     display: none;
   }
 
@@ -520,8 +563,17 @@
 
 @media (prefers-reduced-motion: reduce) {
   .node,
-  .relations {
+  .relations,
+  .previewCluster {
     opacity: 1;
     animation: none;
+  }
+
+  .previewStar {
+    transition: none;
+  }
+
+  .previewLink {
+    transition: none;
   }
 }

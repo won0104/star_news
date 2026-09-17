@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Link, useSearchParams } from 'react-router-dom'
 import { historyGraph, historyOverview, historyStories } from '../../data/history'
 import { useSettingsValues } from '../../store/settings'
@@ -43,6 +42,8 @@ export function DiaryHistoryPane() {
   const selectedEvent = findEvent(selectedNode)
   // The primary story's events are exactly the ones the graph turns into stars.
   const clusterEvents = cluster.story.events
+  // 펼쳐 둔 사건. 한 번에 하나만 열린다.
+  const [openEventId, setOpenEventId] = useState(null)
   const eventPageCount = Math.max(1, Math.ceil(clusterEvents.length / EVENTS_PER_PAGE))
   const safeEventPageIndex = Math.min(eventPageIndex, eventPageCount - 1)
   const visibleEvents = clusterEvents.slice(
@@ -184,16 +185,83 @@ export function DiaryHistoryPane() {
                 </p>
               </div>
 
+              {/*
+                사건을 누르면 그 자리에서 펼쳐진다. 모달로 띄우던 것을 접은 이유는, 여기서
+                보려는 것이 사건 하나의 전부가 아니라 "이 사건에서 내가 접한 발언"이라는
+                한 조각이어서다 — 목록을 덮을 만큼의 내용이 아니다.
+
+                한 번에 하나만 열린다. 페이지가 짧아 여러 개를 펼치면 목록이 화면을 넘긴다.
+              */}
               <ul className={styles.eventList}>
-                {visibleEvents.map((event) => (
-                  <li key={event.id}>
-                    <button type="button" onClick={() => selectEventFromList(event)}>
-                      <small>{event.lastReadAt}</small>
-                      <strong>{event.title}</strong>
-                      <p>관련 기사 {event.articles.length}개</p>
-                    </button>
-                  </li>
-                ))}
+                {visibleEvents.map((event) => {
+                  const open = openEventId === event.id
+                  const statements = event.statements ?? []
+
+                  return (
+                    <li key={event.id}>
+                      <button
+                        type="button"
+                        aria-expanded={open}
+                        onClick={() => {
+                          setOpenEventId(open ? null : event.id)
+                          // 목록과 행성이 따로 놀지 않도록, 펼치는 사건으로 지구를 돌린다.
+                          if (!open) selectEventFromList(event)
+                        }}
+                      >
+                        <small>{event.lastReadAt}</small>
+                        <strong>{event.title}</strong>
+                        <p>
+                          <span className={styles.eventCount}>발언 {statements.length}</span>
+                          <span className={styles.eventChevron} aria-hidden>
+                            {open ? '▾' : '▸'}
+                          </span>
+                        </p>
+                      </button>
+
+                      {open && (
+                        <div className={styles.statementBox}>
+                          <section>
+                            <h4>발언</h4>
+                            {statements.length > 0 ? (
+                              <ul className={styles.statementList}>
+                                {statements.map((statement) => (
+                                  <li key={statement.nodeKey}>{statement.label}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className={styles.statementEmpty}>
+                                이 사건에서 접한 발언이 없어요.
+                              </p>
+                            )}
+                          </section>
+
+                          <section>
+                            <h4>
+                              내가 읽은 기사
+                              <b>{event.articles.length}</b>
+                            </h4>
+                            {event.articles.length > 0 ? (
+                              <ul className={styles.eventArticleList}>
+                                {event.articles.map((article) => (
+                                  <li key={article.id}>
+                                    <small>
+                                      {article.source} · {article.readAt}
+                                    </small>
+                                    <p>{article.title}</p>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className={styles.statementEmpty}>
+                                이 사건에서 읽은 기사가 없어요.
+                              </p>
+                            )}
+                          </section>
+                        </div>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
 
               {eventPageCount > 1 && (
@@ -250,86 +318,7 @@ export function DiaryHistoryPane() {
         </article>
       </DiaryShell>
 
-      {selectedEvent && (
-        <ArticlePopup event={selectedEvent} onClose={() => setSelectedNode(null)} />
-      )}
     </section>
   )
 }
 
-/**
- * The articles behind one Event, in a window over the diary.
- *
- * The diary's right page lists Events and nothing else, so the articles need somewhere
- * of their own; a window keeps the page underneath intact, which a second in-page view
- * did not. Mounted only while an Event is chosen — there is no open/closed animation to
- * preserve, so there is nothing to keep mounted for.
- */
-function ArticlePopup({ event, onClose }) {
-  const closeRef = useRef(null)
-
-  useEffect(() => {
-    const closeOnEscape = (keyEvent) => {
-      if (keyEvent.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', closeOnEscape)
-    closeRef.current?.focus()
-    return () => document.removeEventListener('keydown', closeOnEscape)
-  }, [onClose])
-
-  return createPortal(
-    <div
-      className={styles.scrim}
-      role="presentation"
-      onClick={(clickEvent) => {
-        if (clickEvent.target === clickEvent.currentTarget) onClose()
-      }}
-    >
-      <div
-        className={styles.popup}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="article-popup-title"
-      >
-        <button
-          type="button"
-          ref={closeRef}
-          className={styles.popupClose}
-          onClick={onClose}
-          aria-label="닫기"
-        >
-          ✕
-        </button>
-
-        <div className={styles.popupHead}>
-          <span>READ ARTICLES</span>
-          <h3 id="article-popup-title">{event.title}</h3>
-          <p>
-            관련 기사 {event.articles.length}개 · 마지막 열람 {event.lastReadAt}
-          </p>
-        </div>
-
-        <ol className={styles.articleList}>
-          {event.articles.map((article, index) => (
-            <li key={article.id}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <div>
-                <small>
-                  {article.source} · {article.readAt}
-                </small>
-                <strong>{article.title}</strong>
-                <p>{article.summary}</p>
-                {/* Nothing behind this yet: the article data carries no link and there is
-                    no article route, the same gap <TrendPanel>'s 상세 보기 is holding. */}
-                <button type="button" className={styles.articleDetail}>
-                  상세 보기 →
-                </button>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </div>,
-    document.body,
-  )
-}

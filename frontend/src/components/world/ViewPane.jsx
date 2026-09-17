@@ -22,7 +22,7 @@ import styles from './ViewPane.module.css'
  */
 export function ViewPane({ view, settled = true, playTrendTransition = false }) {
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${view === 'trend' ? styles.trendPage : ''}`}>
       {view === 'trend' && <TrendStage playTransition={playTrendTransition} />}
       {view === 'foryou' && <RecommendPane settled={settled} />}
       {view === 'foryou2' && <EditorialRecommendPane />}
