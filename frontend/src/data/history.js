@@ -9,12 +9,36 @@ export const historyOverview = {
 
 const SOURCES = ['연합뉴스', '한국경제', '전자신문'];
 
-const makeEvent = (id, title, articleCount, lastReadAt, at) => ({
+/**
+ * 한 기사에 실제 길이의 요약을 물려 기사 패널이 견디는지 본다. 나머지 기본 요약은
+ * 30자 안팎이라 줄바꿈도 스크롤도 일어나지 않아, 그 상태로는 레이아웃이 검증되지 않는다.
+ * 실제 요약은 이 정도 분량으로 내려온다.
+ */
+const SAMPLE_LONG_SUMMARY =
+  '유니테스트가 최근 SK하이닉스와 검사장비 공급 계약을 체결했다. ' +
+  'HBM3E 수율 경쟁이 본격화되며 테스트 장비 수요와 장비주에 대한 관심이 커진 상황에서 체결된 계약이다. ' +
+  '유니테스트는 국내에서 처음으로 메모리 모듈·컴포넌트 테스터를 개발한 업체이며, ' +
+  '전체 매출의 약 60%를 태양광 사업에서 올리고 태양광 발전시공과 태양전지 개발도 병행하고 있다.'
+
+/** 사건 전체를 설명하는 Event 요약. 기사 한 건의 요약과는 다른 층위다. */
+const SAMPLE_EVENT_SUMMARY =
+  '한국은행이 1년째 기준금리 3.50%를 8차례 연속 동결했다. ' +
+  '물가가 5개월 연속 3%대에 머무르는 가운데 부동산 PF 부실 우려·취약차주 연체율 상승·저성장 압력이 ' +
+  '동시에 금리 인하 필요를 키웠지만 물가 안정 확신이 없어 긴축을 유지하는 딜레마에 빠졌다. ' +
+  '관건은 물가 수습 여부로, 당분간 추가 동결 가능성이 거론되는 한편 시장은 2분기 말~3분기 인하 가능성을 주시하고 있다.'
+
+/**
+ * `summaries`를 주면 기사별 기본 요약 대신 그 값을 쓴다. 인덱스별로 null이면 기본값으로 떨어진다.
+ * `summary`는 Event 자체의 요약으로, 기사 한 건이 아니라 사건 전체를 설명한다 — 화면의
+ * EVENT SUMMARY가 첫 기사 요약을 빌려 쓰던 것을 대신한다.
+ */
+const makeEvent = (id, title, articleCount, lastReadAt, at, summaries = [], summary = null) => ({
   id,
   title,
   articleCount,
   lastReadAt,
   at,
+  summary,
   articles: SOURCES.map((source, index) => ({
     id: `${id}-article-${index + 1}`,
     source,
@@ -24,7 +48,7 @@ const makeEvent = (id, title, articleCount, lastReadAt, at) => ({
       `${title}, 시장과 현장 반응은`,
       `${title} 관련 쟁점 정리`,
     ][index],
-    summary: [
+    summary: summaries[index] ?? [
       '사건의 배경과 발표 내용, 앞으로의 일정을 정리한 기사예요.',
       '사건 이후 시장과 업계, 현장에서 나타난 변화를 다뤘어요.',
       '이 사건과 연결된 주요 쟁점과 후속 전망을 설명해요.',
@@ -124,7 +148,7 @@ const topic = (topicCode, topicName, tone, articleCount, storyId, storyTitle, ev
 
 export const historyStories = [
   topic('POLITICS', '정치', 'rose', 18, 'policy-session', '정기국회와 주요 정책 협상', [
-    makeEvent('budget-talk', '여야, 내년도 예산안 협상 착수', 7, '오늘 00:31', [19, 25]),
+    makeEvent('budget-talk', '여야, 내년도 예산안 협상 착수', 7, '오늘 00:31', [19, 25], [SAMPLE_LONG_SUMMARY], SAMPLE_EVENT_SUMMARY),
     makeEvent('committee', '상임위별 주요 법안 심사 재개', 6, '어제 19:20', [81, 26]),
     makeEvent('audit-plan', '국정감사 일정과 증인 협의', 5, '9월 11일', [50, 80]),
   ]),

@@ -3,11 +3,11 @@ import { createPortal } from 'react-dom'
 import { Link, useSearchParams } from 'react-router-dom'
 import { historyGraph, historyOverview, historyStories } from '../../data/history'
 import { useSettingsValues } from '../../store/settings'
+import { DiaryShell } from './DiaryShell'
 import { HistoryPane } from './HistoryPane'
 import styles from './DiaryHistoryPane.module.css'
 
 const HistoryPlanet = lazy(() => import('./HistoryPlanet'))
-const DIARY_FRAME_URL = '/assets/history/diary-observatory-window-transparent.png'
 const BOOKMARK_ASSET = '/assets/history/bookmarks'
 const EVENTS_PER_PAGE = 3
 
@@ -94,8 +94,7 @@ export function DiaryHistoryPane() {
       className={`${styles.page} ${styles[TONE_CLASS[cluster.tone]]}`}
       aria-label="나의 기록 다이어리"
     >
-      <div className={styles.diaryStage}>
-        <img className={styles.diaryFrame} src={DIARY_FRAME_URL} alt="" aria-hidden="true" />
+      <DiaryShell stageClassName={styles.diaryStage} frameClassName={styles.diaryFrame}>
 
         <Link className={styles.reportBookmark} to="/app?view=report">
           <img src={`${BOOKMARK_ASSET}/bookmark-report-blank.svg`} alt="" aria-hidden="true" />
@@ -249,7 +248,7 @@ export function DiaryHistoryPane() {
             </div>
           )}
         </article>
-      </div>
+      </DiaryShell>
 
       {selectedEvent && (
         <ArticlePopup event={selectedEvent} onClose={() => setSelectedNode(null)} />

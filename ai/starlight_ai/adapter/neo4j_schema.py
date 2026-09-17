@@ -145,14 +145,19 @@ def adapt_to_schema(
             continue
 
         if kind == "STATEMENT":
+            # 2.1 public-v2: text / statement_type
+            # 2.3 compact public-v2.2: canonical_text / statement_type_value
             nodes_out.append(
                 {
                     "labels": ["Statement"],
                     "properties": {
                         "nodeId": nid,
-                        "text": _display_text(props, "text", "name"),
-                        "statementType": props.get("statement_type")
-                        or props.get("statementType"),
+                        "text": _display_text(props, "text", "canonical_text", "name"),
+                        "statementType": (
+                            props.get("statement_type")
+                            or props.get("statementType")
+                            or props.get("statement_type_value")
+                        ),
                     },
                 }
             )

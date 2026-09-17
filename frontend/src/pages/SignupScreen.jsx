@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { checkIdAvailability, signUp } from '../api/auth';
 import { authMessages, signupCopy } from '../data/auth';
 import { startSession } from '../store/session';
-import { validateConfirm, validateEmail, validateId, validateName, validatePassword } from '../utils/validation';
+import { validateConfirm, validateId, validateNickname, validatePassword } from '../utils/validation';
 import { AuthField } from '../components/auth/AuthField';
 import { AuthForm, AuthFormError, AuthPrompt, AuthShell, AuthSubmit } from '../components/auth/AuthShell';
 import styles from '../components/auth/Auth.module.css';
@@ -14,8 +14,7 @@ import styles from '../components/auth/Auth.module.css';
 export function SignupScreen() {
   const navigate = useNavigate();
   const [id, setId] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [terms, setTerms] = useState(false);
@@ -52,14 +51,24 @@ export function SignupScreen() {
       return;
     }
     clearError('id');
+    setFormError(null);
     setIdCheck({
       status: 'checking'
     });
-    const available = await checkIdAvailability(trimmedId);
-    setIdCheck({
-      status: available ? 'available' : 'taken',
-      id: trimmedId
-    });
+    try {
+      const available = await checkIdAvailability(trimmedId);
+      setIdCheck({
+        status: available ? 'available' : 'taken',
+        id: trimmedId
+      });
+    } catch (error) {
+      // Unchecked is the honest state after a failed check — treating it as "taken"
+      // would blame the id for what the network did.
+      setIdCheck({
+        status: 'idle'
+      });
+      setFormError(error?.code === 'NETWORK_ERROR' ? authMessages.networkFailed : authMessages.signupFailed);
+    }
   };
   const idMessage = idCheck.status === 'checking' ? {
     tone: 'muted',
@@ -77,8 +86,7 @@ export function SignupScreen() {
     const passwordError = validatePassword(password);
     const next = {
       id: idError,
-      name: validateName(name),
-      email: validateEmail(email),
+      nickname: validateNickname(nickname),
       password: passwordError,
       confirm: passwordError ? null : validateConfirm(password, confirm),
       terms: terms ? null : authMessages.termsRequired
@@ -88,19 +96,27 @@ export function SignupScreen() {
     setSubmitting(true);
     setFormError(null);
     try {
-      await signUp({
+      // signUp logs in as well — the signup response carries no token of its own.
+      const session = await signUp({
         id: trimmedId,
-        name: name.trim(),
-        email: email.trim(),
+        nickname: nickname.trim(),
         password
       });
-      // Signing up drops you straight into a session, same as signing in.
-      startSession({
-        id: trimmedId
-      });
+      startSession(session);
       navigate('/app');
-    } catch {
-      setFormError(authMessages.signupFailed);
+    } catch (error) {
+      if (error?.code === 'LOGIN_ID_ALREADY_EXISTS') {
+        setIdCheck({
+          status: 'taken',
+          id: trimmedId
+        });
+        setErrors(prev => ({
+          ...prev,
+          id: authMessages.idTaken
+        }));
+        return;
+      }
+      setFormError(error?.code === 'SIGNUP_LOGIN_FAILED' || error?.code === 'NETWORK_ERROR' ? error.message : authMessages.signupFailed);
     } finally {
       setSubmitting(false);
     }
@@ -110,13 +126,9 @@ export function SignupScreen() {
         <AuthField id="signup-id" label={signupCopy.id.label} placeholder={signupCopy.id.placeholder} autoComplete="username" value={id} error={errors.id} message={idMessage} onChange={event => handleIdChange(event.target.value)} trailing={<button type="button" className={styles.secondary} disabled={idCheck.status === 'checking'} onClick={runIdCheck}>
               {signupCopy.duplicateCheck}
             </button>} />
-        <AuthField id="signup-name" label={signupCopy.name.label} placeholder={signupCopy.name.placeholder} autoComplete="name" value={name} error={errors.name} onChange={event => {
-        setName(event.target.value);
-        clearError('name');
-      }} />
-        <AuthField id="signup-email" type="email" label={signupCopy.email.label} placeholder={signupCopy.email.placeholder} autoComplete="email" value={email} error={errors.email} onChange={event => {
-        setEmail(event.target.value);
-        clearError('email');
+        <AuthField id="signup-nickname" label={signupCopy.nickname.label} placeholder={signupCopy.nickname.placeholder} autoComplete="nickname" value={nickname} error={errors.nickname} onChange={event => {
+        setNickname(event.target.value);
+        clearError('nickname');
       }} />
         <AuthField id="signup-password" type="password" label={signupCopy.password.label} placeholder={signupCopy.password.placeholder} autoComplete="new-password" value={password} error={errors.password} onChange={event => {
         setPassword(event.target.value);

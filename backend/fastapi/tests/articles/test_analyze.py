@@ -1,4 +1,5 @@
 import json
+import math
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -17,6 +18,29 @@ MOCK_AI_RESULT_PATH = Path(__file__).resolve().parents[1] / "fixtures" / "starli
 
 def _mock_ai_result() -> dict:
     return json.loads(MOCK_AI_RESULT_PATH.read_text(encoding="utf-8"))
+
+
+def _dot(a: list[float], b: list[float]) -> float:
+    return sum(x * y for x, y in zip(a, b))
+
+
+def _normalize(a: list[float]) -> list[float]:
+    norm = math.sqrt(_dot(a, a))
+    return [x / norm for x in a]
+
+
+# base와 정확히 원하는 "Neo4j 벡터 인덱스 score"를 갖는 새 unit vector를 만든다 (numpy 없이 순수 파이썬으로)
+# 실측 확인: Neo4j cosine 인덱스의 score는 순수 코사인이 아니라 (1 + 코사인) / 2 로 변환된 값이라,
+# 원하는 score를 만들려면 그에 대응하는 raw cosine(=2*score-1)을 먼저 구해서 합성해야 한다.
+# base·cos + 직교성분·sin으로 합성하면 base와의 내적(raw cosine)이 정확히 그 값이 됨
+def _vector_with_similarity(base: list[float], target_score: float) -> list[float]:
+    base = _normalize(base)
+    raw = [1.0 if i % 2 == 0 else -1.0 for i in range(len(base))]
+    dot = _dot(raw, base)
+    orthogonal = _normalize([r - dot * b for r, b in zip(raw, base)])
+    target_cosine = 2 * target_score - 1
+    other_weight = math.sqrt(max(0.0, 1 - target_cosine**2))
+    return [target_cosine * b + other_weight * o for b, o in zip(base, orthogonal)]
 
 
 # /articles/analyze 엔드포인트 검증. _call_ai만 목업으로 바꾸고, 나머지(Neo4j 반영)는 실제 로컬 Neo4j로 그대로 실행한다.
@@ -118,3 +142,84 @@ def test_analyze_article_is_idempotent_on_retry(monkeypatch):
 
     # Statement는 CREATE가 아니라 MERGE라, 두 번 분석해도 중복 생성되면 안 됨
     assert statement_count == 1
+
+
+# Event.title/embedding만 바꾼 목업을 만든다 (같은 Topic/Entity 등은 그대로 재사용)
+def _mock_ai_result_with_event(title: str, embedding: list[float]) -> dict:
+    result = _mock_ai_result()
+    for node in result["nodes"]:
+        if "Event" in node["labels"]:
+            node["properties"]["title"] = title
+            node["properties"]["embedding"] = embedding
+    return result
+
+
+# 서로 다른 기사의 Event 둘이 "같은 사건(Event dedup)"은 아니지만 "같은 흐름"일 만큼 유사하면,
+# 둘 다 외톨이 상태에서 만나 하나의 Story로 승격되는지 확인 (B안 핵심 시나리오)
+def test_two_related_events_get_promoted_into_shared_story(monkeypatch):
+    test_article_id_1 = 900301
+    test_article_id_2 = 900302
+    test_source_id = 900001
+
+    with _driver.session() as session:
+        session.run(
+            "MATCH (a:Article) WHERE a.mysqlArticleId IN [$id1, $id2] DETACH DELETE a",
+            id1=test_article_id_1,
+            id2=test_article_id_2,
+        )
+
+    base_mock = _mock_ai_result()
+    base_event_node = next(n for n in base_mock["nodes"] if "Event" in n["labels"])
+    base_embedding = base_event_node["properties"]["embedding"]
+    # Event dedup 임계값(0.92)보다 낮고 Story 임계값(0.80)보다는 높은 유사도 - "다른 사건, 같은 흐름"
+    related_embedding = _vector_with_similarity(base_embedding, 0.85)
+
+    headers = {"x-internal-api-key": settings.internal_api_key}
+
+    monkeypatch.setattr(
+        service, "_call_ai", lambda request: _mock_ai_result_with_event("1차 발표", base_embedding)
+    )
+    first = client.post(
+        "/internal/v1/articles/analyze",
+        json={
+            "articleId": test_article_id_1,
+            "title": "청년 주거 지원 1차 발표",
+            "content": "목업 대체",
+            "sourceId": test_source_id,
+            "sourceName": "테스트뉴스",
+            "publishedAt": "2026-09-08T09:00:00+09:00",
+        },
+        headers=headers,
+    )
+    assert first.status_code == 200
+
+    monkeypatch.setattr(
+        service, "_call_ai", lambda request: _mock_ai_result_with_event("후속 조치 발표", related_embedding)
+    )
+    second = client.post(
+        "/internal/v1/articles/analyze",
+        json={
+            "articleId": test_article_id_2,
+            "title": "청년 주거 지원 후속 조치",
+            "content": "목업 대체",
+            "sourceId": test_source_id,
+            "sourceName": "테스트뉴스",
+            "publishedAt": "2026-09-15T09:00:00+09:00",
+        },
+        headers=headers,
+    )
+    assert second.status_code == 200
+
+    with _driver.session() as session:
+        story_ids = session.run(
+            """
+            MATCH (a:Article)-[:COVERS]->(:Event)-[:PART_OF]->(s:Story)
+            WHERE a.mysqlArticleId IN [$id1, $id2]
+            RETURN DISTINCT s.nodeId AS storyId
+            """,
+            id1=test_article_id_1,
+            id2=test_article_id_2,
+        ).value()
+
+    # 둘 다 정확히 같은 Story 하나로 묶여야 함 (승격 시나리오)
+    assert len(story_ids) == 1

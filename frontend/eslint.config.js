@@ -20,4 +20,9 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Build config runs in Node, not the browser — `process` is a global there.
+    files: ['vite.config.js'],
+    languageOptions: { globals: globals.node },
+  },
 ])

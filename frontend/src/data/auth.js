@@ -27,13 +27,9 @@ export const signupCopy = {
     placeholder: '사용할 아이디를 입력하세요'
   },
   duplicateCheck: '중복확인',
-  name: {
-    label: '이름',
-    placeholder: '이름을 입력하세요'
-  },
-  email: {
-    label: '이메일',
-    placeholder: 'you@example.com'
+  nickname: {
+    label: '닉네임',
+    placeholder: '2~50자로 입력하세요'
   },
   password: {
     label: '비밀번호',
@@ -53,18 +49,24 @@ export const signupCopy = {
 export const authMessages = {
   idRequired: '아이디를 입력해 주세요.',
   idTooShort: '아이디는 4자 이상이어야 합니다.',
-  idFormat: '아이디는 영문, 숫자, 밑줄(_)만 사용할 수 있습니다.',
+  idFormat: '아이디는 영문 소문자, 숫자, 밑줄(_)만 사용할 수 있습니다.',
+  idTooLong: '아이디는 50자 이하여야 합니다.',
   idChecking: '확인 중…',
   idAvailable: '사용 가능한 아이디입니다.',
   idTaken: '이미 사용 중인 아이디입니다.',
   idUnchecked: '아이디 중복확인을 해 주세요.',
-  nameRequired: '이름을 입력해 주세요.',
+  nicknameRequired: '닉네임을 입력해 주세요.',
+  nicknameTooShort: '닉네임은 2자 이상이어야 합니다.',
+  nicknameTooLong: '닉네임은 50자 이하여야 합니다.',
   emailRequired: '이메일을 입력해 주세요.',
   emailFormat: '올바른 이메일 형식이 아닙니다.',
   passwordRequired: '비밀번호를 입력해 주세요.',
   passwordTooShort: '비밀번호는 8자 이상이어야 합니다.',
+  passwordTooLong: '비밀번호는 20자 이하여야 합니다.',
   confirmMismatch: '비밀번호가 일치하지 않습니다.',
   termsRequired: '약관에 동의해야 가입할 수 있습니다.',
   loginFailed: '아이디 또는 비밀번호를 확인해 주세요.',
-  signupFailed: '가입에 실패했습니다. 잠시 후 다시 시도해 주세요.'
+  loginDeleted: '탈퇴한 계정입니다.',
+  signupFailed: '가입에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+  networkFailed: '서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.'
 };

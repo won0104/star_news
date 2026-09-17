@@ -27,27 +27,6 @@
   --tone: 128, 215, 193;
 }
 
-.diaryStage {
-  position: relative;
-  width: 100%;
-  margin-inline: auto;
-  aspect-ratio: 3 / 2;
-  overflow: hidden;
-  isolation: isolate;
-  background: transparent;
-  filter: drop-shadow(0 24px 42px rgba(42, 25, 12, 0.3));
-}
-
-.diaryFrame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-}
-
 .reportBookmark {
   position: absolute;
   z-index: 6;

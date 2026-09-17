@@ -20,9 +20,8 @@ class KGExtractor:
         import os
 
         self.bundle = Path(kg_dir).expanduser().resolve()
-        config = self.bundle / "config" / "pipeline.json"
-        if not config.is_file():
-            raise FileNotFoundError(f"KG bundle missing config/pipeline.json: {self.bundle}")
+        if not self.bundle.is_dir():
+            raise FileNotFoundError(f"KG bundle directory missing: {self.bundle}")
 
         if hf_cache is not None:
             cache = str(Path(hf_cache).expanduser().resolve())
@@ -33,9 +32,27 @@ class KGExtractor:
         if root not in sys.path:
             sys.path.insert(0, root)
 
+        self.device = device
+        # v2.3 권장 엔트리(BoundedCandidate). 없으면 기존 pipeline.json 경로.
+        bounded = (
+            self.bundle / "runtime" / "candidate_routing" / "integrated.py"
+        )
+        if bounded.is_file():
+            from runtime.candidate_routing.integrated import ArticleLocalBoundedCandidate
+
+            candidate = ArticleLocalBoundedCandidate.load(device=device)
+            candidate.eager_backbone()
+            self._pipeline = candidate
+            return
+
+        config = self.bundle / "config" / "pipeline.json"
+        if not config.is_file():
+            raise FileNotFoundError(
+                f"KG bundle missing config/pipeline.json: {self.bundle}"
+            )
+
         from runtime import ArticleLocalKGPipeline
 
-        self.device = device
         self._pipeline = ArticleLocalKGPipeline.from_config(
             config,
             repository_root=self.bundle,
