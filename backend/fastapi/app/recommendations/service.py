@@ -5,7 +5,15 @@ from datetime import datetime, timedelta, timezone
 from neo4j import Session
 
 from app.recommendations import repository
-from app.recommendations.schemas import CBFCandidate, CFCandidate, ScoredEvent
+from app.recommendations.schemas import (
+    CBFCandidate,
+    CFCandidate,
+    RecommendationCalculateRequest,
+    RecommendationCalculateResponse,
+    RecommendationItem,
+    ScoredEvent,
+    UserRecommendationResult,
+)
 
 # 최근성 가중치 반감기(일). 이 날짜만큼 지나면 가중치가 절반으로 줄어듦.
 RECENCY_HALF_LIFE_DAYS = 14
@@ -17,9 +25,47 @@ FAVORITE_WEIGHT_MULTIPLIER = 2.0
 POPULARITY_HALF_LIFE_DAYS = 3
 
 
-# 관심 기반/관심 확장 추천 최종 계산
-def calculate_recommendations(request: dict):
-    raise NotImplementedError
+# 관심 기반 추천 최종 계산 - Chunk로 묶인 유저들을 순회하며 각자 추천 결과를 조립한다
+def calculate_recommendations(
+    request: RecommendationCalculateRequest, session: Session
+) -> RecommendationCalculateResponse:
+    results: list[UserRecommendationResult] = []
+
+    for user in request.users:
+        # 1) Neo4j User Graph에 없는 유저는 이 유저만 건너뛰고 나머지는 정상 처리 (부분 성공)
+        if not repository.user_exists(session, user.user_id):
+            continue
+
+        # 2) CONSUMED 이력 여부로 이번 결과가 CF+CBF 정상 계산인지 콜드스타트인지 판정
+        is_cold_start = not repository.has_consumption_history(session, user.user_id)
+        recommendation_type = "COLD_START" if is_cold_start else "NORMAL"
+
+        # 3) 실제 추천 계산 
+        scored = calculate_interest_based_recommendations(user.user_id, session, is_cold_start=is_cold_start)
+
+        # 후보가 하나도 없으면 (신규 Topic이라 인기 Event도 없는 등) 빈 목록으로 응답
+        if not scored:
+            results.append(UserRecommendationResult(user_id=user.user_id, items=[]))
+            continue
+
+        # 4) 응답에 필요한 화면 표시 정보(제목/대표 Topic)를 최종 추천 Event들에 대해서만 한 번에 조회
+        display_info = repository.fetch_event_display_info(session, [s.event_id for s in scored])
+
+        # 5) 점수 순서(scored가 이미 내림차순)를 그대로 rank로 매겨서 응답 아이템 조립
+        items = [
+            RecommendationItem(
+                event_id=s.event_id,
+                label=display_info.get(s.event_id, {}).get("label") or "",
+                topic_code=display_info.get(s.event_id, {}).get("topicCode") or "",
+                score=s.score,
+                rank=rank,
+                recommendation_type=recommendation_type,
+            )
+            for rank, s in enumerate(scored, start=1)
+        ]
+        results.append(UserRecommendationResult(user_id=user.user_id, items=items))
+
+    return RecommendationCalculateResponse(cycle=request.cycle, results=results)
 
 # CF/CBF 결합 가중치 기본값. 나중에 -84에서 튜닝.
 DEFAULT_CBF_WEIGHT = 0.5
@@ -28,7 +74,9 @@ DEFAULT_CF_WEIGHT = 0.5
 # 1. 추천 후보 공통 필터링 공용 모듈
 def get_eligible_candidate_event_ids(user_id: int, session: Session) -> set[str]:
     recency_threshold = datetime.now(timezone.utc) - timedelta(days=repository.RECENCY_WINDOW_DAYS)
-    return set(repository.find_candidate_events(session, user_id, recency_threshold))
+    # 관심 Topic이 있으면 그 Topic으로 후보를 하드 필터링, 없으면 전체 Topic 대상
+    interested_topic_codes = repository.find_user_interested_topics(session, user_id)
+    return set(repository.find_candidate_events(session, user_id, recency_threshold, interested_topic_codes))
 
 # 2. 협업 필터링(CF) 공용 모듈
 def calculate_cf_scores(user_id: int, session: Session) -> list[CFCandidate]:
@@ -139,10 +187,13 @@ def calculate_interest_based_recommendations(
     session: Session,
     cbf_weight: float = DEFAULT_CBF_WEIGHT,
     cf_weight: float = DEFAULT_CF_WEIGHT,
+    is_cold_start: bool | None = None,
 ) -> list[ScoredEvent]:
 
     # 콜드 스타트 처리
-    if not repository.has_consumption_history(session, user_id):
+    if is_cold_start is None:
+        is_cold_start = not repository.has_consumption_history(session, user_id)
+    if is_cold_start:
         return get_cold_start_fallback(user_id, session)
 
     # 후보 필터링 ∩ (CF+CBF 가중합) 계산

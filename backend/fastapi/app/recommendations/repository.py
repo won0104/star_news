@@ -6,39 +6,47 @@ from neo4j import Session
 # 유사 유저 탐색 시 fan-out을 제한하는 상위 인원 수
 SIMILAR_USER_LIMIT = 50
 
-# 후보 Event로 인정하는 최근성 기간 (일). 이보다 오래된 Event는 후보에서 제외.
+# 후보 Event로 인정하는 최근성 기간 (일) - 이보다 오래된 Event는 후보에서 제외
 RECENCY_WINDOW_DAYS = 15
 
 # 콘텐츠 기반 추천(CBF)에서 최종적으로 반환할 유사 Event 개수
 CONTENT_SIMILAR_EVENT_LIMIT = 20
 
 # Cold Start 폴백에서 최종적으로 반환할 Event 개수
-FALLBACK_EVENT_LIMIT = 20
+FALLBACK_EVENT_LIMIT = 10
 
 # 관심 기반 추천에서 최종적으로 반환할 Event 개수
-FINAL_RECOMMENDATION_LIMIT = 5
+FINAL_RECOMMENDATION_LIMIT = 10
 
 
 # 1. 추천 후보 공통 필터링
 # - 미열람 필터: 본인이 이미 CONSUMED한 Event 제외
 # - 비선호 Topic 제외 필터: 본인이 DISLIKES한 Topic으로 분류된 Event 제외
+# - 관심 Topic 하드 필터: 관심 Topic이 있으면 그 Topic으로 분류된 Event만, 없으면 전체 대상
 # - 최근성 필터: recency_threshold보다 오래된 Event 제외
-def find_candidate_events(session: Session, user_id: int, recency_threshold: datetime) -> list[str]:
+def find_candidate_events(
+    session: Session, user_id: int, recency_threshold: datetime, interested_topic_codes: list[str]
+) -> list[str]:
     result = session.run(
         """
         // 최근성 필터 먼저 적용 (event_occurred_at 인덱스로 좁힘)
         MATCH (candidate:Event)
-        
+
         WHERE candidate.occurredAt >= $recencyThreshold
-        // 비선호 Topic, 미열람 필터 적용 
+        // 비선호 Topic, 미열람, 관심 Topic 필터 적용
         MATCH (u:User {userId: $userId})
         WHERE NOT (u)-[:CONSUMED]->(candidate)
           AND NOT (candidate)-[:CLASSIFIED_AS]->(:Topic)<-[:DISLIKES]-(u)
+          AND ($interestedTopicCodes IS NULL OR EXISTS {
+              (candidate)-[:CLASSIFIED_AS]->(t:Topic) WHERE t.topicCode IN $interestedTopicCodes
+          })
 
         RETURN candidate.nodeId AS eventId
         """,
         userId=user_id,
         recencyThreshold=recency_threshold,
+        # 빈 리스트를 그대로 넘기면 `IN []`가 항상 거짓이라 아무것도 안 나옴 -> None으로 바꿔서 "필터 없음"으로 취급
+        interestedTopicCodes=interested_topic_codes or None,
     )
     return [record["eventId"] for record in result]
 
@@ -175,3 +183,23 @@ def find_events_with_consumer_counts(session: Session, topic_codes: list[str]) -
         }
         for record in result
     ]
+
+
+# 5. POST /internal/v1/recommendations/calculate 응답 조립용
+# 유저가 Neo4j User Graph에 존재하는지 확인 - 없는 유저는 추천 계산 대상에서 제외
+def user_exists(session: Session, user_id: int) -> bool:
+    result = session.run("MATCH (u:User {userId: $userId}) RETURN u LIMIT 1", userId=user_id).single()
+    return result is not None
+
+
+# 최종 추천 Event들의 화면 표시 정보(제목/대표 Topic) 조회 - event_id -> {label, topicCode}
+def fetch_event_display_info(session: Session, event_ids: list[str]) -> dict[str, dict]:
+    result = session.run(
+        """
+        MATCH (e:Event) WHERE e.nodeId IN $eventIds
+        OPTIONAL MATCH (e)-[:CLASSIFIED_AS]->(t:Topic)
+        RETURN e.nodeId AS eventId, e.title AS label, t.topicCode AS topicCode
+        """,
+        eventIds=event_ids,
+    )
+    return {record["eventId"]: {"label": record["label"], "topicCode": record["topicCode"]} for record in result}
