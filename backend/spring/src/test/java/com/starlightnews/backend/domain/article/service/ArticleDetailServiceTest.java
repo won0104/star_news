@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.domain.NewsOrganization;
 import com.starlightnews.backend.domain.article.dto.ArticleDetailResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
 import com.starlightnews.backend.domain.article.exception.ArticleErrorCode;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
@@ -41,6 +42,9 @@ class ArticleDetailServiceTest {
 	@Mock
 	private UserArticleFavoriteRepository userArticleFavoriteRepository;
 
+	@Mock
+	private ArticleSummaryService articleSummaryService;
+
 	@InjectMocks
 	private ArticleDetailService articleDetailService;
 
@@ -61,21 +65,40 @@ class ArticleDetailServiceTest {
 		assertThat(response.originalUrl()).isEqualTo("https://news.example.com/articles/101");
 		assertThat(response.bookmarked()).isFalse();
 		verifyNoInteractions(userArticleFavoriteRepository);
+		verifyNoInteractions(articleSummaryService);
 	}
 
 	@Test
-	void 로그인_사용자가_북마크한_기사는_bookmarked_true다() {
+	void 요약이_없는_기사는_생성한_요약을_상세에_포함한다() {
 		Article article = article(null);
 		given(articleRepository.findDetailByArticleId(ARTICLE_ID, AnalysisStatus.COMPLETED))
 				.willReturn(Optional.of(article));
 		given(userArticleFavoriteRepository.existsById(
 				new UserArticleFavoriteId(USER_ID, ARTICLE_ID))).willReturn(true);
+		given(articleSummaryService.generate(ARTICLE_ID)).willReturn(new ArticleSummaryResponse(
+				ARTICLE_ID, "생성된 요약", SummaryStatus.COMPLETED));
 
 		ArticleDetailResponse response = articleDetailService.getDetail(ARTICLE_ID, USER_ID);
 
-		assertThat(response.summary()).isNull();
-		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.NOT_REQUESTED);
+		assertThat(response.summary()).isEqualTo("생성된 요약");
+		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.COMPLETED);
 		assertThat(response.bookmarked()).isTrue();
+		verify(articleSummaryService).generate(ARTICLE_ID);
+	}
+
+	@Test
+	void 다른_요청이_요약_생성중이면_PROCESSING을_상세에_포함한다() {
+		Article article = article(null);
+		ReflectionTestUtils.setField(article, "summaryStatus", SummaryStatus.PROCESSING);
+		given(articleRepository.findDetailByArticleId(ARTICLE_ID, AnalysisStatus.COMPLETED))
+				.willReturn(Optional.of(article));
+		given(articleSummaryService.generate(ARTICLE_ID)).willReturn(new ArticleSummaryResponse(
+				ARTICLE_ID, null, SummaryStatus.PROCESSING));
+
+		ArticleDetailResponse response = articleDetailService.getDetail(ARTICLE_ID, null);
+
+		assertThat(response.summary()).isNull();
+		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.PROCESSING);
 	}
 
 	@Test
@@ -88,6 +111,7 @@ class ArticleDetailServiceTest {
 		assertThat(thrown).isInstanceOf(BusinessException.class);
 		assertThat(((BusinessException) thrown).getErrorCode()).isEqualTo(ArticleErrorCode.ARTICLE_NOT_FOUND);
 		verify(userArticleFavoriteRepository, never()).existsById(new UserArticleFavoriteId(USER_ID, ARTICLE_ID));
+		verifyNoInteractions(articleSummaryService);
 	}
 
 	@Test
@@ -101,6 +125,7 @@ class ArticleDetailServiceTest {
 		assertThat(((BusinessException) thrown).getErrorCode())
 				.isEqualTo(ArticleErrorCode.ARTICLE_DETAIL_QUERY_FAILED);
 		verifyNoInteractions(userArticleFavoriteRepository);
+		verifyNoInteractions(articleSummaryService);
 	}
 
 	@Test
@@ -116,6 +141,7 @@ class ArticleDetailServiceTest {
 		assertThat(thrown).isInstanceOf(BusinessException.class);
 		assertThat(((BusinessException) thrown).getErrorCode())
 				.isEqualTo(ArticleErrorCode.ARTICLE_DETAIL_QUERY_FAILED);
+		verifyNoInteractions(articleSummaryService);
 	}
 
 	private Article article(String summary) {

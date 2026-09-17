@@ -33,7 +33,8 @@ public class ArticleSummaryService {
 			주어진 기사 제목과 본문만 근거로 핵심 내용을 한국어로 요약하라.
 
 			- 핵심 사건이나 결정을 먼저 제시하고, 주요 근거와 수치, 본문에 제시된 영향이나 전망을 중요도 순으로 충분히 담는다.
-			- 핵심 정보가 적으면 짧게 작성해도 되며, 분량을 채우기 위해 내용을 반복하거나 추측하지 않는다.
+			- 핵심 정보가 충분하면 공백과 문장부호를 포함해 160~190자로 작성한다.
+			- 핵심 정보가 적으면 160자보다 짧게 작성해도 되며, 분량을 채우기 위해 내용을 반복하거나 추측하지 않는다.
 			- 어떤 경우에도 공백과 문장부호를 포함해 200자를 초과하지 않는다.
 			- 기사의 핵심을 객관적으로 전달하는 요약문으로 쓰고, 모든 문장을 "~했다", "~이다", "~전망이다"와 같은 하다체로 끝맺는다.
 			- 키워드와 수치만 나열하는 개조식, 명사형 종결, 화살표나 괄호에 의존한 축약을 사용하지 않는다.
@@ -42,16 +43,6 @@ public class ArticleSummaryService {
 			- 언론사 이름, 기자 이름, 기사 제목은 언급하지 않는다.
 			- "이 기사는", "요약하면" 같은 말로 시작하지 않고 내용부터 바로 쓴다.
 			- 요약문 외의 설명이나 형식 표시는 출력하지 않는다.""";
-
-	private static final String REWRITE_INSTRUCTION = """
-			너는 뉴스 요약문을 다듬는 편집자다.
-			아래 요약문의 사실과 핵심 의미를 유지하면서 다시 작성하라.
-
-			- 공백과 문장부호를 포함해 200자를 초과하지 않는다.
-			- 내용을 새로 추가하거나 추측하지 않는다.
-			- 모든 문장을 하다체의 자연스러운 완결 문장으로 작성한다.
-			- 키워드와 수치만 나열하는 개조식을 사용하지 않는다.
-			- 수정한 요약문 외의 설명이나 형식 표시는 출력하지 않는다.""";
 
 	private final ArticleRepository articleRepository;
 	private final ArticleSummaryWriter writer;
@@ -115,12 +106,7 @@ public class ArticleSummaryService {
 				.formatted(target.getTitle(), target.getContent());
 		try {
 			String summary = normalizeSummary(gmsClient.generate(INSTRUCTION, input));
-			if (codePointCount(summary) <= MAX_SUMMARY_CODE_POINTS && endsWithCompleteSentence(summary)) {
-				return summary;
-			}
-
-			String rewritten = normalizeSummary(gmsClient.generate(REWRITE_INSTRUCTION, summary));
-			return keepCompleteSentencesWithinLimit(rewritten);
+			return keepCompleteSentencesWithinLimit(summary);
 		} catch (RuntimeException exception) {
 			markFailedOrThrow(target.getArticleId());
 			log.warn("기사 요약 생성에 실패했습니다. articleId={}", target.getArticleId(), exception);
@@ -173,25 +159,11 @@ public class ArticleSummaryService {
 		return value.codePointCount(0, value.length());
 	}
 
-	private static boolean endsWithCompleteSentence(String summary) {
-		Matcher sentenceEnd = SENTENCE_END_PATTERN.matcher(summary);
-		int lastSentenceEndIndex = -1;
-		while (sentenceEnd.find()) {
-			lastSentenceEndIndex = sentenceEnd.end();
-		}
-		return lastSentenceEndIndex == summary.length();
-	}
-
-	/** 200자를 넘긴 재작성 결과는 마지막 완결 문장까지만 남겨 문장 중간 절단을 막는다. */
+	/** 생성 결과에서 200자 이내의 마지막 완결 문장까지만 남겨 문장 중간 절단을 막는다. */
 	static String keepCompleteSentencesWithinLimit(String summary) {
-		if (codePointCount(summary) <= MAX_SUMMARY_CODE_POINTS) {
-			if (endsWithCompleteSentence(summary)) {
-				return summary;
-			}
-			throw new IllegalStateException("완결된 요약 문장이 아닙니다.");
-		}
-
-		int maxEndIndex = summary.offsetByCodePoints(0, MAX_SUMMARY_CODE_POINTS);
+		int maxEndIndex = codePointCount(summary) <= MAX_SUMMARY_CODE_POINTS
+				? summary.length()
+				: summary.offsetByCodePoints(0, MAX_SUMMARY_CODE_POINTS);
 		Matcher sentenceEnd = SENTENCE_END_PATTERN.matcher(summary);
 		int lastCompleteEndIndex = -1;
 		while (sentenceEnd.find() && sentenceEnd.end() <= maxEndIndex) {

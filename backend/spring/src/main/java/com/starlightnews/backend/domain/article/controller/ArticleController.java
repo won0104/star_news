@@ -40,9 +40,10 @@ public class ArticleController {
 	@Operation(
 			summary = "기사 상세 조회",
 			description = """
-					기사 정보, 저장된 AI 요약과 상태, 언론사 원문 주소를 조회한다. 인증 불필요.
+					기사 정보, AI 요약과 상태, 언론사 원문 주소를 조회한다. 인증 불필요.
 					유효한 Access Token이 있으면 현재 사용자의 기사 북마크 여부를 함께 반환한다.
-					이 API는 요약을 생성하거나 외부 API를 호출하지 않는다.""")
+					저장된 요약이 없으면 GMS로 요약을 생성해 저장한 뒤 반환한다.
+					다른 요청이 이미 생성 중이면 summary=null, summaryStatus=PROCESSING을 반환한다.""")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
@@ -51,8 +52,15 @@ public class ArticleController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
 					description = "기사를 찾을 수 없음 (code: ARTICLE_NOT_FOUND)",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422",
+					description = "요약할 본문 없음 (code: ARTICLE_CONTENT_UNAVAILABLE)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "502",
+					description = "GMS 호출 또는 응답 처리 실패 (code: SUMMARY_GENERATION_FAILED)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",
-					description = "기사 상세 조회 실패 (code: ARTICLE_DETAIL_QUERY_FAILED)",
+					description = "기사 상세 조회 또는 요약 저장 실패 "
+							+ "(code: ARTICLE_DETAIL_QUERY_FAILED, SUMMARY_SAVE_FAILED)",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	@SecurityRequirements

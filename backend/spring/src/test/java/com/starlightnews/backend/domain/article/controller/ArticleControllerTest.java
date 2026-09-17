@@ -164,21 +164,21 @@ class ArticleControllerTest {
 	}
 
 	@Test
-	void 요약이_없으면_null과_NOT_REQUESTED를_응답한다() throws Exception {
+	void 다른_요청이_요약_생성중이면_null과_PROCESSING을_응답한다() throws Exception {
 		given(articleDetailService.getDetail(101L, null)).willReturn(new ArticleDetailResponse(
 				101L,
 				"국방부, 한미 연합훈련 일정 발표",
 				"연합뉴스",
 				OffsetDateTime.parse("2026-08-31T10:00:00+09:00"),
 				null,
-				SummaryStatus.NOT_REQUESTED,
+				SummaryStatus.PROCESSING,
 				"https://news.example.com/articles/101",
 				false));
 
 		mockMvc.perform(get(DETAIL_PATH, 101L))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.summary").isEmpty())
-				.andExpect(jsonPath("$.data.summaryStatus").value("NOT_REQUESTED"));
+				.andExpect(jsonPath("$.data.summaryStatus").value("PROCESSING"));
 	}
 
 	@Test

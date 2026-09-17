@@ -4,19 +4,20 @@ import java.time.ZoneOffset;
 
 import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.dto.ArticleDetailResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
 import com.starlightnews.backend.domain.article.exception.ArticleErrorCode;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
+import com.starlightnews.backend.global.enums.SummaryStatus;
 import com.starlightnews.backend.global.error.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-/** 기사 상세 정보와 로그인 사용자의 북마크 여부를 조회한다. */
+/** 기사 상세 정보와 요약, 로그인 사용자의 북마크 여부를 조회한다. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,25 +27,34 @@ public class ArticleDetailService {
 
 	private final ArticleRepository articleRepository;
 	private final UserArticleFavoriteRepository userArticleFavoriteRepository;
+	private final ArticleSummaryService articleSummaryService;
 
 	/**
-	 * 저장된 기사 상세와 요약 상태를 그대로 반환한다.
-	 * 이 조회에서는 요약을 생성하거나 외부 API를 호출하지 않는다.
+	 * 저장된 요약이 없으면 생성한 뒤 기사 상세와 함께 반환한다.
+	 * 다른 요청이 이미 생성 중인 경우에는 PROCESSING 상태를 그대로 반환한다.
 	 */
-	@Transactional(readOnly = true)
 	public ArticleDetailResponse getDetail(Long articleId, Long userId) {
 		Article article = findArticle(articleId);
 		boolean bookmarked = isBookmarked(userId, articleId);
+		ArticleSummaryResponse summaryResponse = resolveSummary(article);
 
 		return new ArticleDetailResponse(
 				article.getArticleId(),
 				article.getTitle(),
 				article.getOrganization().getName(),
 				article.getPublishedAt().atOffset(KOREA_OFFSET),
-				article.getSummary(),
-				article.getSummaryStatus(),
+				summaryResponse.summary(),
+				summaryResponse.summaryStatus(),
 				article.getUrl(),
 				bookmarked);
+	}
+
+	private ArticleSummaryResponse resolveSummary(Article article) {
+		if (article.getSummaryStatus() == SummaryStatus.COMPLETED) {
+			return new ArticleSummaryResponse(
+					article.getArticleId(), article.getSummary(), article.getSummaryStatus());
+		}
+		return articleSummaryService.generate(article.getArticleId());
 	}
 
 	private Article findArticle(Long articleId) {

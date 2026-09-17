@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -85,6 +84,7 @@ class ArticleSummaryServiceTest {
 		ArgumentCaptor<String> input = ArgumentCaptor.forClass(String.class);
 		verify(gmsClient).generate(instruction.capture(), input.capture());
 		assertThat(instruction.getValue())
+				.contains("160~190자")
 				.contains("200자를 초과하지 않는다")
 				.contains("하다체로 끝맺는다")
 				.contains("개조식");
@@ -182,28 +182,36 @@ class ArticleSummaryServiceTest {
 	}
 
 	@Test
-	void GMS_결과가_200자를_초과하면_한_번_재작성한다() {
+	void GMS_결과가_200자를_초과하면_한_번의_호출_결과에서_완결_문장만_남긴다() {
 		givenTarget(target(SummaryStatus.NOT_REQUESTED, null, CONTENT));
 		given(writer.claim(ARTICLE_ID)).willReturn(true);
 		String tooLong = "첫 문장이다. " + "가".repeat(200);
-		String rewritten = "핵심 내용을 유지한 완결된 요약문이다.";
-		given(gmsClient.generate(anyString(), anyString())).willReturn(tooLong, rewritten);
+		given(gmsClient.generate(anyString(), anyString())).willReturn(tooLong);
 
 		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
 
-		assertThat(response.summary()).isEqualTo(rewritten);
-		verify(gmsClient, times(2)).generate(anyString(), anyString());
-		verify(writer).complete(ARTICLE_ID, rewritten);
+		assertThat(response.summary()).isEqualTo("첫 문장이다.");
+		verify(gmsClient).generate(anyString(), anyString());
+		verify(writer).complete(ARTICLE_ID, "첫 문장이다.");
 	}
 
 	@Test
-	void 재작성_결과도_200자를_초과하면_마지막_완결_문장까지만_남긴다() {
+	void 결과가_200자를_초과하면_마지막_완결_문장까지만_남긴다() {
 		String source = "첫 번째 완결 문장이다. " + "가".repeat(200) + ".";
 
 		String limited = ArticleSummaryService.keepCompleteSentencesWithinLimit(source);
 
 		assertThat(limited).isEqualTo("첫 번째 완결 문장이다.");
 		assertThat(limited.codePointCount(0, limited.length())).isLessThanOrEqualTo(200);
+	}
+
+	@Test
+	void 결과가_200자_이내여도_끝부분이_미완결이면_마지막_완결_문장까지만_남긴다() {
+		String source = "첫 번째 완결 문장이다. 아직 끝나지 않은 문장";
+
+		String limited = ArticleSummaryService.keepCompleteSentencesWithinLimit(source);
+
+		assertThat(limited).isEqualTo("첫 번째 완결 문장이다.");
 	}
 
 	@Test
