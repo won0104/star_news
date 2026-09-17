@@ -225,3 +225,28 @@
     transition: none;
   }
 }
+
+/* 커서 페이지네이션의 다음 묶음. `hasNext` 가 참일 때만 나오므로, 눌러도 아무것도
+   늘지 않는 경우가 없다. 목록 끝에 붙어 읽던 자리를 잃지 않는다. */
+.more {
+  width: 100%;
+  min-height: 38px;
+  margin: 4px 0 0;
+  border: 1px solid rgba(233, 196, 119, 0.32);
+  border-radius: 999px;
+  background: rgba(255, 244, 222, 0.06);
+  color: #e9c477;
+  font: 600 12.5px var(--font-sans);
+  cursor: pointer;
+}
+
+.more:hover {
+  border-color: rgba(255, 217, 138, 0.6);
+  background: rgba(255, 244, 222, 0.12);
+  color: #ffd98a;
+}
+
+.more:focus-visible {
+  outline: 2px solid #e4c679;
+  outline-offset: 2px;
+}
