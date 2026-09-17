@@ -52,14 +52,14 @@
   }
 }
 
-@media (min-width: 1600px) {
+@media (min-width: 1024px) {
   .page {
-    padding: 40px 48px 56px 256px;
+    padding: 40px 48px 56px calc(var(--desktop-nav-width) + 48px);
   }
 
   .page.trendPage {
     /* Keep the approved 8:5 window in the content column. TrendStage alone extends a
        scenery strip leftward beneath the glass rail, so the wooden frame stays visible. */
-    padding: 0 0 0 208px;
+    padding: 0 0 0 var(--desktop-nav-width);
   }
 }

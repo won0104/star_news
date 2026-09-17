@@ -195,13 +195,13 @@
   }
 }
 
-/* Wide screens have horizontal room but limited vertical room above the window. Moving
-   the same translucent chrome into a rail spends that surplus width and leaves the
-   photograph's top edge unobstructed. Narrow screens keep the familiar top bar. */
-@media (min-width: 1600px) {
+/* Desktop screens use their horizontal room for the translucent rail and leave the
+   photograph's top edge unobstructed. Its fluid width keeps a 1024px laptop useful while
+   preserving the roomier 208px treatment on larger monitors. */
+@media (min-width: 1024px) {
   .bar {
     inset: 0 auto 0 0;
-    width: 208px;
+    width: var(--desktop-nav-width);
     height: 100dvh;
     flex-direction: column;
     align-items: stretch;

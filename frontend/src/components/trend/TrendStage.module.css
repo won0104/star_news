@@ -95,15 +95,16 @@
   }
 }
 
-@media (min-width: 1600px) {
+@media (min-width: 1024px) {
   .sidebarExtension {
     position: absolute;
     top: 0;
     right: 100%;
     display: block;
-    width: 208px;
+    width: var(--desktop-nav-width);
     height: 100%;
-    object-fit: fill;
+    object-fit: cover;
+    object-position: center;
     pointer-events: none;
     user-select: none;
   }

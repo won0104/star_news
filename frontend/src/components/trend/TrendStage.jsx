@@ -51,6 +51,10 @@ export function TrendStage({ playTransition = false }) {
             srcSet={nightfall.mobileStill}
           />
           <source media="(max-aspect-ratio: 1/1)" srcSet={nightfall.tabletStill} />
+          <source
+            media="(min-width: 1024px) and (max-width: 1499px) and (max-aspect-ratio: 8/5)"
+            srcSet={nightfall.compactStill}
+          />
           <source media="(max-aspect-ratio: 4/3)" srcSet={nightfall.compactStill} />
           <img
             className={`${styles.still} ${ready ? styles.stillReady : ''}`}
