@@ -17,7 +17,7 @@ EVENT_CANDIDATE_TOP_K = 8
 EVENT_EMBEDDING_EMA_WEIGHT = 0.15
 
 # Story dedup 벡터 유사도 임계값 - Event(0.92)보다 낮음: "같은 사건"이 아니라 "같은 흐름"이라는 느슨한 기준
-STORY_SIMILARITY_THRESHOLD = 0.80
+STORY_SIMILARITY_THRESHOLD = 0.75
 # 벡터 검색 시 후보로 가져올 최대 개수
 STORY_CANDIDATE_TOP_K = 8
 # 대표 벡터(centroid) 갱신 시 새 임베딩을 반영하는 비율 (지수이동평균) - Event와 동일 가중치 재사용
@@ -282,7 +282,7 @@ def merge_event_node(
     created_at: datetime,
     candidate_actor_names: list[str],
     candidate_target_names: list[str],
-) -> str:
+) -> tuple[str, bool]:
     candidates = session.run(
         """
         CALL db.index.vector.queryNodes('event_embedding_index', $topK, $embedding)
@@ -307,10 +307,10 @@ def merge_event_node(
 
         # 매칭 확정 - 기존 Event를 재사용하고 대표 벡터(centroid)만 갱신
         blended_embedding = _ema_update_embedding(signals["embedding"], embedding, EVENT_EMBEDDING_EMA_WEIGHT)
-        return _update_matched_event(session, row["nodeId"], title, blended_embedding, created_at)
+        return _update_matched_event(session, row["nodeId"], title, blended_embedding, created_at), False
 
     # 후보가 하나도 없거나 전부 충돌 -> 매칭되는 기존 Event가 없는 것이므로 새로 생성
-    return _create_new_event_node(session, title, embedding, embedding_model, created_at)
+    return _create_new_event_node(session, title, embedding, embedding_model, created_at), True
 
 
 # 5. Story

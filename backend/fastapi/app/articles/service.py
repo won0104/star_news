@@ -143,19 +143,20 @@ def _apply_analysis(
             actor_names = _linked_entity_names(edges, "ACTOR", props["nodeId"], id_map, normalized_name_by_ai_id)
             target_names = _linked_entity_names(edges, "TARGET", props["nodeId"], id_map, normalized_name_by_ai_id)
 
-            real_id = repository.merge_event_node(
+            real_id, is_new_event = repository.merge_event_node(
                 tx, props["title"], props["embedding"], props["embeddingModel"], now, actor_names, target_names
             )
             id_map[props["nodeId"]] = real_id
             event_node_ids.add(real_id)
 
-            # Event가 확정될 때마다 Story에 속할지 판단
-            story_node_id = repository.assign_event_to_story(
-                tx, real_id, props["title"], props["embedding"], props["embeddingModel"],
-                primary_topic_code, request.published_at, now,
-            )
-            if story_node_id:
-                story_node_ids.add(story_node_id)
+            # Story 배정은 Event가 새로 생겼을 때 한 번만
+            if is_new_event:
+                story_node_id = repository.assign_event_to_story(
+                    tx, real_id, props["title"], props["embedding"], props["embeddingModel"],
+                    primary_topic_code, request.published_at, now,
+                )
+                if story_node_id:
+                    story_node_ids.add(story_node_id)
 
     # Statement 노드 반영
     statement_node_ids: set[str] = set()
