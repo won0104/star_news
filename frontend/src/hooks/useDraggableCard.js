@@ -19,11 +19,19 @@ export function useDraggableCard() {
       }
 
       const card = cardRef.current;
-      const boundary = card?.offsetParent;
-      if (!card || !boundary) return;
+      if (!card) return;
 
       const cardRect = card.getBoundingClientRect();
-      const boundaryRect = boundary.getBoundingClientRect();
+      // `position: fixed` 카드는 offsetParent가 없으므로, 그때는 카드를 띄운 장면을
+      // 경계로 삼는다. 뷰포트만 쓰면 모바일 상단 내비게이션 뒤까지 올라갈 수 있다.
+      const boundaryRect = card.offsetParent?.getBoundingClientRect()
+        ?? card.parentElement?.getBoundingClientRect()
+        ?? {
+        left: 0,
+        top: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight,
+        };
 
       dragRef.current = {
         pointerId: event.pointerId,

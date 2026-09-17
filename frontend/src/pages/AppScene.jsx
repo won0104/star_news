@@ -19,13 +19,22 @@ const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
  */
 const ARRIVAL = { foryou: arrivalScene }
 const TREND_BACKDROP = { id: 'trend', src: nightfall.still, loop: null }
+const HISTORY_BACKDROP = {
+  id: 'history',
+  src: '/assets/history/history-desk-background.png',
+  loop: null,
+}
 
 /**
  * 공용 햇살 방 대신 자기 사진을 바닥으로 쓰는 목적지. 오늘의 트렌드는 밤 창가, 나를 위한
- * 추천은 코르크 보드가 걸린 벽 — 둘 다 화면이 그 사진 위에 직접 그려지므로, 사진이 다르면
- * 화면이 어긋난다.
+ * 추천은 코르크 보드가 걸린 벽, 나의 기록은 나무 책상 — 모두 화면이 그 사진 위에 직접
+ * 그려지므로, 사진이 다르면 화면이 어긋난다.
  */
-const SCENE_BY_VIEW = { trend: TREND_BACKDROP, foryou: arrivalScene }
+const SCENE_BY_VIEW = {
+  trend: TREND_BACKDROP,
+  foryou: arrivalScene,
+  log: HISTORY_BACKDROP,
+}
 
 /**
  * /app — the sunlit room, the bar over it, and one of the bar's four destinations on top.

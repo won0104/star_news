@@ -276,6 +276,22 @@
   scrollbar-width: thin;
 }
 
+.sheet[data-dragging='true'] {
+  user-select: none;
+}
+
+.sheetHead {
+  display: grid;
+  gap: 0.3cqw;
+  padding-right: 1.7cqw;
+  cursor: grab;
+  touch-action: none;
+}
+
+.sheet[data-dragging='true'] .sheetHead {
+  cursor: grabbing;
+}
+
 .sheetClose {
   position: absolute;
   top: 0.55cqw;
@@ -301,7 +317,6 @@
 
 .sheet h2 {
   margin: 0;
-  padding-right: 1.7cqw;
   font: 700 1.2cqw/1.35 var(--font-serif-kr);
   word-break: keep-all;
 }
@@ -479,8 +494,9 @@
   }
 
   .sheetClose { top: 10px; right: 12px; width: 28px; height: 28px; font-size: 20px; }
+  .sheetHead { gap: 6px; padding-right: 30px; }
   .sheetKind { font-size: 11px; }
-  .sheet h2 { font-size: 19px; padding-right: 30px; }
+  .sheet h2 { font-size: 19px; }
   .sheetReason { font-size: 12px; padding: 8px 10px; }
   .sheetReason b { font-size: 10px; }
   .summary { font-size: 14px; }

@@ -262,10 +262,40 @@
   }
 }
 
-/* The shared 50% paper glass is appropriate over the sunlit room but flattens a night
-   photograph into a grey panel. Keep the same blur and controls while allowing the
-   scene's colour and window frame to remain visible through the trend chrome. */
+/* The trend scene needs its own night glass. A pale veil left the brown navigation
+   labels dependent on whichever part of the photograph happened to sit behind them;
+   this smoky layer keeps the room visible while giving every label a stable, warm
+   foreground. The custom properties are scoped here so the daytime screens retain the
+   paper treatment and ink colours above. */
 .nightGlass {
-  background: rgba(250, 246, 238, 0.36);
-  backdrop-filter: blur(14px) saturate(0.9);
+  --nav-ink: rgba(246, 236, 215, 0.76);
+  --nav-ink-active: rgba(255, 247, 231, 0.96);
+  --topbar-border: rgba(232, 199, 128, 0.2);
+  background: linear-gradient(180deg, rgba(9, 15, 27, 0.58), rgba(24, 18, 17, 0.5));
+  backdrop-filter: blur(14px) saturate(0.82);
+  box-shadow: var(--topbar-shadow);
+}
+
+.nightGlass .navRule {
+  background: rgba(232, 199, 128, 0.22);
+}
+
+.nightGlass .navItem:hover,
+.nightGlass .signIn:hover {
+  background: rgba(232, 199, 128, 0.1);
+}
+
+.nightGlass .navItemActive,
+.nightGlass .navItemActive:hover,
+.nightGlass .signUp {
+  background: linear-gradient(110deg, rgba(10, 13, 20, 0.9), rgba(25, 24, 24, 0.84));
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 199, 128, 0.26),
+    var(--pill-dark-shadow);
+}
+
+@media (min-width: 1024px) {
+  .nightGlass {
+    box-shadow: 10px 0 30px rgba(3, 7, 15, 0.2);
+  }
 }

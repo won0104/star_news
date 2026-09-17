@@ -45,9 +45,11 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
   const [graph, setGraph] = useState(null)
   const [graphState, setGraphState] = useState('idle')
   const [previewGraphs, setPreviewGraphs] = useState({})
+  const [articlePanelOpen, setArticlePanelOpen] = useState(false)
   // Neighbours do not change while the screen is open, so a key already opened is served
   // from here rather than fetched again.
   const cache = useRef(new Map())
+  const activeKeyRef = useRef(null)
 
   useEffect(() => {
     if (given) return
@@ -67,9 +69,11 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
   }, [given])
 
   const close = useCallback(() => {
+    activeKeyRef.current = null
     setOpenKey(null)
     setGraph(null)
     setGraphState('idle')
+    setArticlePanelOpen(false)
   }, [])
 
   useEffect(() => {
@@ -91,7 +95,8 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
 
   // Not memoised: it only ever lands on an onClick, and it has to read `sample`, which is
   // derived from this render.
-  const open = (trend) => {
+  const open = (trend, { preserveGraph = false } = {}) => {
+    activeKeyRef.current = trend.nodeKey
     setOpenKey(trend.nodeKey)
 
     // A sampled sky's keys are not in Neo4j, so asking for them would only 404.
@@ -105,17 +110,19 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
       return
     }
 
-    setGraph(null)
+    if (!preserveGraph) setGraph(null)
     setGraphState('loading')
     fetchNeighbors(trend.nodeType, trend.nodeKey)
       .then((payload) => {
         cache.current.set(trend.nodeKey, payload)
         // A different star may have been pressed while this was in flight.
-        setGraph((current) => current ?? payload)
+        if (activeKeyRef.current !== trend.nodeKey) return
+        setGraph(payload)
         setGraphState('ready')
       })
       .catch((error) => {
         if (error?.name === 'AbortError') return
+        if (activeKeyRef.current !== trend.nodeKey) return
         setGraphState('failed')
       })
   }
@@ -161,7 +168,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
   }, [givenNeighbors, graph, graphState, previewGraphs, sample])
 
   if (openKey) {
-    if (graphState === 'loading' || !graph) {
+    if (!graph) {
       const chosen = ranked.find((trend) => trend.nodeKey === openKey)
       return (
         <Notice
@@ -190,8 +197,12 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
       <TrendConstellation
         graph={graph}
         previewGraphs={previews}
+        articlePanelOpen={articlePanelOpen}
+        onArticlePanelOpenChange={setArticlePanelOpen}
         onBack={close}
-        onWalk={(node) => open({ nodeType: node.nodeType ?? 'EVENT', nodeKey: node.id })}
+        onWalk={(node) =>
+          open({ nodeType: node.nodeType ?? 'EVENT', nodeKey: node.id }, { preserveGraph: true })
+        }
         details={sample ? trendNodeDetails : undefined}
         articleSamples={sample ? trendNodeArticles : undefined}
         overlayRoot={overlayRoot}

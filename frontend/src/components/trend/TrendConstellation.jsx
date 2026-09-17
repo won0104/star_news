@@ -177,6 +177,8 @@ function StarArt({ role }) {
 export function TrendConstellation({
   graph,
   previewGraphs,
+  articlePanelOpen,
+  onArticlePanelOpenChange,
   onBack,
   onWalk,
   details,
@@ -184,14 +186,21 @@ export function TrendConstellation({
   overlayRoot,
 }) {
   const [centreId, setCentreId] = useState(constellationStart)
-  const [open, setOpen] = useState(false)
+  const [localPanelOpen, setLocalPanelOpen] = useState(false)
   const [full, setFull] = useState(false)
   // 사용자가 직접 연 Entity·Statement. 같은 별을 다시 누르면 선택이 풀린다.
   const [picked, setPicked] = useState(null)
   const [pickedState, setPickedState] = useState('idle')
   const detailRequestRef = useRef(null)
+  const articlePageRequestRef = useRef(null)
   const [articles, setArticles] = useState(null)
   const [articlesState, setArticlesState] = useState('idle')
+  const [articlesKey, setArticlesKey] = useState(null)
+  const open = articlePanelOpen ?? localPanelOpen
+  const setOpen = (next) => {
+    if (onArticlePanelOpenChange) onArticlePanelOpenChange(next)
+    else setLocalPanelOpen(next)
+  }
   const narrow = useIsNarrow()
   // A graph has no authored layout key of its own, so it takes the default composition.
   const layoutKey = graph ? 'spread' : constellationEvents[centreId].layout
@@ -199,6 +208,7 @@ export function TrendConstellation({
   const bySlot = graph ? bySlotFromGraph(graph) : bySlotFromMock(centreId)
   const nodes = nodesFor(bySlot, narrow, layout.slots)
   const centre = nodes[0]
+  const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
   const visibleNodeKeys = new Set(nodes.map((node) => node.id))
   const at = (node) => (narrow ? node.slot.atNarrow : node.slot.at)
 
@@ -251,51 +261,38 @@ export function TrendConstellation({
       })
   }
 
-  /**
-   * 중심 별을 눌렀을 때. 패널을 열면서 그 Node 의 기사를 가져온다.
-   *
-   * `articleSamples` answers for the sampled sky, whose keys are not in Neo4j. `cursor`
-   * is passed for 더 보기, and the page is appended rather than replacing what is read.
-   */
-  const loadArticles = (cursor) => {
-    const centreKey = centre.event
-    const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
+  /** 현재 Event의 다음 기사 페이지를 기존 카드에 이어 붙인다. */
+  const loadMoreArticles = (cursor) => {
+    if (!cursor || articlesKey !== centre.event) return
 
-    const ready = !cursor && articleSamples?.[centreKey]
-    if (ready) {
-      setArticles(ready)
-      setArticlesState('ready')
-      return
-    }
-
-    if (!cursor) setArticles(null)
+    articlePageRequestRef.current?.abort()
+    const controller = new AbortController()
+    articlePageRequestRef.current = controller
     setArticlesState('loading')
-    fetchNodeArticles(centreType, centreKey, { cursor })
+    fetchNodeArticles(centreType, centre.event, { cursor, signal: controller.signal })
       .then((payload) => {
-        setArticles((was) =>
-          cursor && was
-            ? { ...payload, articles: [...was.articles, ...payload.articles] }
-            : payload,
-        )
+        if (controller.signal.aborted) return
+        setArticles((was) => ({
+          ...payload,
+          articles: [...(was?.articles ?? []), ...payload.articles],
+        }))
         setArticlesState('ready')
       })
       .catch((error) => {
         if (error?.name === 'AbortError') return
         setArticlesState('failed')
       })
+      .finally(() => {
+        if (articlePageRequestRef.current === controller) articlePageRequestRef.current = null
+      })
   }
 
   const togglePanel = () => {
-    const next = !open
-    setOpen(next)
-    if (next && articlesState === 'idle') loadArticles()
+    setOpen(!open)
   }
 
   const walkTo = (node) => {
     closeDetail()
-    setOpen(false)
-    setArticles(null)
-    setArticlesState('idle')
 
     if (onWalk) {
       onWalk(node)
@@ -316,8 +313,43 @@ export function TrendConstellation({
     }
   }, [])
 
+  /**
+   * 패널이 열린 채 중심 Event가 바뀌면 카드는 유지하고 내용만 새 Event 기준으로 바꾼다.
+   * 현재 key의 응답이 도착하기 전에는 이전 기사를 섞지 않고 loading 상태를 보여준다.
+   */
   useEffect(() => {
-    return () => detailRequestRef.current?.abort()
+    if (!open || articlesKey === centre.event) return undefined
+
+    articlePageRequestRef.current?.abort()
+    const controller = new AbortController()
+    const centreKey = centre.event
+    const ready = articleSamples?.[centreKey]
+    const request = ready
+      ? Promise.resolve(ready)
+      : fetchNodeArticles(centreType, centreKey, { signal: controller.signal })
+
+    request
+      .then((payload) => {
+        if (controller.signal.aborted) return
+        setArticles(payload)
+        setArticlesKey(centreKey)
+        setArticlesState('ready')
+      })
+      .catch((error) => {
+        if (error?.name === 'AbortError') return
+        setArticles(null)
+        setArticlesKey(centreKey)
+        setArticlesState('failed')
+      })
+
+    return () => controller.abort()
+  }, [articleSamples, articlesKey, centre.event, centreType, open])
+
+  useEffect(() => {
+    return () => {
+      detailRequestRef.current?.abort()
+      articlePageRequestRef.current?.abort()
+    }
   }, [])
 
   useEffect(() => {
@@ -351,15 +383,16 @@ export function TrendConstellation({
       />
     ) : null
 
+  const articleIsCurrent = articlesKey === centre.event
   const articlePanel = (
     <TrendPanel
       id={PANEL_ID}
-      data={articles}
-      state={articlesState}
+      data={articleIsCurrent ? articles : null}
+      state={open && !articleIsCurrent ? 'loading' : articlesState}
       title={centre.label}
       open={open}
       onClose={() => setOpen(false)}
-      onMore={() => loadArticles(articles?.nextCursor)}
+      onMore={() => loadMoreArticles(articles?.nextCursor)}
     />
   )
 
