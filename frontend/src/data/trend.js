@@ -600,6 +600,10 @@ export const panelCopy = {
   save: '기사 저장',
   unsave: '저장 해제',
   fieldLabel: '사건 별자리',
+  articlesLoading: '관련 기사를 불러오는 중…',
+  articlesFailed: '관련 기사를 불러오지 못했어요.',
+  articlesEmpty: '아직 이어진 기사가 없어요.',
+  more: '더 보기',
 }
 
 /** The coordinate space the component's slots are percentages of. */

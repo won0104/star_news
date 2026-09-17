@@ -107,7 +107,7 @@ export function HistoryEventScene() {
               </dl>
               <div className={styles.eventSummary}>
                 <span>EVENT SUMMARY</span>
-                <p>{event.articles[0]?.summary}</p>
+                <p>{event.summary ?? event.articles[0]?.summary}</p>
               </div>
             </article>
 

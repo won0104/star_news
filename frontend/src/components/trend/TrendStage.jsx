@@ -4,7 +4,7 @@ import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { useSettingsValues } from '../../store/settings';
 import { SCREEN_TRANSITIONS } from '../../utils/motion';
 import { BackgroundVideo } from '../common/BackgroundVideo';
-import { TrendConstellation } from './TrendConstellation';
+import { TrendSky } from './TrendSky';
 import styles from './TrendStage.module.css';
 
 /**
@@ -67,7 +67,7 @@ export function TrendStage({ playTransition = false }) {
         />
       )}
 
-      {settled && <TrendConstellation />}
+      {settled && <TrendSky />}
     </div>
   );
 }

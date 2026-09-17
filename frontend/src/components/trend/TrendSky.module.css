@@ -1,0 +1,303 @@
+/*
+ * 오늘의 트렌드's ten stars.
+ *
+ * The field is whatever <TrendStage> leaves under the bar, and everything inside is a
+ * percentage of it — same authoring as <TrendConstellation>, so the two screens sit in
+ * the same coordinate space and a star does not jump when one hands over to the other.
+ *
+ * `container-type: size` on the field and a cover-sized canvas over it keep the type
+ * scale tied to the picture rather than to the viewport: at any window the labels hold
+ * their proportion to the stars they belong to.
+ */
+
+.field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: size;
+}
+
+/* The source frame is 1440 × 900. A cover-sized canvas keeps the star coordinates and the
+   type scale in one system, the way the constellation screen does. */
+.canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100cqw, 160cqh);
+  aspect-ratio: 8 / 5;
+  transform: translate(-50%, -50%);
+  container-type: inline-size;
+}
+
+.ambientLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ambientStar {
+  position: absolute;
+  display: block;
+}
+
+.ambientStar img {
+  width: 100%;
+  height: auto;
+}
+
+/* ---- 별 ---------------------------------------------------------------------- */
+
+.node {
+  position: absolute;
+  display: flex;
+  width: 26cqw;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%);
+}
+
+.star {
+  display: block;
+  width: calc(7.4cqw * var(--scale));
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.star img {
+  width: 100%;
+  height: auto;
+  /* The art is a warm star on transparent; the glow is added here so it can react to
+     hover without a second asset. */
+  filter: drop-shadow(0 0 calc(1.6cqw * var(--scale)) rgba(255, 224, 160, 0.42));
+}
+
+.star:hover {
+  transform: scale(1.09);
+}
+
+.star:hover img {
+  filter: drop-shadow(0 0 calc(2.4cqw * var(--scale)) rgba(255, 232, 180, 0.72));
+}
+
+.star:focus-visible {
+  outline: 2px solid #e4c679;
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.nodeOn .star img {
+  filter: drop-shadow(0 0 calc(3cqw * var(--scale)) rgba(255, 236, 190, 0.85));
+}
+
+/* ---- 주변 그래프 -------------------------------------------------------------- */
+
+/* Lines are drawn in the field's own percentage space, so `preserveAspectRatio="none"`
+   stretches the 0–100 box to the canvas and every endpoint lands on its star. */
+.links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* `non-scaling-stroke` takes the width in device pixels rather than viewBox units, so it
+   has to be a pixel figure — a viewBox-scale value like 0.12 would come out invisible. */
+.links line {
+  stroke: #e8d6a8;
+  stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
+}
+
+.centreNode .label {
+  font-size: clamp(13px, 1.5cqw, 24px);
+}
+
+.eyebrow {
+  margin: 0 0 0.25cqw;
+  font: 700 clamp(7px, 0.62cqw, 10px) var(--font-sans);
+  letter-spacing: 0.13em;
+  color: rgba(238, 207, 132, 0.78);
+}
+
+.aroundNode {
+  width: 20cqw;
+}
+
+/* Sits over the field rather than the canvas: the canvas is cover-sized and its corners
+   can fall outside the visible field. */
+.back {
+  position: absolute;
+  z-index: 6;
+  top: 20px;
+  left: 24px;
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 1px solid rgba(226, 197, 126, 0.42);
+  border-radius: 999px;
+  background: rgba(20, 18, 18, 0.7);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  color: rgba(248, 226, 181, 0.96);
+  font: 700 13px var(--font-sans);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.back:hover {
+  border-color: rgba(238, 207, 132, 0.72);
+  background: rgba(33, 29, 27, 0.82);
+}
+
+.back:focus-visible {
+  outline: 2px solid #e4c679;
+  outline-offset: 3px;
+}
+
+/* ---- 라벨 -------------------------------------------------------------------- */
+
+.text {
+  margin-top: 0.7cqw;
+  text-align: center;
+  pointer-events: none;
+}
+
+.label {
+  margin: 0;
+  font: 700 clamp(11px, 1.18cqw, 19px)/1.34 var(--font-serif-kr);
+  color: rgba(252, 244, 228, 0.95);
+  text-shadow: 0 1px 6px rgba(8, 10, 18, 0.72);
+  word-break: keep-all;
+}
+
+.meta {
+  display: flex;
+  margin: 0.32cqw 0 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.62cqw;
+  font: clamp(9px, 0.82cqw, 13px) var(--font-sans);
+  color: rgba(228, 214, 186, 0.7);
+  text-shadow: 0 1px 5px rgba(8, 10, 18, 0.7);
+}
+
+.rank {
+  padding: 0.1cqw 0.5cqw;
+  border: 1px solid rgba(226, 197, 126, 0.42);
+  border-radius: 999px;
+  color: rgba(238, 207, 132, 0.92);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.nodeOn .label {
+  color: #fff8ea;
+}
+
+/* ---- 화면 설명 ---------------------------------------------------------------- */
+
+.blurb {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: 4.5%;
+  width: min(62%, 720px);
+  margin: 0;
+  transform: translateX(-50%);
+  font: clamp(10px, 0.95vw, 14px)/1.6 var(--font-serif-kr);
+  color: rgba(226, 212, 186, 0.6);
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(8, 10, 18, 0.7);
+  word-break: keep-all;
+  pointer-events: none;
+}
+
+.snapshot {
+  position: absolute;
+  z-index: 5;
+  right: 24px;
+  bottom: 18px;
+  margin: 0;
+  font: clamp(9px, 0.72vw, 12px) var(--font-sans);
+  color: rgba(214, 199, 172, 0.45);
+  pointer-events: none;
+}
+
+/* ---- 빈 상태 ----------------------------------------------------------------- */
+
+/* `/home` answers an empty list rather than an error when no round has been published —
+   before the first aggregation, and any day the pipeline produced nothing. */
+.empty {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  justify-items: center;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.empty > span {
+  color: rgba(238, 207, 132, 0.66);
+  font-size: clamp(26px, 3vw, 44px);
+}
+
+.empty p {
+  margin: 12px 0 0;
+  font: clamp(12px, 1.1vw, 17px) var(--font-serif-kr);
+  color: rgba(246, 236, 218, 0.82);
+}
+
+.emptyHint {
+  font-family: var(--font-sans);
+  font-size: clamp(10px, 0.82vw, 13px) !important;
+  color: rgba(214, 199, 172, 0.5) !important;
+}
+
+/* ---- 좁은 화면 --------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .canvas {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    transform: none;
+  }
+
+  .node {
+    width: 38cqw;
+  }
+
+  .aroundNode {
+    width: 30cqw;
+  }
+
+  .back {
+    top: 14px;
+    left: 14px;
+    min-height: 34px;
+    padding: 7px 13px;
+    font-size: 12px;
+  }
+
+  .star {
+    width: calc(11cqw * var(--scale));
+  }
+
+  .label {
+    font-size: clamp(10px, 2.1cqw, 15px);
+  }
+
+  .meta {
+    font-size: clamp(8px, 1.5cqw, 12px);
+  }
+
+  .blurb {
+    width: 84%;
+    bottom: 3%;
+  }
+}

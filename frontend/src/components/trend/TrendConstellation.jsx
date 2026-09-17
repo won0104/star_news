@@ -6,12 +6,14 @@ import {
   constellationEvents,
   constellationLayouts,
   constellationStart,
-  eventPanels,
   panelCopy,
   stars,
   trendFigmaAssets,
 } from '../../data/trend'
+import { fetchNodeArticles, fetchNodeDetail } from '../../api/trend'
+import { edgeLabels } from '../../data/trendNeighbors'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { NodeDetailPanel } from './NodeDetailPanel'
 import { TrendPanel } from './TrendPanel'
 import styles from './TrendConstellation.module.css'
 
@@ -37,10 +39,10 @@ const AMBIENT_ART = {
   statement: trendFigmaAssets.statementSticker,
 }
 
-function nodesFor(centreId, narrow, layoutSlots) {
+/** 목업 별자리 한 벌을 슬롯별 후보로 정리한다. */
+function bySlotFromMock(centreId) {
   const centre = constellationEvents[centreId]
-  const slots = layoutSlots.filter((slot) => !(narrow && slot.hideNarrow))
-  const bySlot = {
+  return {
     centre: [{ id: centre.id, label: centre.label, meta: centre.meta, event: centre.id }],
     related: centre.related.map((id) => {
       const event = constellationEvents[id]
@@ -49,6 +51,46 @@ function nodesFor(centreId, narrow, layoutSlots) {
     entity: centre.entities,
     statement: centre.statements,
   }
+}
+
+/**
+ * `GET /graphs/nodes/{type}/{key}/neighbors` 응답 하나를 같은 후보 목록으로 옮긴다.
+ *
+ * The composition has one centre, two related-event slots, two entity slots and one
+ * statement slot, so a response is sorted into those four buckets and each takes as many
+ * as it has room for. The response is already neighborScore descending, so what survives
+ * the trim is the strongest of each kind rather than whatever came first.
+ *
+ * TIME nodes have no slot in this composition and are dropped. `meta` is the relation's
+ * own name, which is the one thing the mock carried that the graph does not.
+ */
+function bySlotFromGraph(graph) {
+  const centre = graph.centerNode
+  const metaFor = (nodeKey) => {
+    const edge = graph.edges?.find((e) => e.targetNodeKey === nodeKey)
+    return edgeLabels[edge?.edgeType] ?? edge?.edgeType ?? ''
+  }
+  const of = (nodeType) =>
+    (graph.nodes ?? [])
+      .filter((node) => node.nodeType === nodeType)
+      .map((node) => ({
+        id: node.nodeKey,
+        label: node.label,
+        meta: metaFor(node.nodeKey),
+        event: node.nodeKey,
+        nodeType: node.nodeType,
+      }))
+
+  return {
+    centre: [{ id: centre.nodeKey, label: centre.label, meta: '지금 보는 사건', event: centre.nodeKey }],
+    related: of('EVENT'),
+    entity: of('ENTITY'),
+    statement: of('STATEMENT'),
+  }
+}
+
+function nodesFor(bySlot, narrow, layoutSlots) {
+  const slots = layoutSlots.filter((slot) => !(narrow && slot.hideNarrow))
   const taken = { centre: 0, related: 0, entity: 0, statement: 0 }
 
   return slots
@@ -68,21 +110,112 @@ function StarArt({ role }) {
   )
 }
 
-export function TrendConstellation() {
+/**
+ * `graph`를 주면 그 주변 그래프를 그리고, 없으면 목업 별자리를 그린다.
+ *
+ * Either way the composition is the same — one centre with its parts hung on the authored
+ * slots — so 오늘의 트렌드 keeps the picture it always had while the data behind it moves
+ * from the mock to the endpoint. `onWalk` is how a related event re-centres when the
+ * caller owns the loading; without it the mock's own walk is used.
+ */
+export function TrendConstellation({ graph, onBack, onWalk, details, articleSamples }) {
   const [centreId, setCentreId] = useState(constellationStart)
   const [open, setOpen] = useState(false)
   const [full, setFull] = useState(false)
+  // 사용자가 직접 연 Node. 없으면 카드는 중심 Node 를 설명한다.
+  const [picked, setPicked] = useState(null)
+  const [pickedState, setPickedState] = useState('idle')
+  const [articles, setArticles] = useState(null)
+  const [articlesState, setArticlesState] = useState('idle')
   const narrow = useIsNarrow()
-  const layoutKey = constellationEvents[centreId].layout
+  // A graph has no authored layout key of its own, so it takes the default composition.
+  const layoutKey = graph ? 'spread' : constellationEvents[centreId].layout
   const layout = constellationLayouts[layoutKey] ?? constellationLayouts.spread
   const ambientLayout = ambientLayouts[layoutKey] ?? ambientLayouts.spread
-  const nodes = nodesFor(centreId, narrow, layout.slots)
+  const bySlot = graph ? bySlotFromGraph(graph) : bySlotFromMock(centreId)
+  const nodes = nodesFor(bySlot, narrow, layout.slots)
   const centre = nodes[0]
   const at = (node) => (narrow ? node.slot.atNarrow : node.slot.at)
 
-  const walkTo = (id) => {
-    setCentreId(id)
+  /**
+   * 인물·기관과 발언을 눌렀을 때. 이 둘은 중심이 되지 않고 카드로만 펼친다 — 중심 자리의
+   * 슬롯 배분이 Event 기준이라, Entity 를 가운데 두면 related/entity 칸이 맞지 않는다.
+   *
+   * `details` gives the sample its answers without a request: those keys are not in Neo4j,
+   * so asking for them would only 404.
+   */
+  const openDetail = (node, nodeType) => {
+    const ready = details?.[node.id]
+    if (ready) {
+      setPicked(ready)
+      setPickedState('ready')
+      return
+    }
+
+    setPicked({ nodeType, nodeKey: node.id, title: node.label })
+    setPickedState('loading')
+    fetchNodeDetail(nodeType, node.id)
+      .then((payload) => {
+        setPicked(payload)
+        setPickedState('ready')
+      })
+      .catch((error) => {
+        if (error?.name === 'AbortError') return
+        setPickedState('failed')
+      })
+  }
+
+  /**
+   * 중심 별을 눌렀을 때. 패널을 열면서 그 Node 의 기사를 가져온다.
+   *
+   * `articleSamples` answers for the sampled sky, whose keys are not in Neo4j. `cursor`
+   * is passed for 더 보기, and the page is appended rather than replacing what is read.
+   */
+  const loadArticles = (cursor) => {
+    const centreKey = centre.event
+    const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
+
+    const ready = !cursor && articleSamples?.[centreKey]
+    if (ready) {
+      setArticles(ready)
+      setArticlesState('ready')
+      return
+    }
+
+    if (!cursor) setArticles(null)
+    setArticlesState('loading')
+    fetchNodeArticles(centreType, centreKey, { cursor })
+      .then((payload) => {
+        setArticles((was) =>
+          cursor && was
+            ? { ...payload, articles: [...was.articles, ...payload.articles] }
+            : payload,
+        )
+        setArticlesState('ready')
+      })
+      .catch((error) => {
+        if (error?.name === 'AbortError') return
+        setArticlesState('failed')
+      })
+  }
+
+  const togglePanel = () => {
+    const next = !open
+    setOpen(next)
+    if (next && articlesState === 'idle') loadArticles()
+  }
+
+  const walkTo = (node) => {
+    if (onWalk) {
+      onWalk(node)
+      return
+    }
+    setCentreId(node.event)
     setOpen(false)
+    setPicked(null)
+    setPickedState('idle')
+    setArticles(null)
+    setArticlesState('idle')
   }
 
   const enterFull = useCallback(() => {
@@ -120,13 +253,20 @@ export function TrendConstellation() {
   const board = (
     <div
       className={`${styles.field} ${full ? styles.fieldFull : ''}`}
-      data-layout={constellationEvents[centreId].layout}
+      data-layout={layoutKey}
       role="group"
       aria-label={panelCopy.fieldLabel}
     >
       <span className={styles.layoutBadge}>구도 · {layout.label}</span>
 
       <div className={styles.fieldActions}>
+        {onBack && !full && (
+          <button type="button" className={styles.fieldAction} onClick={onBack}>
+            <span aria-hidden>←</span>
+            오늘의 트렌드
+          </button>
+        )}
+
         <button
           type="button"
           className={styles.fieldAction}
@@ -204,15 +344,22 @@ export function TrendConstellation() {
                   aria-controls={isCentre ? PANEL_ID : undefined}
                   aria-label={
                     isCentre
-                      ? `${node.label} — ${panelCopy.open(eventPanels[node.event]?.count)}`
+                      ? `${node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
                       : `${node.label} — ${panelCopy.recentre}`
                   }
-                  onClick={isCentre ? () => setOpen((was) => !was) : () => walkTo(node.event)}
+                  onClick={isCentre ? togglePanel : () => walkTo(node)}
                 >
                   {art}
                 </button>
               ) : (
-                art
+                <button
+                  type="button"
+                  className={styles.starButton}
+                  aria-label={`${node.label} — 상세 보기`}
+                  onClick={() => openDetail(node, role === 'entity' ? 'ENTITY' : 'STATEMENT')}
+                >
+                  {art}
+                </button>
               )}
 
               <div className={`${styles.text} ${styles[`${visual}Text`]}`}>
@@ -224,15 +371,67 @@ export function TrendConstellation() {
         })}
       </div>
 
+      {graph && (
+        <DetailCard
+          // 중심이 바뀌거나 다른 Node 를 고르면 새로 마운트돼 닫힘 상태가 풀린다.
+          key={`${graph.centerNode.nodeKey}:${picked?.nodeKey ?? ''}`}
+          centre={graph.centerNode}
+          sample={details?.[graph.centerNode.nodeKey]}
+          picked={picked}
+          pickedState={pickedState}
+        />
+      )}
+
       <TrendPanel
         id={PANEL_ID}
-        eventId={centre.event}
+        data={articles}
+        state={articlesState}
         title={centre.label}
         open={open}
         onClose={() => setOpen(false)}
+        onMore={() => loadArticles(articles?.nextCursor)}
       />
     </div>
   )
 
   return full ? createPortal(board, document.body) : board
+}
+
+/**
+ * 카드가 무엇을 설명할지 고른다 — 고른 Node 가 있으면 그것, 없으면 중심 Node.
+ *
+ * Its own component so a centre change or a new pick remounts it through the `key`,
+ * which resets the closed flag without an effect writing state during a render pass.
+ * The centre's own detail is fetched here rather than by the screen above, because this
+ * is the only place that needs it.
+ */
+function DetailCard({ centre, sample, picked, pickedState }) {
+  const [closed, setClosed] = useState(false)
+  const [fetched, setFetched] = useState(null)
+  const [state, setState] = useState(sample ? 'ready' : 'loading')
+
+  useEffect(() => {
+    if (sample) return
+    const controller = new AbortController()
+    fetchNodeDetail(centre.nodeType, centre.nodeKey, { signal: controller.signal })
+      .then((payload) => {
+        setFetched(payload)
+        setState('ready')
+      })
+      .catch((error) => {
+        if (error?.name === 'AbortError') return
+        setState('failed')
+      })
+    return () => controller.abort()
+  }, [centre, sample])
+
+  if (closed) return null
+
+  return (
+    <NodeDetailPanel
+      node={picked ?? sample ?? fetched}
+      state={picked ? pickedState : sample ? 'ready' : state}
+      onClose={() => setClosed(true)}
+    />
+  )
 }
