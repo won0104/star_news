@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  ambientLayouts,
-  ambientStars,
   constellationEvents,
   constellationLayouts,
   constellationStart,
@@ -34,10 +32,33 @@ const ROLE_STAR = {
   statement: stars.statement,
 }
 
-const AMBIENT_ART = {
-  event: trendFigmaAssets.relatedLeftSticker,
-  entity: trendFigmaAssets.entitySticker,
-  statement: trendFigmaAssets.statementSticker,
+const PREVIEW_STAR = {
+  EVENT: trendFigmaAssets.relatedLeftSticker,
+  ENTITY: trendFigmaAssets.entitySticker,
+  STATEMENT: trendFigmaAssets.statementSticker,
+}
+
+const PREVIEW_LIMITS = {
+  EVENT: 2,
+  ENTITY: 2,
+  STATEMENT: 1,
+}
+
+const PREVIEW_POINTS = {
+  relatedLeft: [
+    [-15.5, -5.5],
+    [-14, 3],
+    [-10.5, 10],
+    [-3.5, 14.5],
+    [-16.5, 12],
+  ],
+  relatedRight: [
+    [15.5, -7],
+    [14, 2],
+    [10.5, 9],
+    [3.5, 13.5],
+    [16.5, 11],
+  ],
 }
 
 /** 목업 별자리 한 벌을 슬롯별 후보로 정리한다. */
@@ -83,7 +104,9 @@ function bySlotFromGraph(graph) {
       }))
 
   return {
-    centre: [{ id: centre.nodeKey, label: centre.label, meta: '지금 보는 사건', event: centre.nodeKey }],
+    centre: [
+      { id: centre.nodeKey, label: centre.label, meta: '지금 보는 사건', event: centre.nodeKey },
+    ],
     related: of('EVENT'),
     entity: of('ENTITY'),
     statement: of('STATEMENT'),
@@ -101,6 +124,38 @@ function nodesFor(bySlot, narrow, layoutSlots) {
       return node ? { ...node, slot } : null
     })
     .filter(Boolean)
+}
+
+/**
+ * 다음 중심 화면에 실제로 배치될 후보만 고른 뒤, 현재 화면에서 이미 보이는 Node는
+ * 중복으로 그리지 않는다. 보이는 Node도 슬롯 수에는 포함해야 전환 뒤 구성과 어긋나지 않는다.
+ */
+function previewNodesFor(graph, visibleNodeKeys) {
+  const taken = { EVENT: 0, ENTITY: 0, STATEMENT: 0 }
+
+  return (graph?.nodes ?? []).reduce((preview, node) => {
+    const limit = PREVIEW_LIMITS[node.nodeType]
+    if (!limit || taken[node.nodeType] >= limit) return preview
+    taken[node.nodeType] += 1
+    if (visibleNodeKeys.has(node.nodeKey)) return preview
+    preview.push(node)
+    return preview
+  }, [])
+}
+
+function previewSummary(nodes) {
+  const count = { EVENT: 0, ENTITY: 0, STATEMENT: 0 }
+  nodes.forEach((node) => {
+    count[node.nodeType] += 1
+  })
+
+  return [
+    count.EVENT ? `사건 ${count.EVENT}` : '',
+    count.ENTITY ? `개체 ${count.ENTITY}` : '',
+    count.STATEMENT ? `발언 ${count.STATEMENT}` : '',
+  ]
+    .filter(Boolean)
+    .join(', ')
 }
 
 function StarArt({ role }) {
@@ -121,6 +176,7 @@ function StarArt({ role }) {
  */
 export function TrendConstellation({
   graph,
+  previewGraphs,
   onBack,
   onWalk,
   details,
@@ -140,10 +196,10 @@ export function TrendConstellation({
   // A graph has no authored layout key of its own, so it takes the default composition.
   const layoutKey = graph ? 'spread' : constellationEvents[centreId].layout
   const layout = constellationLayouts[layoutKey] ?? constellationLayouts.spread
-  const ambientLayout = ambientLayouts[layoutKey] ?? ambientLayouts.spread
   const bySlot = graph ? bySlotFromGraph(graph) : bySlotFromMock(centreId)
   const nodes = nodesFor(bySlot, narrow, layout.slots)
   const centre = nodes[0]
+  const visibleNodeKeys = new Set(nodes.map((node) => node.id))
   const at = (node) => (narrow ? node.slot.atNarrow : node.slot.at)
 
   /**
@@ -284,15 +340,16 @@ export function TrendConstellation({
     }
   }, [leaveFull])
 
-  const detailCard = graph && picked ? (
-    <NodeDetailPanel
-      key={picked.nodeKey}
-      id={DETAIL_ID}
-      node={picked}
-      state={pickedState}
-      onClose={closeDetail}
-    />
-  ) : null
+  const detailCard =
+    graph && picked ? (
+      <NodeDetailPanel
+        key={picked.nodeKey}
+        id={DETAIL_ID}
+        node={picked}
+        state={pickedState}
+        onClose={closeDetail}
+      />
+    ) : null
 
   const articlePanel = (
     <TrendPanel
@@ -340,30 +397,6 @@ export function TrendConstellation({
       </div>
 
       <div className={styles.canvas}>
-        <div className={styles.ambientLayer} aria-hidden>
-          {ambientStars.map((star, index) => {
-            const starAt = ambientLayout[index] ?? star.at
-
-            return (
-              <span
-                key={star.id}
-                className={`${styles.ambientStar} ${styles[`ambient${star.role[0].toUpperCase()}${star.role.slice(1)}`]}`}
-                data-star-id={star.id}
-                data-related-events={star.events.join(' ')}
-                style={{
-                  left: `${starAt[0]}%`,
-                  top: `${starAt[1]}%`,
-                  width: `${star.size / 14.4}cqw`,
-                  opacity: (star.opacity ?? 0.9) * 0.42,
-                  transform: `translate(-50%, -50%) rotate(${star.rotate}deg)`,
-                }}
-              >
-                <img src={AMBIENT_ART[star.role]} alt="" />
-              </span>
-            )
-          })}
-        </div>
-
         <svg
           className={`${styles.mobileLinks} ${styles.variantLinks}`}
           viewBox="0 0 100 100"
@@ -386,6 +419,9 @@ export function TrendConstellation({
           const isCentre = role === 'centre'
           const isEvent = isCentre || role === 'related'
           const art = <StarArt role={role} />
+          const previewNodes =
+            role === 'related' ? previewNodesFor(previewGraphs?.[node.id], visibleNodeKeys) : []
+          const previewText = previewSummary(previewNodes)
 
           return (
             <div
@@ -397,6 +433,45 @@ export function TrendConstellation({
                 animationDelay: `${index * 90}ms`,
               }}
             >
+              {previewNodes.length > 0 && (
+                <div
+                  className={`${styles.previewCluster} ${styles[`${visual}Preview`]}`}
+                  aria-hidden
+                >
+                  {previewNodes.map((preview, previewIndex) => {
+                    const [x, y] = PREVIEW_POINTS[visual][previewIndex]
+                    const lineLength = Math.hypot(x, y)
+                    const lineAngle = Math.atan2(-y, -x)
+
+                    return (
+                      <Fragment key={preview.nodeKey}>
+                        <span
+                          className={styles.previewLink}
+                          style={{
+                            '--preview-x': `${x}cqw`,
+                            '--preview-y': `${y}cqw`,
+                            '--preview-line-length': `${lineLength}cqw`,
+                            '--preview-line-angle': `${lineAngle}rad`,
+                          }}
+                        />
+                        <span
+                          className={`${styles.previewStar} ${styles[`preview${preview.nodeType[0]}${preview.nodeType.slice(1).toLowerCase()}`]}`}
+                          data-node-type={preview.nodeType}
+                          style={{
+                            '--preview-x': `${x}cqw`,
+                            '--preview-y': `${y}cqw`,
+                            '--preview-delay': `${previewIndex * 55}ms`,
+                            '--preview-rotate': `${previewIndex % 2 === 0 ? -6 : 7}deg`,
+                          }}
+                        >
+                          <img src={PREVIEW_STAR[preview.nodeType]} alt="" />
+                        </span>
+                      </Fragment>
+                    )
+                  })}
+                </div>
+              )}
+
               {isEvent ? (
                 <button
                   type="button"
@@ -406,7 +481,7 @@ export function TrendConstellation({
                   aria-label={
                     isCentre
                       ? `${node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
-                      : `${node.label} — ${panelCopy.recentre}`
+                      : `${node.label} — ${panelCopy.recentre}${previewText ? `; 다음 구성 ${previewText}` : ''}`
                   }
                   onClick={isCentre ? togglePanel : () => walkTo(node)}
                 >

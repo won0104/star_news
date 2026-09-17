@@ -44,6 +44,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
   const [openKey, setOpenKey] = useState(null)
   const [graph, setGraph] = useState(null)
   const [graphState, setGraphState] = useState('idle')
+  const [previewGraphs, setPreviewGraphs] = useState({})
   // Neighbours do not change while the screen is open, so a key already opened is served
   // from here rather than fetched again.
   const cache = useRef(new Map())
@@ -119,26 +120,76 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
       })
   }
 
+  /**
+   * 화면에 보이는 관련 Event가 다음 중심이 되었을 때의 1-Hop 구성을 미리 가져온다.
+   * 작은 별은 별도 장식이 아니라 이 응답을 유형별로 요약한 것이며, 이미 받아 둔 응답은
+   * 실제 Event 이동에도 같은 cache를 사용한다.
+   */
+  useEffect(() => {
+    if (graphState !== 'ready' || !graph || sample) return undefined
+
+    const relatedEvents = (graph.nodes ?? [])
+      .filter((node) => node.nodeType === 'EVENT')
+      .slice(0, 2)
+    const missing = relatedEvents.filter(
+      (node) => !givenNeighbors?.[node.nodeKey] && !previewGraphs[node.nodeKey],
+    )
+    if (missing.length === 0) return undefined
+
+    const controller = new AbortController()
+    Promise.allSettled(
+      missing.map(async (node) => {
+        const payload =
+          cache.current.get(node.nodeKey) ??
+          (await fetchNeighbors(node.nodeType, node.nodeKey, {
+            depth: 1,
+            signal: controller.signal,
+          }))
+        cache.current.set(node.nodeKey, payload)
+        return [node.nodeKey, payload]
+      }),
+    ).then((results) => {
+      if (controller.signal.aborted) return
+      const ready = results
+        .filter((result) => result.status === 'fulfilled')
+        .map((result) => result.value)
+      if (ready.length === 0) return
+      setPreviewGraphs((current) => ({ ...current, ...Object.fromEntries(ready) }))
+    })
+
+    return () => controller.abort()
+  }, [givenNeighbors, graph, graphState, previewGraphs, sample])
+
   if (openKey) {
     if (graphState === 'loading' || !graph) {
       const chosen = ranked.find((trend) => trend.nodeKey === openKey)
       return (
         <Notice
           mark={graphState === 'failed' ? '⚠' : '✦'}
-          title={
-            graphState === 'failed' ? trendSkyExpandCopy.failed : trendSkyExpandCopy.loading
-          }
+          title={graphState === 'failed' ? trendSkyExpandCopy.failed : trendSkyExpandCopy.loading}
           hint={chosen?.label}
           onBack={close}
         />
       )
     }
 
-    // The composition is <TrendConstellation>'s, unchanged — centre with its parts on the
-    // authored slots. Only the data behind it is new.
+    const previews = Object.fromEntries(
+      (graph.nodes ?? [])
+        .filter((node) => node.nodeType === 'EVENT')
+        .slice(0, 2)
+        .map((node) => [
+          node.nodeKey,
+          sample
+            ? trendNeighbors[node.nodeKey]
+            : (givenNeighbors?.[node.nodeKey] ?? previewGraphs[node.nodeKey]),
+        ])
+        .filter(([, preview]) => preview),
+    )
+
     return (
       <TrendConstellation
         graph={graph}
+        previewGraphs={previews}
         onBack={close}
         onWalk={(node) => open({ nodeType: node.nodeType ?? 'EVENT', nodeKey: node.id })}
         details={sample ? trendNodeDetails : undefined}
