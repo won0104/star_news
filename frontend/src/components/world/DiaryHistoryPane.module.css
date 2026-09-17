@@ -840,3 +840,15 @@
   font: italic clamp(8px, 0.7vw, 11px) var(--font-serif-kr);
   color: #a08b6d;
 }
+
+/* 불러오는 중·실패처럼 한 줄로 끝나는 알림. 사건 목록이 설 자리에 같은 크기로 서서,
+   페이지가 비었을 때 오른쪽 면이 접히지 않게 한다. */
+.pageNotice {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  margin: 0;
+  font: clamp(10px, 0.9vw, 14px)/1.6 var(--font-serif-kr);
+  color: #8b7355;
+  text-align: center;
+}
