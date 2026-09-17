@@ -36,6 +36,17 @@ export function ArticlePanel({ article, open, onClose, onToggleSave, id }) {
               {article.source} · {article.at}
             </p>
             <h2 className={styles.headline}>{article.headline}</h2>
+            {/* `url` is not in the article data yet, and React drops an undefined href —
+                so this renders as plain text until the field exists, rather than as a
+                link that goes nowhere. */}
+            <a
+              className={styles.origin}
+              href={article.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {eventCopy.origin} ↗
+            </a>
           </div>
 
           <div className={styles.body}>
