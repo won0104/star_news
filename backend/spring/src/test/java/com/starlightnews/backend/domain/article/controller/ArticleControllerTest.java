@@ -3,8 +3,10 @@ package com.starlightnews.backend.domain.article.controller;
 import java.time.OffsetDateTime;
 
 import com.starlightnews.backend.domain.article.dto.ArticleDetailResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
 import com.starlightnews.backend.domain.article.exception.ArticleErrorCode;
 import com.starlightnews.backend.domain.article.service.ArticleDetailService;
+import com.starlightnews.backend.domain.article.service.ArticleSummaryService;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.enums.SummaryStatus;
 import com.starlightnews.backend.global.error.BusinessException;
@@ -26,6 +28,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ArticleControllerTest {
 
 	private static final String DETAIL_PATH = "/api/v1/articles/{articleId}";
+	private static final String SUMMARY_PATH = "/api/v1/articles/{articleId}/summary";
 	private static final String REQUEST_ID = "550e8400-e29b-41d4-a716-446655440000";
 
 	@Autowired
@@ -46,6 +50,73 @@ class ArticleControllerTest {
 
 	@MockitoBean
 	private ArticleDetailService articleDetailService;
+
+	@MockitoBean
+	private ArticleSummaryService articleSummaryService;
+
+	@Test
+	void 비회원도_기사_요약을_생성하고_200을_응답받는다() throws Exception {
+		given(articleSummaryService.generate(101L)).willReturn(new ArticleSummaryResponse(
+				101L, "생성된 기사 요약", SummaryStatus.COMPLETED));
+
+		mockMvc.perform(post(SUMMARY_PATH, 101L).header(RequestIdFilter.HEADER_NAME, REQUEST_ID))
+				.andExpect(status().isOk())
+				.andExpect(header().string(RequestIdFilter.HEADER_NAME, REQUEST_ID))
+				.andExpect(jsonPath("$.data.articleId").value(101))
+				.andExpect(jsonPath("$.data.summary").value("생성된 기사 요약"))
+				.andExpect(jsonPath("$.data.summaryStatus").value("COMPLETED"))
+				.andExpect(jsonPath("$.meta.requestId").value(REQUEST_ID));
+	}
+
+	@Test
+	void 이미_요약_생성중이면_202_PROCESSING을_응답한다() throws Exception {
+		given(articleSummaryService.generate(101L)).willReturn(new ArticleSummaryResponse(
+				101L, null, SummaryStatus.PROCESSING));
+
+		mockMvc.perform(post(SUMMARY_PATH, 101L))
+				.andExpect(status().isAccepted())
+				.andExpect(jsonPath("$.data.summary").isEmpty())
+				.andExpect(jsonPath("$.data.summaryStatus").value("PROCESSING"));
+	}
+
+	@Test
+	void 요약_API의_articleId가_숫자가_아니면_400_TYPE_MISMATCH를_응답한다() throws Exception {
+		mockMvc.perform(post(SUMMARY_PATH, "not-a-number"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("TYPE_MISMATCH"));
+
+		verify(articleSummaryService, never()).generate(anyLong());
+	}
+
+	@Test
+	void 기사_본문이_없으면_422_ARTICLE_CONTENT_UNAVAILABLE를_응답한다() throws Exception {
+		given(articleSummaryService.generate(101L))
+				.willThrow(new BusinessException(ArticleErrorCode.ARTICLE_CONTENT_UNAVAILABLE));
+
+		mockMvc.perform(post(SUMMARY_PATH, 101L))
+				.andExpect(status().isUnprocessableEntity())
+				.andExpect(jsonPath("$.code").value("ARTICLE_CONTENT_UNAVAILABLE"));
+	}
+
+	@Test
+	void GMS_호출이_실패하면_502_SUMMARY_GENERATION_FAILED를_응답한다() throws Exception {
+		given(articleSummaryService.generate(101L))
+				.willThrow(new BusinessException(ArticleErrorCode.SUMMARY_GENERATION_FAILED));
+
+		mockMvc.perform(post(SUMMARY_PATH, 101L))
+				.andExpect(status().isBadGateway())
+				.andExpect(jsonPath("$.code").value("SUMMARY_GENERATION_FAILED"));
+	}
+
+	@Test
+	void 요약_저장이_실패하면_500_SUMMARY_SAVE_FAILED를_응답한다() throws Exception {
+		given(articleSummaryService.generate(101L))
+				.willThrow(new BusinessException(ArticleErrorCode.SUMMARY_SAVE_FAILED));
+
+		mockMvc.perform(post(SUMMARY_PATH, 101L))
+				.andExpect(status().isInternalServerError())
+				.andExpect(jsonPath("$.code").value("SUMMARY_SAVE_FAILED"));
+	}
 
 	@Test
 	void 비회원도_기사_상세와_요청_ID를_조회한다() throws Exception {

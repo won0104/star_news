@@ -73,6 +73,76 @@ class ArticleRepositoryTest {
 	}
 
 	@Test
+	void 요약_생성_상태는_한_요청만_PROCESSING으로_선점한다() {
+		NewsOrganization organization = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article article = entityManager.persist(new Article(
+				"요약 대상 기사",
+				LocalDateTime.of(2026, 9, 17, 9, 0),
+				organization,
+				null,
+				AnalysisStatus.COMPLETED));
+		entityManager.flush();
+
+		int first = claimSummary(article.getArticleId());
+		int second = claimSummary(article.getArticleId());
+		entityManager.clear();
+
+		assertThat(first).isEqualTo(1);
+		assertThat(second).isZero();
+		ArticleRepository.ArticleSummaryTarget target = articleRepository
+				.findSummaryTargetByArticleIdAndAnalysisStatus(
+						article.getArticleId(), AnalysisStatus.COMPLETED)
+				.orElseThrow();
+		assertThat(target.getSummaryStatus()).isEqualTo(SummaryStatus.PROCESSING);
+	}
+
+	@Test
+	void PROCESSING_상태에_생성된_요약과_생성시각을_저장한다() {
+		NewsOrganization organization = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article article = entityManager.persist(new Article(
+				"요약 대상 기사",
+				LocalDateTime.of(2026, 9, 17, 9, 0),
+				organization,
+				null,
+				AnalysisStatus.COMPLETED));
+		entityManager.flush();
+		claimSummary(article.getArticleId());
+		LocalDateTime generatedAt = LocalDateTime.of(2026, 9, 17, 10, 0);
+
+		int updated = articleRepository.completeSummaryGeneration(
+				article.getArticleId(),
+				"생성된 기사 요약",
+				generatedAt,
+				SummaryStatus.PROCESSING,
+				SummaryStatus.COMPLETED);
+		entityManager.clear();
+
+		assertThat(updated).isEqualTo(1);
+		Object[] row = (Object[]) entityManager.getEntityManager().createNativeQuery(
+					"SELECT summary, summary_status, summary_generated_at "
+							+ "FROM articles WHERE article_id = ?1")
+				.setParameter(1, article.getArticleId())
+				.getSingleResult();
+		assertThat(row[0]).isEqualTo("생성된 기사 요약");
+		assertThat(row[1]).isEqualTo("COMPLETED");
+		assertThat(row[2]).isNotNull();
+	}
+
+	@Test
+	void 분석이_완료되지_않은_기사는_요약_생성을_선점할_수_없다() {
+		NewsOrganization organization = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article article = entityManager.persist(new Article(
+				"분석 중인 기사",
+				LocalDateTime.of(2026, 9, 17, 9, 0),
+				organization,
+				null,
+				AnalysisStatus.PROCESSING));
+		entityManager.flush();
+
+		assertThat(claimSummary(article.getArticleId())).isZero();
+	}
+
+	@Test
 	void articleId_목록으로_기사를_언론사와_함께_조회한다() {
 		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
 		Article a1 = entityManager.persist(new Article("제목1", LocalDateTime.of(2024, 1, 11, 9, 0), org));
@@ -237,5 +307,13 @@ class ArticleRepositoryTest {
 	@Test
 	void findIdByUrlHash는_저장되지_않은_기사면_빈_Optional이다() {
 		assertThat(articleRepository.findIdByUrlHash(ArticleUrls.hash("https://없는.기사/1"))).isEmpty();
+	}
+
+	private int claimSummary(Long articleId) {
+		return articleRepository.claimSummaryGeneration(
+				articleId,
+				AnalysisStatus.COMPLETED,
+				SummaryStatus.PROCESSING,
+				List.of(SummaryStatus.NOT_REQUESTED, SummaryStatus.FAILED));
 	}
 }
