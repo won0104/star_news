@@ -71,19 +71,17 @@ def calculate_recommendations(
 DEFAULT_CBF_WEIGHT = 0.5
 DEFAULT_CF_WEIGHT = 0.5
 
-# 1. 추천 후보 공통 필터링 공용 모듈
-def get_eligible_candidate_event_ids(user_id: int, session: Session) -> set[str]:
-    recency_threshold = datetime.now(timezone.utc) - timedelta(days=repository.RECENCY_WINDOW_DAYS)
-    # 관심 Topic이 있으면 그 Topic으로 후보를 하드 필터링, 없으면 전체 Topic 대상
-    interested_topic_codes = repository.find_user_interested_topics(session, user_id)
-    return set(repository.find_candidate_events(session, user_id, recency_threshold, interested_topic_codes))
-
-# 2. 협업 필터링(CF) 공용 모듈
-def calculate_cf_scores(user_id: int, session: Session) -> list[CFCandidate]:
-    candidates = repository.find_cf_candidate_events(session, user_id)
+# 1. 협업 필터링(CF) 공용 모듈
+def calculate_cf_scores(
+    user_id: int,
+    session: Session,
+    interested_topic_codes: list[str] | None = None,
+    recency_threshold: datetime | None = None,
+) -> list[CFCandidate]:
+    candidates = repository.find_cf_candidate_events(session, user_id, interested_topic_codes, recency_threshold)
     return [CFCandidate(event_id=c["eventId"], cf_score=c["cfScore"]) for c in candidates]
 
-# 3. 콘텐츠 기반 필터링(CBF) 공용 모듈
+# 2. 콘텐츠 기반 필터링(CBF) 공용 모듈
 # CONSUMED 이력 하나의 가중치 계산 - 많이 클릭할수록(로그 스케일), 최근에 볼수록(지수 감쇠) 가중치 증가
 def _calculate_consumption_weight(
     event_click_count: int, last_viewed_at: datetime, now: datetime, is_favorited: bool
@@ -126,8 +124,19 @@ def _build_user_profile_vector(consumed_events: list[dict]) -> list[float] | Non
     return [value / total_weight for value in weighted_sum]
 
 
+# CBF 벡터 검색 rawLimit 재시도 설정 - 필터 통과분이 부족할 때만 두 배씩 늘려서 재조회
+_CBF_RAW_LIMIT_INITIAL = repository.CONTENT_SIMILAR_EVENT_LIMIT * 3
+_CBF_RAW_LIMIT_MAX = 500
+
+
 # 콘텐츠 기반 필터링(CBF) 공용 모듈. 유저 프로필 벡터로 유사 Event 검색.
-def calculate_cbf_scores(user_id: int, session: Session) -> list[CBFCandidate]:
+# interested_topic_codes/recency_threshold를 넘기면 그 조건까지 벡터 검색 결과에 바로 적용됨 (없으면 필터 없이 전체 대상)
+def calculate_cbf_scores(
+    user_id: int,
+    session: Session,
+    interested_topic_codes: list[str] | None = None,
+    recency_threshold: datetime | None = None,
+) -> list[CBFCandidate]:
     # 1) 뭘 봤는지 조회
     consumed_events = repository.find_consumed_events_with_embeddings(session, user_id)
 
@@ -137,13 +146,24 @@ def calculate_cbf_scores(user_id: int, session: Session) -> list[CBFCandidate]:
         return []
 
     # 3) 그 벡터랑 비슷한 Event 검색
-    similar_events = repository.find_similar_events_by_vector(session, profile_vector, user_id)
+    # 필터 통과분이 목표치(CONTENT_SIMILAR_EVENT_LIMIT)보다 적으면 rawLimit을 2배씩 늘려서 재시도한다
+    raw_limit = _CBF_RAW_LIMIT_INITIAL
+    while True:
+        similar_events = repository.find_similar_events_by_vector(
+            session, profile_vector, user_id, interested_topic_codes, recency_threshold, raw_limit
+        )
+        enough = len(similar_events) >= repository.CONTENT_SIMILAR_EVENT_LIMIT
+        exhausted = raw_limit >= _CBF_RAW_LIMIT_MAX
+        if enough or exhausted:
+            break
+        raw_limit = min(raw_limit * 2, _CBF_RAW_LIMIT_MAX)
+
     return [
         CBFCandidate(event_id=e["eventId"], content_score=e["contentScore"]) for e in similar_events
     ]
 
 
-# 4. Cold Start (CONSUMED 이력 없는 유저) 폴백
+# 3. Cold Start (CONSUMED 이력 없는 유저) 폴백
 # 인기도 점수 계산 - 많이 볼수록(로그 스케일), 최근 사건일수록(지수 감쇠) 점수 증가. CBF 가중치 계산과 같은 형태.
 def _calculate_popularity_score(unique_consumers: int, occurred_at: datetime, now: datetime) -> float:
     days_since = max((now - occurred_at).total_seconds() / 86400, 0)
@@ -174,14 +194,14 @@ def get_cold_start_fallback(user_id: int, session: Session) -> list[ScoredEvent]
     return scored[: repository.FALLBACK_EVENT_LIMIT]
 
 
-# 5. 관심 기반 추천 최종 계산 (CF + CBF 가중합)
+# 4. 관심 기반 추천 최종 계산 (CF + CBF 가중합)
 # final_score = cbf_weight × cbf_score + cf_weight × cf_score
 def calculate_final_score(cbf_score: float, cf_score: float, cbf_weight: float, cf_weight: float) -> float:
     return cbf_weight * cbf_score + cf_weight * cf_score
 
 
 # 관심 기반 추천 메인 함수
-# Cold Start면 인기도 폴백, 아니면 후보 필터링 ∩ (CF+CBF 가중합) 계산
+# Cold Start면 인기도 폴백, 아니면 CF+CBF 가중합 계산 (공통 후보 조건은 CF/CBF 쿼리 안에서 각자 바로 적용됨)
 def calculate_interest_based_recommendations(
     user_id: int,
     session: Session,
@@ -196,13 +216,20 @@ def calculate_interest_based_recommendations(
     if is_cold_start:
         return get_cold_start_fallback(user_id, session)
 
-    # 후보 필터링 ∩ (CF+CBF 가중합) 계산
-    eligible_ids = get_eligible_candidate_event_ids(user_id, session)
-    cf_scores = {c.event_id: c.cf_score for c in calculate_cf_scores(user_id, session)}
-    cbf_scores = {c.event_id: c.content_score for c in calculate_cbf_scores(user_id, session)}
+    # 관심 Topic/최근성 기준을 한 번만 계산해서 CF/CBF 양쪽에 그대로 넘김 (중복 조회 방지)
+    interested_topic_codes = repository.find_user_interested_topics(session, user_id)
+    recency_threshold = datetime.now(timezone.utc) - timedelta(days=repository.RECENCY_WINDOW_DAYS)
 
-    # CF든 CBF든 하나라도 점수가 있는 Event 중, 후보 필터링을 통과한 것만 최종 후보로 남김
-    candidate_ids = (set(cf_scores) | set(cbf_scores)) & eligible_ids
+    cf_scores = {
+        c.event_id: c.cf_score
+        for c in calculate_cf_scores(user_id, session, interested_topic_codes, recency_threshold)
+    }
+    cbf_scores = {
+        c.event_id: c.content_score
+        for c in calculate_cbf_scores(user_id, session, interested_topic_codes, recency_threshold)
+    }
+
+    candidate_ids = set(cf_scores) | set(cbf_scores)
 
     scored = [
         ScoredEvent(
@@ -214,5 +241,5 @@ def calculate_interest_based_recommendations(
         for event_id in candidate_ids
     ]
     scored.sort(key=lambda s: s.score, reverse=True)
-    # 상위 5개 반환
+    # 상위 FINAL_RECOMMENDATION_LIMIT개만 반환
     return scored[: repository.FINAL_RECOMMENDATION_LIMIT]

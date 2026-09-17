@@ -19,41 +19,26 @@ FALLBACK_EVENT_LIMIT = 10
 FINAL_RECOMMENDATION_LIMIT = 10
 
 
-# 1. 추천 후보 공통 필터링
-# - 미열람 필터: 본인이 이미 CONSUMED한 Event 제외
-# - 비선호 Topic 제외 필터: 본인이 DISLIKES한 Topic으로 분류된 Event 제외
-# - 관심 Topic 하드 필터: 관심 Topic이 있으면 그 Topic으로 분류된 Event만, 없으면 전체 대상
-# - 최근성 필터: recency_threshold보다 오래된 Event 제외
-def find_candidate_events(
-    session: Session, user_id: int, recency_threshold: datetime, interested_topic_codes: list[str]
-) -> list[str]:
-    result = session.run(
-        """
-        // 최근성 필터 먼저 적용 (event_occurred_at 인덱스로 좁힘)
-        MATCH (candidate:Event)
-
-        WHERE candidate.occurredAt >= $recencyThreshold
-        // 비선호 Topic, 미열람, 관심 Topic 필터 적용
-        MATCH (u:User {userId: $userId})
-        WHERE NOT (u)-[:CONSUMED]->(candidate)
-          AND NOT (candidate)-[:CLASSIFIED_AS]->(:Topic)<-[:DISLIKES]-(u)
-          AND ($interestedTopicCodes IS NULL OR EXISTS {
-              (candidate)-[:CLASSIFIED_AS]->(t:Topic) WHERE t.topicCode IN $interestedTopicCodes
-          })
-
-        RETURN candidate.nodeId AS eventId
-        """,
-        userId=user_id,
-        recencyThreshold=recency_threshold,
-        # 빈 리스트를 그대로 넘기면 `IN []`가 항상 거짓이라 아무것도 안 나옴 -> None으로 바꿔서 "필터 없음"으로 취급
-        interestedTopicCodes=interested_topic_codes or None,
-    )
-    return [record["eventId"] for record in result]
+# 1. 공통 후보 조건
+# (미열람/비선호 Topic 제외/관심 Topic 하드 필터/최근성)을 매번 새로 안 만들도록 한 곳에서 조립.
+_CANDIDATE_CONDITIONS = """
+  AND NOT (u)-[:CONSUMED]->(candidate)
+  AND NOT (candidate)-[:CLASSIFIED_AS]->(:Topic)<-[:DISLIKES]-(u)
+  AND ($interestedTopicCodes IS NULL OR EXISTS {
+      (candidate)-[:CLASSIFIED_AS]->(t:Topic) WHERE t.topicCode IN $interestedTopicCodes
+  })
+  AND ($recencyThreshold IS NULL OR candidate.occurredAt >= $recencyThreshold)
+"""
 
 
 # 2. 협업 필터링(CF) 후보 Event 조회 - 유사도는 Jaccard(교집합/합집합)로 계산
 # (반환값: [{eventId, cfScore}, ...] (cfScore 내림차순))
-def find_cf_candidate_events(session: Session, user_id: int) -> list[dict]:
+def find_cf_candidate_events(
+    session: Session,
+    user_id: int,
+    interested_topic_codes: list[str] | None = None,
+    recency_threshold: datetime | None = None,
+) -> list[dict]:
     result = session.run(
         """
         // 본인의 전체 소비 수는 유사 유저와 무관하니 한 번만 계산 (유사 유저 수만큼 반복 계산되는 것 방지)
@@ -74,14 +59,19 @@ def find_cf_candidate_events(session: Session, user_id: int) -> list[dict]:
         ORDER BY jaccard DESC
         LIMIT $similarUserLimit
 
-        // 유사 유저는 소비했지만 본인은 아직 소비하지 않은 Event, 유사도 합산으로 점수 매김
-        MATCH (similar)-[:CONSUMED]->(rec:Event)
-        WHERE NOT (u)-[:CONSUMED]->(rec)
-        RETURN rec.nodeId AS eventId, sum(jaccard) AS cfScore
+        // 유사 유저는 소비했지만 본인은 아직 소비하지 않은 Event, 공통 후보 조건까지 적용해 유사도 합산으로 점수 매김
+        MATCH (similar)-[:CONSUMED]->(candidate:Event)
+        WHERE true
+        """
+        + _CANDIDATE_CONDITIONS
+        + """
+        RETURN candidate.nodeId AS eventId, sum(jaccard) AS cfScore
         ORDER BY cfScore DESC
         """,
         userId=user_id,
         similarUserLimit=SIMILAR_USER_LIMIT,
+        interestedTopicCodes=interested_topic_codes or None,
+        recencyThreshold=recency_threshold,
     )
     return [{"eventId": record["eventId"], "cfScore": record["cfScore"]} for record in result]
 
@@ -111,28 +101,39 @@ def find_consumed_events_with_embeddings(session: Session, user_id: int) -> list
     ]
 
 
-# 프로필 벡터로 벡터 인덱스에서 유사 Event 검색. 이미 소비한 Event는 제외.
-# (제외 필터링이 인덱스 검색 이후에 걸려서 rawLimit을 넉넉히 잡아 최종 개수가 부족해지는 걸 방지)
-def find_similar_events_by_vector(session: Session, profile_vector: list[float], user_id: int) -> list[dict]:
+# 프로필 벡터로 벡터 인덱스에서 유사 Event 검색, 공통 후보 조건까지 적용
+def find_similar_events_by_vector(
+    session: Session,
+    profile_vector: list[float],
+    user_id: int,
+    interested_topic_codes: list[str] | None,
+    recency_threshold: datetime,
+    raw_limit: int,
+    limit: int = CONTENT_SIMILAR_EVENT_LIMIT,
+) -> list[dict]:
     result = session.run(
         """
         MATCH (u:User {userId: $userId})
 
         // 벡터 인덱스에서 프로필 벡터와 가까운 순으로 rawLimit개 조회
         CALL db.index.vector.queryNodes('event_embedding_index', $rawLimit, $profileVector)
-        YIELD node, score
+        YIELD node AS candidate, score
 
-        // 이미 소비한 Event는 제외
-        WHERE NOT (u)-[:CONSUMED]->(node)
-
-        RETURN node.nodeId AS eventId, score AS contentScore
+        // 공통 후보 조건(미열람/비선호 Topic/관심 Topic/최근성) 적용
+        WHERE true
+        """
+        + _CANDIDATE_CONDITIONS
+        + """
+        RETURN candidate.nodeId AS eventId, score AS contentScore
         ORDER BY contentScore DESC
         LIMIT $limit
         """,
         userId=user_id,
         profileVector=profile_vector,
-        rawLimit=CONTENT_SIMILAR_EVENT_LIMIT * 3,
-        limit=CONTENT_SIMILAR_EVENT_LIMIT,
+        rawLimit=raw_limit,
+        limit=limit, # raw_limit은 호출측이 조절 - 필터 통과분이 부족하면 호출측이 더 큰 raw_limit으로 재시도한다
+        interestedTopicCodes=interested_topic_codes or None,
+        recencyThreshold=recency_threshold,
     )
     return [{"eventId": record["eventId"], "contentScore": record["contentScore"]} for record in result]
 
