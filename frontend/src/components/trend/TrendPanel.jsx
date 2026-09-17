@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { panelCopy } from '../../data/trend'
-import { useDraggableCard } from '../../hooks/useDraggableCard'
+import { useResizableCard } from '../../hooks/useResizableCard'
 import styles from './TrendPanel.module.css'
+
+const RESIZE_CORNERS = [
+  { direction: 'nw', label: '왼쪽 위 모서리에서 카드 크기 조절' },
+  { direction: 'ne', label: '오른쪽 위 모서리에서 카드 크기 조절' },
+  { direction: 'sw', label: '왼쪽 아래 모서리에서 카드 크기 조절' },
+  { direction: 'se', label: '오른쪽 아래 모서리에서 카드 크기 조절' },
+]
 
 /**
  * 중심 Node와 이어진 기사들 — `GET /graphs/nodes/{nodeType}/{nodeKey}/articles`.
@@ -21,7 +28,8 @@ import styles from './TrendPanel.module.css'
  */
 export function TrendPanel({ data, state, title, open, onClose, onMore, id }) {
   const [saved, setSaved] = useState({})
-  const { cardRef, cardStyle, dragging, handleProps } = useDraggableCard()
+  const { cardRef, cardStyle, dragging, resizing, positioned, handleProps, resizeHandleProps } =
+    useResizableCard()
 
   const articles = data?.articles ?? []
 
@@ -32,6 +40,8 @@ export function TrendPanel({ data, state, title, open, onClose, onMore, id }) {
       className={`${styles.panel} ${open ? '' : styles.panelClosed}`}
       style={cardStyle}
       data-dragging={dragging}
+      data-resizing={resizing}
+      data-positioned={positioned}
       aria-label={title}
       inert={!open}
     >
@@ -88,7 +98,9 @@ export function TrendPanel({ data, state, title, open, onClose, onMore, id }) {
                 <svg className={styles.bookmarkIcon} viewBox="0 0 13 17" aria-hidden>
                   <path
                     d="M1 1.6A.6.6 0 0 1 1.6 1h9.8a.6.6 0 0 1 .6.6v14.2l-5.5-3.6L1 15.8z"
-                    fill={(saved[article.articleId] ?? article.bookmarked) ? 'currentColor' : 'none'}
+                    fill={
+                      (saved[article.articleId] ?? article.bookmarked) ? 'currentColor' : 'none'
+                    }
                     stroke="currentColor"
                     strokeWidth="1.3"
                     strokeLinejoin="round"
@@ -111,6 +123,17 @@ export function TrendPanel({ data, state, title, open, onClose, onMore, id }) {
           {panelCopy.more}
         </button>
       )}
+
+      {RESIZE_CORNERS.map(({ direction, label }) => (
+        <button
+          key={direction}
+          type="button"
+          className={`${styles.resizeHandle} ${styles[`resize${direction.toUpperCase()}`]}`}
+          aria-label={label}
+          title={`${label} — 방향키로도 조절할 수 있습니다`}
+          {...resizeHandleProps(direction)}
+        />
+      ))}
     </aside>
   )
 }
