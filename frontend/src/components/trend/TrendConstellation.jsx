@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   ambientLayouts,
@@ -18,6 +18,7 @@ import { TrendPanel } from './TrendPanel'
 import styles from './TrendConstellation.module.css'
 
 const PANEL_ID = 'trend-articles'
+const DETAIL_ID = 'trend-node-detail'
 
 const ROLE_CLASS = {
   centre: styles.centreNode,
@@ -118,13 +119,21 @@ function StarArt({ role }) {
  * from the mock to the endpoint. `onWalk` is how a related event re-centres when the
  * caller owns the loading; without it the mock's own walk is used.
  */
-export function TrendConstellation({ graph, onBack, onWalk, details, articleSamples }) {
+export function TrendConstellation({
+  graph,
+  onBack,
+  onWalk,
+  details,
+  articleSamples,
+  overlayRoot,
+}) {
   const [centreId, setCentreId] = useState(constellationStart)
   const [open, setOpen] = useState(false)
   const [full, setFull] = useState(false)
-  // 사용자가 직접 연 Node. 없으면 카드는 중심 Node 를 설명한다.
+  // 사용자가 직접 연 Entity·Statement. 같은 별을 다시 누르면 선택이 풀린다.
   const [picked, setPicked] = useState(null)
   const [pickedState, setPickedState] = useState('idle')
+  const detailRequestRef = useRef(null)
   const [articles, setArticles] = useState(null)
   const [articlesState, setArticlesState] = useState('idle')
   const narrow = useIsNarrow()
@@ -144,7 +153,22 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
    * `details` gives the sample its answers without a request: those keys are not in Neo4j,
    * so asking for them would only 404.
    */
-  const openDetail = (node, nodeType) => {
+  const closeDetail = () => {
+    detailRequestRef.current?.abort()
+    detailRequestRef.current = null
+    setPicked(null)
+    setPickedState('idle')
+  }
+
+  const toggleDetail = (node, nodeType) => {
+    if (picked?.nodeKey === node.id) {
+      closeDetail()
+      return
+    }
+
+    detailRequestRef.current?.abort()
+    detailRequestRef.current = null
+
     const ready = details?.[node.id]
     if (ready) {
       setPicked(ready)
@@ -154,14 +178,20 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
 
     setPicked({ nodeType, nodeKey: node.id, title: node.label })
     setPickedState('loading')
-    fetchNodeDetail(nodeType, node.id)
+    const controller = new AbortController()
+    detailRequestRef.current = controller
+    fetchNodeDetail(nodeType, node.id, { signal: controller.signal })
       .then((payload) => {
+        if (controller.signal.aborted) return
         setPicked(payload)
         setPickedState('ready')
       })
       .catch((error) => {
         if (error?.name === 'AbortError') return
         setPickedState('failed')
+      })
+      .finally(() => {
+        if (detailRequestRef.current === controller) detailRequestRef.current = null
       })
   }
 
@@ -206,16 +236,16 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
   }
 
   const walkTo = (node) => {
+    closeDetail()
+    setOpen(false)
+    setArticles(null)
+    setArticlesState('idle')
+
     if (onWalk) {
       onWalk(node)
       return
     }
     setCentreId(node.event)
-    setOpen(false)
-    setPicked(null)
-    setPickedState('idle')
-    setArticles(null)
-    setArticlesState('idle')
   }
 
   const enterFull = useCallback(() => {
@@ -228,6 +258,10 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {})
     }
+  }, [])
+
+  useEffect(() => {
+    return () => detailRequestRef.current?.abort()
   }, [])
 
   useEffect(() => {
@@ -250,6 +284,35 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
     }
   }, [leaveFull])
 
+  const detailCard = graph && picked ? (
+    <NodeDetailPanel
+      key={picked.nodeKey}
+      id={DETAIL_ID}
+      node={picked}
+      state={pickedState}
+      onClose={closeDetail}
+    />
+  ) : null
+
+  const articlePanel = (
+    <TrendPanel
+      id={PANEL_ID}
+      data={articles}
+      state={articlesState}
+      title={centre.label}
+      open={open}
+      onClose={() => setOpen(false)}
+      onMore={() => loadArticles(articles?.nextCursor)}
+    />
+  )
+
+  const overlays = (
+    <>
+      {detailCard}
+      {articlePanel}
+    </>
+  )
+
   const board = (
     <div
       className={`${styles.field} ${full ? styles.fieldFull : ''}`}
@@ -257,8 +320,6 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
       role="group"
       aria-label={panelCopy.fieldLabel}
     >
-      <span className={styles.layoutBadge}>구도 · {layout.label}</span>
-
       <div className={styles.fieldActions}>
         {onBack && !full && (
           <button type="button" className={styles.fieldAction} onClick={onBack}>
@@ -355,8 +416,10 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
                 <button
                   type="button"
                   className={styles.starButton}
-                  aria-label={`${node.label} — 상세 보기`}
-                  onClick={() => openDetail(node, role === 'entity' ? 'ENTITY' : 'STATEMENT')}
+                  aria-expanded={picked?.nodeKey === node.id}
+                  aria-controls={DETAIL_ID}
+                  aria-label={`${node.label} — ${picked?.nodeKey === node.id ? '상세 닫기' : '상세 보기'}`}
+                  onClick={() => toggleDetail(node, role === 'entity' ? 'ENTITY' : 'STATEMENT')}
                 >
                   {art}
                 </button>
@@ -371,67 +434,16 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
         })}
       </div>
 
-      {graph && (
-        <DetailCard
-          // 중심이 바뀌거나 다른 Node 를 고르면 새로 마운트돼 닫힘 상태가 풀린다.
-          key={`${graph.centerNode.nodeKey}:${picked?.nodeKey ?? ''}`}
-          centre={graph.centerNode}
-          sample={details?.[graph.centerNode.nodeKey]}
-          picked={picked}
-          pickedState={pickedState}
-        />
-      )}
-
-      <TrendPanel
-        id={PANEL_ID}
-        data={articles}
-        state={articlesState}
-        title={centre.label}
-        open={open}
-        onClose={() => setOpen(false)}
-        onMore={() => loadArticles(articles?.nextCursor)}
-      />
+      {(full || !overlayRoot) && overlays}
     </div>
   )
 
-  return full ? createPortal(board, document.body) : board
-}
-
-/**
- * 카드가 무엇을 설명할지 고른다 — 고른 Node 가 있으면 그것, 없으면 중심 Node.
- *
- * Its own component so a centre change or a new pick remounts it through the `key`,
- * which resets the closed flag without an effect writing state during a render pass.
- * The centre's own detail is fetched here rather than by the screen above, because this
- * is the only place that needs it.
- */
-function DetailCard({ centre, sample, picked, pickedState }) {
-  const [closed, setClosed] = useState(false)
-  const [fetched, setFetched] = useState(null)
-  const [state, setState] = useState(sample ? 'ready' : 'loading')
-
-  useEffect(() => {
-    if (sample) return
-    const controller = new AbortController()
-    fetchNodeDetail(centre.nodeType, centre.nodeKey, { signal: controller.signal })
-      .then((payload) => {
-        setFetched(payload)
-        setState('ready')
-      })
-      .catch((error) => {
-        if (error?.name === 'AbortError') return
-        setState('failed')
-      })
-    return () => controller.abort()
-  }, [centre, sample])
-
-  if (closed) return null
+  if (full) return createPortal(board, document.body)
 
   return (
-    <NodeDetailPanel
-      node={picked ?? sample ?? fetched}
-      state={picked ? pickedState : sample ? 'ready' : state}
-      onClose={() => setClosed(true)}
-    />
+    <>
+      {board}
+      {overlayRoot && createPortal(overlays, overlayRoot)}
+    </>
   )
 }

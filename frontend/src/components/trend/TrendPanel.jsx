@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { panelCopy } from '../../data/trend'
+import { useDraggableCard } from '../../hooks/useDraggableCard'
 import styles from './TrendPanel.module.css'
 
 /**
@@ -20,13 +21,17 @@ import styles from './TrendPanel.module.css'
  */
 export function TrendPanel({ data, state, title, open, onClose, onMore, id }) {
   const [saved, setSaved] = useState({})
+  const { cardRef, cardStyle, dragging, handleProps } = useDraggableCard()
 
   const articles = data?.articles ?? []
 
   return (
     <aside
+      ref={cardRef}
       id={id}
       className={`${styles.panel} ${open ? '' : styles.panelClosed}`}
+      style={cardStyle}
+      data-dragging={dragging}
       aria-label={title}
       inert={!open}
     >
@@ -34,7 +39,7 @@ export function TrendPanel({ data, state, title, open, onClose, onMore, id }) {
         ✕
       </button>
 
-      <div className={styles.head}>
+      <div className={styles.head} title="드래그하여 이동" {...handleProps}>
         <span className={styles.eyebrow}>RELATED ARTICLES</span>
         <h2 className={styles.title}>
           {title}

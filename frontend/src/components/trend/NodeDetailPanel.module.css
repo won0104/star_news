@@ -1,25 +1,32 @@
 /*
  * Node 상세 카드.
  *
- * Sits in the field's bottom-left rather than sliding in over it: the point of pressing a
- * star is to learn what it is while still reading the constellation, so covering the
- * picture would defeat the press. Same warm dark glass as the field's own controls, so it
- * belongs to this screen rather than arriving from the product's card world.
+ * Sits over the room's bottom-left frame rather than inside the night sky: the point of
+ * pressing a star is to learn what it is while still reading the constellation, and the
+ * physical frame keeps that card visually on the viewer's side of the glass.
  */
 
 .card {
   position: absolute;
   z-index: 7;
   left: 24px;
-  bottom: 24px;
+  bottom: calc(max(0px, 100% - 100svh) + 24px);
   width: min(300px, 34%);
   padding: 18px 20px 20px;
   border: 1px solid rgba(226, 197, 126, 0.42);
   border-radius: 14px;
-  background: rgba(20, 18, 18, 0.82);
+  background: rgba(20, 18, 18, 0.62);
   box-shadow: 0 18px 38px rgba(0, 0, 0, 0.42);
   color: rgba(248, 240, 224, 0.94);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px) saturate(0.82);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.card[data-dragging='true'] {
+  z-index: 9;
+  cursor: grabbing;
 }
 
 .close {
@@ -100,7 +107,7 @@
   .card {
     left: 14px;
     right: 14px;
-    bottom: 14px;
+    bottom: calc(max(0px, 100% - 100svh) + 14px);
     width: auto;
     padding: 14px 16px 16px;
   }
