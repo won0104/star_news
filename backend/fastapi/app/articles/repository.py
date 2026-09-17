@@ -17,7 +17,7 @@ EVENT_CANDIDATE_TOP_K = 8
 EVENT_EMBEDDING_EMA_WEIGHT = 0.15
 
 # Story dedup 벡터 유사도 임계값 - Event(0.92)보다 낮음: "같은 사건"이 아니라 "같은 흐름"이라는 느슨한 기준
-STORY_SIMILARITY_THRESHOLD = 0.80
+STORY_SIMILARITY_THRESHOLD = 0.75
 # 벡터 검색 시 후보로 가져올 최대 개수
 STORY_CANDIDATE_TOP_K = 8
 # 대표 벡터(centroid) 갱신 시 새 임베딩을 반영하는 비율 (지수이동평균) - Event와 동일 가중치 재사용
