@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "기사", description = "기사 상세 조회 및 요약 생성")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiPaths.API_V1 + "/articles")
+@RequestMapping(value = ApiPaths.API_V1 + "/articles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArticleController {
 
 	private final ArticleDetailService articleDetailService;
