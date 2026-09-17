@@ -34,6 +34,7 @@ export function PhotoBackdrop({
   scene = backdrop,
   motion = false,
   veil = false,
+  hideScrollbar = false,
   onSettled,
   children,
 }) {
@@ -47,7 +48,7 @@ export function PhotoBackdrop({
   }, [plays, onSettled]);
 
   return (
-    <div className={styles.root}>
+    <div className={`${styles.root} ${hideScrollbar ? styles.scrollbarHidden : ''}`}>
       <div className={styles.wash} aria-hidden>
         <img
           className={`${styles.photo} ${ready ? styles.photoReady : ''}`}

@@ -194,3 +194,78 @@
     width: 100%;
   }
 }
+
+/* Wide screens have horizontal room but limited vertical room above the window. Moving
+   the same translucent chrome into a rail spends that surplus width and leaves the
+   photograph's top edge unobstructed. Narrow screens keep the familiar top bar. */
+@media (min-width: 1200px) {
+  .bar {
+    inset: 0 auto 0 0;
+    width: 208px;
+    height: 100dvh;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 24px 18px 20px;
+    border-right: 1px solid var(--topbar-border);
+    border-bottom: 0;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(14px);
+    box-shadow: 10px 0 30px rgba(43, 33, 22, 0.12);
+  }
+
+  .brand {
+    justify-content: flex-start;
+    padding: 10px 12px;
+  }
+
+  .brandName {
+    font-size: 20px;
+  }
+
+  .nav {
+    width: 100%;
+    flex: none;
+    flex-direction: column;
+    align-items: stretch;
+    margin: 28px 0 0;
+    overflow: visible;
+  }
+
+  .navRule {
+    width: auto;
+    height: 1px;
+    margin: 4px 12px;
+  }
+
+  .navItem {
+    width: 100%;
+    padding: 12px 14px;
+    text-align: left;
+  }
+
+  .spacer {
+    display: block;
+    flex: 1;
+  }
+
+  .auth {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .signIn,
+  .signUp {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* The shared 50% paper glass is appropriate over the sunlit room but flattens a night
+   photograph into a grey panel. Keep the same blur and controls while allowing the
+   scene's colour and window frame to remain visible through the trend chrome. */
+.nightGlass {
+  background: rgba(250, 246, 238, 0.36);
+  backdrop-filter: blur(14px) saturate(0.9);
+}

@@ -6,6 +6,17 @@
   background: #efe8dc;
 }
 
+/* 오늘의 트렌드는 짧게 스크롤되지만 사진이 화면 끝까지 이어지는 한 장면이다.
+   Windows의 고정 scrollbar gutter가 공용 낮 배경을 세로 띠처럼 드러내지 않도록
+   indicator만 감춘다. Wheel, keyboard, touch scrolling remain available. */
+.scrollbarHidden {
+  scrollbar-width: none;
+}
+
+.scrollbarHidden::-webkit-scrollbar {
+  display: none;
+}
+
 /*
  * Warm stand-in painted underneath the photo, so the page still reads as a sunlit
  * room while the image loads (or if the file is missing).

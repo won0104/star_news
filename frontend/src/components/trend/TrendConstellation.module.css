@@ -395,6 +395,10 @@
 }
 
 @media (max-width: 900px) {
+  .layoutBadge {
+    display: none;
+  }
+
   .canvas {
     inset: 0;
     width: 100%;

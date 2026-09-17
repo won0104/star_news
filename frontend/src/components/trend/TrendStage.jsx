@@ -8,35 +8,16 @@ import { TrendSky } from './TrendSky';
 import styles from './TrendStage.module.css';
 
 /**
- * 주요 트렌드 — the attic going dark, once, and then the constellation on the still it
- * settles on.
+ * 주요 트렌드 — 밤 풍경을 담은 창과, 유리 안에서만 움직이는 별자리.
  *
- * The clip is the screen changing state, not an intro: it hands over to the still, and
- * the stars are drawn on the still, so they wait for the hand-over rather than competing
- * with ten seconds of moving light. `settled` is that moment.
+ * Desktop and narrow screens use separately authored crops so `object-fit: cover` does
+ * not throw the wooden frame away. <TrendSky> is clipped to the opening instead of the
+ * whole photograph: the frame and plant therefore stay in the foreground even though
+ * the photograph itself is one flat asset.
  *
- * Two ways to be settled, and both are needed. The clip reaching its end is the ordinary
- * one. The other is nobody having asked for a clip — the 애니메이션 없애기 setting, or the
- * OS's own reduced-motion preference — and it has to be decided out here: <BackgroundVideo>
- * renders nothing under reduced motion, so waiting for its `onEnded` would leave the
- * screen a bare wall with no stars on it, forever.
- *
- * The still carries the screen and the clip plays over it, which is why the still is
- * mounted from the start rather than swapped in on `ended`.
- *
- * `fadeMs` is double <BackgroundVideo>'s default 700ms because this join is a step, not a
- * match. Home's clip ends on its own still (34.8dB, once corrected) and can cut quickly;
- * this one does not — measured in the stage box, the clip's last frame is mean 29,26,28
- * against the still's 70,65,67, so the screen lifts about 2.5x however it is handled
- * (per-channel 2.8/2.6/2.3, and 14.8dB against that still). Over 1.4s that reads as the
- * room settling; at 700ms it read as a flash.
- *
- * Those figures survived the clip being replaced: the 3.3s 1080p render ends on the same
- * near-black as the 10s one it took over from, so the correction here did not have to
- * move. Its tail is a smooth fade — 116, 94, 75, 56, 40, 31 over the last three quarters
- * of a second — with no cut in it. An all-black sample at 2.9s on the first pass was an
- * undecoded frame, not a frame: seeking fires `seeked` before the decoder has produced
- * the picture, so anything measuring frames here has to wait for one.
+ * A transition is optional. It only plays when an asset that ends on this exact still is
+ * configured; otherwise the screen settles immediately instead of cross-fading between
+ * unrelated rooms.
  */
 export function TrendStage({ playTransition = false }) {
   const [ready, setReady] = useState(false);
@@ -44,30 +25,57 @@ export function TrendStage({ playTransition = false }) {
   const { reduceMotion } = useSettingsValues();
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const still = !SCREEN_TRANSITIONS || !playTransition || reduceMotion || prefersReducedMotion;
-  const settled = still || ended;
+  const canPlayTransition = Boolean(
+    nightfall.clip?.mp4 &&
+      SCREEN_TRANSITIONS &&
+      playTransition &&
+      !reduceMotion &&
+      !prefersReducedMotion,
+  );
+  const settled = !canPlayTransition || ended;
 
   return (
     <div className={styles.stage}>
-      <img
-        className={`${styles.still} ${ready ? styles.stillReady : ''}`}
-        src={nightfall.still}
-        alt=""
-        aria-hidden
-        onLoad={() => setReady(true)}
-      />
-
-      {!still && (
-        <BackgroundVideo
-          mp4={nightfall.clip.mp4}
-          playOnce
-          fadeMs={1400}
-          onEnded={() => setEnded(true)}
-          className={styles.clip}
+      <div className={styles.sceneFrame}>
+        <img
+          className={styles.sidebarExtension}
+          src={nightfall.sidebarStill}
+          alt=""
+          aria-hidden
         />
-      )}
 
-      {settled && <TrendSky />}
+        <picture>
+          <source
+            media="(max-width: 900px) and (max-aspect-ratio: 2/3)"
+            srcSet={nightfall.mobileStill}
+          />
+          <source media="(max-aspect-ratio: 1/1)" srcSet={nightfall.tabletStill} />
+          <source media="(max-aspect-ratio: 4/3)" srcSet={nightfall.compactStill} />
+          <img
+            className={`${styles.still} ${ready ? styles.stillReady : ''}`}
+            src={nightfall.still}
+            alt=""
+            aria-hidden
+            onLoad={() => setReady(true)}
+          />
+        </picture>
+
+        {canPlayTransition && (
+          <BackgroundVideo
+            mp4={nightfall.clip.mp4}
+            playOnce
+            fadeMs={1400}
+            onEnded={() => setEnded(true)}
+            className={styles.clip}
+          />
+        )}
+
+        {settled && (
+          <div className={styles.windowGlass}>
+            <TrendSky />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

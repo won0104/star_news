@@ -54,8 +54,8 @@ export const trendSlots = [
   { at: [11, 47], atNarrow: [50, 58] },
   { at: [86, 54], atNarrow: [22, 70] },
   { at: [51, 18], atNarrow: [78, 70] },
-  { at: [77, 75], atNarrow: [38, 84] },
-  { at: [17, 72], atNarrow: [66, 86] },
+  { at: [77, 75], atNarrow: [28, 84] },
+  { at: [17, 72], atNarrow: [72, 84] },
 ]
 
 /** 별 크기는 기사 수가 정한다. 가장 많은 Event가 1.0, 가장 적은 Event가 이 값. */

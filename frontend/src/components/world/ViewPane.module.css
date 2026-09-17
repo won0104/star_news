@@ -17,6 +17,16 @@
   padding: 96px 48px 56px 48px;
 }
 
+/* 오늘의 트렌드는 공용 카드 여백 대신 자체 무대를 사용한다. 무대가 사이드바 아래로
+   별도의 창밖 풍경을 이어 붙이므로 이 레이어는 투명하게 유지한다. */
+.page.trendPage {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+}
+
 .stub {
   width: fit-content;
   margin: 0;
@@ -39,5 +49,17 @@
 @media (max-width: 420px) {
   .page {
     padding-top: 128px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .page {
+    padding: 40px 48px 56px 256px;
+  }
+
+  .page.trendPage {
+    /* Keep the approved 8:5 window in the content column. TrendStage alone extends a
+       scenery strip leftward beneath the glass rail, so the wooden frame stays visible. */
+    padding: 0 0 0 208px;
   }
 }
