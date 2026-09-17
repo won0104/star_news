@@ -9,11 +9,21 @@ ENTITY_PRONOUNS: frozenset[str] = frozenset(
     {
         "그", "그녀", "그들", "그녀들", "그이", "그분", "이", "저", "얘", "걔", "쟤",
         "이쪽", "그쪽", "저쪽", "나", "너", "우리", "저희", "당신", "본인", "자신", "자기", "자기들", "여러분",
+        "제", "내",
         "형", "동생", "누나", "언니", "오빠", "형님", "아우", "형수", "제수", "시동생", "처남", "매형",
         "고모", "이모", "삼촌", "외삼촌", "할아버지", "할머니", "아버지", "어머니", "아빠", "엄마",
         "아들", "딸", "남편", "아내", "부인", "배우자",
     }
 )
+
+# "해당 국가들은", "이들 기업"처럼 지시 표현으로 시작하는 스팬 - 뒤에 어떤 명사가 붙어도 특정 개체명이 아니라
+# 앞서 언급된 대상을 다시 가리키는 표현이라 노이즈로 간주
+# 실제 데이터에서 확인된 것만 등록
+ENTITY_REFERENTIAL_PREFIXES: frozenset[str] = frozenset({"이들", "그들", "해당"})
+
+# "그는", "그를"처럼 대명사에 조사만 붙은 형태를 노이즈로 잡기 위해 시험 삼아 떼어볼 조사 목록
+# (실제 저장되는 이름은 안 건드림 - 노이즈 판별에만 씀)
+_TRAILING_PARTICLES: tuple[str, ...] = ("은", "는", "이", "가", "을", "를", "의", "도")
 
 _QUOTE_AND_WRAP = "\"'“”‘’「」『』[]()（）〈〉<>《》·…⋯–—-"
 
@@ -55,6 +65,17 @@ def is_noise_entity_name(name: str | None) -> bool:
 
     # 부분 포함이 아니라 정규화된 이름 전체가 대명사/친족 호칭과 정확히 일치할 때만 노이즈
     if core in ENTITY_PRONOUNS:
+        return True
+
+    # 대명사 + 조사 결합형("그는", "그를") - 조사 하나를 떼어봤을 때 대명사와 정확히 일치하면 노이즈
+    # (저장되는 이름 자체를 바꾸는 게 아니라 노이즈 판별에만 씀)
+    for particle in _TRAILING_PARTICLES:
+        if core.endswith(particle) and core[: -len(particle)] in ENTITY_PRONOUNS:
+            return True
+
+    # 첫 단어가 지시 표현이면(뒤에 명사가 오든 안 오든) 노이즈
+    first_word = core.split(" ", 1)[0]
+    if first_word in ENTITY_REFERENTIAL_PREFIXES:
         return True
 
     return False
