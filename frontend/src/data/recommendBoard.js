@@ -108,7 +108,7 @@ const EVENT_TOPIC = {
   'nk-defence': 'POLITICS',
   'won-rate': 'ECONOMY',
   'house-debt': 'ECONOMY',
-  'semi-equip': 'WORLD',
+  'semi-equip': 'INTERNATIONAL',
   'ev-battery': 'IT_SCIENCE',
   'ai-rule': 'IT_SCIENCE',
   shipbuilding: 'ECONOMY',
