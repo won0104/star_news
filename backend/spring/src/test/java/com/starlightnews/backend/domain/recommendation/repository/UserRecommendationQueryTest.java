@@ -64,7 +64,7 @@ class UserRecommendationQueryTest {
 	private UserRecommendation save(long userId, String eventId, short rank,
 			RecommendationType type, LocalDateTime availableAt) {
 		UserRecommendation saved = repository.save(new UserRecommendation(userId, eventId, type,
-				new BigDecimal("0.900000"), rank, "테스트 근거",
+				new BigDecimal("0.900000"), rank,
 				availableAt.minusMinutes(30),
 				availableAt.getHour() < 12 ? RecommendationCycle.AM : RecommendationCycle.PM,
 				availableAt));
@@ -78,8 +78,8 @@ class UserRecommendationQueryTest {
 
 	@Test
 	void 공개된_회차_중_가장_최근_것을_고른다() {
-		save(USER_ID, eventId(1), (short) 1, RecommendationType.INTEREST_BASED, AM);
-		save(USER_ID, eventId(2), (short) 1, RecommendationType.INTEREST_BASED, PM);
+		save(USER_ID, eventId(1), (short) 1, RecommendationType.NORMAL, AM);
+		save(USER_ID, eventId(2), (short) 1, RecommendationType.NORMAL, PM);
 
 		Optional<LocalDateTime> latest = repository.findLatestAvailableAt(USER_ID, PM.plusMinutes(1));
 
@@ -88,8 +88,8 @@ class UserRecommendationQueryTest {
 
 	@Test
 	void 아직_공개_시각이_안_된_회차는_고르지_않는다() {
-		save(USER_ID, eventId(1), (short) 1, RecommendationType.INTEREST_BASED, AM);
-		save(USER_ID, eventId(2), (short) 1, RecommendationType.INTEREST_BASED, PM);
+		save(USER_ID, eventId(1), (short) 1, RecommendationType.NORMAL, AM);
+		save(USER_ID, eventId(2), (short) 1, RecommendationType.NORMAL, PM);
 
 		// 정오 기준으로는 오전 회차만 보여야 한다. 06:00·18:00 공개 규칙이 여기서 지켜진다.
 		assertThat(repository.findLatestAvailableAt(USER_ID, PM.minusHours(6))).contains(AM);
@@ -97,23 +97,23 @@ class UserRecommendationQueryTest {
 
 	@Test
 	void 공개된_회차가_없으면_비어_있다() {
-		save(USER_ID, eventId(1), (short) 1, RecommendationType.INTEREST_BASED, PM);
+		save(USER_ID, eventId(1), (short) 1, RecommendationType.NORMAL, PM);
 
 		assertThat(repository.findLatestAvailableAt(USER_ID, PM.minusMinutes(1))).isEmpty();
 	}
 
 	@Test
 	void 남의_회차는_보이지_않는다() {
-		save(OTHER_USER_ID, eventId(1), (short) 1, RecommendationType.INTEREST_BASED, PM);
+		save(OTHER_USER_ID, eventId(1), (short) 1, RecommendationType.NORMAL, PM);
 
 		assertThat(repository.findLatestAvailableAt(USER_ID, PM.plusMinutes(1))).isEmpty();
 	}
 
 	@Test
 	void 순위_오름차순으로_돌려준다() {
-		save(USER_ID, eventId(3), (short) 3, RecommendationType.INTEREST_BASED, PM);
-		save(USER_ID, eventId(1), (short) 1, RecommendationType.INTEREST_BASED, PM);
-		save(USER_ID, eventId(2), (short) 2, RecommendationType.INTEREST_BASED, PM);
+		save(USER_ID, eventId(3), (short) 3, RecommendationType.NORMAL, PM);
+		save(USER_ID, eventId(1), (short) 1, RecommendationType.NORMAL, PM);
+		save(USER_ID, eventId(2), (short) 2, RecommendationType.NORMAL, PM);
 
 		List<UserRecommendation> page = repository.findCycle(USER_ID, PM);
 
@@ -123,9 +123,9 @@ class UserRecommendationQueryTest {
 
 	@Test
 	void 같은_순위가_겹쳐도_빠짐없이_돌려준다() {
-		// rank 는 유형 안에서만 유일하다. 두 유형이 한 회차에 들어오면 1위가 둘이다.
-		save(USER_ID, eventId(1), (short) 1, RecommendationType.INTEREST_BASED, PM);
-		save(USER_ID, eventId(2), (short) 1, RecommendationType.KNOWLEDGE_GAP, PM);
+		// DB 유니크 제약이 유형까지 묶여 있어 한 회차에 순위가 겹쳐도 막지 않는다.
+		save(USER_ID, eventId(1), (short) 1, RecommendationType.NORMAL, PM);
+		save(USER_ID, eventId(2), (short) 1, RecommendationType.COLD_START, PM);
 
 		assertThat(repository.findCycle(USER_ID, PM)).hasSize(2);
 	}
@@ -133,9 +133,9 @@ class UserRecommendationQueryTest {
 	@Test
 	void 순위가_같으면_ID_순으로_줄을_세운다() {
 		UserRecommendation first = save(USER_ID, eventId(1), (short) 1,
-				RecommendationType.INTEREST_BASED, PM);
+				RecommendationType.NORMAL, PM);
 		UserRecommendation second = save(USER_ID, eventId(2), (short) 1,
-				RecommendationType.KNOWLEDGE_GAP, PM);
+				RecommendationType.COLD_START, PM);
 
 		assertThat(repository.findCycle(USER_ID, PM))
 				.extracting(UserRecommendation::getUserRecommendationId)
@@ -144,8 +144,8 @@ class UserRecommendationQueryTest {
 
 	@Test
 	void 다른_회차는_섞이지_않는다() {
-		save(USER_ID, eventId(1), (short) 1, RecommendationType.INTEREST_BASED, AM);
-		save(USER_ID, eventId(2), (short) 1, RecommendationType.INTEREST_BASED, PM);
+		save(USER_ID, eventId(1), (short) 1, RecommendationType.NORMAL, AM);
+		save(USER_ID, eventId(2), (short) 1, RecommendationType.NORMAL, PM);
 
 		List<UserRecommendation> page = repository.findCycle(USER_ID, PM);
 

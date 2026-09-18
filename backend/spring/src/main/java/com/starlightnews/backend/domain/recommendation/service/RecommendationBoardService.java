@@ -76,8 +76,7 @@ public class RecommendationBoardService {
 					event.getTopicCode(),
 					recommendation.getRecommendationScore(),
 					recommendation.getRank(),
-					recommendation.getRecommendationType(),
-					recommendation.getReason());
+					recommendation.getRecommendationType());
 		}).toList();
 	}
 }

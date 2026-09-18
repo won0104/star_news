@@ -97,8 +97,7 @@ class RecommendationDetailServiceTest {
 
 	private long saveRecommendation(long userId) {
 		UserRecommendation saved = userRecommendationRepository.save(new UserRecommendation(userId,
-				EVENT_ID, RecommendationType.INTEREST_BASED, new BigDecimal("0.920000"), (short) 1,
-				"관심 Story 에서 아직 접하지 않은 사건입니다.", availableAt.minusMinutes(30),
+				EVENT_ID, RecommendationType.NORMAL, new BigDecimal("0.920000"), (short) 1, availableAt.minusMinutes(30),
 				RecommendationCycle.PM, availableAt));
 		entityManager.flush();
 		return saved.getUserRecommendationId();

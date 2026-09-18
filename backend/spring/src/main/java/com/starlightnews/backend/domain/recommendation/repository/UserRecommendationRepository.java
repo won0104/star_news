@@ -55,8 +55,9 @@ public interface UserRecommendationRepository extends JpaRepository<UserRecommen
 	 * <p>나눠 보내지 않는다. 한 회차에 담기는 추천이 사용자당
 	 * {@code app.recommendation.limit-per-user} 개(기본 10, 최대 50)뿐이라 한 화면에 들어간다.
 	 *
-	 * <p>{@code rank} 는 유형 안에서만 유일해서 한 회차에 같은 순위가 여러 번 나온다. 순위가
-	 * 같으면 PK 로 순서를 정해 회차마다 같은 차례로 보이게 한다.
+	 * <p>순위가 같으면 PK 로 순서를 정한다. 한 사용자의 한 회차는 한 유형이라 지금은 순위가 겹치지
+	 * 않지만, 유니크 제약이 유형까지 묶여 있어 DB 가 겹침을 막아 주지 않는다. 겹쳐도 회차마다 같은
+	 * 차례로 보이게 둔다.
 	 */
 	@Query("SELECT r FROM UserRecommendation r "
 			+ "WHERE r.userId = :userId AND r.availableAt = :availableAt "

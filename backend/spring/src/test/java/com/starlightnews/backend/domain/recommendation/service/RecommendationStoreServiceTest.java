@@ -60,7 +60,7 @@ class RecommendationStoreServiceTest {
 
 	private Item item(String eventId, int rank, String type) {
 		return new Item(eventId, "기준금리 동결", "ECONOMY",
-				new BigDecimal("0.920000"), (short) rank, type, "관심 Story 에서 아직 접하지 않은 사건입니다.");
+				new BigDecimal("0.920000"), (short) rank, type);
 	}
 
 	private List<UserRecommendation> storedFor(long userId) {
@@ -71,11 +71,11 @@ class RecommendationStoreServiceTest {
 
 	@Test
 	void 추천을_회차_정보와_함께_저장한다() {
-		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "KNOWLEDGE_GAP")))), window);
+		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "COLD_START")))), window);
 
 		assertThat(storedFor(1L)).singleElement().satisfies(saved -> {
 			assertThat(saved.getEventId()).isEqualTo(EVENT_ID);
-			assertThat(saved.getRecommendationType()).isEqualTo(RecommendationType.KNOWLEDGE_GAP);
+			assertThat(saved.getRecommendationType()).isEqualTo(RecommendationType.COLD_START);
 			assertThat(saved.getRank()).isEqualTo((short) 1);
 			assertThat(saved.getCycle()).isEqualTo(RecommendationCycle.AM);
 			assertThat(saved.getRecommendedAt()).isEqualTo(MORNING_RUN);
@@ -85,7 +85,7 @@ class RecommendationStoreServiceTest {
 
 	@Test
 	void Event_표시_정보도_함께_저장한다() {
-		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "KNOWLEDGE_GAP")))), window);
+		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "COLD_START")))), window);
 		entityManager.flush();
 		entityManager.clear();
 
@@ -97,10 +97,10 @@ class RecommendationStoreServiceTest {
 	@Test
 	void 같은_회차를_다시_저장하면_이전_것을_갈아끼운다() {
 		// 재시도해도 결과가 같아야 한다.
-		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "KNOWLEDGE_GAP")))), window);
+		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "COLD_START")))), window);
 		entityManager.flush();
 
-		storeService.store(List.of(new UserResult(1L, List.of(item(OTHER_EVENT_ID, 1, "KNOWLEDGE_GAP")))), window);
+		storeService.store(List.of(new UserResult(1L, List.of(item(OTHER_EVENT_ID, 1, "COLD_START")))), window);
 
 		assertThat(storedFor(1L)).extracting(UserRecommendation::getEventId)
 				.containsExactly(OTHER_EVENT_ID);
@@ -110,21 +110,21 @@ class RecommendationStoreServiceTest {
 	void 회차를_갈아끼울_때_유형을_가리지_않는다() {
 		// 유형별로 지우면 한 유형만 새 회차가 되고 다른 유형은 이전 회차가 남는다.
 		storeService.store(List.of(new UserResult(1L, List.of(
-				item(EVENT_ID, 1, "KNOWLEDGE_GAP"),
-				item(OTHER_EVENT_ID, 1, "INTEREST_BASED")))), window);
+				item(EVENT_ID, 1, "COLD_START"),
+				item(OTHER_EVENT_ID, 1, "NORMAL")))), window);
 		entityManager.flush();
 
-		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "KNOWLEDGE_GAP")))), window);
+		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "COLD_START")))), window);
 
 		assertThat(storedFor(1L)).hasSize(1);
 	}
 
 	@Test
 	void 다른_사용자의_회차는_건드리지_않는다() {
-		storeService.store(List.of(new UserResult(2L, List.of(item(EVENT_ID, 1, "KNOWLEDGE_GAP")))), window);
+		storeService.store(List.of(new UserResult(2L, List.of(item(EVENT_ID, 1, "COLD_START")))), window);
 		entityManager.flush();
 
-		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "KNOWLEDGE_GAP")))), window);
+		storeService.store(List.of(new UserResult(1L, List.of(item(EVENT_ID, 1, "COLD_START")))), window);
 
 		assertThat(storedFor(2L)).hasSize(1);
 	}
@@ -133,7 +133,7 @@ class RecommendationStoreServiceTest {
 	void 모르는_추천_유형은_건너뛰고_나머지는_저장한다() {
 		// FastAPI 가 새 유형을 추가해도 묶음 전체가 실패하면 안 된다.
 		RecommendationStoreResult result = storeService.store(List.of(new UserResult(1L, List.of(
-				item(EVENT_ID, 1, "KNOWLEDGE_GAP"),
+				item(EVENT_ID, 1, "COLD_START"),
 				item(OTHER_EVENT_ID, 2, "SOMETHING_NEW")))), window);
 
 		assertThat(result.storedItems()).isEqualTo(1);
@@ -144,7 +144,7 @@ class RecommendationStoreServiceTest {
 	@Test
 	void 모르는_Topic도_건너뛴다() {
 		Item unknownTopic = new Item(EVENT_ID, "제목", "NOT_A_TOPIC",
-				new BigDecimal("0.5"), (short) 1, "KNOWLEDGE_GAP", "이유");
+				new BigDecimal("0.5"), (short) 1, "COLD_START");
 
 		RecommendationStoreResult result =
 				storeService.store(List.of(new UserResult(1L, List.of(unknownTopic))), window);
@@ -156,7 +156,7 @@ class RecommendationStoreServiceTest {
 	@Test
 	void 값이_빠진_추천은_건너뛴다() {
 		Item missingRank = new Item(EVENT_ID, "제목", "ECONOMY",
-				new BigDecimal("0.5"), null, "KNOWLEDGE_GAP", "이유");
+				new BigDecimal("0.5"), null, "COLD_START");
 
 		assertThat(storeService.store(List.of(new UserResult(1L, List.of(missingRank))), window)
 				.skippedItems()).isEqualTo(1);
@@ -166,8 +166,8 @@ class RecommendationStoreServiceTest {
 	void 같은_순위가_두_번_오면_뒤엣것을_건너뛴다() {
 		// 유니크 제약에 걸려 묶음 전체가 실패하는 것을 막는다.
 		RecommendationStoreResult result = storeService.store(List.of(new UserResult(1L, List.of(
-				item(EVENT_ID, 1, "KNOWLEDGE_GAP"),
-				item(OTHER_EVENT_ID, 1, "KNOWLEDGE_GAP")))), window);
+				item(EVENT_ID, 1, "COLD_START"),
+				item(OTHER_EVENT_ID, 1, "COLD_START")))), window);
 
 		assertThat(result.storedItems()).isEqualTo(1);
 		assertThat(result.skippedItems()).isEqualTo(1);
@@ -176,8 +176,8 @@ class RecommendationStoreServiceTest {
 	@Test
 	void 같은_Event가_두_번_오면_뒤엣것을_건너뛴다() {
 		RecommendationStoreResult result = storeService.store(List.of(new UserResult(1L, List.of(
-				item(EVENT_ID, 1, "KNOWLEDGE_GAP"),
-				item(EVENT_ID, 2, "KNOWLEDGE_GAP")))), window);
+				item(EVENT_ID, 1, "COLD_START"),
+				item(EVENT_ID, 2, "COLD_START")))), window);
 
 		assertThat(result.storedItems()).isEqualTo(1);
 		assertThat(result.skippedItems()).isEqualTo(1);
@@ -186,8 +186,8 @@ class RecommendationStoreServiceTest {
 	@Test
 	void 유형이_다르면_같은_순위를_그대로_저장한다() {
 		RecommendationStoreResult result = storeService.store(List.of(new UserResult(1L, List.of(
-				item(EVENT_ID, 1, "KNOWLEDGE_GAP"),
-				item(OTHER_EVENT_ID, 1, "INTEREST_BASED")))), window);
+				item(EVENT_ID, 1, "COLD_START"),
+				item(OTHER_EVENT_ID, 1, "NORMAL")))), window);
 
 		assertThat(result.storedItems()).isEqualTo(2);
 		assertThat(storedFor(1L)).hasSize(2);
@@ -210,8 +210,8 @@ class RecommendationStoreServiceTest {
 	@Test
 	void 여러_사용자를_한_번에_저장한다() {
 		RecommendationStoreResult result = storeService.store(List.of(
-				new UserResult(1L, List.of(item(EVENT_ID, 1, "KNOWLEDGE_GAP"))),
-				new UserResult(2L, List.of(item(EVENT_ID, 1, "INTEREST_BASED")))), window);
+				new UserResult(1L, List.of(item(EVENT_ID, 1, "COLD_START"))),
+				new UserResult(2L, List.of(item(EVENT_ID, 1, "NORMAL")))), window);
 
 		assertThat(result.storedUsers()).isEqualTo(2);
 		assertThat(result.storedItems()).isEqualTo(2);

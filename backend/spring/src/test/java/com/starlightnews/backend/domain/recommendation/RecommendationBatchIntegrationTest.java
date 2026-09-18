@@ -121,8 +121,7 @@ class RecommendationBatchIntegrationTest {
 				{"data": {"cycle": "AM", "results": [
 				  {"userId": %d, "items": [
 				    {"eventId": "%s", "label": "한국은행 기준금리 동결", "topicCode": "ECONOMY",
-				     "score": 0.92, "rank": 1, "recommendationType": "KNOWLEDGE_GAP",
-				     "reason": "관심 Story 에서 아직 접하지 않은 사건입니다."}
+				     "score": 0.92, "rank": 1, "recommendationType": "COLD_START"}
 				  ]}
 				]}}
 				""".formatted(userId, EVENT_ID);
