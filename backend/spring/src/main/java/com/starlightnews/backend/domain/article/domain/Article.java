@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.starlightnews.backend.domain.article.support.ArticleUrls;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
 import com.starlightnews.backend.global.enums.ContentType;
+import com.starlightnews.backend.global.enums.SummaryStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -71,6 +72,10 @@ public class Article {
 	@Column(name = "topic_code", length = 32)
 	private String topicCode;
 
+	/** 분석 단계가 채우는 세부 분야. 수집 시점에는 비어 있다. */
+	@Column(name = "subtopic_code", length = 64)
+	private String subtopicCode;
+
 	@JdbcTypeCode(SqlTypes.LONGVARCHAR)
 	@Column(nullable = false)
 	private String content;
@@ -83,6 +88,13 @@ public class Article {
 	@Column(name = "summary")
 	private String summary;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "summary_status", nullable = false, length = 32)
+	private SummaryStatus summaryStatus;
+
+	@Column(name = "summary_generated_at")
+	private LocalDateTime summaryGeneratedAt;
+
 	/** Neo4j Article Node 의 nodeId. AI 분석 전이면 null 이라 Neo4j 에 대응 Node 가 없다. */
 	// articles.node_id 는 CHAR(36) 이므로 CHAR 로 매핑한다 (기본 VARCHAR 이면 validate 실패).
 	@JdbcTypeCode(SqlTypes.CHAR)
@@ -92,6 +104,10 @@ public class Article {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "analysis_status", nullable = false, length = 32)
 	private AnalysisStatus analysisStatus;
+
+	/** AI 분석이 일시적으로 실패한 횟수. 한도에 닿으면 FAILED 가 된다. */
+	@Column(name = "analysis_attempts", nullable = false)
+	private int analysisAttempts;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")
@@ -112,6 +128,7 @@ public class Article {
 		this.publishedAt = publishedAt;
 		this.organization = organization;
 		this.summary = summary;
+		this.summaryStatus = summary == null ? SummaryStatus.NOT_REQUESTED : SummaryStatus.COMPLETED;
 		this.analysisStatus = analysisStatus;
 		this.url = FIXTURE_URL_PREFIX + title;
 		this.urlHash = ArticleUrls.hash(this.url);

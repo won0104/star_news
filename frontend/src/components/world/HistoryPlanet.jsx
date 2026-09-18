@@ -9,6 +9,8 @@ import styles from './HistoryPane.module.css';
  * picking을 맡고, DOM 라벨·선택 패널은 키보드와 스크린 리더 접근성을 보완한다.
  */
 const PLANET_RADIUS = 5;
+const EDGE_SURFACE_OFFSET = 0.045;
+const TOPIC_STAR_SCALE = 0.7;
 const STANDARD_CAMERA = { minimum: 8.4, maximum: 14.2, defaultZ: 11.4 };
 const DIARY_CAMERA = { minimum: 19.5, maximum: 28.2, defaultZ: 23.4 };
 const LABEL_LIMIT = 12;
@@ -19,22 +21,12 @@ const FRONT = new THREE.Vector3(0, 0, 1);
 const MODEL_FRONT = new THREE.Vector3(1, 0, 0);
 const STAR_MODEL_URL = '/assets/history/star-node.glb';
 
-const TOPIC_COORDINATES = {
-  POLITICS: [22, -42],
-  ECONOMY: [16, 5],
-  SOCIETY: [-16, -18],
-  CULTURE: [-34, 28],
-  WORLD: [30, 76],
-  SPORTS: [-9, 116],
-  IT_SCIENCE: [48, 152],
-};
-
 const TOPIC_COLORS = {
   POLITICS: 0xec8d9d,
   ECONOMY: 0xe7bc5b,
   SOCIETY: 0x80d7c1,
   CULTURE: 0xefb484,
-  WORLD: 0xc09bf4,
+  INTERNATIONAL: 0xc09bf4,
   SPORTS: 0x6fcde2,
   IT_SCIENCE: 0x7aa4ff,
 };
@@ -46,28 +38,44 @@ const EVENT_SIZE_STEPS = [
   { maximum: Number.POSITIVE_INFINITY, label: '10+', size: 0.94 },
 ];
 
+/**
+ * 행성 위의 노드는 세 종류다 — 사건(EVENT), 인물·기관(ENTITY), 발언(STATEMENT).
+ *
+ * 색은 이미 분야(topicCode)가, 크기는 읽은 기사 수가 쓰고 있다. 그래서 유형에 남은
+ * 채널은 모양이다: 사건은 별, 인물·기관은 구, 발언은 팔면체. 모양은 색과 달리
+ * 색맹·저채도 화면에서도 남고, 라벨 없이 멀리서도 구분된다.
+ *
+ * `sizeMultiplier` 는 기사 수로 정한 크기 위에 곱해진다. 사건이 이야기의 축이고
+ * 인물과 발언은 거기에 붙는 것이므로, 같은 기사 수라도 사건이 가장 크게 선다.
+ */
 const NODE_STYLE = {
-  TOPIC_CLUSTER: { label: '토픽' },
-  EVENT: { label: '이벤트' },
+  TOPIC_CLUSTER: { label: '토픽', sizeMultiplier: 1 },
+  EVENT: { label: '이벤트', sizeMultiplier: 1 },
+  ENTITY: { label: '인물·기관', sizeMultiplier: 0.8 },
+  STATEMENT: { label: '발언', sizeMultiplier: 0.7 },
+};
+
+/**
+ * 별 모델(glb)을 쓰지 않는 유형의 기하. 네트워크를 기다리지 않고 바로 만들어지므로,
+ * glb 로드가 늦거나 실패해도 인물·발언은 항상 보인다.
+ */
+const PRIMITIVE_GEOMETRY = {
+  ENTITY: (size) => new THREE.SphereGeometry(size * 0.3, 20, 14),
+  STATEMENT: (size) => new THREE.OctahedronGeometry(size * 0.34, 0),
 };
 
 const RELATION_LABEL = {
   BELONGS_TO_TOPIC: '분야에 속함',
   CAUSES: '원인·결과',
   SUBEVENT_OF: '상위 사건',
+  ACTOR: '주체',
+  TARGET: '대상',
+  CONTAINS_STATEMENT: '발언 포함',
+  PART_OF: '상위 사건',
+  OCCURRED_AT: '발생 시점',
 };
 
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
-
-function fromLatitudeLongitude(latitude, longitude, radius = 1) {
-  const phi = THREE.MathUtils.degToRad(90 - latitude);
-  const theta = THREE.MathUtils.degToRad(longitude + 180);
-  return new THREE.Vector3(
-    -radius * Math.sin(phi) * Math.cos(theta),
-    radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta),
-  );
-}
 
 function fallbackTopicPoint(index, count) {
   const y = 1 - ((index + 0.5) / Math.max(count, 1)) * 2;
@@ -85,12 +93,9 @@ function buildLayout(graph) {
   const topics = nodes.filter((node) => node.kind === 'TOPIC_CLUSTER');
   const topicAnchors = new Map();
 
-  topics.forEach((topic, index) => {
-    const coordinates = TOPIC_COORDINATES[topic.topicCode];
-    const anchor = coordinates
-      ? fromLatitudeLongitude(coordinates[0], coordinates[1])
-      : fallbackTopicPoint(index, topics.length);
-    topicAnchors.set(topic.topicCode, anchor.normalize());
+  const orderedTopics = [...topics].sort((left, right) => left.topicCode.localeCompare(right.topicCode));
+  orderedTopics.forEach((topic, index) => {
+    topicAnchors.set(topic.topicCode, fallbackTopicPoint(index, orderedTopics.length));
   });
 
   const childIndexes = new Map();
@@ -146,17 +151,15 @@ function trackballPoint(clientX, clientY, rect) {
   return new THREE.Vector3(x / length, y / length, 0);
 }
 
-function makeArc(start, end, weight) {
+function makeArc(start, end) {
   const points = [];
   const normalizedStart = start.clone().normalize();
   const normalizedEnd = end.clone().normalize();
-  const separation = normalizedStart.angleTo(normalizedEnd);
-  const lift = 0.14 + separation * 0.72 + clamp(weight ?? 0.4, 0, 1) * 0.12;
 
-  for (let index = 0; index <= 24; index += 1) {
-    const progress = index / 24;
+  for (let index = 0; index <= 32; index += 1) {
+    const progress = index / 32;
     const point = normalizedStart.clone().lerp(normalizedEnd, progress).normalize();
-    point.multiplyScalar(PLANET_RADIUS + 0.16 + Math.sin(Math.PI * progress) * lift);
+    point.multiplyScalar(PLANET_RADIUS + EDGE_SURFACE_OFFSET);
     points.push(point);
   }
   return points;
@@ -287,17 +290,8 @@ export default function HistoryPlanet({
     );
     globe.add(grid);
 
-    const atmosphere = new THREE.Mesh(
-      new THREE.SphereGeometry(PLANET_RADIUS + 0.32, 48, 32),
-      new THREE.MeshBasicMaterial({
-        color: 0x75a9c7,
-        transparent: true,
-        opacity: 0.055,
-        side: THREE.BackSide,
-        blending: THREE.AdditiveBlending,
-      }),
-    );
-    globe.add(atmosphere);
+    // 대기 광채 구체(반지름 +0.32, BackSide)를 걷어냈다. 안쪽 면만 그려 테두리만 남는
+    // 방식이라 행성을 감싸는 빛이 아니라 행성 밖에 그려진 원 하나로 읽혔다.
 
     scene.add(new THREE.HemisphereLight(0xb8d9ed, 0x05080c, 1.35));
     const keyLight = new THREE.DirectionalLight(0xdcecf6, 2.4);
@@ -314,8 +308,10 @@ export default function HistoryPlanet({
 
     layout.nodes.forEach((node, nodeIndex) => {
       const isTopic = node.kind === 'TOPIC_CLUSTER';
+      const kind = nodeKind(node);
+      const style = NODE_STYLE[kind] ?? NODE_STYLE.EVENT;
       const sizeStep = eventSizeForArticleCount(node.sourceArticleCount);
-      const modelSize = isTopic ? 0.94 : sizeStep.size * 0.76;
+      const modelSize = (isTopic ? 0.94 : sizeStep.size * 0.76) * style.sizeMultiplier;
       const color = colorForNode(node);
       const holder = new THREE.Group();
       holder.position.copy(node.position);
@@ -336,38 +332,33 @@ export default function HistoryPlanet({
       holder.add(pickMesh);
       pickMeshes.push(pickMesh);
 
-      let selectionRing;
-      if (isTopic) {
-        selectionRing = new THREE.Mesh(
-          new THREE.TorusGeometry(modelSize * 0.62, 0.018, 8, 48),
-          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.72 }),
-        );
-        selectionRing.quaternion.setFromUnitVectors(FRONT, node.position.clone().normalize());
-        holder.add(selectionRing);
-      } else {
-        selectionRing = new THREE.Mesh(
-          new THREE.RingGeometry(modelSize * 0.54, modelSize * 0.62, 32),
-          new THREE.MeshBasicMaterial({
-            color,
-            transparent: true,
-            opacity: 0.92,
-            side: THREE.DoubleSide,
-            depthWrite: false,
-          }),
-        );
-        selectionRing.quaternion.setFromUnitVectors(FRONT, node.position.clone().normalize());
-        selectionRing.visible = false;
-        holder.add(selectionRing);
+      globe.add(holder);
+
+      // 인물·발언은 별 모델을 쓰지 않으므로 여기서 끝난다. glb 로더는 model 이 이미
+      // 채워진 항목을 건너뛴다.
+      const primitive = PRIMITIVE_GEOMETRY[kind];
+      let model = null;
+      let modelMaterial = null;
+      if (primitive) {
+        modelMaterial = new THREE.MeshStandardMaterial({
+          color,
+          emissive: color,
+          emissiveIntensity: kind === 'STATEMENT' ? 0.34 : 0.28,
+          roughness: 0.38,
+          metalness: 0.12,
+          transparent: true,
+        });
+        model = new THREE.Mesh(primitive(modelSize), modelMaterial);
+        modelHolder.add(model);
       }
 
-      globe.add(holder);
       nodeEntries.set(node.id, {
         node,
+        kind,
         holder,
         modelHolder,
-        model: null,
-        modelMaterial: null,
-        selectionRing,
+        model,
+        modelMaterial,
         baseModelSize: modelSize,
         baseModelScale: 1,
       });
@@ -386,9 +377,10 @@ export default function HistoryPlanet({
       const maximumDimension = Math.max(dimensions.x, dimensions.y, dimensions.z) || 1;
 
       nodeEntries.forEach((entry) => {
+        if (entry.model) return;
         const color = colorForNode(entry.node);
         const isTopic = entry.node.kind === 'TOPIC_CLUSTER';
-        const isCompactEvent = useEventCards && !isTopic;
+        const isCompactEvent = useEventCards && entry.kind === 'EVENT';
         const material = new THREE.MeshStandardMaterial({
           color,
           emissive: color,
@@ -419,7 +411,7 @@ export default function HistoryPlanet({
       const source = layout.nodeById.get(edge.sourceId);
       const target = layout.nodeById.get(edge.targetId);
       if (!source || !target || source.id === target.id) return;
-      const geometry = new THREE.BufferGeometry().setFromPoints(makeArc(source.position, target.position, edge.weight));
+      const geometry = new THREE.BufferGeometry().setFromPoints(makeArc(source.position, target.position));
       const color = colorForNode(source);
       const material = new THREE.LineBasicMaterial({
         color,
@@ -482,8 +474,8 @@ export default function HistoryPlanet({
           }
           sizeMultiplier = isTopic || inTopic ? 1 : 0.92;
         }
+        if (isTopic) sizeMultiplier = TOPIC_STAR_SCALE;
         entry.model?.scale.setScalar(entry.baseModelScale * sizeMultiplier);
-        entry.selectionRing.visible = isSelected && (!useEventCards || isTopic);
       });
       edgeEntries.forEach((entry) => {
         const connected = entry.edge.sourceId === currentSelection || entry.edge.targetId === currentSelection;
@@ -689,7 +681,8 @@ export default function HistoryPlanet({
       const candidates = [];
       nodeEntries.forEach((entry) => {
         const isTopic = entry.node.kind === 'TOPIC_CLUSTER';
-        if (useEventCards && !isTopic) entry.modelHolder.visible = true;
+        const isCard = useEventCards && entry.kind === 'EVENT';
+        if (isCard) entry.modelHolder.visible = true;
         const element = labelRefs.current.get(entry.node.id);
         if (!element) return;
         entry.holder.getWorldPosition(worldPosition);
@@ -708,6 +701,7 @@ export default function HistoryPlanet({
             id: entry.node.id,
             entry,
             isTopic,
+            isCard,
             element,
             x: clamp((projected.x * 0.5 + 0.5) * width, horizontalInset, width - horizontalInset),
             y: clamp((-projected.y * 0.5 + 0.5) * height, topInset, height - bottomInset),
@@ -752,7 +746,7 @@ export default function HistoryPlanet({
         candidate.element.style.pointerEvents = 'auto';
         candidate.element.tabIndex = 0;
         candidate.element.setAttribute('aria-hidden', 'false');
-        if (useEventCards && !candidate.isTopic) candidate.entry.modelHolder.visible = false;
+        if (candidate.isCard) candidate.entry.modelHolder.visible = false;
         occupied.push(bounds);
         visibleCount += 1;
       });
@@ -852,14 +846,19 @@ export default function HistoryPlanet({
 
   return (
     <div className={`${styles.planetFrame} ${isDiary ? styles.diaryPlanetFrame : ''} ${useEventCards ? styles.eventCardMode : ''}`}>
-      {!isDiary && <div className={styles.planetLegend} aria-label="노드 범례">
+      {/* 다이어리에서도 범례를 둔다 — 모양이 유형을 뜻한다는 것을 말해줄 자리가 여기뿐이고,
+          모양은 색처럼 짐작되지 않는다. 좁은 인셋이라 크기와 자리만 줄인다. */}
+      <div
+        className={`${styles.planetLegend} ${isDiary ? styles.diaryLegend : ''}`}
+        aria-label="노드 범례"
+      >
         {Object.entries(NODE_STYLE).map(([kind, item]) => (
           <span key={kind} className={styles.legendItem}>
             <i data-node-kind={kind} aria-hidden="true" />
             {item.label}
           </span>
         ))}
-      </div>}
+      </div>
 
       {!isDiary && !useEventCards && <div
         className={styles.planetScale}
@@ -902,7 +901,12 @@ export default function HistoryPlanet({
                 onClick={() => onSelectNode(node)}
               >
                 <strong>{node.title}</strong>
-                <small>{node.sourceArticleCount}개 기사</small>
+                {/* 기사 수는 토픽과 사건에만 있다. 인물·발언은 대신 자기 유형을 밝힌다. */}
+                <small>
+                  {node.sourceArticleCount == null
+                    ? (NODE_STYLE[nodeKind(node)] ?? NODE_STYLE.EVENT).label
+                    : `${node.sourceArticleCount}개 기사`}
+                </small>
               </button>
             ))}
           </div>
@@ -992,7 +996,9 @@ export default function HistoryPlanet({
             </div>
             <h3>{selectedNode.title}</h3>
             <p>
-              직접 연결 {selectedRelations.length}개 · 읽은 기사 {selectedNode.sourceArticleCount}개
+              직접 연결 {selectedRelations.length}개
+              {selectedNode.sourceArticleCount != null
+                && ` · 읽은 기사 ${selectedNode.sourceArticleCount}개`}
             </p>
             {selectedRelations.length > 0 && (
               <ul className={styles.nodeRelations} aria-label="직접 연결된 노드">

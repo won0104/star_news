@@ -1,20 +1,180 @@
-/*
- * Each change is its own form on its own card, so it reads as one thing you can do
- * rather than a wall of inputs with a single button at the end.
- */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 20px 20px 18px;
+/* ---- 로그인한 계정 ---------------------------------------------------------- */
+.who {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+}
+
+.who div {
+  padding: 14px 18px;
   border: 1px solid var(--paper-edge);
   border-radius: 10px;
   background: var(--auth-input-bg);
 }
 
-/* The button sits with its own form, not in the pane footer: there are two of them and
-   a shared footer could not say which change it would apply. */
-.actions {
+.who dt {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.who dd {
+  margin: 4px 0 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--headline-ink);
+  overflow-wrap: anywhere;
+}
+
+/* ---- 회원 탈퇴 ---------------------------------------------------------------- */
+/* 종이 위의 다른 카드와 같은 모양이지만 테두리만 붉게 — 위험한 자리라는 것을 색 하나로
+   말하고, 나머지는 소리를 낮춘다. */
+.danger {
+  padding: 18px 20px 20px;
+  border: 1px solid rgba(181, 48, 33, 0.35);
+  border-radius: 10px;
+  background: rgba(181, 48, 33, 0.04);
+}
+
+.dangerTitle {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--accent-event);
+}
+
+.dangerList {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.dangerActions {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* 첫 단계는 테두리만 있는 버튼 — 눌러도 아직 아무 일도 일어나지 않는다는 뜻.
+   두 번째(.dangerButtonSolid)는 채워진 붉은 버튼 — 여기서 실제로 지워진다. */
+.dangerButton {
+  height: 46px;
+  padding: 0 24px;
+  border: 1px solid rgba(181, 48, 33, 0.55);
+  border-radius: 8px;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--accent-event);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.dangerButton:hover {
+  background: rgba(181, 48, 33, 0.08);
+}
+
+.dangerButtonSolid {
+  border-color: var(--accent-event);
+  background: var(--accent-event);
+  color: #fff;
+}
+
+.dangerButtonSolid:hover {
+  filter: brightness(1.08);
+  background: var(--accent-event);
+}
+
+.dangerButton:disabled,
+.dangerButton:disabled:hover {
+  opacity: 0.55;
+  cursor: default;
+  filter: none;
+}
+
+.dangerButton:focus-visible {
+  outline: 2px solid var(--accent-event);
+  outline-offset: 2px;
+}
+
+/* ---- 비밀번호 확인 ------------------------------------------------------------ */
+.confirm {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed rgba(181, 48, 33, 0.3);
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field > span {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--auth-label);
+}
+
+.input {
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--auth-border);
+  border-radius: 8px;
+  background: var(--auth-input-bg);
+  font: inherit;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--auth-title);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.input::placeholder {
+  color: var(--auth-muted);
+}
+
+.input:focus {
+  border-color: var(--accent-event);
+  box-shadow: 0 0 0 3px rgba(181, 48, 33, 0.14);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--accent-event);
+}
+
+/* 오류·진행·완료가 같은 줄에 선다. 비어 있어도 높이를 지켜 버튼이 튀지 않게. */
+.message {
+  min-height: 1.5em;
+  margin: 8px 0 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--auth-error);
+}
+
+.messageDone {
+  color: var(--brass-b);
+}
+
+@media (max-width: 900px) {
+  .who {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dangerActions {
+    flex-direction: column-reverse;
+  }
+
+  .dangerActions > * {
+    width: 100%;
+  }
 }

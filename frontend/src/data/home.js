@@ -54,16 +54,12 @@ export const accountMenu = {
   label: '계정 메뉴',
   items: [
     {
-      id: 'account',
-      label: '계정설정',
-    },
-    {
       id: 'interest',
       label: '뉴스 관리',
     },
     {
-      id: 'display',
-      label: '화면설정',
+      id: 'account',
+      label: '계정',
     },
   ],
   signOut: '로그아웃',

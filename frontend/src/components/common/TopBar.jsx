@@ -19,6 +19,9 @@ import styles from './TopBar.module.css';
  * rounded edge. Free-standing spans stay clear of it, and being decorative they are
  * `aria-hidden` — the nav's own list semantics say where one item ends.
  *
+ * `nightGlass` keeps the same translucent chrome over a dark scene while letting more
+ * of that scene through than the sunlit-room default.
+ *
  * `onAuth` is only asked for while nobody is signed in. The account menu needs nothing
  * from here — its entries open the settings overlay and end the session themselves.
  *
@@ -27,7 +30,7 @@ import styles from './TopBar.module.css';
  * Without it the mark falls back to opening the first destination, which is what the
  * screens that are already at the front want.
  */
-export function TopBar({ activeId, onSelect, onBrand, onAuth }) {
+export function TopBar({ activeId, onSelect, onBrand, onAuth, nightGlass = false }) {
   const account = useSession();
   const navRef = useRef(null);
 
@@ -46,7 +49,7 @@ export function TopBar({ activeId, onSelect, onBrand, onAuth }) {
   }, [activeId]);
 
   return (
-    <header className={styles.bar}>
+    <header className={`${styles.bar} ${nightGlass ? styles.nightGlass : ''}`}>
       <button
         type="button"
         className={styles.brand}

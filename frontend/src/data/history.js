@@ -32,6 +32,30 @@ const SAMPLE_EVENT_SUMMARY =
  * `summary`는 Event 자체의 요약으로, 기사 한 건이 아니라 사건 전체를 설명한다 — 화면의
  * EVENT SUMMARY가 첫 기사 요약을 빌려 쓰던 것을 대신한다.
  */
+const STATEMENT_SHAPES = [
+  (title) => `"${title}을 예정대로 추진한다"`,
+  (title) => `"${title} 관련 협의를 이어가겠다"`,
+  (title) => `"${title}의 영향을 지켜보고 있다"`,
+]
+
+/**
+ * 이 사건에서 내가 접한 발언.
+ *
+ * Shaped like what `GET /users/me/graph/map` yields once that response is wired: the
+ * STATEMENT nodes on the other end of this event's edges. So a statement carries the
+ * node fields the graph uses — `nodeType`, `nodeKey`, `label` — rather than a shape of
+ * its own, and swapping the mock for the response does not move anything downstream.
+ *
+ * 개수를 일부러 0~3 으로 흩뿌린다. 개인 그래프는 내가 읽거나 클릭한 Node 만 담으므로
+ * 발언이 하나도 없는 사건이 실제로 나오고, 그 경우의 화면도 확인해야 한다.
+ */
+const makeStatements = (id, title, count) =>
+  Array.from({ length: count }, (_, index) => ({
+    nodeType: 'STATEMENT',
+    nodeKey: `${id}-statement-${index + 1}`,
+    label: STATEMENT_SHAPES[index % STATEMENT_SHAPES.length](title),
+  }))
+
 const makeEvent = (id, title, articleCount, lastReadAt, at, summaries = [], summary = null) => ({
   id,
   title,
@@ -39,6 +63,7 @@ const makeEvent = (id, title, articleCount, lastReadAt, at, summaries = [], summ
   lastReadAt,
   at,
   summary,
+  statements: makeStatements(id, title, articleCount % 4),
   articles: SOURCES.map((source, index) => ({
     id: `${id}-article-${index + 1}`,
     source,
@@ -77,7 +102,7 @@ const storyVariants = {
     ['performing-arts', '공연 시장의 새로운 성장', ['대형 뮤지컬 관객 기록 경신', '지역 공연장 공동제작 확대', '온라인 공연 유통 실험']],
     ['heritage-return', '문화유산 보존과 환수', ['해외 소재 문화유산 국내 환수', '궁궐 복원 사업 단계 완료', '디지털 문화유산 공개 확대']],
   ],
-  WORLD: [
+  INTERNATIONAL: [
     ['global-election', '주요국 선거 이후 정책 전환', ['새 내각 경제정책 발표', '이민 정책 개편안 공개', '의회 연정 협상 타결']],
     ['energy-order', '에너지 공급망 재편', ['산유국 감산 기조 연장', '유럽 천연가스 비축률 상승', '재생에너지 공동투자 확대']],
   ],
@@ -167,7 +192,7 @@ export const historyStories = [
     makeEvent('webtoon', '웹툰 플랫폼 해외 매출 증가', 4, '9월 12일', [81, 26]),
     makeEvent('museum', '국립박물관 야간 개장 확대', 4, '9월 9일', [50, 80]),
   ]),
-  topic('WORLD', '국제', 'violet', 17, 'ai-trade-rule', 'AI 규제와 첨단기술 통상 갈등', [
+  topic('INTERNATIONAL', '국제', 'violet', 17, 'ai-trade-rule', 'AI 규제와 첨단기술 통상 갈등', [
     makeEvent('eu-ai-act', 'EU, AI법 단계적 시행', 6, '어제 23:02', [19, 25]),
     makeEvent('export-control', '미국, 대중 반도체 수출통제 확대', 6, '어제 13:45', [81, 26]),
     makeEvent('japan-chip', '일본, 첨단 반도체 투자 지원', 5, '9월 10일', [50, 80]),
@@ -215,6 +240,73 @@ const historyEventNodes = historyStories.flatMap((cluster) => cluster.story.even
   localContext: { storyId: cluster.story.id, eventId: event.id },
 })));
 
+/**
+ * 인물·기관.
+ *
+ * 개인 그래프는 내가 읽은 기사가 지나간 Node 만 담으므로 분야마다 한두 곳만 남는다.
+ * `GET /users/me/graph/map` 이 붙으면 이 표가 응답의 ENTITY 노드로 교체된다.
+ *
+ * `sourceArticleCount` 를 null 로 둔다 — 인물에게는 "내가 읽은 기사 수"가 없고, 0 으로
+ * 두면 화면이 "기사 0개"라고 말해버린다. 행성 쪽은 null 을 보고 유형 이름을 대신 쓴다.
+ */
+const TOPIC_ENTITIES = {
+  POLITICS: ['국회', '기획재정부'],
+  ECONOMY: ['한국은행', '금융위원회'],
+  SOCIETY: ['기상청'],
+  CULTURE: ['국립박물관'],
+  INTERNATIONAL: ['EU 집행위원회', '미국 상무부'],
+  SPORTS: ['KBO'],
+  IT_SCIENCE: ['삼성전자', '엔비디아'],
+};
+
+const entityId = (topicCode, index) => `ENTITY:${topicCode}-${index + 1}`;
+
+const historyEntityNodes = historyStories.flatMap((cluster) => (
+  (TOPIC_ENTITIES[cluster.topicCode] ?? []).map((name, index) => ({
+    id: entityId(cluster.topicCode, index),
+    kind: 'NODE',
+    nodeType: 'ENTITY',
+    nodeKey: `${cluster.topicCode.toLowerCase()}-entity-${index + 1}`,
+    topicCode: cluster.topicCode,
+    title: name,
+    sourceArticleCount: null,
+    weight: 0.44,
+  }))
+));
+
+/** 인물은 사건의 주체로 붙는다. 한 분야에 인물이 둘이면 사건도 갈라 붙인다. */
+const historyEntityEdges = historyStories.flatMap((cluster) => (
+  (TOPIC_ENTITIES[cluster.topicCode] ?? []).map((name, index) => ({
+    sourceId: entityId(cluster.topicCode, index),
+    targetId: `EVENT:${cluster.story.events[index % cluster.story.events.length].id}`,
+    relationship: 'ACTOR',
+    weight: 0.52,
+  }))
+));
+
+/** 발언은 이미 사건 안에 있다(makeStatements) — 그것을 그래프 노드로도 세운다. */
+const historyStatementNodes = historyStories.flatMap((cluster) => (
+  cluster.story.events.flatMap((event) => event.statements.map((statement) => ({
+    id: `STATEMENT:${statement.nodeKey}`,
+    kind: 'NODE',
+    nodeType: 'STATEMENT',
+    nodeKey: statement.nodeKey,
+    topicCode: cluster.topicCode,
+    title: statement.label,
+    sourceArticleCount: null,
+    weight: 0.3,
+  })))
+));
+
+const historyStatementEdges = historyStories.flatMap((cluster) => (
+  cluster.story.events.flatMap((event) => event.statements.map((statement) => ({
+    sourceId: `EVENT:${event.id}`,
+    targetId: `STATEMENT:${statement.nodeKey}`,
+    relationship: 'CONTAINS_STATEMENT',
+    weight: 0.4,
+  })))
+));
+
 const historyTopicEdges = historyStories.flatMap((cluster) => cluster.story.events.map((event) => ({
   sourceId: `topic:${cluster.topicCode}`,
   targetId: `EVENT:${event.id}`,
@@ -226,8 +318,19 @@ export const historyGraph = {
   generatedAt: historyOverview.generatedAt,
   mockSource: historyGraphMock.source,
   mockNotice: historyGraphMock.notice,
-  nodes: [...historyTopicNodes, ...historyEventNodes, ...historyGraphMock.nodes],
-  edges: [...historyTopicEdges, ...historyGraphMock.edges],
+  nodes: [
+    ...historyTopicNodes,
+    ...historyEventNodes,
+    ...historyEntityNodes,
+    ...historyStatementNodes,
+    ...historyGraphMock.nodes,
+  ],
+  edges: [
+    ...historyTopicEdges,
+    ...historyEntityEdges,
+    ...historyStatementEdges,
+    ...historyGraphMock.edges,
+  ],
 };
 
 export const historyCopy = {

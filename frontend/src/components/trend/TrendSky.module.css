@@ -12,8 +12,12 @@
 
 .field {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: min(100%, 1680px);
   overflow: hidden;
+  transform: translateX(-50%);
   container-type: size;
 }
 
@@ -29,36 +33,54 @@
   container-type: inline-size;
 }
 
-.ambientLayer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+/* The compact background is 4:3. The live coordinates use the same frame, so reducing
+   the background scale also reduces the stars instead of only clipping their field. */
+@media (max-aspect-ratio: 4/3) {
+  .canvas {
+    width: max(100cqw, 133.333cqh);
+    aspect-ratio: 4 / 3;
+  }
 }
 
-.ambientStar {
-  position: absolute;
-  display: block;
-}
-
-.ambientStar img {
-  width: 100%;
-  height: auto;
+/* The 3:4 asset already follows the visible tablet pane closely. Percent coordinates
+   should span that pane directly; cover-cropping a landscape canvas clipped side stars. */
+@media (max-aspect-ratio: 1/1) {
+  .canvas {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    transform: none;
+  }
 }
 
 /* ---- 별 ---------------------------------------------------------------------- */
 
 .node {
   position: absolute;
+  left: var(--x);
+  top: var(--y);
   display: flex;
-  width: 26cqw;
+  width: min(26cqw, 360px);
   flex-direction: column;
   align-items: center;
   transform: translate(-50%, -50%);
 }
 
+/* The viewport can still be wide while the window opening is narrow (for example beside
+   the desktop rail). Choose the compact slots from the space the stars actually receive,
+   so edge labels never depend on the browser width or get clipped by the wooden frame. */
+@container (max-width: 1100px) {
+  .node {
+    left: var(--narrow-x);
+    top: var(--narrow-y);
+    width: min(38cqw, 360px);
+  }
+}
+
 .star {
   display: block;
-  width: calc(7.4cqw * var(--scale));
+  width: calc(min(7.4cqw, 12cqh, 76px) * var(--scale));
   padding: 0;
   border: 0;
   background: none;
@@ -124,7 +146,7 @@
 }
 
 .aroundNode {
-  width: 20cqw;
+  width: min(20cqw, 300px);
 }
 
 /* Sits over the field rather than the canvas: the canvas is cover-sized and its corners
@@ -198,22 +220,6 @@
 
 /* ---- 화면 설명 ---------------------------------------------------------------- */
 
-.blurb {
-  position: absolute;
-  z-index: 5;
-  left: 50%;
-  bottom: 4.5%;
-  width: min(62%, 720px);
-  margin: 0;
-  transform: translateX(-50%);
-  font: clamp(10px, 0.95vw, 14px)/1.6 var(--font-serif-kr);
-  color: rgba(226, 212, 186, 0.6);
-  text-align: center;
-  text-shadow: 0 1px 6px rgba(8, 10, 18, 0.7);
-  word-break: keep-all;
-  pointer-events: none;
-}
-
 .snapshot {
   position: absolute;
   z-index: 5;
@@ -258,7 +264,24 @@
 
 /* ---- 좁은 화면 --------------------------------------------------------------- */
 
-@media (max-width: 900px) {
+/* When live data is available, lift its snapshot time above the labels in compact panes. */
+@container (max-width: 900px) {
+  .snapshot {
+    top: 10px;
+    right: 10px;
+    bottom: auto;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(10, 14, 28, 0.48);
+    color: rgba(230, 216, 190, 0.62);
+    white-space: nowrap;
+    backdrop-filter: blur(6px);
+  }
+}
+
+/* Match <TrendStage>'s portrait-source decision. Short, nearly square side panels keep
+   the landscape coordinate system instead of stretching a 9:16 sky behind the bar. */
+@media (max-width: 900px) and (max-aspect-ratio: 2/3) {
   .canvas {
     left: 0;
     top: 0;
@@ -269,7 +292,7 @@
   }
 
   .node {
-    width: 38cqw;
+    width: min(38cqw, 360px);
   }
 
   .aroundNode {
@@ -285,7 +308,7 @@
   }
 
   .star {
-    width: calc(11cqw * var(--scale));
+    width: calc(min(11cqw, 8cqh, 64px) * var(--scale));
   }
 
   .label {
@@ -296,8 +319,8 @@
     font-size: clamp(8px, 1.5cqw, 12px);
   }
 
-  .blurb {
-    width: 84%;
-    bottom: 3%;
+  .snapshot {
+    right: 50%;
+    transform: translateX(50%);
   }
 }

@@ -99,10 +99,24 @@ class FastApiClientTest {
 	}
 
 	@Test
-	void 요청_형식이_틀려_400이면_BAD_REQUEST() {
+	void 내용을_거부해_400이면_REJECTED() {
+		// 대상 데이터의 문제다. 기사 분석이라면 그 기사를 분석 대상에서 빼도 된다.
 		server.expect(requestTo(BASE_URL + PATH))
 				.andRespond(withStatus(HttpStatus.BAD_REQUEST)
 						.body(errorBody("INVALID_ARTICLE")).contentType(MediaType.APPLICATION_JSON));
+
+		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(InternalApiErrorCode.INTERNAL_API_REJECTED);
+	}
+
+	@Test
+	void 요청_형식이_틀려_422면_BAD_REQUEST() {
+		// 우리 쪽 계약 버그다. 400 과 섞이면 버그 하나로 멀쩡한 대상이 전부 버려진다.
+		server.expect(requestTo(BASE_URL + PATH))
+				.andRespond(withStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+						.body("{\"detail\":[{\"loc\":[\"body\",\"articleId\"],\"msg\":\"Field required\"}]}")
+						.contentType(MediaType.APPLICATION_JSON));
 
 		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
 

@@ -41,7 +41,7 @@ class GmsClientTest {
 
 	private GmsClient client(String apiKey) {
 		return new GmsClient(builder.baseUrl(BASE_URL).build(),
-				new GmsProperties(BASE_URL, apiKey, "gpt-5-mini", Duration.ofSeconds(5)),
+				new GmsProperties(BASE_URL, apiKey, "gpt-5.4-nano", Duration.ofSeconds(5)),
 				new ObjectMapper());
 	}
 
@@ -62,7 +62,7 @@ class GmsClientTest {
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer test-key"))
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.model").value("gpt-5-mini"))
+				.andExpect(jsonPath("$.model").value("gpt-5.4-nano"))
 				.andExpect(jsonPath("$.messages[0].role").value("developer"))
 				.andExpect(jsonPath("$.messages[0].content").value("한국어로 답하라"))
 				.andExpect(jsonPath("$.messages[1].role").value("user"))

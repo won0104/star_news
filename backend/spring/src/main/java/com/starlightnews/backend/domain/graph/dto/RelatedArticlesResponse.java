@@ -12,7 +12,7 @@ public record RelatedArticlesResponse(
 
 		List<Item> articles,
 
-		@Schema(description = "중복 제거한 전체 관련 기사 수", example = "18")
+		@Schema(description = "중복 제거한 전체 관련 기사 수", example = "42")
 		long totalCount,
 
 		@Schema(description = "이번 응답에 포함된 기사 수", example = "30")
@@ -25,6 +25,7 @@ public record RelatedArticlesResponse(
 		String nextCursor
 ) {
 
+	@Schema(name = "RelatedArticleItem")
 	public record Item(
 
 			@Schema(description = "MySQL Article PK", example = "930001")

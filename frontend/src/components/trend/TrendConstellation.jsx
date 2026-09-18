@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  ambientLayouts,
-  ambientStars,
   constellationEvents,
   constellationLayouts,
   constellationStart,
@@ -18,6 +16,7 @@ import { TrendPanel } from './TrendPanel'
 import styles from './TrendConstellation.module.css'
 
 const PANEL_ID = 'trend-articles'
+const DETAIL_ID = 'trend-node-detail'
 
 const ROLE_CLASS = {
   centre: styles.centreNode,
@@ -33,10 +32,33 @@ const ROLE_STAR = {
   statement: stars.statement,
 }
 
-const AMBIENT_ART = {
-  event: trendFigmaAssets.relatedLeftSticker,
-  entity: trendFigmaAssets.entitySticker,
-  statement: trendFigmaAssets.statementSticker,
+const PREVIEW_STAR = {
+  EVENT: trendFigmaAssets.relatedLeftSticker,
+  ENTITY: trendFigmaAssets.entitySticker,
+  STATEMENT: trendFigmaAssets.statementSticker,
+}
+
+const PREVIEW_LIMITS = {
+  EVENT: 2,
+  ENTITY: 2,
+  STATEMENT: 1,
+}
+
+const PREVIEW_POINTS = {
+  relatedLeft: [
+    [-15.5, -5.5],
+    [-14, 3],
+    [-10.5, 10],
+    [-3.5, 14.5],
+    [-16.5, 12],
+  ],
+  relatedRight: [
+    [15.5, -7],
+    [14, 2],
+    [10.5, 9],
+    [3.5, 13.5],
+    [16.5, 11],
+  ],
 }
 
 /** 목업 별자리 한 벌을 슬롯별 후보로 정리한다. */
@@ -82,7 +104,9 @@ function bySlotFromGraph(graph) {
       }))
 
   return {
-    centre: [{ id: centre.nodeKey, label: centre.label, meta: '지금 보는 사건', event: centre.nodeKey }],
+    centre: [
+      { id: centre.nodeKey, label: centre.label, meta: '지금 보는 사건', event: centre.nodeKey },
+    ],
     related: of('EVENT'),
     entity: of('ENTITY'),
     statement: of('STATEMENT'),
@@ -102,6 +126,38 @@ function nodesFor(bySlot, narrow, layoutSlots) {
     .filter(Boolean)
 }
 
+/**
+ * 다음 중심 화면에 실제로 배치될 후보만 고른 뒤, 현재 화면에서 이미 보이는 Node는
+ * 중복으로 그리지 않는다. 보이는 Node도 슬롯 수에는 포함해야 전환 뒤 구성과 어긋나지 않는다.
+ */
+function previewNodesFor(graph, visibleNodeKeys) {
+  const taken = { EVENT: 0, ENTITY: 0, STATEMENT: 0 }
+
+  return (graph?.nodes ?? []).reduce((preview, node) => {
+    const limit = PREVIEW_LIMITS[node.nodeType]
+    if (!limit || taken[node.nodeType] >= limit) return preview
+    taken[node.nodeType] += 1
+    if (visibleNodeKeys.has(node.nodeKey)) return preview
+    preview.push(node)
+    return preview
+  }, [])
+}
+
+function previewSummary(nodes) {
+  const count = { EVENT: 0, ENTITY: 0, STATEMENT: 0 }
+  nodes.forEach((node) => {
+    count[node.nodeType] += 1
+  })
+
+  return [
+    count.EVENT ? `사건 ${count.EVENT}` : '',
+    count.ENTITY ? `개체 ${count.ENTITY}` : '',
+    count.STATEMENT ? `발언 ${count.STATEMENT}` : '',
+  ]
+    .filter(Boolean)
+    .join(', ')
+}
+
 function StarArt({ role }) {
   return (
     <span className={`${styles.art} ${styles.portableArt}`} aria-hidden>
@@ -118,23 +174,42 @@ function StarArt({ role }) {
  * from the mock to the endpoint. `onWalk` is how a related event re-centres when the
  * caller owns the loading; without it the mock's own walk is used.
  */
-export function TrendConstellation({ graph, onBack, onWalk, details, articleSamples }) {
+export function TrendConstellation({
+  graph,
+  previewGraphs,
+  articlePanelOpen,
+  onArticlePanelOpenChange,
+  onBack,
+  onWalk,
+  details,
+  articleSamples,
+  overlayRoot,
+}) {
   const [centreId, setCentreId] = useState(constellationStart)
-  const [open, setOpen] = useState(false)
+  const [localPanelOpen, setLocalPanelOpen] = useState(false)
   const [full, setFull] = useState(false)
-  // 사용자가 직접 연 Node. 없으면 카드는 중심 Node 를 설명한다.
+  // 사용자가 직접 연 Entity·Statement. 같은 별을 다시 누르면 선택이 풀린다.
   const [picked, setPicked] = useState(null)
   const [pickedState, setPickedState] = useState('idle')
+  const detailRequestRef = useRef(null)
+  const articlePageRequestRef = useRef(null)
   const [articles, setArticles] = useState(null)
   const [articlesState, setArticlesState] = useState('idle')
+  const [articlesKey, setArticlesKey] = useState(null)
+  const open = articlePanelOpen ?? localPanelOpen
+  const setOpen = (next) => {
+    if (onArticlePanelOpenChange) onArticlePanelOpenChange(next)
+    else setLocalPanelOpen(next)
+  }
   const narrow = useIsNarrow()
   // A graph has no authored layout key of its own, so it takes the default composition.
   const layoutKey = graph ? 'spread' : constellationEvents[centreId].layout
   const layout = constellationLayouts[layoutKey] ?? constellationLayouts.spread
-  const ambientLayout = ambientLayouts[layoutKey] ?? ambientLayouts.spread
   const bySlot = graph ? bySlotFromGraph(graph) : bySlotFromMock(centreId)
   const nodes = nodesFor(bySlot, narrow, layout.slots)
   const centre = nodes[0]
+  const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
+  const visibleNodeKeys = new Set(nodes.map((node) => node.id))
   const at = (node) => (narrow ? node.slot.atNarrow : node.slot.at)
 
   /**
@@ -144,7 +219,22 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
    * `details` gives the sample its answers without a request: those keys are not in Neo4j,
    * so asking for them would only 404.
    */
-  const openDetail = (node, nodeType) => {
+  const closeDetail = () => {
+    detailRequestRef.current?.abort()
+    detailRequestRef.current = null
+    setPicked(null)
+    setPickedState('idle')
+  }
+
+  const toggleDetail = (node, nodeType) => {
+    if (picked?.nodeKey === node.id) {
+      closeDetail()
+      return
+    }
+
+    detailRequestRef.current?.abort()
+    detailRequestRef.current = null
+
     const ready = details?.[node.id]
     if (ready) {
       setPicked(ready)
@@ -154,8 +244,11 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
 
     setPicked({ nodeType, nodeKey: node.id, title: node.label })
     setPickedState('loading')
-    fetchNodeDetail(nodeType, node.id)
+    const controller = new AbortController()
+    detailRequestRef.current = controller
+    fetchNodeDetail(nodeType, node.id, { signal: controller.signal })
       .then((payload) => {
+        if (controller.signal.aborted) return
         setPicked(payload)
         setPickedState('ready')
       })
@@ -163,59 +256,49 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
         if (error?.name === 'AbortError') return
         setPickedState('failed')
       })
+      .finally(() => {
+        if (detailRequestRef.current === controller) detailRequestRef.current = null
+      })
   }
 
-  /**
-   * 중심 별을 눌렀을 때. 패널을 열면서 그 Node 의 기사를 가져온다.
-   *
-   * `articleSamples` answers for the sampled sky, whose keys are not in Neo4j. `cursor`
-   * is passed for 더 보기, and the page is appended rather than replacing what is read.
-   */
-  const loadArticles = (cursor) => {
-    const centreKey = centre.event
-    const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
+  /** 현재 Event의 다음 기사 페이지를 기존 카드에 이어 붙인다. */
+  const loadMoreArticles = (cursor) => {
+    if (!cursor || articlesKey !== centre.event) return
 
-    const ready = !cursor && articleSamples?.[centreKey]
-    if (ready) {
-      setArticles(ready)
-      setArticlesState('ready')
-      return
-    }
-
-    if (!cursor) setArticles(null)
+    articlePageRequestRef.current?.abort()
+    const controller = new AbortController()
+    articlePageRequestRef.current = controller
     setArticlesState('loading')
-    fetchNodeArticles(centreType, centreKey, { cursor })
+    fetchNodeArticles(centreType, centre.event, { cursor, signal: controller.signal })
       .then((payload) => {
-        setArticles((was) =>
-          cursor && was
-            ? { ...payload, articles: [...was.articles, ...payload.articles] }
-            : payload,
-        )
+        if (controller.signal.aborted) return
+        setArticles((was) => ({
+          ...payload,
+          articles: [...(was?.articles ?? []), ...payload.articles],
+        }))
         setArticlesState('ready')
       })
       .catch((error) => {
         if (error?.name === 'AbortError') return
         setArticlesState('failed')
       })
+      .finally(() => {
+        if (articlePageRequestRef.current === controller) articlePageRequestRef.current = null
+      })
   }
 
   const togglePanel = () => {
-    const next = !open
-    setOpen(next)
-    if (next && articlesState === 'idle') loadArticles()
+    setOpen(!open)
   }
 
   const walkTo = (node) => {
+    closeDetail()
+
     if (onWalk) {
       onWalk(node)
       return
     }
     setCentreId(node.event)
-    setOpen(false)
-    setPicked(null)
-    setPickedState('idle')
-    setArticles(null)
-    setArticlesState('idle')
   }
 
   const enterFull = useCallback(() => {
@@ -227,6 +310,45 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
     setFull(false)
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {})
+    }
+  }, [])
+
+  /**
+   * 패널이 열린 채 중심 Event가 바뀌면 카드는 유지하고 내용만 새 Event 기준으로 바꾼다.
+   * 현재 key의 응답이 도착하기 전에는 이전 기사를 섞지 않고 loading 상태를 보여준다.
+   */
+  useEffect(() => {
+    if (!open || articlesKey === centre.event) return undefined
+
+    articlePageRequestRef.current?.abort()
+    const controller = new AbortController()
+    const centreKey = centre.event
+    const ready = articleSamples?.[centreKey]
+    const request = ready
+      ? Promise.resolve(ready)
+      : fetchNodeArticles(centreType, centreKey, { signal: controller.signal })
+
+    request
+      .then((payload) => {
+        if (controller.signal.aborted) return
+        setArticles(payload)
+        setArticlesKey(centreKey)
+        setArticlesState('ready')
+      })
+      .catch((error) => {
+        if (error?.name === 'AbortError') return
+        setArticles(null)
+        setArticlesKey(centreKey)
+        setArticlesState('failed')
+      })
+
+    return () => controller.abort()
+  }, [articleSamples, articlesKey, centre.event, centreType, open])
+
+  useEffect(() => {
+    return () => {
+      detailRequestRef.current?.abort()
+      articlePageRequestRef.current?.abort()
     }
   }, [])
 
@@ -250,6 +372,38 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
     }
   }, [leaveFull])
 
+  const detailCard =
+    graph && picked ? (
+      <NodeDetailPanel
+        key={picked.nodeKey}
+        id={DETAIL_ID}
+        node={picked}
+        state={pickedState}
+        onClose={closeDetail}
+      />
+    ) : null
+
+  const articleIsCurrent = articlesKey === centre.event
+  const articlePanel = (
+    <TrendPanel
+      id={PANEL_ID}
+      data={articleIsCurrent ? articles : null}
+      state={open && !articleIsCurrent ? 'loading' : articlesState}
+      title={centre.label}
+      node={{ nodeType: centreType, nodeKey: centre.event }}
+      open={open}
+      onClose={() => setOpen(false)}
+      onMore={() => loadMoreArticles(articles?.nextCursor)}
+    />
+  )
+
+  const overlays = (
+    <>
+      {detailCard}
+      {articlePanel}
+    </>
+  )
+
   const board = (
     <div
       className={`${styles.field} ${full ? styles.fieldFull : ''}`}
@@ -257,8 +411,6 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
       role="group"
       aria-label={panelCopy.fieldLabel}
     >
-      <span className={styles.layoutBadge}>구도 · {layout.label}</span>
-
       <div className={styles.fieldActions}>
         {onBack && !full && (
           <button type="button" className={styles.fieldAction} onClick={onBack}>
@@ -279,30 +431,6 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
       </div>
 
       <div className={styles.canvas}>
-        <div className={styles.ambientLayer} aria-hidden>
-          {ambientStars.map((star, index) => {
-            const starAt = ambientLayout[index] ?? star.at
-
-            return (
-              <span
-                key={star.id}
-                className={`${styles.ambientStar} ${styles[`ambient${star.role[0].toUpperCase()}${star.role.slice(1)}`]}`}
-                data-star-id={star.id}
-                data-related-events={star.events.join(' ')}
-                style={{
-                  left: `${starAt[0]}%`,
-                  top: `${starAt[1]}%`,
-                  width: `${star.size / 14.4}cqw`,
-                  opacity: (star.opacity ?? 0.9) * 0.42,
-                  transform: `translate(-50%, -50%) rotate(${star.rotate}deg)`,
-                }}
-              >
-                <img src={AMBIENT_ART[star.role]} alt="" />
-              </span>
-            )
-          })}
-        </div>
-
         <svg
           className={`${styles.mobileLinks} ${styles.variantLinks}`}
           viewBox="0 0 100 100"
@@ -325,6 +453,9 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
           const isCentre = role === 'centre'
           const isEvent = isCentre || role === 'related'
           const art = <StarArt role={role} />
+          const previewNodes =
+            role === 'related' ? previewNodesFor(previewGraphs?.[node.id], visibleNodeKeys) : []
+          const previewText = previewSummary(previewNodes)
 
           return (
             <div
@@ -336,6 +467,45 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
                 animationDelay: `${index * 90}ms`,
               }}
             >
+              {previewNodes.length > 0 && (
+                <div
+                  className={`${styles.previewCluster} ${styles[`${visual}Preview`]}`}
+                  aria-hidden
+                >
+                  {previewNodes.map((preview, previewIndex) => {
+                    const [x, y] = PREVIEW_POINTS[visual][previewIndex]
+                    const lineLength = Math.hypot(x, y)
+                    const lineAngle = Math.atan2(-y, -x)
+
+                    return (
+                      <Fragment key={preview.nodeKey}>
+                        <span
+                          className={styles.previewLink}
+                          style={{
+                            '--preview-x': `${x}cqw`,
+                            '--preview-y': `${y}cqw`,
+                            '--preview-line-length': `${lineLength}cqw`,
+                            '--preview-line-angle': `${lineAngle}rad`,
+                          }}
+                        />
+                        <span
+                          className={`${styles.previewStar} ${styles[`preview${preview.nodeType[0]}${preview.nodeType.slice(1).toLowerCase()}`]}`}
+                          data-node-type={preview.nodeType}
+                          style={{
+                            '--preview-x': `${x}cqw`,
+                            '--preview-y': `${y}cqw`,
+                            '--preview-delay': `${previewIndex * 55}ms`,
+                            '--preview-rotate': `${previewIndex % 2 === 0 ? -6 : 7}deg`,
+                          }}
+                        >
+                          <img src={PREVIEW_STAR[preview.nodeType]} alt="" />
+                        </span>
+                      </Fragment>
+                    )
+                  })}
+                </div>
+              )}
+
               {isEvent ? (
                 <button
                   type="button"
@@ -345,7 +515,7 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
                   aria-label={
                     isCentre
                       ? `${node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
-                      : `${node.label} — ${panelCopy.recentre}`
+                      : `${node.label} — ${panelCopy.recentre}${previewText ? `; 다음 구성 ${previewText}` : ''}`
                   }
                   onClick={isCentre ? togglePanel : () => walkTo(node)}
                 >
@@ -355,8 +525,10 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
                 <button
                   type="button"
                   className={styles.starButton}
-                  aria-label={`${node.label} — 상세 보기`}
-                  onClick={() => openDetail(node, role === 'entity' ? 'ENTITY' : 'STATEMENT')}
+                  aria-expanded={picked?.nodeKey === node.id}
+                  aria-controls={DETAIL_ID}
+                  aria-label={`${node.label} — ${picked?.nodeKey === node.id ? '상세 닫기' : '상세 보기'}`}
+                  onClick={() => toggleDetail(node, role === 'entity' ? 'ENTITY' : 'STATEMENT')}
                 >
                   {art}
                 </button>
@@ -371,67 +543,16 @@ export function TrendConstellation({ graph, onBack, onWalk, details, articleSamp
         })}
       </div>
 
-      {graph && (
-        <DetailCard
-          // 중심이 바뀌거나 다른 Node 를 고르면 새로 마운트돼 닫힘 상태가 풀린다.
-          key={`${graph.centerNode.nodeKey}:${picked?.nodeKey ?? ''}`}
-          centre={graph.centerNode}
-          sample={details?.[graph.centerNode.nodeKey]}
-          picked={picked}
-          pickedState={pickedState}
-        />
-      )}
-
-      <TrendPanel
-        id={PANEL_ID}
-        data={articles}
-        state={articlesState}
-        title={centre.label}
-        open={open}
-        onClose={() => setOpen(false)}
-        onMore={() => loadArticles(articles?.nextCursor)}
-      />
+      {(full || !overlayRoot) && overlays}
     </div>
   )
 
-  return full ? createPortal(board, document.body) : board
-}
-
-/**
- * 카드가 무엇을 설명할지 고른다 — 고른 Node 가 있으면 그것, 없으면 중심 Node.
- *
- * Its own component so a centre change or a new pick remounts it through the `key`,
- * which resets the closed flag without an effect writing state during a render pass.
- * The centre's own detail is fetched here rather than by the screen above, because this
- * is the only place that needs it.
- */
-function DetailCard({ centre, sample, picked, pickedState }) {
-  const [closed, setClosed] = useState(false)
-  const [fetched, setFetched] = useState(null)
-  const [state, setState] = useState(sample ? 'ready' : 'loading')
-
-  useEffect(() => {
-    if (sample) return
-    const controller = new AbortController()
-    fetchNodeDetail(centre.nodeType, centre.nodeKey, { signal: controller.signal })
-      .then((payload) => {
-        setFetched(payload)
-        setState('ready')
-      })
-      .catch((error) => {
-        if (error?.name === 'AbortError') return
-        setState('failed')
-      })
-    return () => controller.abort()
-  }, [centre, sample])
-
-  if (closed) return null
+  if (full) return createPortal(board, document.body)
 
   return (
-    <NodeDetailPanel
-      node={picked ?? sample ?? fetched}
-      state={picked ? pickedState : sample ? 'ready' : state}
-      onClose={() => setClosed(true)}
-    />
+    <>
+      {board}
+      {overlayRoot && createPortal(overlays, overlayRoot)}
+    </>
   )
 }

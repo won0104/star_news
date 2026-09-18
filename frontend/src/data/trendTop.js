@@ -51,11 +51,11 @@ export const trendSlots = [
   { at: [69, 32], atNarrow: [76, 18] },
   { at: [62, 64], atNarrow: [72, 44] },
   { at: [36, 70], atNarrow: [28, 45] },
-  { at: [11, 47], atNarrow: [50, 58] },
+  { at: [16, 47], atNarrow: [50, 58] },
   { at: [86, 54], atNarrow: [22, 70] },
   { at: [51, 18], atNarrow: [78, 70] },
-  { at: [77, 75], atNarrow: [38, 84] },
-  { at: [17, 72], atNarrow: [66, 86] },
+  { at: [77, 75], atNarrow: [28, 84] },
+  { at: [17, 72], atNarrow: [72, 84] },
 ]
 
 /** 별 크기는 기사 수가 정한다. 가장 많은 Event가 1.0, 가장 적은 Event가 이 값. */
@@ -63,14 +63,12 @@ export const TREND_MIN_SCALE = 0.52
 
 export const trendSkyCopy = {
   fieldLabel: '오늘의 트렌드 별자리',
-  blurb: '최근 24시간 동안 기사가 가장 많이 모인 사건입니다. 별을 누르면 그 사건과 이어진 이야기가 펼쳐집니다.',
   rank: (n) => `${n}위`,
   articles: (n) => `기사 ${n}개`,
   snapshot: (at) => `${at} 기준`,
   empty: '아직 집계된 트렌드가 없어요.',
   emptyHint: '트렌드는 매일 06시와 18시에 새로 모입니다.',
   loading: '오늘의 트렌드를 불러오는 중…',
-  sampleNote: '표본 데이터 · 집계 대기 중',
   failed: '트렌드를 불러오지 못했어요.',
   failedHint: '잠시 후 다시 시도해 주세요.',
 }

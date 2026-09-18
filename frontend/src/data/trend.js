@@ -20,26 +20,19 @@
  */
 
 /**
- * 주요 트렌드's screen, as it stands: the attic falling from daylight to night. Three and
- * a third silent seconds that play once and hand back to the still they end on, which is
- * the same treatment the home screen gives its own clip — see `backdrop.loop` in
- * data/home.js and the note in <BackgroundVideo>.
- *
- * The `-v3` in the filename is not decoration: files in public/ carry no content hash, so
- * a replacement has to take a new name or a CDN keeps handing out the old bytes. v1 was a
- * 10s 1280x720 render of the same transition; v2 was this one with the image tool's mark
- * burned into the frames at 7.6% in from the right and 13.4% up from the bottom, which a
- * video cannot be patched out of the way a still can.
- *
- * One mp4 and no webm, unlike home's pair, and it has not been through the encoder
- * (ffmpeg is not installed here) — so it is the render as delivered: 4.53MB of 1920x1080
- * H.264 at roughly 11Mbps, carrying an audio track the element mutes and nobody will ever
- * hear. scripts/encode-clip.ps1 has the recipe, and on a clip this short it should land
- * well under a megabyte.
+ * The room seen behind 오늘의 트렌드. Both crops come from the same source composition;
+ * each keeps the wooden window around the interactive sky instead of asking cover to
+ * invent a mobile crop. A transition stays disabled until a clip is authored to end on
+ * this exact room — handing off from the former attic image would read as a flash cut.
  */
 export const nightfall = {
-  still: '/assets/trend/figma/attic-night.png',
-  clip: { mp4: '/assets/trend/nightfall-v3.mp4' },
+  still: '/assets/trend/trend-window-night-desktop-v1.jpg',
+  sidebarStill: '/assets/trend/trend-window-night-sidebar-extension-v2.png',
+  ultrawideStill: '/assets/trend/trend-window-night-ultrawide-v1.jpg',
+  compactStill: '/assets/trend/trend-window-night-compact-v1.jpg',
+  tabletStill: '/assets/trend/trend-window-night-tablet-v1.jpg',
+  mobileStill: '/assets/trend/trend-window-night-mobile-tall-v1.jpg',
+  clip: null,
 }
 
 /** Exact exported layers from Figma frame 870:2. The relation layer includes the
@@ -599,6 +592,11 @@ export const panelCopy = {
   recentre: '이 사건을 가운데로',
   save: '기사 저장',
   unsave: '저장 해제',
+  saveNode: '이 사건 즐겨찾기',
+  unsaveNode: '즐겨찾기 해제',
+  /** 저장 버튼 옆 한 줄. 로그인 없이 누르면 요청 없이 이것만 뜬다. */
+  signInToSave: '로그인하면 저장할 수 있어요.',
+  saveFailed: '저장하지 못했어요. 다시 시도해 주세요.',
   fieldLabel: '사건 별자리',
   articlesLoading: '관련 기사를 불러오는 중…',
   articlesFailed: '관련 기사를 불러오지 못했어요.',

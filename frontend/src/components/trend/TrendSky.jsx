@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchHomeTrends, fetchNeighbors } from '../../api/trend'
-import { stars, trendFigmaAssets } from '../../data/trend'
+import { stars } from '../../data/trend'
 import {
   trendNeighbors,
   trendNodeArticles,
@@ -8,7 +8,6 @@ import {
   trendSkyExpandCopy,
 } from '../../data/trendNeighbors'
 import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlots } from '../../data/trendTop'
-import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { TrendConstellation } from './TrendConstellation'
 import styles from './TrendSky.module.css'
 
@@ -39,16 +38,18 @@ import styles from './TrendSky.module.css'
  * rounds are landing.
  */
 const SAMPLE_WHEN_EMPTY = true
-export function TrendSky({ data: given, neighbors: givenNeighbors }) {
-  const narrow = useIsNarrow()
+export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }) {
   const [home, setHome] = useState(given ?? null)
   const [homeState, setHomeState] = useState(given ? 'ready' : 'loading')
   const [openKey, setOpenKey] = useState(null)
   const [graph, setGraph] = useState(null)
   const [graphState, setGraphState] = useState('idle')
+  const [previewGraphs, setPreviewGraphs] = useState({})
+  const [articlePanelOpen, setArticlePanelOpen] = useState(false)
   // Neighbours do not change while the screen is open, so a key already opened is served
   // from here rather than fetched again.
   const cache = useRef(new Map())
+  const activeKeyRef = useRef(null)
 
   useEffect(() => {
     if (given) return
@@ -68,9 +69,11 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
   }, [given])
 
   const close = useCallback(() => {
+    activeKeyRef.current = null
     setOpenKey(null)
     setGraph(null)
     setGraphState('idle')
+    setArticlePanelOpen(false)
   }, [])
 
   useEffect(() => {
@@ -92,7 +95,8 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
 
   // Not memoised: it only ever lands on an onClick, and it has to read `sample`, which is
   // derived from this render.
-  const open = (trend) => {
+  const open = (trend, { preserveGraph = false } = {}) => {
+    activeKeyRef.current = trend.nodeKey
     setOpenKey(trend.nodeKey)
 
     // A sampled sky's keys are not in Neo4j, so asking for them would only 404.
@@ -106,45 +110,102 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
       return
     }
 
-    setGraph(null)
+    if (!preserveGraph) setGraph(null)
     setGraphState('loading')
     fetchNeighbors(trend.nodeType, trend.nodeKey)
       .then((payload) => {
         cache.current.set(trend.nodeKey, payload)
         // A different star may have been pressed while this was in flight.
-        setGraph((current) => current ?? payload)
+        if (activeKeyRef.current !== trend.nodeKey) return
+        setGraph(payload)
         setGraphState('ready')
       })
       .catch((error) => {
         if (error?.name === 'AbortError') return
+        if (activeKeyRef.current !== trend.nodeKey) return
         setGraphState('failed')
       })
   }
 
+  /**
+   * 화면에 보이는 관련 Event가 다음 중심이 되었을 때의 1-Hop 구성을 미리 가져온다.
+   * 작은 별은 별도 장식이 아니라 이 응답을 유형별로 요약한 것이며, 이미 받아 둔 응답은
+   * 실제 Event 이동에도 같은 cache를 사용한다.
+   */
+  useEffect(() => {
+    if (graphState !== 'ready' || !graph || sample) return undefined
+
+    const relatedEvents = (graph.nodes ?? [])
+      .filter((node) => node.nodeType === 'EVENT')
+      .slice(0, 2)
+    const missing = relatedEvents.filter(
+      (node) => !givenNeighbors?.[node.nodeKey] && !previewGraphs[node.nodeKey],
+    )
+    if (missing.length === 0) return undefined
+
+    const controller = new AbortController()
+    Promise.allSettled(
+      missing.map(async (node) => {
+        const payload =
+          cache.current.get(node.nodeKey) ??
+          (await fetchNeighbors(node.nodeType, node.nodeKey, {
+            depth: 1,
+            signal: controller.signal,
+          }))
+        cache.current.set(node.nodeKey, payload)
+        return [node.nodeKey, payload]
+      }),
+    ).then((results) => {
+      if (controller.signal.aborted) return
+      const ready = results
+        .filter((result) => result.status === 'fulfilled')
+        .map((result) => result.value)
+      if (ready.length === 0) return
+      setPreviewGraphs((current) => ({ ...current, ...Object.fromEntries(ready) }))
+    })
+
+    return () => controller.abort()
+  }, [givenNeighbors, graph, graphState, previewGraphs, sample])
+
   if (openKey) {
-    if (graphState === 'loading' || !graph) {
+    if (!graph) {
       const chosen = ranked.find((trend) => trend.nodeKey === openKey)
       return (
         <Notice
           mark={graphState === 'failed' ? '⚠' : '✦'}
-          title={
-            graphState === 'failed' ? trendSkyExpandCopy.failed : trendSkyExpandCopy.loading
-          }
+          title={graphState === 'failed' ? trendSkyExpandCopy.failed : trendSkyExpandCopy.loading}
           hint={chosen?.label}
           onBack={close}
         />
       )
     }
 
-    // The composition is <TrendConstellation>'s, unchanged — centre with its parts on the
-    // authored slots. Only the data behind it is new.
+    const previews = Object.fromEntries(
+      (graph.nodes ?? [])
+        .filter((node) => node.nodeType === 'EVENT')
+        .slice(0, 2)
+        .map((node) => [
+          node.nodeKey,
+          sample
+            ? trendNeighbors[node.nodeKey]
+            : (givenNeighbors?.[node.nodeKey] ?? previewGraphs[node.nodeKey]),
+        ])
+        .filter(([, preview]) => preview),
+    )
+
     return (
       <TrendConstellation
         graph={graph}
+        previewGraphs={previews}
+        articlePanelOpen={articlePanelOpen}
+        onArticlePanelOpenChange={setArticlePanelOpen}
         onBack={close}
-        onWalk={(node) => open({ nodeType: node.nodeType ?? 'EVENT', nodeKey: node.id })}
+        onWalk={(node) =>
+          open({ nodeType: node.nodeType ?? 'EVENT', nodeKey: node.id }, { preserveGraph: true })
+        }
         details={sample ? trendNodeDetails : undefined}
         articleSamples={sample ? trendNodeArticles : undefined}
+        overlayRoot={overlayRoot}
       />
     )
   }
@@ -166,11 +227,10 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
   return (
     <div className={styles.field} role="group" aria-label={trendSkyCopy.fieldLabel}>
       <div className={styles.canvas}>
-        <AmbientStars />
-
         {ranked.map((trend, index) => {
           const slot = trendSlots[index]
-          const [x, y] = (narrow && slot.atNarrow) || slot.at
+          const [x, y] = slot.at
+          const [narrowX, narrowY] = slot.atNarrow || slot.at
           // Area, not diameter, carries the count — a star twice as wide should not read
           // as four times the news.
           const scale =
@@ -180,7 +240,13 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
             <div
               key={trend.nodeKey}
               className={styles.node}
-              style={{ left: `${x}%`, top: `${y}%`, '--scale': scale }}
+              style={{
+                '--x': `${x}%`,
+                '--y': `${y}%`,
+                '--narrow-x': `${narrowX}%`,
+                '--narrow-y': `${narrowY}%`,
+                '--scale': scale,
+              }}
             >
               <button
                 type="button"
@@ -203,15 +269,11 @@ export function TrendSky({ data: given, neighbors: givenNeighbors }) {
         })}
       </div>
 
-      <p className={styles.blurb}>{trendSkyCopy.blurb}</p>
-
-      <p className={styles.snapshot}>
-        {sample
-          ? trendSkyCopy.sampleNote
-          : source?.snapshotAt
-            ? trendSkyCopy.snapshot(formatSnapshot(source.snapshotAt))
-            : ''}
-      </p>
+      {!sample && source?.snapshotAt && (
+        <p className={styles.snapshot}>
+          {trendSkyCopy.snapshot(formatSnapshot(source.snapshotAt))}
+        </p>
+      )}
     </div>
   )
 }
@@ -234,40 +296,6 @@ function Notice({ mark, title, hint, onBack }) {
     </div>
   )
 }
-
-function AmbientStars() {
-  return (
-    <div className={styles.ambientLayer} aria-hidden>
-      {ambient.map((star) => (
-        <span
-          key={star.id}
-          className={styles.ambientStar}
-          style={{
-            left: `${star.at[0]}%`,
-            top: `${star.at[1]}%`,
-            width: `${star.size / 14.4}cqw`,
-            opacity: star.opacity,
-            transform: `translate(-50%, -50%) rotate(${star.rotate}deg)`,
-          }}
-        >
-          <img src={trendFigmaAssets.relatedLeftSticker} alt="" />
-        </span>
-      ))}
-    </div>
-  )
-}
-
-/** Decorative stars, kept near the perimeter so no label lands on one. */
-const ambient = [
-  { id: 'a1', at: [7, 20], size: 30, rotate: -8, opacity: 0.5 },
-  { id: 'a2', at: [93, 22], size: 26, rotate: 6, opacity: 0.42 },
-  { id: 'a3', at: [31, 12], size: 22, rotate: 3, opacity: 0.38 },
-  { id: 'a4', at: [8, 82], size: 28, rotate: -5, opacity: 0.45 },
-  { id: 'a5', at: [92, 86], size: 24, rotate: 9, opacity: 0.4 },
-  { id: 'a6', at: [64, 90], size: 20, rotate: -3, opacity: 0.34 },
-  { id: 'a7', at: [45, 88], size: 26, rotate: 5, opacity: 0.4 },
-  { id: 'a8', at: [96, 40], size: 20, rotate: -6, opacity: 0.32 },
-]
 
 /** `2026-09-17T06:00:00+09:00` → `9월 17일 06시`. The offset is the server's, so it is read
  *  out of the string rather than through a Date, which would shift it to this machine's

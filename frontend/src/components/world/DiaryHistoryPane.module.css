@@ -390,15 +390,8 @@
     transform 140ms ease;
 }
 
-.eventList button::after {
-  position: absolute;
-  top: 50%;
-  right: 6px;
-  content: '›';
-  color: #756554;
-  font: 18px/1 var(--font-serif-kr);
-  transform: translateY(-50%);
-}
+/* 예전의 '›' 꼬리표는 떼어냈다. 이 행은 다른 화면으로 넘어가는 링크가 아니라 제자리에서
+   펼쳐지는 토글이고, 방향을 가리키는 표시는 행 안의 ▸/▾ 가 맡는다. */
 
 .eventList button:hover {
   color: #193248;
@@ -771,4 +764,91 @@
   .articleList strong {
     font-size: 13px;
   }
+}
+
+/* ---- 사건 토글 ---------------------------------------------------------------- */
+
+/* 행 오른쪽 끝 — 발언 개수와 펼침 표시가 한 줄에 선다. */
+.eventCount {
+  font-variant-numeric: tabular-nums;
+}
+
+.eventChevron {
+  margin-left: 8px;
+  color: #8a7862;
+}
+
+/* 펼쳐진 내용. 종이 위에 살짝 눌러 넣은 자리처럼, 왼쪽 괘선 하나로만 구분한다 —
+   카드로 띄우면 목록 안에 또 다른 목록이 얹힌 것처럼 읽힌다. */
+.statementBox {
+  display: grid;
+  gap: clamp(10px, 1vw, 15px);
+  padding: clamp(10px, 1vw, 14px) 4px clamp(13px, 1.2vw, 18px) clamp(10px, 1vw, 14px);
+  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
+  border-left: 2px solid rgba(var(--tone), 0.45);
+  background: rgba(255, 252, 244, 0.34);
+}
+
+.statementBox h4 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 6px;
+  font: 700 clamp(8px, 0.68vw, 11px) var(--font-sans);
+  letter-spacing: 0.06em;
+  color: #8a7862;
+}
+
+.statementBox h4 b {
+  font-variant-numeric: tabular-nums;
+  color: #6f5c47;
+}
+
+.statementList,
+.eventArticleList {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 발언은 인용이다 — 따옴표가 데이터에 들어 있으니 표시는 기울임과 들여쓰기로만 준다. */
+.statementList li {
+  padding-left: 9px;
+  border-left: 1px solid rgba(69, 57, 45, 0.22);
+  font: italic clamp(9px, 0.8vw, 13px)/1.5 var(--font-serif-kr);
+  color: #4b3d30;
+  word-break: keep-all;
+}
+
+.eventArticleList small {
+  display: block;
+  font: clamp(7px, 0.6vw, 10px) var(--font-sans);
+  color: #9b8567;
+}
+
+.eventArticleList p {
+  margin: 2px 0 0;
+  font: clamp(9px, 0.76vw, 12px)/1.45 var(--font-serif-kr);
+  color: #4b3d30;
+  word-break: keep-all;
+}
+
+.statementEmpty {
+  margin: 0;
+  font: italic clamp(8px, 0.7vw, 11px) var(--font-serif-kr);
+  color: #a08b6d;
+}
+
+/* 불러오는 중·실패처럼 한 줄로 끝나는 알림. 사건 목록이 설 자리에 같은 크기로 서서,
+   페이지가 비었을 때 오른쪽 면이 접히지 않게 한다. */
+.pageNotice {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  margin: 0;
+  font: clamp(10px, 0.9vw, 14px)/1.6 var(--font-serif-kr);
+  color: #8b7355;
+  text-align: center;
 }

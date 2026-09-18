@@ -27,8 +27,8 @@ const nodes = [
   mockEvent('mock-loan-control', 'ECONOMY', '가계대출 관리 강화', 4, 0.78),
   mockEvent('mock-typhoon', 'SOCIETY', '태풍 해솔 한반도 접근', 5, 0.9),
   mockEvent('mock-flight-cancel', 'SOCIETY', '제주 항공편 결항', 3, 0.68),
-  mockEvent('mock-ai-export', 'WORLD', 'AI 가속기 수출규제 발표', 5, 0.92),
-  mockEvent('mock-license-rule', 'WORLD', '수출 허가요건 확대', 3, 0.7),
+  mockEvent('mock-ai-export', 'INTERNATIONAL', 'AI 가속기 수출규제 발표', 5, 0.92),
+  mockEvent('mock-license-rule', 'INTERNATIONAL', '수출 허가요건 확대', 3, 0.7),
   mockEvent('mock-manager-exit', 'SPORTS', '부산 웨이브스 감독 사퇴', 4, 0.86),
   mockEvent('mock-team-rebuild', 'SPORTS', '선수단 개편 착수', 3, 0.68),
 ];

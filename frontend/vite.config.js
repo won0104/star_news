@@ -27,6 +27,24 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: env.VITE_API_PROXY_TARGET || DEFAULT_API_TARGET,
           changeOrigin: true,
+          /*
+           * 브라우저가 붙인 Origin 을 떼고 보낸다.
+           *
+           * Same-origin GETs carry no `Origin`, but a same-origin POST does — so once the
+           * proxy forwarded it, the API saw `http://localhost:5174`, found it outside its
+           * allow-list and answered `Invalid CORS request` with 403. Every write failed
+           * while every read worked, which is what made it look like a signup bug.
+           *
+           * By the time the request leaves here it is server-to-server and the header is
+           * a leftover from the browser leg, so dropping it is honest rather than a
+           * bypass: nothing is claiming an origin it does not have. In production the app
+           * and the API share an origin and none of this applies.
+           */
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              proxyReq.removeHeader('origin')
+            })
+          },
         },
       },
     },

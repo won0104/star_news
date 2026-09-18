@@ -1,0 +1,323 @@
+/*
+ * 저장한 사건 / 저장한 기사.
+ *
+ * Same two leaves as 나의 리포트's own pages — the coordinates are that stylesheet's, so
+ * the book does not shift under the reader when a bookmark is pressed. Only the right
+ * leaf differs: it scrolls, because a saved list keeps going while a report does not.
+ *
+ * Palette is the bookmark asset README's, like the rest of this book: ink #44392F,
+ * navy #182B43, gold #EEC376, cream #EBE2D2–#F8F3E9.
+ */
+
+.leftPage,
+.rightPage {
+  position: absolute;
+  z-index: 3;
+  top: 9%;
+  bottom: 9%;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  color: #44392f;
+}
+
+.leftPage {
+  left: 14.4%;
+  width: 31.5%;
+}
+
+.rightPage {
+  left: 54.2%;
+  width: 31.5%;
+  gap: 2%;
+}
+
+/* ---- 왼쪽 머리 ---------------------------------------------------------------- */
+
+.head > span {
+  font: 700 clamp(7px, 0.63vw, 10px) var(--font-sans);
+  letter-spacing: 0.13em;
+  color: #8b7355;
+}
+
+.head h1 {
+  margin: 4px 0 0;
+  font: 700 clamp(16px, 1.6vw, 26px)/1.26 var(--font-serif-kr);
+  color: #2f2620;
+}
+
+.head p {
+  margin: 6px 0 0;
+  padding-bottom: 4%;
+  border-bottom: 1px solid rgba(94, 74, 51, 0.24);
+  font: clamp(8px, 0.72vw, 11px)/1.55 var(--font-serif-kr);
+  color: #7b6650;
+  word-break: keep-all;
+}
+
+.placeholder {
+  margin: auto 0;
+  font: clamp(9px, 0.8vw, 12px) var(--font-serif-kr);
+  color: #a08b6d;
+  text-align: center;
+}
+
+/* ---- 왼쪽 본문 ---------------------------------------------------------------- */
+
+.detail {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding-top: 5%;
+}
+
+.kind {
+  font: 700 clamp(7px, 0.62vw, 10px) var(--font-sans);
+  letter-spacing: 0.12em;
+  color: #8b7355;
+}
+
+.detail h2 {
+  margin: 6px 0 0;
+  font: 700 clamp(13px, 1.25vw, 20px)/1.4 var(--font-serif-kr);
+  color: #2f2620;
+  word-break: keep-all;
+}
+
+.facts {
+  display: grid;
+  gap: 6px;
+  margin: 5% 0 0;
+  padding: 4% 0;
+  border-top: 1px solid rgba(94, 74, 51, 0.2);
+  border-bottom: 1px solid rgba(94, 74, 51, 0.2);
+}
+
+.facts div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.facts dt {
+  font: clamp(7px, 0.6vw, 10px) var(--font-sans);
+  color: #8b7355;
+}
+
+.facts dd {
+  margin: 0;
+  font: 600 clamp(8px, 0.72vw, 12px) var(--font-serif-kr);
+  color: #44392f;
+}
+
+.summary {
+  margin: 5% 0 0;
+  font: clamp(8px, 0.74vw, 12px)/1.7 var(--font-serif-kr);
+  color: #5d4b38;
+  word-break: keep-all;
+}
+
+/* 왼쪽 안의 목록은 스스로 스크롤한다 — 기사가 다섯 개라 페이지를 밀어내지 않는다. */
+.related {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  margin-top: 6%;
+}
+
+.related h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+  font: 700 clamp(9px, 0.82vw, 13px) var(--font-serif-kr);
+  color: #3a2f26;
+}
+
+.related h3 b {
+  font: 600 clamp(8px, 0.68vw, 11px) var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #8b7355;
+}
+
+.related ul {
+  display: grid;
+  gap: 9px;
+  min-height: 0;
+  margin: 4% 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.related small {
+  display: block;
+  font: clamp(7px, 0.58vw, 10px) var(--font-sans);
+  color: #9b8567;
+}
+
+.related p {
+  margin: 2px 0 0;
+  font: clamp(8px, 0.7vw, 11px)/1.45 var(--font-serif-kr);
+  color: #5d4b38;
+  word-break: keep-all;
+}
+
+/* ---- 오른쪽 목록 -------------------------------------------------------------- */
+
+/* The one scrolling region in the book. `scrollbar-width: thin` rather than a hidden bar:
+   a list that can move should look like it can. */
+.list {
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+  flex: 1;
+  margin: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.list button {
+  display: block;
+  width: 100%;
+  padding: 3.5% 4%;
+  border: 1px solid rgba(94, 74, 51, 0.18);
+  border-radius: 4px;
+  background: rgba(255, 252, 244, 0.42);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.list button:hover {
+  border-color: rgba(94, 74, 51, 0.4);
+  background: rgba(255, 253, 248, 0.7);
+}
+
+.list button:focus-visible {
+  outline: 2px solid #182b43;
+  outline-offset: 2px;
+}
+
+.rowOn {
+  border-color: rgba(24, 43, 67, 0.55) !important;
+  background: rgba(238, 195, 118, 0.16) !important;
+}
+
+.list small {
+  display: block;
+  font: clamp(7px, 0.58vw, 10px) var(--font-sans);
+  color: #9b8567;
+}
+
+.list strong {
+  display: block;
+  margin-top: 3px;
+  font: 700 clamp(9px, 0.8vw, 13px)/1.42 var(--font-serif-kr);
+  color: #3a2f26;
+  word-break: keep-all;
+}
+
+.more {
+  flex: none;
+  min-height: 30px;
+  border: 1px solid rgba(94, 74, 51, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 252, 244, 0.5);
+  color: #5d4b38;
+  font: 600 clamp(8px, 0.68vw, 11px) var(--font-sans);
+  cursor: pointer;
+}
+
+.more:hover {
+  border-color: rgba(94, 74, 51, 0.5);
+  background: rgb(255, 253, 248);
+}
+
+/* ---- 알림 ---------------------------------------------------------------------- */
+
+/* 로그인 필요 · 비어 있음 · 실패가 같은 자리에 같은 모양으로 선다. */
+.notice {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  flex: 1;
+  margin: 0;
+  text-align: center;
+}
+
+.notice p {
+  margin: 0;
+  font: clamp(9px, 0.82vw, 13px)/1.6 var(--font-serif-kr);
+  color: #7b6650;
+}
+
+.noticeHint {
+  margin-top: 6px !important;
+  font-family: var(--font-sans) !important;
+  font-size: clamp(8px, 0.66vw, 11px) !important;
+  color: #a08b6d !important;
+}
+
+/* ---- 좁은 화면 ---------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .leftPage,
+  .rightPage {
+    position: relative;
+    inset: auto;
+    width: auto;
+    gap: 14px;
+  }
+
+  .related ul,
+  .list {
+    max-height: 320px;
+  }
+}
+
+/* 지금 보고 있는 것이 실제 북마크가 아님을 알린다. 표본을 진짜처럼 두면 나중에
+   "저장했는데 왜 목록이 그대로냐"로 돌아온다. */
+.sampleNote {
+  flex: none;
+  margin: 0;
+  font: clamp(7px, 0.6vw, 10px) var(--font-sans);
+  color: #a08b6d;
+  text-align: right;
+}
+
+/* 요약이 없을 때. 본문과 같은 자리지만 흐린 기울임으로, 기사 내용이 아니라 상태임을 알린다. */
+.summaryNone {
+  margin: 5% 0 0;
+  font: italic clamp(8px, 0.74vw, 12px)/1.6 var(--font-serif-kr);
+  color: #a08b6d;
+}
+
+/* 책 밖으로 나가는 유일한 링크. 버튼이 아니라 한 줄로 두어, 페이지를 떠나는 일이
+   곁길로 읽히게 한다. */
+.origin {
+  display: inline-block;
+  margin: auto 0 0;
+  padding-top: 6%;
+  font: 600 clamp(8px, 0.7vw, 11px) var(--font-sans);
+  color: #2e415b;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(46, 65, 91, 0.32);
+}
+
+.origin:hover {
+  color: #182b43;
+  text-decoration-color: currentColor;
+}
+
+.origin:focus-visible {
+  outline: 2px solid #182b43;
+  outline-offset: 3px;
+}

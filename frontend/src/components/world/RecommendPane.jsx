@@ -1,193 +1,284 @@
-import { Link } from 'react-router-dom';
-import { events } from '../../data/events';
-import { recommend } from '../../data/recommend';
-import styles from './RecommendPane.module.css';
+import { useEffect, useState } from 'react'
+import { fetchRecommendationBoard, fetchRecommendationDetail } from '../../api/recommendations'
+import {
+  BANNER_FRAME,
+  BOARD_FRAME,
+  BOARD_SIZE,
+  SLOTS,
+  boardCopy,
+  placement,
+  sampleBoard,
+  sampleDetail,
+} from '../../data/recommendBoard'
+import { topicName } from '../../data/topics'
+import { useDraggableCard } from '../../hooks/useDraggableCard'
+import styles from './RecommendPane.module.css'
 
-const BOARD = { width: 1446.576, height: 814 };
-const ASSET = '/assets/board/figma';
-
-const NOTES = [
-  {
-    paper: 'paper-1.png',
-    shadow: 'paper-1-shadow.png',
-    frame: { x: 43.87, y: 143.21, w: 354.922, h: 354.922 },
-    shadowFrame: { x: 39.34, y: 150.01, w: 354.922, h: 354.922 },
-    pin: { image: 'pin-yellow.png', cropHeight: '131.93%', frame: { x: 195.29, y: 138.97, w: 37.077, h: 28.02 } },
-  },
-  {
-    paper: 'paper-2.png',
-    shadow: 'paper-2-shadow.png',
-    frame: { x: 403.04, y: 342.75, w: 289.542, h: 289.542 },
-    shadowFrame: { x: 398.79, y: 398.23, w: 289.542, h: 239.728 },
-  },
-  {
-    paper: 'paper-3.png',
-    shadow: 'paper-3-shadow.png',
-    frame: { x: 48.12, y: 472.1, w: 393.981, h: 315.298 },
-    shadowFrame: { x: 42.45, y: 551.63, w: 393.981, h: 241.426 },
-  },
-  {
-    paper: 'paper-square.png',
-    shadow: 'paper-square-shadow.png',
-    frame: { x: 366.76, y: 100.76, w: 252.802, h: 252.802 },
-    shadowFrame: { x: 363.13, y: 105.8, w: 252.802, h: 252.802 },
-    pin: { image: 'pin-brass.png', cropHeight: '145.9%', frame: { x: 475.02, y: 114.43, w: 35.884, h: 24.595 } },
-  },
-  {
-    paper: 'paper-5.png',
-    shadow: 'paper-5-shadow.png',
-    frame: { x: 697.39, y: 161.33, w: 354.922, h: 354.922 },
-    shadowFrame: { x: 693.15, y: 168.12, w: 354.922, h: 354.922 },
-    pin: { image: 'pin-green.png', cropHeight: '132.77%', frame: { x: 857.3, y: 158.5, w: 44.719, h: 33.681 } },
-  },
-  {
-    paper: 'paper-square.png',
-    shadow: 'paper-square-shadow.png',
-    frame: { x: 1073.6, y: 83.78, w: 251.272, h: 251.272 },
-    shadowFrame: { x: 1068.73, y: 87.52, w: 251.272, h: 251.272 },
-    pin: { image: 'pin-red.png', cropHeight: '100%', frame: { x: 1183.92, y: 86.61, w: 40.191, h: 40.191 } },
-  },
-  {
-    paper: 'paper-7.png',
-    shadow: 'paper-7-shadow.png',
-    frame: { x: 1068.73, y: 338.79, w: 354.922, h: 354.922 },
-    shadowFrame: { x: 1063.92, y: 402.75, w: 354.922, h: 299.448 },
-  },
-  {
-    paper: 'paper-8.png',
-    shadow: 'paper-8-shadow.png',
-    frame: { x: 789.09, y: 495.02, w: 296.334, h: 296.334 },
-    shadowFrame: { x: 784.85, y: 502.1, w: 296.334, h: 296.334 },
-  },
-];
-
-const DECORATIONS = [
-  { image: 'tape.png', frame: { x: 619.56, y: 272.28, w: 116.609, h: 33.115 } },
-  { image: 'tape-short.png', frame: { x: 1025.13, y: 328.92, w: 120.588, h: 52.861 }, rotate: '10deg' },
-  { image: 'leaf.png', frame: { x: 423.42, y: 660.03, w: 88.306, h: 88.306 } },
-  { image: 'tape.png', frame: { x: 454.83, y: 704.18, w: 91.488, h: 37.146 }, rotate: '-7.89deg' },
-];
-
-const TITLES = [
-  {
-    image: 'title-pink.png',
-    frame: { x: 51.51, y: 48.68, w: 311.618, h: 103.873 },
-    fontSize: '20px',
-  },
-  {
-    image: 'title-blue.png',
-    frame: { x: 702.49, y: 40.47, w: 335.959, h: 112.081 },
-    fontSize: '25px',
-  },
-];
-
-function placement(frame) {
-  return {
-    left: `${(frame.x / BOARD.width) * 100}%`,
-    top: `${(frame.y / BOARD.height) * 100}%`,
-    width: `${(frame.w / BOARD.width) * 100}%`,
-    height: `${(frame.h / BOARD.height) * 100}%`,
-  };
-}
-
-function relativePlacement(frame, parent) {
-  return {
-    left: `${((frame.x - parent.x) / parent.w) * 100}%`,
-    top: `${((frame.y - parent.y) / parent.h) * 100}%`,
-    width: `${(frame.w / parent.w) * 100}%`,
-    height: `${(frame.h / parent.h) * 100}%`,
-  };
-}
+/**
+ * 나를 위한 추천 — 코르크 보드가 걸린 벽 사진 위에 글자를 쓴다.
+ *
+ * 사진은 이 컴포넌트가 그리지 않는다. <PhotoBackdrop> 이 화면 전체에 깔아 둔 것이
+ * 이 방이고(data/recommend.js 의 arrivalScene), 보드·종이·핀·테이프·낙서가 전부 그 안에
+ * 있다. 여기서 하는 일은 그 사진의 종이 자리(data/recommendBoard.js 의 SLOTS)에 추천
+ * 하나씩을 글자로 얹는 것뿐이다.
+ *
+ * 그러려면 이 층이 사진과 정확히 같은 사각형 위에 서야 한다. <PhotoBackdrop> 은 사진을
+ * `object-fit: cover; object-position: center bottom` 으로 깔므로, 여기 `.photoBox` 도 같은
+ * 규칙으로 크기를 잡는다 — 뷰포트를 덮는 최소 크기로 늘리고, 가로 가운데·세로 아래에 맞춘다.
+ * 그 위의 % 좌표는 사진 좌표와 1:1 이 된다.
+ *
+ * 추천은 한 회차가 통째로 온다(최대 10개). 카드를 누르면 요약과 기사를 담은 종이 한 장이
+ * 보드 위로 올라온다 — 다른 화면으로 가지 않는다. 열 장을 훑는 게 이 화면의 일이라,
+ * 하나를 보고 돌아올 때마다 판이 다시 그려지면 안 된다.
+ *
+ * 로그인이 필요하다. 비로그인(401)·회차 없음·실패는 오류가 아니라 상태다 — 종이를
+ * 비워두면 사진만 남아 화면이 뭘 하는 곳인지 알 수 없으니, 표본 카드를 걸고 표본임을
+ * 밝힌다. SAMPLE_WHEN_EMPTY 를 끄면 그 자리에 상태 문구만 선다.
+ */
+const SAMPLE_WHEN_EMPTY = true
 
 export function RecommendPane({ settled = true }) {
-  const visibleCards = recommend.cards.slice(0, NOTES.length);
+  const [board, setBoard] = useState(null)
+  const [state, setState] = useState('loading')
+  const [openId, setOpenId] = useState(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchRecommendationBoard({ signal: controller.signal })
+      .then((payload) => {
+        setBoard(payload)
+        setState('ready')
+      })
+      .catch((error) => {
+        if (error?.name === 'AbortError') return
+        setState(error?.status === 401 ? 'signedOut' : 'failed')
+      })
+    return () => controller.abort()
+  }, [])
+
+  const live = board?.items ?? []
+  const sample = SAMPLE_WHEN_EMPTY && state !== 'loading' && live.length === 0
+  const source = sample ? sampleBoard : board
+  const items = source?.items ?? []
+  const open = items.find((item) => item.userRecommendationId === openId) ?? null
+
+  // 상태 문구는 표본을 걸지 않을 때만 종이 자리를 대신한다.
+  const notice = !sample && state !== 'ready'
+    ? { loading: boardCopy.loading, signedOut: boardCopy.signedOut, failed: boardCopy.failed }[state]
+    : !sample && items.length === 0
+      ? boardCopy.empty
+      : null
+  const noticeHint = notice === boardCopy.signedOut
+    ? boardCopy.signedOutHint
+    : notice === boardCopy.empty
+      ? boardCopy.emptyHint
+      : null
 
   return (
-    <section className={styles.page} aria-label={recommend.title}>
-      <div className={`${styles.board} ${settled ? styles.boardIn : styles.boardWaiting}`}>
-        <img className={styles.boardBase} src={`${ASSET}/board.png`} alt="" draggable="false" />
+    <section
+      className={`${styles.stage} ${settled ? styles.stageIn : styles.stageWaiting}`}
+      aria-labelledby="recommend-board-title"
+    >
+      {/* <PhotoBackdrop> 의 .photoFramed 와 같은 변수 넷으로 같은 사각형을 만든다. */}
+      <div
+        className={styles.photoBox}
+        style={{
+          '--photo-w': BOARD_SIZE.width,
+          '--photo-h': BOARD_SIZE.height,
+          '--photo-focus-x': BOARD_FRAME.focusX ?? 0.5,
+          '--photo-focus-y': BOARD_FRAME.focusY ?? 0.5,
+          '--photo-zoom': BOARD_FRAME.zoom ?? 1,
+        }}
+      >
+        {/* 분홍 테이프 위 제목. 테이프는 사진에 있으니 글자만 놓는다. */}
+        <header className={styles.banner} style={placement(BANNER_FRAME)}>
+          <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
+          <h1 id="recommend-board-title">{boardCopy.title}</h1>
+          <p className={styles.cycle}>{cycleLine(source, sample)}</p>
+        </header>
 
-        {TITLES.map((title) => (
-          <div
-            key={title.image}
-            className={styles.titleTag}
-            style={{ ...placement(title.frame), '--title-size': title.fontSize }}
-            aria-hidden
-          >
-            <img src={`${ASSET}/${title.image}`} alt="" draggable="false" />
-            <span>나를 위한 추천</span>
-          </div>
-        ))}
-
-        <ul className={styles.notes}>
-          {visibleCards.map((card, index) => {
-            const event = events[card.eventId];
-            const note = NOTES[index];
-
+        <ol className={styles.slots} aria-label="추천 Event 열 장">
+          {SLOTS.map((slot, index) => {
+            const item = items[index]
             return (
-              <li key={card.eventId} className={`${styles.note} ${styles[`note${index + 1}`]}`} style={placement(note.frame)}>
-                <img
-                  className={styles.paperShadow}
-                  src={`${ASSET}/${note.shadow}`}
-                  style={relativePlacement(note.shadowFrame, note.frame)}
-                  alt=""
-                  draggable="false"
-                />
-                <img className={styles.paperImage} src={`${ASSET}/${note.paper}`} alt="" draggable="false" />
-
-                <Link className={styles.paperContent} to={`/event/${event.id}`} aria-label={`${event.title}. ${card.reason}`}>
-                  <h3 className={styles.noteTitle}>{event.title}</h3>
-                  <p className={styles.noteSummary}>{event.summary}</p>
-                  <p className={styles.reason}>
-                    <span className={styles.reasonKey}>{recommend.reasonLabel} · </span>
-                    {card.reason}
-                  </p>
-                  <span className={styles.noteFoot}>
-                    <span className={styles.noteTags}>{event.hashtags.slice(0, 2).join('  ')}</span>
-                    <span className={styles.noteGo} aria-hidden>자세히 →</span>
-                  </span>
-                </Link>
-
-                {note.pin && (
-                  <span
-                    className={styles.fastener}
-                    style={relativePlacement(note.pin.frame, note.frame)}
-                    aria-hidden
+              <li
+                key={slot.doodle}
+                className={styles.slot}
+                data-tone={slot.tone}
+                style={placement(slot.frame)}
+              >
+                {item ? (
+                  <button
+                    type="button"
+                    className={styles.card}
+                    aria-pressed={openId === item.userRecommendationId}
+                    aria-label={`${index + 1}위. ${boardCopy.open(item.label)}`}
+                    onClick={() =>
+                      setOpenId(openId === item.userRecommendationId ? null : item.userRecommendationId)
+                    }
                   >
-                    <img
-                      src={`${ASSET}/${note.pin.image}`}
-                      style={{ height: note.pin.cropHeight }}
-                      alt=""
-                      draggable="false"
-                    />
-                  </span>
+                    <span className={styles.cardHead}>
+                      <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
+                      <span className={styles.topic}>{topicName(item.topicCode)}</span>
+                    </span>
+                    <strong className={styles.label}>{item.label}</strong>
+                    {item.reason && <span className={styles.reason}>{item.reason}</span>}
+                  </button>
+                ) : (
+                  <span className={styles.blank} aria-hidden="true" />
                 )}
               </li>
-            );
+            )
           })}
-        </ul>
-
-        <div className={styles.decorations} aria-hidden>
-          {DECORATIONS.map((item, index) => (
-            <img
-              key={`${item.image}-${index}`}
-              className={styles.decoration}
-              src={`${ASSET}/${item.image}`}
-              style={{ ...placement(item.frame), '--decor-rotate': item.rotate ?? '0deg' }}
-              alt=""
-              draggable="false"
-            />
-          ))}
-        </div>
-
-        <img
-          className={styles.treeShadow}
-          src={`${ASSET}/tree-shadow.png`}
-          style={placement({ x: 16, y: 5, w: 1414.028, h: 795.886 })}
-          alt=""
-          draggable="false"
-        />
+        </ol>
       </div>
+
+      {/* 종이 밖의 것들은 사진 상자가 아니라 뷰포트에 붙인다 — 사진이 뷰포트보다 넓어져
+          양옆이 잘릴 때 함께 잘려 나가지 않도록. */}
+      {notice && (
+        <div className={styles.notice} role="status">
+          <p>{notice}</p>
+          {noticeHint && <p className={styles.noticeHint}>{noticeHint}</p>}
+        </div>
+      )}
+
+      {sample && <p className={styles.sampleNote}>{boardCopy.sampleNote}</p>}
+
+      {open && (
+        <DetailSheet
+          key={open.userRecommendationId}
+          item={open}
+          sample={sample}
+          onClose={() => setOpenId(null)}
+        />
+      )}
     </section>
-  );
+  )
+}
+
+/**
+ * 종이 한 장 위의 요약과 기사.
+ *
+ * userRecommendationId 로 키가 걸려 있어 다른 카드를 열면 새로 마운트된다 — 늦게 도착한
+ * 이전 카드의 응답이 이 카드 위에 앉는 일이 없다. 표본 모드에서는 요청을 보내지 않는다.
+ *
+ * `contextSummary` 가 null 인 것은 정상이다. 공개 시각까지 요약이 안 만들어지는 회차가
+ * 있어서, 그때는 "준비 중"이라고 말하고 기사만 보여준다.
+ */
+function DetailSheet({ item, sample, onClose }) {
+  const [detail, setDetail] = useState(sample ? sampleDetail(item) : null)
+  const [state, setState] = useState(sample ? 'ready' : 'loading')
+  const { cardRef, cardStyle, dragging, handleProps } = useDraggableCard()
+
+  useEffect(() => {
+    if (sample) return undefined
+    const controller = new AbortController()
+    fetchRecommendationDetail(item.userRecommendationId, { signal: controller.signal })
+      .then((payload) => {
+        setDetail(payload)
+        setState('ready')
+      })
+      .catch((error) => {
+        if (error?.name === 'AbortError') return
+        setState('failed')
+      })
+    return () => controller.abort()
+  }, [item.userRecommendationId, sample])
+
+  useEffect(() => {
+    const onKey = (event) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const articles = detail?.articles ?? []
+
+  return (
+    <aside
+      ref={cardRef}
+      className={styles.sheet}
+      style={cardStyle}
+      data-dragging={dragging}
+      aria-labelledby="recommend-sheet-title"
+    >
+      <button type="button" className={styles.sheetClose} aria-label={boardCopy.close} onClick={onClose}>
+        ×
+      </button>
+
+      <header className={styles.sheetHead} {...handleProps}>
+        <span className={styles.sheetKind}>
+          {String(item.rank).padStart(2, '0')} · {topicName(item.topicCode)}
+        </span>
+        <h2 id="recommend-sheet-title">{item.label}</h2>
+      </header>
+      {item.reason && (
+        <p className={styles.sheetReason}>
+          <b>{boardCopy.reasonLabel}</b> {item.reason}
+        </p>
+      )}
+
+      {state === 'loading' && <p className={styles.sheetNote}>{boardCopy.loading}</p>}
+      {state === 'failed' && <p className={styles.sheetNote}>{boardCopy.detailFailed}</p>}
+
+      {state === 'ready' && (
+        <>
+          {detail?.contextSummary ? (
+            <p className={styles.summary}>{detail.contextSummary}</p>
+          ) : (
+            <p className={styles.sheetNote}>{boardCopy.summaryPending}</p>
+          )}
+
+          <section className={styles.articles}>
+            <h3>
+              {boardCopy.articles}
+              <b>{articles.length}</b>
+            </h3>
+            {articles.length > 0 ? (
+              <ul>
+                {articles.map((article) => (
+                  <li key={article.articleId}>
+                    <small>
+                      {article.organizationName} · {formatDate(article.publishedAt)}
+                    </small>
+                    <p>{article.title}</p>
+                    {article.originalUrl && (
+                      <a href={article.originalUrl} target="_blank" rel="noreferrer">
+                        {boardCopy.origin} ↗
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.sheetNote}>{boardCopy.articlesEmpty}</p>
+            )}
+          </section>
+        </>
+      )}
+    </aside>
+  )
+}
+
+/** "아침 추천 · 06:00 공개". 표본이면 시각을 말하지 않는다 — 없는 회차의 시각은 거짓이다. */
+function cycleLine(source, sample) {
+  if (!source?.cycle) return ''
+  const cycle = boardCopy.cycle[source.cycle] ?? source.cycle
+  if (sample) return cycle
+  const time = formatTime(source.availableAt)
+  return time ? `${cycle} · ${boardCopy.availableAt(time)}` : cycle
+}
+
+/** `2026-09-17T06:00:00+09:00` → `06:00`. 서버 오프셋을 그대로 읽는다. */
+function formatTime(value) {
+  const match = /T(\d{2}):(\d{2})/.exec(value ?? '')
+  return match ? `${match[1]}:${match[2]}` : ''
+}
+
+/** ISO 든 `2026.09.10 08:55` 든, 월·일만 뽑는다. */
+function formatDate(value) {
+  const match = /^(\d{4})[-.](\d{2})[-.](\d{2})/.exec(value ?? '')
+  if (!match) return value ?? ''
+  return `${Number(match[2])}월 ${Number(match[3])}일`
 }

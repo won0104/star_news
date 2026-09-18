@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { backdrop, extraViews, navItems } from '../data/home'
 import { arrivalScene } from '../data/recommend'
+import { nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
 import { TopBar } from '../components/common/TopBar'
 import { ViewPane } from '../components/world/ViewPane'
@@ -17,6 +18,23 @@ const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
  * simply arrived on without one — which is every destination but 나를 위한 추천 today.
  */
 const ARRIVAL = { foryou: arrivalScene }
+const TREND_BACKDROP = { id: 'trend', src: nightfall.still, loop: null }
+const HISTORY_BACKDROP = {
+  id: 'history',
+  src: '/assets/history/history-desk-background.png',
+  loop: null,
+}
+
+/**
+ * 공용 햇살 방 대신 자기 사진을 바닥으로 쓰는 목적지. 오늘의 트렌드는 밤 창가, 나를 위한
+ * 추천은 코르크 보드가 걸린 벽, 나의 기록은 나무 책상 — 모두 화면이 그 사진 위에 직접
+ * 그려지므로, 사진이 다르면 화면이 어긋난다.
+ */
+const SCENE_BY_VIEW = {
+  trend: TREND_BACKDROP,
+  foryou: arrivalScene,
+  log: HISTORY_BACKDROP,
+}
 
 /**
  * /app — the sunlit room, the bar over it, and one of the bar's four destinations on top.
@@ -91,15 +109,22 @@ export function AppScene() {
   }
 
   const arriving = !walked && enteredFromHome
-  const scene = (arriving && ARRIVAL[view]) || backdrop
+  const scene = (arriving && ARRIVAL[view]) || SCENE_BY_VIEW[view] || backdrop
   const motion = SCREEN_TRANSITIONS && !reduceMotion && scene !== backdrop
   const [settled, setSettled] = useState(false)
   const onSettled = useCallback(() => setSettled(true), [])
 
   return (
-    <PhotoBackdrop key={scene.id} scene={scene} motion={motion} onSettled={onSettled}>
+    <PhotoBackdrop
+      key={scene.id}
+      scene={scene}
+      motion={motion}
+      hideScrollbar={view === 'trend'}
+      onSettled={onSettled}
+    >
       <TopBar
         activeId={view === 'foryou2' ? 'foryou' : view}
+        nightGlass={view === 'trend'}
         onSelect={open}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}

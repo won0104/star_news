@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,7 @@ public class HomeController {
 					description = "홈 데이터 조회 또는 조합 실패 (HOME_DATA_FETCH_FAILED)",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
+	@SecurityRequirements
 	@GetMapping
 	public ApiResponse<HomeResponse> getHome(
 			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId

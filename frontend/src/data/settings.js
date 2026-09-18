@@ -2,8 +2,14 @@
  * Copy for the settings overlay — Figma V3 / Overlay / Settings.
  *
  * Structure and wording are the Figma frames'; the palette and type are this project's
- * (tokens.css), which is why nothing here carries a colour. The four panes are the
- * frame's own rail order, and `interest` is what the top bar's 뉴스 관리 opens.
+ * (tokens.css), which is why nothing here carries a colour. One pane is left — 관심 관리,
+ * which is what the top bar's 뉴스 관리 opens.
+ *
+ * 뺀 것들: 계정 설정(이메일·비밀번호 변경)은 배포 API 에 회원 정보를 바꾸는 엔드포인트가
+ * 없어 목업으로만 서 있던 화면이었다. 화면 설정(테마·글자 크기·애니메이션)은 셋 중 둘이
+ * 저장만 되고 어디에도 적용되지 않았고, 애니메이션은 utils/motion.js 가 전역으로 끈 상태다.
+ * 관심 없음 관리는 자유 입력이라 API(분야 코드 목록)에 넣을 수 없어, 관심 관리 안의 두 번째
+ * 목록으로 합쳤다. 필요해지면 그때 다시 넣는다.
  */
 
 export const settingsCopy = {
@@ -15,181 +21,88 @@ export const settingsCopy = {
 };
 
 export const settingsPanes = [{
-  id: 'account',
-  label: '계정 설정'
-}, {
   id: 'interest',
   label: '관심 관리'
 }, {
-  id: 'dislikes',
-  label: '관심 없음 관리'
-}, {
-  id: 'display',
-  label: '화면 설정'
+  id: 'account',
+  label: '계정'
 }];
 
 /**
- * 계정 설정 — Figma V3 / Overlay / Settings / Account.
+ * 계정 — 지금은 "누구로 로그인했는가"와 회원 탈퇴, 둘뿐이다.
  *
- * Only the two changes that were asked for. No eyebrow: the Interest frame has one and
- * the Dislikes frame does not, so it is per-pane, and this frame's own header has not
- * been read. Better absent than invented.
+ * 이메일·비밀번호 변경은 API 에 없어 여기 없다. 탈퇴는 `DELETE /users/me` 가 비밀번호
+ * 재확인을 요구하므로, 버튼을 누르면 그 자리에 비밀번호 칸이 펼쳐지고 한 번 더 누르게 한다.
+ * 되돌릴 수 없는 일이라 두 단계로 나눈 것이고, 두 번째 버튼 문구는 첫 번째와 다르게 써서
+ * "같은 버튼을 두 번 눌렀다"가 아니라 "확인했다"로 읽히게 한다.
  */
 export const accountPane = {
-  title: '계정 설정',
-  blurb: '로그인에 쓰는 이메일과 비밀번호를 바꿉니다.',
+  eyebrow: 'ACCOUNT',
+  title: '계정',
+  blurb: '로그인한 계정을 확인하고, 필요하면 탈퇴합니다.',
 
-  emailLabel: '이메일 변경',
-  emailHint: '브리핑과 계정 알림을 받을 주소입니다',
-  emailField: '새 이메일',
-  emailPlaceholder: 'you@example.com',
-  emailSubmit: '이메일 변경',
-  emailDone: '이메일을 변경했습니다.',
+  whoLabel: '로그인한 계정',
+  idLabel: '아이디',
+  nicknameLabel: '닉네임',
 
-  passwordLabel: '비밀번호 변경',
-  passwordHint: '8자 이상으로 정합니다',
-  currentField: '현재 비밀번호',
-  currentPlaceholder: '현재 비밀번호를 입력하세요',
-  nextField: '새 비밀번호',
-  nextPlaceholder: '8자 이상 입력하세요',
-  confirmField: '새 비밀번호 확인',
-  confirmPlaceholder: '새 비밀번호를 다시 입력하세요',
-  passwordSubmit: '비밀번호 변경',
-  passwordDone: '비밀번호를 변경했습니다.',
-  currentRequired: '현재 비밀번호를 입력해 주세요.',
-  sameAsCurrent: '현재 비밀번호와 다른 비밀번호를 입력해 주세요.',
-  failed: '변경에 실패했습니다. 잠시 후 다시 시도해 주세요.'
-};
-
-/** 관심 관리 — Figma V3 / Overlay / Settings / Interest. */
-export const interestPane = {
-  eyebrow: 'PREFERENCES · INTEREST',
-  title: '관심 관리',
-  blurb: '관심 토픽은 추천의 범위를, 관심 노드는 그래프에서 이어볼 키워드를 정합니다.',
-
-  topicsLabel: '관심 토픽',
-  topicsHint: '추천 후보를 넓히는 분야입니다',
-  topicsCount: (n) => `${n}개 선택`,
-  topics: [{
-    id: 'politics',
-    label: '정치',
-    scope: '정부 · 국회 · 정당 · 외교 · 국방'
-  }, {
-    id: 'economy',
-    label: '경제',
-    scope: '금융 · 산업 · 부동산 · 고용 · 물가'
-  }, {
-    id: 'society',
-    label: '사회',
-    scope: '사건사고 · 교육 · 노동 · 복지'
-  }, {
-    id: 'culture',
-    label: '문화',
-    scope: '공연 · 전시 · 도서 · 라이프스타일'
-  }, {
-    id: 'world',
-    label: '국제',
-    scope: '외교 · 글로벌 이슈 · 해외 정세'
-  }, {
-    id: 'region',
-    label: '지역',
-    scope: '지자체 · 지역개발 · 교통 · 행정'
-  }, {
-    id: 'sports',
-    label: '스포츠',
-    scope: '프로스포츠 · 국가대표 · 리그'
-  }, {
-    id: 'tech',
-    label: 'IT · 과학',
-    scope: '정보기술 · AI · 플랫폼 · 우주'
-  }],
-
-  nodesLabel: '관심 노드',
-  nodesHint: '그래프에서 이어볼 키워드입니다',
-  nodesCount: (n) => `${n}개 등록`,
-  nodePlaceholder: '인물 · 기업 · 기관 · 개념을 입력하세요',
-  nodeAdd: '추가',
-  suggestedLabel: '읽은 기사에서 추출됨',
-  suggested: ['기준금리', '국정조사특위', '생성형 AI', '항만 물류'],
-  nodeRemove: '관심 노드에서 제거',
-  /** Reads as "읽은 기사 12건 · 연결 개념 8" under each node. */
-  nodeMeta: (articles, concepts) => `읽은 기사 ${articles}건 · 연결 개념 ${concepts}`
+  withdrawLabel: '회원 탈퇴',
+  withdrawHint: '되돌릴 수 없습니다',
+  withdrawBlurb: [
+    '계정이 비활성화되고 즉시 로그아웃됩니다.',
+    '읽은 기록, 북마크, 관심 분야 설정에 더 이상 접근할 수 없습니다.',
+    '같은 아이디로는 다시 가입할 수 없습니다.'
+  ],
+  withdrawOpen: '회원 탈퇴',
+  withdrawCancel: '취소',
+  passwordLabel: '비밀번호 확인',
+  passwordPlaceholder: '현재 비밀번호를 입력하세요',
+  passwordRequired: '비밀번호를 입력해 주세요.',
+  withdrawConfirm: '탈퇴하기',
+  withdrawing: '탈퇴 처리 중…',
+  wrongPassword: '비밀번호가 맞지 않아요.',
+  alreadyDeleted: '이미 탈퇴한 계정이에요. 로그아웃합니다.',
+  sessionExpired: '로그인이 만료됐어요. 다시 로그인한 뒤 시도해 주세요.',
+  failed: '탈퇴하지 못했어요. 잠시 뒤 다시 시도해 주세요.',
+  done: '탈퇴가 완료됐어요. 첫 화면으로 돌아갑니다.'
 };
 
 /**
- * Node kinds carry the graph view's own dot colours (--entity-color and friends), so a
- * keyword kept here is the same colour when you meet it again on /explore.
- */
-export const nodeKinds = {
-  organisation: {
-    label: '기관',
-    tone: 'entity'
-  },
-  concept: {
-    label: '개념',
-    tone: 'topic'
-  },
-  company: {
-    label: '기업',
-    tone: 'story'
-  }
-};
-
-/**
- * 화면 설정 — Figma V3 / Overlay / Settings / Display.
+ * 관심 관리 — 관심 분야와 관심 없는 분야, 둘 다 백엔드 TopicCode 일곱 개 중에서 고른다.
  *
- * Three controls. Only the last one is connected to anything: see the note on each.
+ * 분야 목록은 data/topics.js 의 TOPICS 를 그대로 쓴다(코드가 API 와 같아야 저장이 된다).
+ * 예전의 "관심 노드"(자유 입력 키워드)와 자유 입력 비관심은 뺐다 — 서버가 받는 것은 분야
+ * 코드 목록뿐이고, 노드 관심은 그래프에서 별을 즐겨찾기하는 것(PATCH /bookmarks/nodes)으로
+ * 이미 대신한다.
  */
-export const displayPane = {
-  eyebrow: 'PREFERENCES · DISPLAY',
-  title: '화면 설정',
-  blurb: '보기 편한 쪽으로 화면을 맞춥니다.',
+export const interestPane = {
+  eyebrow: 'PREFERENCES · TOPICS',
+  title: '관심 관리',
+  blurb: '관심 분야는 추천을 넓히고, 관심 없는 분야는 추천에서 덜 보이게 합니다. 바꾸는 즉시 저장됩니다.',
 
-  themeLabel: '화면 테마',
-  themeHint: '방의 밝기를 정합니다',
-  themes: [{
-    id: 'light',
-    label: '밝게'
-  }, {
-    id: 'dark',
-    label: '어둡게'
-  }],
-  themePending: '어두운 팔레트가 아직 없어 선택만 저장됩니다.',
+  interestsLabel: '관심 분야',
+  interestsHint: '추천 후보를 넓히는 분야입니다',
+  dislikesLabel: '관심 없는 분야',
+  dislikesHint: '추천에서 덜 보고 싶은 분야입니다',
+  count: (n) => `${n}개 선택`,
 
-  textSizeLabel: '글자 크기',
-  textSizeHint: '본문과 카드 글자에 적용됩니다',
-  textSizes: [{
-    id: 'default',
-    label: '보통'
-  }, {
-    id: 'large',
-    label: '크게'
-  }],
-  textSizePending: '화면들이 아직 고정 px로 짜여 있어 선택만 저장됩니다.',
+  /** 같은 분야를 양쪽에 동시에 둘 수 없다. 한쪽을 켜면 다른 쪽에서는 내려온다. */
+  exclusive: '관심 분야와 관심 없는 분야는 겹칠 수 없어요. 한쪽을 켜면 다른 쪽에서 빠집니다.',
 
-  motionLabel: '애니메이션 없애기',
-  motionHint: '배경 영상을 재생하지 않습니다. OS의 “동작 줄이기”가 켜져 있으면 이 설정과 무관하게 이미 멈춰 있습니다.',
-  motionState: (off) => (off ? '켜짐' : '꺼짐')
-};
+  loading: '설정을 불러오는 중…',
+  signedOut: '로그인하면 관심 분야를 설정할 수 있어요.',
+  failed: '설정을 불러오지 못했어요. 잠시 뒤 다시 열어주세요.',
+  saving: '저장 중…',
+  saved: '저장됨',
+  saveFailed: '저장하지 못해 이전 상태로 되돌렸어요.',
 
-/** 관심 없음 관리 — Figma V3 / Overlay / Settings / Dislikes. */
-export const dislikesPane = {
-  title: '관심 없음 관리',
-  blurb: '추천에서 덜 보고 싶은 분야와 주제를 관리합니다.',
-
-  addLabel: '관심 없음 항목 추가',
-  addPlaceholder: '분야 또는 주제를 입력하세요',
-  addSubmit: '추가',
-
-  listLabel: '등록된 항목',
-  listCount: (n) => `${n}개`,
-  listEmpty: '등록된 항목이 없습니다.',
-  itemNote: '추천 후보에서 제외 예정',
-  itemRemove: '목록에서 제거',
-
-  /** Two lines in the frame, kept as two so the box breaks where it does there. */
-  notice: [
-    '추가하거나 제거한 내용은 저장 후 추천에 반영됩니다.',
-    '읽지 않았다는 이유만으로 자동 등록되지 않습니다.'
-  ]
+  /** 분야 아래 한 줄 — 어디까지가 이 분야인지. 코드 순서는 TOPICS 와 같다. */
+  scope: {
+    POLITICS: '정부 · 국회 · 정당 · 외교 · 국방',
+    ECONOMY: '금융 · 산업 · 부동산 · 고용 · 물가',
+    SOCIETY: '사건사고 · 교육 · 노동 · 복지',
+    CULTURE: '공연 · 전시 · 도서 · 라이프스타일',
+    INTERNATIONAL: '외교 · 글로벌 이슈 · 해외 정세',
+    SPORTS: '프로스포츠 · 국가대표 · 리그',
+    IT_SCIENCE: '정보기술 · AI · 플랫폼 · 우주'
+  }
 };

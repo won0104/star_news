@@ -194,3 +194,108 @@
     width: 100%;
   }
 }
+
+/* Desktop screens use their horizontal room for the translucent rail and leave the
+   photograph's top edge unobstructed. Its fluid width keeps a 1024px laptop useful while
+   preserving the roomier 208px treatment on larger monitors. */
+@media (min-width: 1024px) {
+  .bar {
+    inset: 0 auto 0 0;
+    width: var(--desktop-nav-width);
+    height: 100dvh;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 24px 18px 20px;
+    border-right: 1px solid var(--topbar-border);
+    border-bottom: 0;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(14px);
+    box-shadow: 10px 0 30px rgba(43, 33, 22, 0.12);
+  }
+
+  .brand {
+    justify-content: flex-start;
+    padding: 10px 12px;
+  }
+
+  .brandName {
+    font-size: 20px;
+  }
+
+  .nav {
+    width: 100%;
+    flex: none;
+    flex-direction: column;
+    align-items: stretch;
+    margin: 28px 0 0;
+    overflow: visible;
+  }
+
+  .navRule {
+    width: auto;
+    height: 1px;
+    margin: 4px 12px;
+  }
+
+  .navItem {
+    width: 100%;
+    padding: 12px 14px;
+    text-align: left;
+  }
+
+  .spacer {
+    display: block;
+    flex: 1;
+  }
+
+  .auth {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .signIn,
+  .signUp {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* The trend scene needs its own night glass. A pale veil left the brown navigation
+   labels dependent on whichever part of the photograph happened to sit behind them;
+   this smoky layer keeps the room visible while giving every label a stable, warm
+   foreground. The custom properties are scoped here so the daytime screens retain the
+   paper treatment and ink colours above. */
+.nightGlass {
+  --nav-ink: rgba(246, 236, 215, 0.76);
+  --nav-ink-active: rgba(255, 247, 231, 0.96);
+  --topbar-border: rgba(232, 199, 128, 0.2);
+  background: linear-gradient(180deg, rgba(9, 15, 27, 0.58), rgba(24, 18, 17, 0.5));
+  backdrop-filter: blur(14px) saturate(0.82);
+  box-shadow: var(--topbar-shadow);
+}
+
+.nightGlass .navRule {
+  background: rgba(232, 199, 128, 0.22);
+}
+
+.nightGlass .navItem:hover,
+.nightGlass .signIn:hover {
+  background: rgba(232, 199, 128, 0.1);
+}
+
+.nightGlass .navItemActive,
+.nightGlass .navItemActive:hover,
+.nightGlass .signUp {
+  background: linear-gradient(110deg, rgba(10, 13, 20, 0.9), rgba(25, 24, 24, 0.84));
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 199, 128, 0.26),
+    var(--pill-dark-shadow);
+}
+
+@media (min-width: 1024px) {
+  .nightGlass {
+    box-shadow: 10px 0 30px rgba(3, 7, 15, 0.2);
+  }
+}

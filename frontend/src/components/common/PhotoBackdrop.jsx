@@ -34,6 +34,7 @@ export function PhotoBackdrop({
   scene = backdrop,
   motion = false,
   veil = false,
+  hideScrollbar = false,
   onSettled,
   children,
 }) {
@@ -47,12 +48,28 @@ export function PhotoBackdrop({
   }, [plays, onSettled]);
 
   return (
-    <div className={styles.root}>
+    <div className={`${styles.root} ${hideScrollbar ? styles.scrollbarHidden : ''}`}>
       <div className={styles.wash} aria-hidden>
+        {/*
+          `scene.frame` 이 있으면 cover 대신 그 규칙으로 건다: 사진을 zoom 배 키우고 focusY
+          지점을 화면 세로 가운데에 맞춘다. 위에 그려지는 화면이 같은 값으로 같은 사각형을
+          계산할 수 있게, 계산은 CSS 변수 넷으로만 한다 (PhotoBackdrop.module.css .photoFramed).
+        */}
         <img
-          className={`${styles.photo} ${ready ? styles.photoReady : ''}`}
+          className={`${styles.photo} ${scene.frame ? styles.photoFramed : ''} ${ready ? styles.photoReady : ''}`}
           src={scene.src}
           alt=""
+          style={
+            scene.frame
+              ? {
+                  '--frame-w': scene.frame.width,
+                  '--frame-h': scene.frame.height,
+                  '--frame-focus-x': scene.frame.focusX ?? 0.5,
+                  '--frame-focus-y': scene.frame.focusY ?? 0.5,
+                  '--frame-zoom': scene.frame.zoom ?? 1,
+                }
+              : undefined
+          }
           onLoad={() => setReady(true)}
         />
         {plays && (

@@ -19,6 +19,7 @@ public record HomeResponse(
 		List<Item> trends
 ) {
 
+	@Schema(name = "HomeTrendItem", description = "오늘의 트렌드 항목")
 	public record Item(
 
 			@Schema(description = "개별 트렌드 항목 ID", example = "101")
