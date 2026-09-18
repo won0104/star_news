@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.starlightnews.backend.domain.graph.support.ArticleCursor;
 import com.starlightnews.backend.domain.graph.support.ArticleRelation;
+import com.starlightnews.backend.global.neo4j.Neo4jDateTimes;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 
@@ -29,19 +30,25 @@ public class Neo4jRelatedArticleRepository implements RelatedArticleRepository {
 			RETURN count(DISTINCT a.mysqlArticleId) AS total
 			""";
 
-	private static final String FIRST_PAGE_CYPHER = """
-			MATCH (a:Article)-[:%s]->(n {nodeId: $nodeKey})
+	/**
+	 * 기사 ID 와 발행 시각. 발행 시각은 정렬·커서 비교 전에 ZONED DATETIME 으로 맞춘다.
+	 * 관계 타입 자리({@code %1$s})는 호출 시 채운다.
+	 */
+	private static final String REFS_CYPHER = """
+			MATCH (a:Article)-[:%1$s]->(n {nodeId: $nodeKey})
 			WHERE $label IN labels(n)
-			WITH DISTINCT a.mysqlArticleId AS articleId, a.publishedAt AS publishedAt
+			WITH DISTINCT a.mysqlArticleId AS articleId, """ + Neo4jDateTimes.normalize("a.publishedAt") + """
+			 AS publishedAt
+			""";
+
+	private static final String FIRST_PAGE_CYPHER = REFS_CYPHER + """
 			RETURN articleId, publishedAt
 			ORDER BY publishedAt DESC, articleId DESC
 			LIMIT $limit
 			""";
 
-	private static final String NEXT_PAGE_CYPHER = """
-			MATCH (a:Article)-[:%s]->(n {nodeId: $nodeKey})
-			WHERE $label IN labels(n)
-			WITH DISTINCT a.mysqlArticleId AS articleId, a.publishedAt AS publishedAt
+	private static final String NEXT_PAGE_CYPHER = REFS_CYPHER + """
+			WITH articleId, publishedAt
 			WHERE publishedAt < $cursorPublishedAt
 			   OR (publishedAt = $cursorPublishedAt AND articleId < $cursorArticleId)
 			RETURN articleId, publishedAt
@@ -94,7 +101,7 @@ public class Neo4jRelatedArticleRepository implements RelatedArticleRepository {
 				.fetchAs(RelatedArticleRef.class)
 				.mappedBy((typeSystem, record) -> new RelatedArticleRef(
 						record.get("articleId").asLong(),
-						record.get("publishedAt").asZonedDateTime().toOffsetDateTime()))
+						Neo4jDateTimes.toOffsetDateTime(record.get("publishedAt"))))
 				.all()
 				.stream()
 				.toList();
