@@ -1,5 +1,6 @@
 package com.starlightnews.backend.domain.recommendation.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import com.starlightnews.backend.domain.recommendation.repository.UserRecommendationRepository;
@@ -24,7 +25,7 @@ class RecommendationRetentionServiceTest {
 
 	private RecommendationRetentionService service(int retentionDays) {
 		return new RecommendationRetentionService(repository,
-				new RecommendationProperties(retentionDays, 100, 10));
+				new RecommendationProperties(retentionDays, 100, 10, 3, Duration.ZERO));
 	}
 
 	private LocalDateTime capturedThreshold() {

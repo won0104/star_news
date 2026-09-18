@@ -27,6 +27,14 @@ public record RecommendationBatchResult(
 				failedUsers);
 	}
 
+	public RecommendationBatchResult plus(RecommendationBatchResult other) {
+		return new RecommendationBatchResult(
+				storedUsers + other.storedUsers(),
+				storedItems + other.storedItems(),
+				skippedItems + other.skippedItems(),
+				failedUsers + other.failedUsers());
+	}
+
 	public RecommendationBatchResult plusFailed(int userCount) {
 		return new RecommendationBatchResult(storedUsers, storedItems, skippedItems,
 				failedUsers + userCount);

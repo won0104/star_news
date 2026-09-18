@@ -65,7 +65,7 @@ class RecommendationControllerTest {
 				List.of(new RecommendationBoardResponse.Item(10241L,
 						"00000020-0920-4000-8000-000000000001", "한국은행 1월 기준금리 동결",
 						TopicCode.ECONOMY, new BigDecimal("0.920000"), (short) 1,
-						RecommendationType.INTEREST_BASED, "관심 Story 에서 아직 접하지 않은 사건입니다.")));
+						RecommendationType.NORMAL)));
 	}
 
 	@Test
@@ -80,7 +80,17 @@ class RecommendationControllerTest {
 				.andExpect(jsonPath("$.data.items[0].label").value("한국은행 1월 기준금리 동결"))
 				.andExpect(jsonPath("$.data.items[0].topicCode").value("ECONOMY"))
 				.andExpect(jsonPath("$.data.items[0].rank").value(1))
-				.andExpect(jsonPath("$.data.items[0].recommendationType").value("INTEREST_BASED"));
+				.andExpect(jsonPath("$.data.items[0].recommendationType").value("NORMAL"));
+	}
+
+	@Test
+	void 응답에_추천_이유가_없다() throws Exception {
+		// FastAPI 가 추천 이유를 더 이상 보내지 않는다. 늘 비어 있는 필드를 내려보내지 않는다.
+		given(recommendationBoardService.getBoard(USER_ID)).willReturn(board());
+
+		mockMvc.perform(get(PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.items[0].reason").doesNotExist());
 	}
 
 	@Test

@@ -31,7 +31,7 @@ public record RecommendationCalculateResponse(Data data) {
 	 *
 	 * @param label              Event 화면 표시 이름. {@code recommendation_events.title} 로 저장한다
 	 * @param topicCode          Event 의 대표 Topic
-	 * @param recommendationType {@code INTEREST_BASED} 또는 {@code KNOWLEDGE_GAP}
+	 * @param recommendationType {@code NORMAL} 또는 {@code COLD_START}
 	 */
 	public record Item(
 			String eventId,
@@ -39,8 +39,7 @@ public record RecommendationCalculateResponse(Data data) {
 			String topicCode,
 			BigDecimal score,
 			Short rank,
-			String recommendationType,
-			String reason
+			String recommendationType
 	) {
 	}
 
