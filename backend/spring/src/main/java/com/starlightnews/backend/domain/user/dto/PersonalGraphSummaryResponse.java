@@ -14,11 +14,14 @@ public record PersonalGraphSummaryResponse(
 		@Schema(description = "스냅샷 생성 시각", example = "2026-09-11T17:30:00+09:00")
 		OffsetDateTime generatedAt,
 
+		@Schema(description = "모든 Topic Cluster 와 각 Topic 의 대표 개인 Node 목록. 개인 Node 가 없어도 Topic Cluster 는 포함된다")
 		List<Node> nodes,
 
+		@Schema(description = "Topic Cluster·대표 개인 Node 사이의 관계. 개인 Node 가 없으면 빈 배열")
 		List<Edge> edges
 ) {
 
+	@Schema(name = "PersonalGraphSummaryNode")
 	public record Node(
 
 			@Schema(description = "그래프 내 Node 식별자. Cluster 는 topic:{topicCode}, Node 는 nodeType:nodeKey",
@@ -51,6 +54,7 @@ public record PersonalGraphSummaryResponse(
 	) {
 	}
 
+	@Schema(name = "PersonalGraphSummaryEdge")
 	public record Edge(
 
 			@Schema(description = "출발 Node id", example = "topic:ECONOMY")

@@ -19,6 +19,7 @@ public record ArticleHistoryResponse(
 		String nextCursor
 ) {
 
+	@Schema(name = "ArticleHistoryItem")
 	public record Item(
 
 			@Schema(description = "MySQL Article PK", example = "930001")
