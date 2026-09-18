@@ -134,6 +134,59 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	@Query("SELECT a FROM Article a JOIN FETCH a.organization WHERE a.articleId IN :articleIds")
 	List<Article> findAllWithOrganizationByArticleIdIn(@Param("articleIds") Collection<Long> articleIds);
 
+	/**
+	 * AI 분석 결과를 반영한다.
+	 *
+	 * <p>분석 대기(PROCESSING) 중인 기사만 바꾼다. 그사이 다른 경로가 상태를 바꿨으면 덮어쓰지 않는다.
+	 *
+	 * @return 바뀐 행 수. 0 이면 이미 분석 대기가 아니었다
+	 */
+	@Modifying
+	@Query("UPDATE Article a SET a.nodeId = :nodeId, a.topicCode = :topicCode, "
+			+ "a.subtopicCode = :subtopicCode, "
+			+ "a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.COMPLETED "
+			+ "WHERE a.articleId = :articleId "
+			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
+	int markAnalyzed(@Param("articleId") Long articleId,
+			@Param("nodeId") String nodeId,
+			@Param("topicCode") String topicCode,
+			@Param("subtopicCode") String subtopicCode);
+
+	/**
+	 * 분석할 수 없는 기사로 표시한다. 다시 불러도 같은 결과라 분석 대상에서 뺀다.
+	 *
+	 * @return 바뀐 행 수. 0 이면 이미 분석 대기가 아니었다
+	 */
+	@Modifying
+	@Query("UPDATE Article a "
+			+ "SET a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.DROPPED "
+			+ "WHERE a.articleId = :articleId "
+			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
+	int markAnalysisRejected(@Param("articleId") Long articleId);
+
+	/**
+	 * 일시 실패를 한 번 센다. 한도에 닿으면 FAILED 로 두어 더 부르지 않는다.
+	 *
+	 * <p><b>상태를 먼저 대입해야 한다.</b> MySQL 은 SET 을 왼쪽부터 평가하고 앞에서 바꾼 값을 뒤에서
+	 * 그대로 본다. 횟수를 먼저 올리면 뒤의 비교가 이미 올라간 값에 다시 1 을 더해, 한도보다 한 번
+	 * 일찍 FAILED 가 된다.
+	 *
+	 * @return 바뀐 행 수. 0 이면 이미 분석 대기가 아니었다
+	 */
+	@Modifying
+	@Query("UPDATE Article a "
+			+ "SET a.analysisStatus = CASE WHEN a.analysisAttempts + 1 >= :maxAttempts "
+			+ "        THEN com.starlightnews.backend.global.enums.AnalysisStatus.FAILED "
+			+ "        ELSE com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING END, "
+			+ "    a.analysisAttempts = a.analysisAttempts + 1 "
+			+ "WHERE a.articleId = :articleId "
+			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
+	int recordAnalysisFailure(@Param("articleId") Long articleId, @Param("maxAttempts") int maxAttempts);
+
+	/** 기사의 현재 분석 상태. */
+	@Query("SELECT a.analysisStatus FROM Article a WHERE a.articleId = :articleId")
+	Optional<AnalysisStatus> findAnalysisStatus(@Param("articleId") Long articleId);
+
 	/** 주어진 ID 중 지정한 분석 상태의 기사 ID만 반환한다. */
 	@Query("SELECT a.articleId FROM Article a "
 			+ "WHERE a.articleId IN :articleIds AND a.analysisStatus = :analysisStatus")
