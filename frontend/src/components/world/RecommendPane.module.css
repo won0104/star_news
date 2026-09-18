@@ -1,12 +1,12 @@
 /*
- * 나를 위한 추천 — 벽 사진 위에 글자를 쓴다.
+ * 나를 위한 추천 — 빈 코르크 보드 위에 종이·핀·글자를 함께 건다.
  *
  * 사진은 <PhotoBackdrop> 이 화면 전체에 `object-fit: cover; object-position: center bottom`
  * 으로 깐다. 이 층은 그 사진과 같은 사각형을 다시 계산해(.photoBox) 그 안에 % 좌표로
- * 글자를 놓는다 — 그래서 뷰포트가 어떤 비율이어도 글자가 사진의 종이 위에 머무른다.
+ * 카드 에셋을 놓는다 — 그래서 뷰포트가 어떤 비율이어도 종이와 글자가 함께 움직인다.
  *
- * 종이·핀·테이프·낙서는 전부 사진 안에 있다. 여기서 그리는 것은 글자, 마우스를 올렸을 때의
- * 얇은 테두리, 카드를 눌렀을 때 올라오는 종이 한 장이 전부다.
+ * 배경은 빈 보드뿐이다. 제목 종이와 추천 종이, 핀은 투명 PNG 에셋이고 추천 button 안에
+ * 들어가므로 종이 전체가 클릭 영역이다. 카드가 없는 슬롯에는 아무것도 남지 않는다.
  *
  * 글자 크기는 cqw — .photoBox(사진 너비)의 백분율. 사진이 커지고 작아져도 글자가 종이 안에
  * 같은 비율로 남는다. 종이 밖의 것(요약 종이·상태 문구·표본 표시)은 .stage(뷰포트)를 기준으로
@@ -71,6 +71,15 @@
   }
 }
 
+/* 4:3에 가까운 데스크톱에서 배경 cover 크기를 그대로 따르면 열 장 중 양끝이 잘린다.
+   빈 보드에는 카드 자국이 없으므로 이 오버레이만 내용 열에 맞춰 한 단계 축소해, 왼쪽
+   내비게이션은 유지하면서도 첫째·열째 카드까지 모두 보이게 한다. */
+@media (min-width: 1024px) and (max-aspect-ratio: 3/2) {
+  .photoBox {
+    width: calc((100% - var(--desktop-nav-width)) * 1.42);
+  }
+}
+
 .photoBox > * {
   pointer-events: auto;
 }
@@ -80,13 +89,34 @@
 .banner {
   position: absolute;
   z-index: 3;
+  isolation: isolate;
+  overflow: visible;
+  pointer-events: none !important;
+}
+
+/* 원본 PNG는 제목 종이 주변에 넓은 투명 여백이 있다. 세로로 크게 놓아 실제 종이 부분만
+   BANNER_FRAME 안에 들어오게 하되, 원본은 자르지 않아 가장자리 질감을 그대로 보존한다. */
+.bannerPaper {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: 105%;
+  height: 322%;
+  object-fit: fill;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 6px 8px rgb(76 43 20 / 0.2));
+}
+
+.bannerCopy {
+  position: absolute;
+  inset: 0;
   display: grid;
   align-content: center;
   justify-items: center;
   gap: 0.15cqw;
   padding: 0 4%;
   text-align: center;
-  pointer-events: none !important;
 }
 
 .eyebrow {
@@ -103,7 +133,6 @@
 }
 
 .cycle {
-  margin: 0;
   min-height: 1em;
   font: 500 0.62cqw var(--font-sans);
   color: #8a6f5c;
@@ -124,45 +153,103 @@
 .slot {
   position: absolute;
   --tone-rgb: 214 133 150;
+  --pin-hue: 0deg;
+  --pin-saturation: 1;
+  --pin-brightness: 1;
 }
 
-.slot[data-tone='rose'] { --tone-rgb: 222 128 150; }
-.slot[data-tone='sky'] { --tone-rgb: 120 168 224; }
-.slot[data-tone='mint'] { --tone-rgb: 108 178 140; }
-.slot[data-tone='sand'] { --tone-rgb: 218 168 84; }
-.slot[data-tone='lilac'] { --tone-rgb: 160 130 214; }
-.slot[data-tone='coral'] { --tone-rgb: 232 130 90; }
+.slot[data-tone='rose'] { --tone-rgb: 222 128 150; --pin-hue: 0deg; }
+.slot[data-tone='sky'] { --tone-rgb: 120 168 224; --pin-hue: 212deg; --pin-saturation: 0.9; }
+.slot[data-tone='mint'] { --tone-rgb: 108 178 140; --pin-hue: 126deg; --pin-saturation: 0.76; }
+.slot[data-tone='sand'] { --tone-rgb: 218 168 84; --pin-hue: 52deg; --pin-saturation: 0.9; --pin-brightness: 1.12; }
+.slot[data-tone='lilac'] { --tone-rgb: 160 130 214; --pin-hue: 276deg; --pin-saturation: 0.72; }
+.slot[data-tone='coral'] { --tone-rgb: 232 130 90; --pin-hue: 20deg; --pin-saturation: 0.9; --pin-brightness: 1.06; }
 
-/* 종이 위에는 이제 핀만 남았다(위 가장자리 ~7%). 글자는 그 바로 아래, 13% 에서 시작한다. */
+/* button이 종이 전체를 감싼다. 종이·핀은 장식이고 .cardCopy만 실제 텍스트 흐름이다. */
 .card {
   position: absolute;
-  inset: 13% 7% 7%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4cqw;
-  padding: 0.45cqw 0.5cqw;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  inset: 0;
+  display: block;
+  padding: 0;
+  border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
   pointer-events: auto;
-  transition: border-color 140ms ease, background 140ms ease, transform 170ms ease;
+  transition: transform 170ms ease;
+}
+
+.cardPaper {
+  position: absolute;
+  z-index: 0;
+  top: -5%;
+  left: -7%;
+  width: 114%;
+  height: 110%;
+  object-fit: fill;
+  pointer-events: none;
+  filter: drop-shadow(0 7px 7px rgb(72 43 24 / 0.2));
+  transition: filter 170ms ease, transform 170ms ease;
+}
+
+/* 원본 핀은 정사각 투명 캔버스 중앙 1/3에 구가 있다. 56px 캔버스를 쓰면 실제 핀은
+   약 19px가 되어 기존 사진 속 핀 크기와 같다. */
+.cardPin {
+  position: absolute;
+  z-index: 2;
+  top: -19px;
+  left: 50%;
+  width: 56px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  pointer-events: none;
+  transform: translateX(-50%);
+  filter:
+    hue-rotate(var(--pin-hue))
+    saturate(var(--pin-saturation))
+    brightness(var(--pin-brightness))
+    drop-shadow(0 3px 2px rgb(66 34 15 / 0.34));
+}
+
+.cardCopy {
+  position: absolute;
+  z-index: 1;
+  inset: 14% 11% 11%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4cqw;
+  padding: 0.35cqw 0.45cqw;
+  pointer-events: none;
 }
 
 .card:hover,
 .card:focus-visible {
-  border-color: rgb(var(--tone-rgb) / 0.55);
-  background: rgb(255 255 255 / 0.28);
   transform: translateY(-2px);
-  outline: none;
+}
+
+.card:focus-visible {
+  border-radius: 5px;
+  outline: 2px solid rgb(var(--tone-rgb) / 0.9);
+  outline-offset: 4px;
+}
+
+.card:hover .cardPaper,
+.card:focus-visible .cardPaper {
+  filter: brightness(1.025) drop-shadow(0 10px 10px rgb(72 43 24 / 0.3));
+  transform: scale(1.012);
+}
+
+.card[aria-pressed='true'] .cardPaper {
+  filter:
+    brightness(1.03)
+    drop-shadow(0 0 0.45cqw rgb(var(--tone-rgb) / 0.72))
+    drop-shadow(0 9px 9px rgb(72 43 24 / 0.26));
 }
 
 .card[aria-pressed='true'] {
-  border-color: rgb(var(--tone-rgb) / 0.9);
-  background: rgb(255 255 255 / 0.36);
+  outline: none;
 }
 
 .cardHead {
@@ -417,13 +504,18 @@
   }
 
   .banner {
-    position: static;
-    padding: 6px 0 16px;
+    position: relative;
+    top: auto !important;
+    left: auto !important;
+    width: min(86vw, 520px) !important;
+    height: 88px !important;
+    margin: 0 auto 14px;
+    padding: 0;
   }
 
   .eyebrow { font-size: 10px; }
-  .banner h1 { font-size: 24px; color: #fbf6ea; text-shadow: 0 1px 8px rgb(40 24 10 / 0.6); }
-  .cycle { font-size: 12px; color: #f2e2cf; }
+  .banner h1 { font-size: 24px; color: #3b3128; text-shadow: none; }
+  .cycle { font-size: 12px; color: #8a6f5c; }
 
   .slots {
     position: static;
@@ -439,28 +531,22 @@
     width: auto !important;
     height: auto !important;
     min-height: 150px;
-    border-radius: 4px;
-    background: #fbf6ea;
-    box-shadow: 0 6px 16px rgb(50 30 14 / 0.28);
-  }
-
-  /* 사진 속 테이프 대신 같은 색 띠 하나. */
-  .slot::before {
-    position: absolute;
-    top: 10px;
-    left: 14px;
-    width: 46px;
-    height: 12px;
-    border-radius: 2px;
-    background: rgb(var(--tone-rgb) / 0.55);
-    content: '';
   }
 
   .card {
-    position: relative;
-    inset: auto;
+    position: absolute;
+    inset: 0;
+  }
+
+  .cardCopy {
+    inset: 15% 11% 11%;
     gap: 6px;
-    padding: 30px 14px 14px;
+    padding: 8px 10px;
+  }
+
+  .cardPin {
+    top: -22px;
+    width: 64px;
   }
 
   .rank { font-size: 12px; }

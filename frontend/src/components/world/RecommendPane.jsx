@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchRecommendationBoard, fetchRecommendationDetail } from '../../api/recommendations'
 import {
+  BOARD_ASSETS,
   BANNER_FRAME,
   BOARD_FRAME,
   BOARD_SIZE,
@@ -15,12 +16,11 @@ import { useDraggableCard } from '../../hooks/useDraggableCard'
 import styles from './RecommendPane.module.css'
 
 /**
- * 나를 위한 추천 — 코르크 보드가 걸린 벽 사진 위에 글자를 쓴다.
+ * 나를 위한 추천 — 빈 코르크 보드 위에 종이와 핀을 건다.
  *
- * 사진은 이 컴포넌트가 그리지 않는다. <PhotoBackdrop> 이 화면 전체에 깔아 둔 것이
- * 이 방이고(data/recommend.js 의 arrivalScene), 보드·종이·핀·테이프·낙서가 전부 그 안에
- * 있다. 여기서 하는 일은 그 사진의 종이 자리(data/recommendBoard.js 의 SLOTS)에 추천
- * 하나씩을 글자로 얹는 것뿐이다.
+ * <PhotoBackdrop> 은 방과 빈 보드만 그린다(data/recommend.js 의 arrivalScene). 제목 종이,
+ * 추천 종이, 핀은 이 컴포넌트가 data/recommendBoard.js 의 좌표에 별도 에셋으로 올린다.
+ * 추천 카드의 button이 종이 전체를 감싸므로 글자가 아닌 종이를 눌러도 상세가 열린다.
  *
  * 그러려면 이 층이 사진과 정확히 같은 사각형 위에 서야 한다. <PhotoBackdrop> 은 사진을
  * `object-fit: cover; object-position: center bottom` 으로 깔므로, 여기 `.photoBox` 도 같은
@@ -90,11 +90,14 @@ export function RecommendPane({ settled = true }) {
           '--photo-zoom': BOARD_FRAME.zoom ?? 1,
         }}
       >
-        {/* 분홍 테이프 위 제목. 테이프는 사진에 있으니 글자만 놓는다. */}
+        {/* 제목 종이도 배경에 굽지 않고 독립 에셋으로 건다. */}
         <header className={styles.banner} style={placement(BANNER_FRAME)}>
-          <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
-          <h1 id="recommend-board-title">{boardCopy.title}</h1>
-          <p className={styles.cycle}>{cycleLine(source, sample)}</p>
+          <img className={styles.bannerPaper} src={BOARD_ASSETS.title} alt="" aria-hidden />
+          <span className={styles.bannerCopy}>
+            <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
+            <h1 id="recommend-board-title">{boardCopy.title}</h1>
+            <span className={styles.cycle}>{cycleLine(source, sample)}</span>
+          </span>
         </header>
 
         <ol className={styles.slots} aria-label="추천 Event 열 장">
@@ -117,12 +120,16 @@ export function RecommendPane({ settled = true }) {
                       setOpenId(openId === item.userRecommendationId ? null : item.userRecommendationId)
                     }
                   >
-                    <span className={styles.cardHead}>
-                      <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
-                      <span className={styles.topic}>{topicName(item.topicCode)}</span>
+                    <img className={styles.cardPaper} src={BOARD_ASSETS.paper} alt="" aria-hidden />
+                    <img className={styles.cardPin} src={BOARD_ASSETS.pin} alt="" aria-hidden />
+                    <span className={styles.cardCopy}>
+                      <span className={styles.cardHead}>
+                        <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
+                        <span className={styles.topic}>{topicName(item.topicCode)}</span>
+                      </span>
+                      <strong className={styles.label}>{item.label}</strong>
+                      {item.reason && <span className={styles.reason}>{item.reason}</span>}
                     </span>
-                    <strong className={styles.label}>{item.label}</strong>
-                    {item.reason && <span className={styles.reason}>{item.reason}</span>}
                   </button>
                 ) : (
                   <span className={styles.blank} aria-hidden="true" />
