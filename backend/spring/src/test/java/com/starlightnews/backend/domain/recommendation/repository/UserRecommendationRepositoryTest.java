@@ -51,7 +51,7 @@ class UserRecommendationRepositoryTest {
 	private UserRecommendation recommendation(long userId, String eventId, int rank,
 			RecommendationType type, LocalDateTime availableAt) {
 		return new UserRecommendation(userId, eventId, type,
-				new BigDecimal("0.920000"), (short) rank, "관심 Story 에서 아직 접하지 않은 사건입니다.",
+				new BigDecimal("0.920000"), (short) rank,
 				RECOMMENDED_AT, RecommendationCycle.AM, availableAt);
 	}
 
@@ -62,8 +62,8 @@ class UserRecommendationRepositoryTest {
 
 	@Test
 	void 추천_결과를_저장하고_순위순으로_조회한다() {
-		saveAndFlush(recommendation(1L, OTHER_EVENT_ID, 2, RecommendationType.INTEREST_BASED, AVAILABLE_AT));
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, OTHER_EVENT_ID, 2, RecommendationType.NORMAL, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 
 		List<UserRecommendation> found =
 				repository.findByUserIdAndAvailableAtOrderByRankAsc(1L, AVAILABLE_AT);
@@ -74,14 +74,14 @@ class UserRecommendationRepositoryTest {
 
 	@Test
 	void 저장한_값이_그대로_돌아온다() {
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 		entityManager.clear();
 
 		UserRecommendation found =
 				repository.findByUserIdAndAvailableAtOrderByRankAsc(1L, AVAILABLE_AT).get(0);
 
 		assertThat(found.getUserRecommendationId()).isNotNull();
-		assertThat(found.getRecommendationType()).isEqualTo(RecommendationType.KNOWLEDGE_GAP);
+		assertThat(found.getRecommendationType()).isEqualTo(RecommendationType.COLD_START);
 		assertThat(found.getRecommendationScore()).isEqualByComparingTo("0.920000");
 		assertThat(found.getRank()).isEqualTo((short) 1);
 		assertThat(found.getCycle()).isEqualTo(RecommendationCycle.AM);
@@ -91,35 +91,35 @@ class UserRecommendationRepositoryTest {
 
 	@Test
 	void 같은_회차에_같은_순위를_두_번_넣을_수_없다() {
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 
 		assertThatThrownBy(() -> saveAndFlush(
-				recommendation(1L, OTHER_EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT)))
+				recommendation(1L, OTHER_EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT)))
 				.isInstanceOf(Exception.class);
 	}
 
 	@Test
 	void 같은_회차에_같은_Event를_두_번_넣을_수_없다() {
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 
 		assertThatThrownBy(() -> saveAndFlush(
-				recommendation(1L, EVENT_ID, 2, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT)))
+				recommendation(1L, EVENT_ID, 2, RecommendationType.COLD_START, AVAILABLE_AT)))
 				.isInstanceOf(Exception.class);
 	}
 
 	@Test
 	void 유형이_다르면_같은_순위를_쓸_수_있다() {
 		// 유니크 제약이 유형을 포함하므로, 관심 기반 1위와 지식 공백 1위가 함께 존재할 수 있다.
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
-		saveAndFlush(recommendation(1L, OTHER_EVENT_ID, 1, RecommendationType.INTEREST_BASED, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, OTHER_EVENT_ID, 1, RecommendationType.NORMAL, AVAILABLE_AT));
 
 		assertThat(repository.findByUserIdAndAvailableAtOrderByRankAsc(1L, AVAILABLE_AT)).hasSize(2);
 	}
 
 	@Test
 	void 사용자가_다르면_같은_순위를_쓸_수_있다() {
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
-		saveAndFlush(recommendation(2L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
+		saveAndFlush(recommendation(2L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 
 		assertThat(repository.findByUserIdAndAvailableAtOrderByRankAsc(2L, AVAILABLE_AT)).hasSize(1);
 	}
@@ -127,9 +127,9 @@ class UserRecommendationRepositoryTest {
 	@Test
 	void 회차를_지우면_해당_사용자의_그_회차만_사라진다() {
 		LocalDateTime previousCycle = AVAILABLE_AT.minusHours(12);
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, previousCycle));
-		saveAndFlush(recommendation(2L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, previousCycle));
+		saveAndFlush(recommendation(2L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 
 		assertThat(repository.deleteCycle(List.of(1L), AVAILABLE_AT)).isEqualTo(1);
 		entityManager.clear();
@@ -142,11 +142,11 @@ class UserRecommendationRepositoryTest {
 	@Test
 	void 회차를_비우면_같은_순위를_다시_넣을_수_있다() {
 		// 재시도로 같은 회차를 다시 저장하는 경우다.
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 
 		repository.deleteCycle(List.of(1L), AVAILABLE_AT);
 		entityManager.flush();
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 
 		assertThat(repository.findByUserIdAndAvailableAtOrderByRankAsc(1L, AVAILABLE_AT)).hasSize(1);
 	}
@@ -155,7 +155,7 @@ class UserRecommendationRepositoryTest {
 	void 기준_시각과_정확히_같은_회차는_남긴다() {
 		// 경계에서 하루치가 통째로 사라지지 않도록 고정한다.
 		LocalDateTime threshold = AVAILABLE_AT.minusDays(7);
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, threshold));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, threshold));
 
 		assertThat(repository.deleteOlderThan(threshold)).isZero();
 		entityManager.clear();
@@ -166,8 +166,8 @@ class UserRecommendationRepositoryTest {
 	@Test
 	void 보관_기간이_지난_회차를_지운다() {
 		LocalDateTime old = AVAILABLE_AT.minusDays(8);
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, old));
-		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.KNOWLEDGE_GAP, AVAILABLE_AT));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, old));
+		saveAndFlush(recommendation(1L, EVENT_ID, 1, RecommendationType.COLD_START, AVAILABLE_AT));
 
 		assertThat(repository.deleteOlderThan(AVAILABLE_AT.minusDays(7))).isEqualTo(1);
 		entityManager.clear();

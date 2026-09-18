@@ -114,7 +114,7 @@ class EventSummaryServiceTest {
 
 	private void recommend(String eventId, short rank) {
 		userRecommendationRepository.save(new UserRecommendation(USER_ID, eventId,
-				RecommendationType.INTEREST_BASED, new BigDecimal("0.920000"), rank, "근거",
+				RecommendationType.NORMAL, new BigDecimal("0.920000"), rank,
 				availableAt.minusMinutes(30), RecommendationCycle.PM, availableAt));
 		entityManager.flush();
 	}
@@ -260,7 +260,7 @@ class EventSummaryServiceTest {
 				.setParameter(1, USER_ID + 1).executeUpdate();
 		recommend(EVENT_ID, (short) 1);
 		userRecommendationRepository.save(new UserRecommendation(USER_ID + 1, EVENT_ID,
-				RecommendationType.INTEREST_BASED, new BigDecimal("0.910000"), (short) 1, "근거",
+				RecommendationType.NORMAL, new BigDecimal("0.910000"), (short) 1,
 				availableAt.minusMinutes(30), RecommendationCycle.PM, availableAt));
 		entityManager.flush();
 

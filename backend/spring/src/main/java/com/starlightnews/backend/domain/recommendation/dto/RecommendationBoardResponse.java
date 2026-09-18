@@ -57,12 +57,9 @@ public record RecommendationBoardResponse(
 			@Schema(description = "회차 안에서의 표시 순위", example = "1")
 			short rank,
 
-			@Schema(description = "추천 근거 유형", example = "INTEREST_BASED")
-			RecommendationType recommendationType,
-
-			@Schema(description = "사용자에게 보여줄 추천 근거 문구", nullable = true,
-					example = "관심 Story 에서 아직 접하지 않은 사건입니다.")
-			String reason
+			@Schema(description = "추천 계산 방식. NORMAL(이력 기반) 또는 COLD_START(이력이 없어 최신·인기 Event 로 대체)",
+					example = "NORMAL")
+			RecommendationType recommendationType
 	) {
 	}
 }

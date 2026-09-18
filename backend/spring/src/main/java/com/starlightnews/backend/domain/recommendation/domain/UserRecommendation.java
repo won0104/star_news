@@ -25,6 +25,8 @@ import org.hibernate.type.SqlTypes;
  * <p>한 회차 안에서 {@code (userId, availableAt, recommendationType)} 기준으로 {@code eventId} 와
  * {@code rank} 가 각각 유일하다. 같은 순위를 두 번 넣으면 저장이 실패한다.
  *
+ * <p>{@code reason} 컬럼은 매핑하지 않는다. FastAPI 가 추천 이유를 더 이상 보내지 않아 늘 비어 있다.
+ *
  * <p>{@code availableAt} 이 공개 시각이다. 조회 API 가 {@code availableAt <= now} 중 가장 최근
  * 회차를 보여주므로, 이 값이 틀리면 추천이 일찍 노출되거나 영영 보이지 않는다.
  */
@@ -64,9 +66,6 @@ public class UserRecommendation {
 	@Column(name = "`rank`", nullable = false)
 	private Short rank;
 
-	@Column(name = "reason", length = 100)
-	private String reason;
-
 	/** 추천을 계산한 시각. 05:30 · 17:30 */
 	@Column(name = "recommended_at", nullable = false)
 	private LocalDateTime recommendedAt;
@@ -80,14 +79,13 @@ public class UserRecommendation {
 	private LocalDateTime availableAt;
 
 	public UserRecommendation(Long userId, String eventId, RecommendationType recommendationType,
-			BigDecimal recommendationScore, Short rank, String reason,
+			BigDecimal recommendationScore, Short rank,
 			LocalDateTime recommendedAt, RecommendationCycle cycle, LocalDateTime availableAt) {
 		this.userId = userId;
 		this.eventId = eventId;
 		this.recommendationType = recommendationType;
 		this.recommendationScore = recommendationScore;
 		this.rank = rank;
-		this.reason = reason;
 		this.recommendedAt = recommendedAt;
 		this.cycle = cycle;
 		this.availableAt = availableAt;
