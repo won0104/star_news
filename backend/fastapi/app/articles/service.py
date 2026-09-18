@@ -29,9 +29,18 @@ def analyze_article(request: ArticleAnalyzeRequest, session) -> ArticleAnalyzeRe
     now = datetime.now(timezone.utc)
 
     # 중간에 실패해도 이 기사에서 만든 노드가 하나도 안 남도록, 아래 반영을 전부 트랜잭션 하나로 묶는다
-    return session.execute_write(
-        lambda tx: _apply_analysis(tx, request, ai_result, primary_topic_code, subtopic_code, now)
-    )
+    try:
+        return session.execute_write(
+            lambda tx: _apply_analysis(tx, request, ai_result, primary_topic_code, subtopic_code, now)
+        )
+    except repository.ArticleIdentityConflictError as exc:
+        # 과거 오프라인 번들의 가짜 mysqlArticleId와 실제 MySQL PK가 겹친 경우다.
+        # 기존 레거시 Article을 운영 기사로 덮지 않고 트랜잭션 전체를 중단한다.
+        raise AppException(
+            409,
+            "ARTICLE_IDENTITY_CONFLICT",
+            "기존 그래프 Article의 식별자가 운영 UUID 정책과 충돌합니다.",
+        ) from exc
 
 
 # FastAPI 컨테이너는 torch/모델을 갖지 않는다.
@@ -178,10 +187,45 @@ def _apply_analysis(
                 # merge_statement_node가 이 엣지를 이미 만들었으니, 아래 엣지 루프에서 또 안 만들게 표시
                 consumed_edge_ids.add(edge["edgeId"])
 
-    # Edge 반영: 앞 단계에서 노드들의 실제 ID가 모두 id_map에 등록된 뒤 실행한다.
+    # COVERS는 AI 임시 Event 여러 개가 같은 실제 Event로 병합될 수 있으므로
+    # 실제 UUID 매핑 후 중복 제거한다. 모델은 primary를 주지 않으므로 안정적인
+    # Event UUID 순서의 첫 관계 하나만 primary로 정한다.
+    covers_by_event: dict[str, float | None] = {}
+    for edge in edges:
+        if edge["type"] != "COVERS":
+            continue
+        start_id = id_map.get(edge["startNodeId"])
+        end_id = id_map.get(edge["endNodeId"])
+        if start_id != article_node_id or end_id is None:
+            continue
+        confidence = (edge.get("properties") or {}).get("confidence")
+        previous = covers_by_event.get(end_id)
+        if previous is None or (confidence is not None and confidence > previous):
+            covers_by_event[end_id] = confidence
+
+    if not covers_by_event:
+        raise AppException(502, "EXTRACTION_FAILED", "분석 결과에 유효한 COVERS 관계가 없습니다.")
+
+    # 재분석 전에 과거 primary를 모두 해제해야 이전 Event가 더 이상 결과에 없어도
+    # primary=true 관계가 두 개 이상 남지 않는다.
+    repository.reset_covers_primary(tx, article_node_id)
+    for index, event_id in enumerate(sorted(covers_by_event)):
+        repository.merge_covers_edge(
+            tx,
+            article_node_id,
+            event_id,
+            covers_by_event[event_id],
+            index == 0,
+            now,
+        )
+
+    # 나머지 Edge 반영: 앞 단계에서 노드들의 실제 ID가 모두 id_map에 등록된 뒤 실행한다.
     for edge in edges:
         # consumed면 위에서 이미 반영됨, CLASSIFIED_AS는 classification.topic으로 별도 반영하므로 여기선 건너뜀
-        if edge["edgeId"] in consumed_edge_ids or edge["type"] == "CLASSIFIED_AS":
+        if (
+            edge["edgeId"] in consumed_edge_ids
+            or edge["type"] in {"CLASSIFIED_AS", "COVERS"}
+        ):
             continue
         start_id = id_map.get(edge["startNodeId"])
         end_id = id_map.get(edge["endNodeId"])
@@ -193,12 +237,7 @@ def _apply_analysis(
 
         edge_props = edge.get("properties", {})
         confidence = edge_props.get("confidence")
-        if edge["type"] == "COVERS":
-            # COVERS는 isPrimary 처리 때문에 별도 함수(merge_covers_edge)로 뺌
-            is_primary = edge_props.get("isPrimary")
-            repository.merge_covers_edge(tx, start_id, end_id, confidence, is_primary, now)
-        else:
-            repository.merge_simple_edge(tx, edge["type"], start_id, end_id, confidence, now)
+        repository.merge_simple_edge(tx, edge["type"], start_id, end_id, confidence, now)
 
     # Topic 분류 - Article은 AI 분류 그대로, Event/Statement/Story는 Article의 대분류를 상속
     # Story는 다음 기사가 Topic 필터로 후보를 찾을 때 이 분류가 있어야 하므로 반드시 필요

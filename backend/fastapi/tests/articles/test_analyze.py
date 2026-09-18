@@ -1,6 +1,7 @@
 import json
 import math
 from pathlib import Path
+from uuid import UUID
 
 from fastapi.testclient import TestClient
 
@@ -77,6 +78,7 @@ def test_analyze_article_creates_graph_from_ai_result(monkeypatch):
     assert data["subtopicCode"] == "EMPLOYMENT_STARTUPS"
     article_node_id = data["articleNodeId"]
     assert article_node_id
+    assert str(UUID(article_node_id)) == article_node_id
 
     # 실제 Neo4j에 노드/엣지가 반영됐는지 직접 확인
     # (목업 기준: Entity 4개, Event 1개, Statement 1개, PUBLISHED_BY 1개, CLASSIFIED_AS 1개)
@@ -85,12 +87,13 @@ def test_analyze_article_creates_graph_from_ai_result(monkeypatch):
             """
             MATCH (a:Article {nodeId: $articleId})
             OPTIONAL MATCH (a)-[:MENTIONS]->(e:Entity)
-            OPTIONAL MATCH (a)-[:COVERS]->(ev:Event)
+            OPTIONAL MATCH (a)-[covers:COVERS]->(ev:Event)
             OPTIONAL MATCH (a)-[:CONTAINS_STATEMENT]->(s:Statement)
             OPTIONAL MATCH (a)-[:PUBLISHED_BY]->(o:Entity:NewsOrganization)
             OPTIONAL MATCH (a)-[:CLASSIFIED_AS]->(t:Topic)
             RETURN count(DISTINCT e) AS entityCount,
                    count(DISTINCT ev) AS eventCount,
+                   count(DISTINCT CASE WHEN covers.isPrimary = true THEN ev END) AS primaryEventCount,
                    count(DISTINCT s) AS statementCount,
                    count(DISTINCT o) AS orgCount,
                    count(DISTINCT t) AS topicCount
@@ -100,6 +103,7 @@ def test_analyze_article_creates_graph_from_ai_result(monkeypatch):
 
     assert record["entityCount"] == 4
     assert record["eventCount"] == 1
+    assert record["primaryEventCount"] == 1
     assert record["statementCount"] == 1
     assert record["orgCount"] == 1
     assert record["topicCount"] == 1
@@ -135,13 +139,78 @@ def test_analyze_article_is_idempotent_on_retry(monkeypatch):
 
     article_node_id = first.json()["data"]["articleNodeId"]
     with _driver.session() as session:
-        statement_count = session.run(
-            "MATCH (:Article {nodeId: $articleId})-[:CONTAINS_STATEMENT]->(:Statement) RETURN count(*) AS c",
+        counts = session.run(
+            """
+            MATCH (a:Article {nodeId: $articleId})
+            OPTIONAL MATCH (a)-[:CONTAINS_STATEMENT]->(s:Statement)
+            OPTIONAL MATCH (a)-[c:COVERS]->(:Event)
+            RETURN count(DISTINCT s) AS statements,
+                   count(DISTINCT CASE WHEN c.isPrimary = true THEN c END) AS primaryCovers
+            """,
             articleId=article_node_id,
-        ).single()["c"]
+        ).single()
 
-    # Statement는 CREATE가 아니라 MERGE라, 두 번 분석해도 중복 생성되면 안 됨
-    assert statement_count == 1
+    # 재분석해도 Statement나 primary COVERS가 중복 생성되면 안 됨
+    assert counts["statements"] == 1
+    assert counts["primaryCovers"] == 1
+
+
+def test_analyze_article_rejects_legacy_non_uuid_collision(monkeypatch):
+    monkeypatch.setattr(service, "_call_ai", lambda request: _mock_ai_result())
+
+    test_article_id = 900103
+    legacy_node_id = "ART-legacy-collision-test"
+    original_title = "2024 레거시 기사"
+    payload = {
+        "articleId": test_article_id,
+        "title": "2026 운영 기사",
+        "content": "실제 본문은 _call_ai가 목업으로 대체되어 쓰이지 않는다.",
+        "sourceId": 900001,
+        "sourceName": "테스트뉴스",
+        "publishedAt": "2026-09-08T09:00:00+09:00",
+    }
+
+    with _driver.session() as session:
+        session.run("MATCH (a:Article {mysqlArticleId: $id}) DETACH DELETE a", id=test_article_id)
+        session.run(
+            """
+            CREATE (:Article {
+                nodeId: $nodeId,
+                mysqlArticleId: $mysqlArticleId,
+                title: $title,
+                publishedAt: datetime('2024-01-01T09:00:00+09:00')
+            })
+            """,
+            nodeId=legacy_node_id,
+            mysqlArticleId=test_article_id,
+            title=original_title,
+        )
+
+    try:
+        response = client.post(
+            "/internal/v1/articles/analyze",
+            json=payload,
+            headers={"x-internal-api-key": settings.internal_api_key},
+        )
+
+        assert response.status_code == 409
+        assert response.json()["code"] == "ARTICLE_IDENTITY_CONFLICT"
+
+        # 충돌 감지 전에 실행된 Article SET도 트랜잭션과 함께 롤백되어야 한다.
+        with _driver.session() as session:
+            record = session.run(
+                """
+                MATCH (a:Article {mysqlArticleId: $id})
+                RETURN a.nodeId AS nodeId, a.title AS title, a.analyzedAt AS analyzedAt
+                """,
+                id=test_article_id,
+            ).single()
+        assert record["nodeId"] == legacy_node_id
+        assert record["title"] == original_title
+        assert record["analyzedAt"] is None
+    finally:
+        with _driver.session() as session:
+            session.run("MATCH (a:Article {mysqlArticleId: $id}) DETACH DELETE a", id=test_article_id)
 
 
 # Event.title/embedding만 바꾼 목업을 만든다 (같은 Topic/Entity 등은 그대로 재사용)
