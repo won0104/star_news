@@ -2,6 +2,7 @@ package com.starlightnews.backend.domain.user.controller;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
 
 import com.starlightnews.backend.domain.graph.exception.GraphErrorCode;
@@ -14,6 +15,7 @@ import com.starlightnews.backend.domain.user.service.PersonalGraphService;
 import com.starlightnews.backend.domain.user.service.PersonalNodeArticleService;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.enums.NodeType;
+import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.error.CommonErrorCode;
 import com.starlightnews.backend.global.request.RequestIdFilter;
@@ -81,16 +83,22 @@ class UserGraphControllerTest {
 				OffsetDateTime.of(2026, 9, 11, 17, 30, 0, 0, ZoneOffset.ofHours(9)),
 				List.of(
 						new PersonalGraphSummaryResponse.Node(
-								"topic:ECONOMY", "TOPIC_CLUSTER", null, null, "ECONOMY", "경제", null, 20, 1.0),
+								"topic:ECONOMY", "TOPIC_CLUSTER", null, null, "ECONOMY", "경제", 20, 1.0),
 						new PersonalGraphSummaryResponse.Node(
-								"ENTITY:" + NODE_KEY, "NODE", "ENTITY", NODE_KEY, "ECONOMY", "한국은행", null, 8, 1.0)),
+								"ENTITY:" + NODE_KEY, "NODE", "ENTITY", NODE_KEY, "ECONOMY", "한국은행", 8, 1.0)),
 				List.of(new PersonalGraphSummaryResponse.Edge(
 						"topic:ECONOMY", "ENTITY:" + NODE_KEY, "BELONGS_TO_TOPIC", 1.0)));
 	}
 
-	private PersonalGraphSummaryResponse emptySummary() {
+	private PersonalGraphSummaryResponse topicClusterOnlySummary() {
+		List<PersonalGraphSummaryResponse.Node> topicClusters = Arrays.stream(TopicCode.values())
+				.map(topic -> new PersonalGraphSummaryResponse.Node(
+						"topic:" + topic.name(), "TOPIC_CLUSTER", null, null,
+						topic.name(), topic.labelKo(), 0, 0.0))
+				.toList();
+
 		return new PersonalGraphSummaryResponse(
-				OffsetDateTime.of(2026, 9, 11, 17, 30, 0, 0, ZoneOffset.ofHours(9)), List.of(), List.of());
+				OffsetDateTime.of(2026, 9, 11, 17, 30, 0, 0, ZoneOffset.ofHours(9)), topicClusters, List.of());
 	}
 
 	private PersonalGraphMapResponse sampleMap() {
@@ -232,12 +240,15 @@ class UserGraphControllerTest {
 	}
 
 	@Test
-	void 개인_노드가_없으면_빈_배열로_응답한다() throws Exception {
-		given(personalGraphService.getSummary(1L)).willReturn(emptySummary());
+	void 개인_노드가_없어도_모든_Topic_Cluster를_응답한다() throws Exception {
+		given(personalGraphService.getSummary(1L)).willReturn(topicClusterOnlySummary());
 
 		mockMvc.perform(get(SUMMARY_PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.nodes").isEmpty())
+				.andExpect(jsonPath("$.data.nodes.length()").value(TopicCode.values().length))
+				.andExpect(jsonPath("$.data.nodes[0].id").value("topic:POLITICS"))
+				.andExpect(jsonPath("$.data.nodes[0].kind").value("TOPIC_CLUSTER"))
+				.andExpect(jsonPath("$.data.nodes[0].nodeType").doesNotExist())
 				.andExpect(jsonPath("$.data.edges").isEmpty());
 	}
 

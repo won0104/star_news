@@ -145,7 +145,7 @@ public class PersonalGraphService {
 			String clusterId = "topic:" + topicCode;
 
 			nodes.add(new PersonalGraphSummaryResponse.Node(
-					clusterId, "TOPIC_CLUSTER", null, null, topicCode, topic.labelKo(), null,
+					clusterId, "TOPIC_CLUSTER", null, null, topicCode, topic.labelKo(),
 					(int) readCount, clusterWeight));
 
 			for (UserKnowledgeNode row : representativesByTopic.getOrDefault(topicCode, List.of())) {
@@ -153,7 +153,7 @@ public class PersonalGraphService {
 				double nodeWeight = (double) importance(row) / maxImportance;
 				nodes.add(new PersonalGraphSummaryResponse.Node(
 						nodeId, "NODE", row.getId().getNodeType().name(), row.getId().getNodeId(), topicCode,
-						row.getNodeLabel(), null, row.getReadArticleCount(), nodeWeight));
+						row.getNodeLabel(), row.getReadArticleCount(), nodeWeight));
 				edges.add(new PersonalGraphSummaryResponse.Edge(clusterId, nodeId, "BELONGS_TO_TOPIC", nodeWeight));
 			}
 		}

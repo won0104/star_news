@@ -107,7 +107,7 @@ public class UserGraphController {
 			description = """
 					내 읽기 최초 진입용 요약 그래프를 조회한다. Topic Cluster 와 각 Topic 의 대표 개인 Node(최대 5개)·Edge 를
 					반환한다. **Access Token 필요.**
-					- 개인 Node 가 하나도 없으면 `nodes`·`edges` 모두 빈 배열이다""")
+					- 개인 Node 가 하나도 없어도 모든 Topic Cluster 를 `nodes` 로 반환하며, `edges` 는 빈 배열이다""")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",

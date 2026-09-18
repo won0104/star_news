@@ -34,6 +34,7 @@ public record RecommendationBoardResponse(
 		return new RecommendationBoardResponse(null, null, null, List.of());
 	}
 
+	@Schema(name = "RecommendationBoardItem")
 	public record Item(
 
 			@Schema(description = "추천 상세 조회 키. 카드 링크에는 eventId 가 아니라 이 값을 쓴다",
