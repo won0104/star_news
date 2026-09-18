@@ -14,6 +14,7 @@ import com.starlightnews.backend.domain.recommendation.repository.UserRecommenda
 import com.starlightnews.backend.domain.recommendation.service.RecommendationBatchResult;
 import com.starlightnews.backend.domain.recommendation.service.EventSummaryService;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationBatchService;
+import com.starlightnews.backend.domain.recommendation.service.RecommendationBoardService;
 import com.starlightnews.backend.global.client.FastApiClient;
 import com.starlightnews.backend.global.client.FastApiProperties;
 import com.starlightnews.backend.global.enums.RecommendationCycle;
@@ -112,6 +113,9 @@ class RecommendationBatchIntegrationTest {
 
 	@Autowired
 	private RecommendationRunRepository runRepository;
+
+	@Autowired
+	private RecommendationBoardService boardService;
 
 	@Autowired
 	private RecommendationRunChunkRepository chunkRepository;
@@ -345,5 +349,18 @@ class RecommendationBatchIntegrationTest {
 		fastApiMockServer.verify();
 		assertThat(chunkRepository.findByRunIdOrderByChunkNoAsc(latestRun().getRunId()).get(0).getAttempts())
 				.isEqualTo(1);
+	}
+
+	@Test
+	void 끝난_회차는_추천_보드에_보인다() {
+		// 실행 기록과 보드 조회가 같은 공개 시각으로 이어지는지 본다. 회차는 이미 지난 날짜라 공개돼 있다.
+		expectCalculate(responseFor(1L));
+		expectCalculate(responseFor(2L));
+
+		batchService.generate(MORNING_RUN);
+		entityManager.flush();
+		entityManager.clear();
+
+		assertThat(boardService.getBoard(1L).availableAt().toLocalDateTime()).isEqualTo(AVAILABLE_AT);
 	}
 }

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationRunStatus;
 import com.starlightnews.backend.domain.recommendation.domain.UserRecommendation;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationBoardResponse;
 import com.starlightnews.backend.domain.recommendation.repository.UserRecommendationRepository;
@@ -74,7 +75,22 @@ class RecommendationBoardServiceTest {
 		return String.format("00000020-0920-4000-8000-%012d", seed);
 	}
 
+	private void run(LocalDateTime availableAt, RecommendationRunStatus status) {
+		entityManager.createNativeQuery("INSERT INTO recommendation_runs "
+						+ "(cycle, available_at, status, started_at) VALUES ('PM', ?1, ?2, ?3)")
+				.setParameter(1, availableAt)
+				.setParameter(2, status.name())
+				.setParameter(3, availableAt.minusMinutes(30))
+				.executeUpdate();
+	}
+
+	/** 끝난 회차로 저장한다. */
 	private void save(int seed, short rank, RecommendationType type, LocalDateTime availableAt) {
+		run(availableAt, RecommendationRunStatus.COMPLETED);
+		saveWithoutRun(seed, rank, type, availableAt);
+	}
+
+	private void saveWithoutRun(int seed, short rank, RecommendationType type, LocalDateTime availableAt) {
 		userRecommendationRepository.save(new UserRecommendation(USER_ID, eventId(seed), type,
 				new BigDecimal("0.920000"), rank,
 				availableAt.minusMinutes(30), RecommendationCycle.PM, availableAt));
@@ -104,6 +120,19 @@ class RecommendationBoardServiceTest {
 		RecommendationBoardResponse response = boardService.getBoard(USER_ID);
 
 		assertThat(response.availableAt().toLocalDateTime()).isEqualTo(opened);
+		assertThat(response.items()).singleElement()
+				.extracting(RecommendationBoardResponse.Item::eventId).isEqualTo(eventId(1));
+	}
+
+	@Test
+	void 공개_시각이_지났어도_아직_도는_회차는_보여주지_않는다() {
+		save(1, (short) 1, RecommendationType.NORMAL, opened.minusHours(12));
+		run(opened, RecommendationRunStatus.RUNNING);
+		saveWithoutRun(2, (short) 1, RecommendationType.NORMAL, opened);
+
+		RecommendationBoardResponse response = boardService.getBoard(USER_ID);
+
+		assertThat(response.availableAt().toLocalDateTime()).isEqualTo(opened.minusHours(12));
 		assertThat(response.items()).singleElement()
 				.extracting(RecommendationBoardResponse.Item::eventId).isEqualTo(eventId(1));
 	}

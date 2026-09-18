@@ -674,6 +674,11 @@ INSERT INTO `user_recommendations` (`user_recommendation_id`, `user_id`, `event_
 (960011, 950002, '00000020-0920-4000-8000-000000000002', 'NORMAL', 0.82, 1, NULL, '2024-05-25 05:30:00.000000', 'AM', '2024-05-25 06:00:00.000000'),
 (960012, 950002, '00000020-0920-4000-8000-000000000003', 'NORMAL', 0.72, 2, NULL, '2024-05-25 05:30:00.000000', 'AM', '2024-05-25 06:00:00.000000');
 
+-- recommendation_runs: 2행. 추천 보드는 실행이 끝난(COMPLETED·PARTIAL) 회차만 보여 준다.
+INSERT INTO `recommendation_runs` (`run_id`, `cycle`, `available_at`, `status`, `total_chunks`, `failed_chunks`, `target_users`, `stored_users`, `failed_users`, `started_at`, `finished_at`) VALUES
+(970001, 'PM', '2024-05-24 18:00:00.000000', 'COMPLETED', 1, 0, 3, 2, 0, '2024-05-24 17:30:00.000000', '2024-05-24 17:31:00.000000'),
+(970002, 'AM', '2024-05-25 06:00:00.000000', 'COMPLETED', 1, 0, 3, 2, 0, '2024-05-25 05:30:00.000000', '2024-05-25 05:31:00.000000');
+
 COMMIT;
 SET SESSION sql_mode=@mock_original_sql_mode;
 
