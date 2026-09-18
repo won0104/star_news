@@ -8,7 +8,9 @@
 .fieldFull {
   position: fixed;
   z-index: 60;
-  background: #302b29 url('/assets/trend/figma/attic-night.png') center / cover no-repeat;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    #071225 url('/assets/trend/trend-fullscreen-galaxy.png') center / cover no-repeat;
 }
 
 .fieldActions {
