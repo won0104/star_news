@@ -4,10 +4,13 @@ import java.util.List;
 
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateRequest;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateResponse;
+import com.starlightnews.backend.domain.recommendation.service.RecommendationCalculateOutcome.Calculated;
+import com.starlightnews.backend.domain.recommendation.service.RecommendationCalculateOutcome.Failed;
 import com.starlightnews.backend.global.client.FastApiClient;
 import com.starlightnews.backend.global.client.InternalApiErrorCode;
 import com.starlightnews.backend.global.enums.RecommendationCycle;
 import com.starlightnews.backend.global.error.BusinessException;
+import com.starlightnews.backend.global.error.CommonErrorCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,7 +54,7 @@ class RecommendationCalculateClientTest {
 		given(fastApiClient.post(eq(CALCULATE_PATH), any(), eq(RecommendationCalculateResponse.class)))
 				.willReturn(expected);
 
-		assertThat(client.calculate(requestFor(1L, 2L))).contains(expected);
+		assertThat(client.calculate(requestFor(1L, 2L))).isEqualTo(new Calculated(expected));
 	}
 
 	@Test
@@ -66,17 +69,28 @@ class RecommendationCalculateClientTest {
 
 	@ParameterizedTest
 	@EnumSource(InternalApiErrorCode.class)
-	void 어떤_실패든_예외를_올리지_않고_빈_결과를_준다(InternalApiErrorCode errorCode) {
-		// 묶음 하나가 실패해도 남은 묶음은 계속 보내야 한다.
+	void 어떤_실패든_예외를_올리지_않고_원인을_돌려준다(InternalApiErrorCode errorCode) {
+		// 묶음 하나가 실패해도 남은 묶음은 계속 보내야 한다. 원인은 회차 실행 기록에 남긴다.
 		given(fastApiClient.post(any(), any(), any())).willThrow(new BusinessException(errorCode));
 
-		assertThatCode(() -> assertThat(client.calculate(requestFor(1L, 2L))).isEmpty())
+		assertThatCode(() -> assertThat(client.calculate(requestFor(1L, 2L))).isEqualTo(new Failed(errorCode)))
 				.doesNotThrowAnyException();
 	}
 
 	@Test
-	void 보낼_사용자가_없으면_호출하지_않는다() {
-		assertThat(client.calculate(requestFor())).isEmpty();
+	void 내부_API_오류가_아닌_코드는_원인_불명_실패로_본다() {
+		given(fastApiClient.post(any(), any(), any()))
+				.willThrow(new BusinessException(CommonErrorCode.INTERNAL_SERVER_ERROR));
+
+		assertThat(client.calculate(requestFor(1L)))
+				.isEqualTo(new Failed(InternalApiErrorCode.INTERNAL_API_FAILED));
+	}
+
+	@Test
+	void 보낼_사용자가_없으면_호출하지_않고_빈_결과를_준다() {
+		// 실패로 돌려주면 빈 묶음 하나가 회차를 PARTIAL 로 만든다.
+		assertThat(client.calculate(requestFor())).isInstanceOfSatisfying(Calculated.class,
+				calculated -> assertThat(calculated.response().results()).isEmpty());
 
 		verify(fastApiClient, never()).post(any(), any(), any());
 	}

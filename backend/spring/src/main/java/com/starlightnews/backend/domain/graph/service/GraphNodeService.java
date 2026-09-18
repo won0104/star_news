@@ -43,7 +43,7 @@ public class GraphNodeService {
 		try {
 			found = graphNodeRepository.findNode(nodeType, nodeKey);
 		} catch (RuntimeException exception) {
-			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED);
+			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED, exception);
 		}
 		return found.orElseThrow(() -> new BusinessException(CommonErrorCode.RESOURCE_NOT_FOUND));
 	}

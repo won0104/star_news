@@ -42,7 +42,7 @@ class RecommendationStoreIntegrationTest {
 	private static final LocalDateTime MORNING_RUN = LocalDateTime.of(2026, 9, 15, 5, 30);
 	private static final LocalDateTime AVAILABLE_AT = LocalDateTime.of(2026, 9, 15, 6, 0);
 
-	/** 노션 명세의 Response 예시 그대로. */
+	/** 노션 명세(/recommendations/calculate, 09-17 수정안)의 Response 예시 그대로. */
 	private static final String SPEC_RESPONSE = """
 			{
 			  "data": {
@@ -57,8 +57,7 @@ class RecommendationStoreIntegrationTest {
 			            "topicCode": "ECONOMY",
 			            "score": 0.92,
 			            "rank": 1,
-			            "recommendationType": "KNOWLEDGE_GAP",
-			            "reason": "관심 있는 통화정책 Story에서 아직 접하지 않은 사건입니다."
+			            "recommendationType": "NORMAL"
 			          }
 			        ]
 			      }
@@ -112,10 +111,9 @@ class RecommendationStoreIntegrationTest {
 		assertThat(stored()).singleElement().satisfies(saved -> {
 			assertThat(saved.getUserId()).isEqualTo(1L);
 			assertThat(saved.getEventId()).isEqualTo(EVENT_ID);
-			assertThat(saved.getRecommendationType()).isEqualTo(RecommendationType.KNOWLEDGE_GAP);
+			assertThat(saved.getRecommendationType()).isEqualTo(RecommendationType.NORMAL);
 			assertThat(saved.getRecommendationScore()).isEqualByComparingTo("0.92");
 			assertThat(saved.getRank()).isEqualTo((short) 1);
-			assertThat(saved.getReason()).isEqualTo("관심 있는 통화정책 Story에서 아직 접하지 않은 사건입니다.");
 			assertThat(saved.getCycle()).isEqualTo(RecommendationCycle.AM);
 			assertThat(saved.getAvailableAt()).isEqualTo(AVAILABLE_AT);
 		});

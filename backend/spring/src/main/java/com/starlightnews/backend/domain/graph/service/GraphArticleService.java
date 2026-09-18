@@ -106,7 +106,7 @@ public class GraphArticleService {
 		try {
 			return call.get();
 		} catch (RuntimeException exception) {
-			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED);
+			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED, exception);
 		}
 	}
 }

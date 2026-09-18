@@ -287,7 +287,7 @@ public class BookmarkService {
 				}
 			}
 		} catch (RuntimeException exception) {
-			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED);
+			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED, exception);
 		}
 
 		if (!foundNodes.equals(requestedNodes)) {
@@ -318,7 +318,7 @@ public class BookmarkService {
 				}
 			}
 		} catch (RuntimeException exception) {
-			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED);
+			throw new BusinessException(GraphErrorCode.GRAPH_NODE_QUERY_FAILED, exception);
 		}
 
 		if (names.size() != rows.size()) {

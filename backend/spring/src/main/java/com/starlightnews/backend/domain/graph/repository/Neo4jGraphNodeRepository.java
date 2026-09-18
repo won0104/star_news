@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.starlightnews.backend.global.enums.NodeType;
+import com.starlightnews.backend.global.neo4j.Neo4jDateTimes;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 
@@ -42,7 +43,7 @@ public class Neo4jGraphNodeRepository implements GraphNodeRepository {
 				.mappedBy((typeSystem, record) -> new GraphNodeRecord(
 						record.get("title").isNull() ? null : record.get("title").asString(),
 						record.get("type").isNull() ? null : record.get("type").asString(),
-						record.get("time").isNull() ? null : record.get("time").asZonedDateTime().toOffsetDateTime()))
+						Neo4jDateTimes.toOffsetDateTime(record.get("time"))))
 				.one();
 	}
 

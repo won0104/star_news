@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationRunStatus;
 import com.starlightnews.backend.domain.recommendation.domain.UserRecommendation;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationBoardResponse;
 import com.starlightnews.backend.domain.recommendation.repository.UserRecommendationRepository;
@@ -74,17 +75,32 @@ class RecommendationBoardServiceTest {
 		return String.format("00000020-0920-4000-8000-%012d", seed);
 	}
 
+	private void run(LocalDateTime availableAt, RecommendationRunStatus status) {
+		entityManager.createNativeQuery("INSERT INTO recommendation_runs "
+						+ "(cycle, available_at, status, started_at) VALUES ('PM', ?1, ?2, ?3)")
+				.setParameter(1, availableAt)
+				.setParameter(2, status.name())
+				.setParameter(3, availableAt.minusMinutes(30))
+				.executeUpdate();
+	}
+
+	/** 끝난 회차로 저장한다. */
 	private void save(int seed, short rank, RecommendationType type, LocalDateTime availableAt) {
+		run(availableAt, RecommendationRunStatus.COMPLETED);
+		saveWithoutRun(seed, rank, type, availableAt);
+	}
+
+	private void saveWithoutRun(int seed, short rank, RecommendationType type, LocalDateTime availableAt) {
 		userRecommendationRepository.save(new UserRecommendation(USER_ID, eventId(seed), type,
-				new BigDecimal("0.920000"), rank, "관심 Story 에서 아직 접하지 않은 사건입니다.",
+				new BigDecimal("0.920000"), rank,
 				availableAt.minusMinutes(30), RecommendationCycle.PM, availableAt));
 		entityManager.flush();
 	}
 
 	@Test
 	void 공개된_회차를_순위_순으로_돌려준다() {
-		save(2, (short) 2, RecommendationType.INTEREST_BASED, opened);
-		save(1, (short) 1, RecommendationType.INTEREST_BASED, opened);
+		save(2, (short) 2, RecommendationType.NORMAL, opened);
+		save(1, (short) 1, RecommendationType.NORMAL, opened);
 
 		RecommendationBoardResponse response = boardService.getBoard(USER_ID);
 
@@ -98,8 +114,8 @@ class RecommendationBoardServiceTest {
 	@Test
 	void 공개_시각이_안_된_회차는_보여주지_않는다() {
 		// 계산은 05:30·17:30 에 끝나지만 공개는 06:00·18:00 이다. 그 사이에는 직전 회차가 보여야 한다.
-		save(1, (short) 1, RecommendationType.INTEREST_BASED, opened);
-		save(2, (short) 1, RecommendationType.KNOWLEDGE_GAP, upcoming);
+		save(1, (short) 1, RecommendationType.NORMAL, opened);
+		save(2, (short) 1, RecommendationType.COLD_START, upcoming);
 
 		RecommendationBoardResponse response = boardService.getBoard(USER_ID);
 
@@ -109,9 +125,22 @@ class RecommendationBoardServiceTest {
 	}
 
 	@Test
+	void 공개_시각이_지났어도_아직_도는_회차는_보여주지_않는다() {
+		save(1, (short) 1, RecommendationType.NORMAL, opened.minusHours(12));
+		run(opened, RecommendationRunStatus.RUNNING);
+		saveWithoutRun(2, (short) 1, RecommendationType.NORMAL, opened);
+
+		RecommendationBoardResponse response = boardService.getBoard(USER_ID);
+
+		assertThat(response.availableAt().toLocalDateTime()).isEqualTo(opened.minusHours(12));
+		assertThat(response.items()).singleElement()
+				.extracting(RecommendationBoardResponse.Item::eventId).isEqualTo(eventId(1));
+	}
+
+	@Test
 	void 공개된_회차가_없으면_빈_응답이다() {
 		// 신규 가입자나 첫 배치 전. 오류가 아니다.
-		save(1, (short) 1, RecommendationType.INTEREST_BASED, upcoming);
+		save(1, (short) 1, RecommendationType.NORMAL, upcoming);
 
 		RecommendationBoardResponse response = boardService.getBoard(USER_ID);
 
@@ -122,7 +151,7 @@ class RecommendationBoardServiceTest {
 
 	@Test
 	void Event_표시_정보를_채워_준다() {
-		save(1, (short) 1, RecommendationType.INTEREST_BASED, opened);
+		save(1, (short) 1, RecommendationType.NORMAL, opened);
 
 		RecommendationBoardResponse.Item item = boardService.getBoard(USER_ID).items().get(0);
 
@@ -130,26 +159,25 @@ class RecommendationBoardServiceTest {
 		assertThat(item.topicCode()).isEqualTo(TopicCode.ECONOMY);
 		assertThat(item.eventId()).isEqualTo(eventId(1));
 		assertThat(item.score()).isEqualByComparingTo("0.920000");
-		assertThat(item.recommendationType()).isEqualTo(RecommendationType.INTEREST_BASED);
-		assertThat(item.reason()).isEqualTo("관심 Story 에서 아직 접하지 않은 사건입니다.");
+		assertThat(item.recommendationType()).isEqualTo(RecommendationType.NORMAL);
 		assertThat(item.userRecommendationId()).isPositive();
 	}
 
 	@Test
 	void 한_회차를_나누지_않고_전부_돌려준다() {
 		// 사용자당 최대 개수가 정해져 있어 한 화면에 들어간다.
-		save(1, (short) 1, RecommendationType.INTEREST_BASED, opened);
-		save(2, (short) 2, RecommendationType.INTEREST_BASED, opened);
-		save(3, (short) 3, RecommendationType.INTEREST_BASED, opened);
+		save(1, (short) 1, RecommendationType.NORMAL, opened);
+		save(2, (short) 2, RecommendationType.NORMAL, opened);
+		save(3, (short) 3, RecommendationType.NORMAL, opened);
 
 		assertThat(boardService.getBoard(USER_ID).items()).hasSize(3);
 	}
 
 	@Test
 	void 같은_순위가_겹쳐도_빠짐없이_돌려준다() {
-		// rank 는 유형 안에서만 유일하다. 두 유형이 한 회차에 들어오면 1위가 둘이다.
-		save(1, (short) 1, RecommendationType.INTEREST_BASED, opened);
-		save(2, (short) 1, RecommendationType.KNOWLEDGE_GAP, opened);
+		// DB 유니크 제약이 유형까지 묶여 있어 한 회차에 순위가 겹쳐도 막지 않는다.
+		save(1, (short) 1, RecommendationType.NORMAL, opened);
+		save(2, (short) 1, RecommendationType.COLD_START, opened);
 
 		assertThat(boardService.getBoard(USER_ID).items()).hasSize(2);
 	}
@@ -158,7 +186,7 @@ class RecommendationBoardServiceTest {
 	@Test
 	void 응답_시각에는_KST_오프셋이_붙는다() {
 		// DB DATETIME(6) 은 KST 벽시계로 저장된다.
-		save(1, (short) 1, RecommendationType.INTEREST_BASED, opened);
+		save(1, (short) 1, RecommendationType.NORMAL, opened);
 
 		RecommendationBoardResponse response = boardService.getBoard(USER_ID);
 

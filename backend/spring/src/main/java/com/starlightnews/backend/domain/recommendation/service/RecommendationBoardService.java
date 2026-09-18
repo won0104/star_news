@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.starlightnews.backend.domain.recommendation.domain.RecommendationEvent;
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationRunStatus;
 import com.starlightnews.backend.domain.recommendation.domain.UserRecommendation;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationBoardResponse;
 import com.starlightnews.backend.domain.recommendation.repository.RecommendationEventRepository;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 사용자에게 공개된 최신 추천 회차를 조회한다.
  *
  * <p>추천은 실시간으로 계산하지 않는다. 05:30·17:30 에 미리 만들어 두고 06:00·18:00 에 공개하므로,
- * 조회는 이미 쌓인 결과 중 공개 시각이 지난 가장 최근 회차를 고르는 일이다.
+ * 조회는 이미 쌓인 결과 중 공개 시각이 지났고 실행이 끝난 가장 최근 회차를 고르는 일이다.
  */
 @Service
 @RequiredArgsConstructor
@@ -43,7 +44,7 @@ public class RecommendationBoardService {
 	@Transactional(readOnly = true)
 	public RecommendationBoardResponse getBoard(Long userId) {
 		Optional<LocalDateTime> availableAt = userRecommendationRepository
-				.findLatestAvailableAt(userId, LocalDateTime.now(KST_ZONE));
+				.findLatestAvailableAt(userId, LocalDateTime.now(KST_ZONE), RecommendationRunStatus.visible());
 		if (availableAt.isEmpty()) {
 			return RecommendationBoardResponse.empty();
 		}
@@ -76,8 +77,7 @@ public class RecommendationBoardService {
 					event.getTopicCode(),
 					recommendation.getRecommendationScore(),
 					recommendation.getRank(),
-					recommendation.getRecommendationType(),
-					recommendation.getReason());
+					recommendation.getRecommendationType());
 		}).toList();
 	}
 }
