@@ -1,6 +1,7 @@
 # 기사 분석 도메인의 Neo4j 쿼리 (Node/Edge 생성·조회).
 import math
 from datetime import datetime, timedelta
+from uuid import UUID
 
 from neo4j import ManagedTransaction, Session
 
@@ -24,6 +25,20 @@ STORY_CANDIDATE_TOP_K = 8
 STORY_EMBEDDING_EMA_WEIGHT = 0.15
 # 이보다 오래 새 Event가 안 붙은 Story/외톨이 Event는 후보에서 제외 (죽은 흐름으로 간주)
 STORY_STALE_DAYS = 30
+
+
+class ArticleIdentityConflictError(RuntimeError):
+    """실제 MySQL 기사 ID가 레거시 비UUID Article에 잘못 연결된 경우."""
+
+
+def _is_uuid(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        UUID(value)
+    except (ValueError, AttributeError):
+        return False
+    return True
 
 
 # 1. Article
@@ -54,7 +69,15 @@ def merge_article_node(
         subtopicCode=subtopic_code,
         analyzedAt=analyzed_at,
     ).single()
-    return result["nodeId"]
+    node_id = result["nodeId"]
+    if not _is_uuid(node_id):
+        # 이 예외는 execute_write 콜백 밖으로 전파되어 위 SET까지 포함한 전체
+        # 기사 분석 트랜잭션을 롤백한다. ART-* 번들 노드에 운영 기사를
+        # 덮어쓰는 과거 사고를 조용히 반복하지 않기 위한 fail-fast 방어다.
+        raise ArticleIdentityConflictError(
+            f"mysqlArticleId={mysql_article_id} is already bound to non-UUID nodeId={node_id!r}"
+        )
+    return node_id
 
 
 # Year 노드를 생성하거나 갱신한다.
@@ -545,6 +568,19 @@ def merge_simple_edge(
 
 
 # Article -> Event COVERS
+def reset_covers_primary(
+    session: Neo4jRunner,
+    article_node_id: str,
+) -> None:
+    session.run(
+        """
+        MATCH (:Article {nodeId: $articleId})-[r:COVERS]->(:Event)
+        SET r.isPrimary = false
+        """,
+        articleId=article_node_id,
+    )
+
+
 def merge_covers_edge(
     session: Neo4jRunner,
     article_node_id: str,
