@@ -25,6 +25,7 @@ import org.springframework.data.domain.Limit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -231,6 +232,33 @@ class ArticleAnalysisBatchServiceTest {
 
 		assertThat(result.stopReason()).isEqualTo(StopReason.TOO_MANY_FAILURES);
 		assertThat(result.errors()).isEqualTo(5);
+	}
+
+	@Test
+	void 회차_전후로_남은_대기를_센다() {
+		// 처리량이 유입을 못 따라가는지 로그로 보려면 회차 상한이 아닌 전체 대기가 필요하다.
+		givenQueue(1);
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+		given(articleRepository.countAnalysisQueue(3)).willReturn(10L, 9L);
+		given(articleRepository.findOldestAnalysisWaitMinutes(3)).willReturn(312L);
+
+		service.analyzePending();
+
+		verify(articleRepository, times(2)).countAnalysisQueue(3);
+		verify(articleRepository).findOldestAnalysisWaitMinutes(3);
+	}
+
+	@Test
+	void 남은_대기가_없으면_오래_기다린_시간을_묻지_않는다() {
+		givenQueue(1);
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+		given(articleRepository.countAnalysisQueue(3)).willReturn(1L, 0L);
+
+		service.analyzePending();
+
+		verify(articleRepository, never()).findOldestAnalysisWaitMinutes(anyInt());
 	}
 
 	@Test

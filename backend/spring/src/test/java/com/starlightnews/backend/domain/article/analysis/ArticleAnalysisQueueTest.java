@@ -113,6 +113,36 @@ class ArticleAnalysisQueueTest {
 	}
 
 	@Test
+	void 대기_전체_수는_회차_상한과_무관하게_센다() {
+		insert("a", "PROCESSING", null, 0);
+		insert("b", "PROCESSING", null, 2);
+		insert("c", "PROCESSING", null, 0);
+		insert("exhausted", "PROCESSING", null, 3);
+		insert("done", "COMPLETED", "00000021-0920-4000-8000-000000009203", 0);
+
+		assertThat(queue(1)).hasSize(1);
+		assertThat(articleRepository.countAnalysisQueue(MAX_ATTEMPTS)).isEqualTo(3);
+	}
+
+	@Test
+	void 대기가_없으면_가장_오래_기다린_시간도_없다() {
+		assertThat(articleRepository.findOldestAnalysisWaitMinutes(MAX_ATTEMPTS)).isNull();
+	}
+
+	@Test
+	void 가장_오래_기다린_기사가_수집된_지_몇_분인지_잰다() {
+		long old = insert("old", "PROCESSING", null, 0);
+		insert("new", "PROCESSING", null, 0);
+		// DB 시각 기준으로 뺀다. 애플리케이션 시각과 견주면 서버 시간대에 따라 어긋난다.
+		entityManager.createNativeQuery("UPDATE articles SET created_at = NOW(6) - INTERVAL 95 MINUTE "
+				+ "WHERE article_id = ?1").setParameter(1, old).executeUpdate();
+		entityManager.flush();
+
+		// 분 단위 내림이다. 기사 시각은 마이크로초까지 찍혀 94분으로 떨어질 수 있다.
+		assertThat(articleRepository.findOldestAnalysisWaitMinutes(MAX_ATTEMPTS)).isBetween(94L, 96L);
+	}
+
+	@Test
 	void 분석_요청에_필요한_값을_함께_가져온다() {
 		long id = insert("fields", "PROCESSING", null, 0);
 

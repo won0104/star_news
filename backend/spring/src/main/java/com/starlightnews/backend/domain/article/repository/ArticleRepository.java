@@ -219,6 +219,24 @@ public interface ArticleRepository extends Repository<Article, Long> {
 			+ "ORDER BY a.articleId ASC")
 	List<AnalysisTarget> findAnalysisQueue(@Param("maxAttempts") int maxAttempts, Limit limit);
 
+	/** 분석 대기 중인 기사 전체 수. 회차당 상한과 무관하게 얼마나 밀렸는지 본다. */
+	@Query("SELECT COUNT(a) FROM Article a "
+			+ "WHERE a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING "
+			+ "AND a.nodeId IS NULL "
+			+ "AND a.analysisAttempts < :maxAttempts")
+	long countAnalysisQueue(@Param("maxAttempts") int maxAttempts);
+
+	/**
+	 * 분석 대기 중인 기사 중 가장 오래 기다린 것이 수집된 지 몇 분 됐는지. 대기가 없으면 null.
+	 *
+	 * <p>DB 안에서 뺀다. created_at 은 컬럼 기본값(DB 서버 시각)으로 찍혀, 애플리케이션 시각과
+	 * 견주면 서버 시간대가 다를 때 몇 시간씩 어긋난다.
+	 */
+	@Query(value = "SELECT TIMESTAMPDIFF(MINUTE, MIN(created_at), NOW()) FROM articles "
+			+ "WHERE analysis_status = 'PROCESSING' AND node_id IS NULL "
+			+ "AND analysis_attempts < :maxAttempts", nativeQuery = true)
+	Long findOldestAnalysisWaitMinutes(@Param("maxAttempts") int maxAttempts);
+
 	/** 주어진 ID 중 지정한 분석 상태의 기사 ID만 반환한다. */
 	@Query("SELECT a.articleId FROM Article a "
 			+ "WHERE a.articleId IN :articleIds AND a.analysisStatus = :analysisStatus")

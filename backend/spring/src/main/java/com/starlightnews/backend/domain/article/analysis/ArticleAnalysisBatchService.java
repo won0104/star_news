@@ -41,13 +41,29 @@ public class ArticleAnalysisBatchService {
 			return ArticleAnalysisBatchResult.empty();
 		}
 
+		long waitingBefore = articleRepository.countAnalysisQueue(properties.maxAttempts());
 		ArticleAnalysisBatchResult result = run(queue);
 
-		log.info("기사 분석 회차 종료: 대상 {}건, 처리 {}건 (완료 {}, 제외 {}, 재시도 {}, 포기 {}, 오류 {}){}",
-				queue.size(), result.processed(), result.completed(), result.dropped(),
-				result.willRetry(), result.gaveUp(), result.errors(),
+		log.info("기사 분석 회차 종료: 대기 {}건 중 {}건 처리 (완료 {}, 제외 {}, 재시도 {}, 포기 {}, 오류 {}), {}{}",
+				waitingBefore, result.processed(), result.completed(), result.dropped(),
+				result.willRetry(), result.gaveUp(), result.errors(), backlog(),
 				result.stopReason() == null ? "" : ", 중단: " + result.stopReason());
 		return result;
+	}
+
+	/**
+	 * 회차가 끝난 뒤 남은 대기를 적는다.
+	 */
+	private String backlog() {
+		long waiting = articleRepository.countAnalysisQueue(properties.maxAttempts());
+		if (waiting == 0) {
+			return "남은 대기 없음";
+		}
+		Long oldestMinutes = articleRepository.findOldestAnalysisWaitMinutes(properties.maxAttempts());
+		return oldestMinutes == null
+				? "남은 대기 %d건".formatted(waiting)
+				: "남은 대기 %d건 (가장 오래 기다린 기사 %d시간 %d분)"
+						.formatted(waiting, oldestMinutes / 60, oldestMinutes % 60);
 	}
 
 	private ArticleAnalysisBatchResult run(List<AnalysisTarget> queue) {
