@@ -276,4 +276,8 @@ export const trendSkyExpandCopy = {
   detailFailed: '이 Node의 상세를 불러오지 못했어요.',
   detailTime: (at) => `${at} 발생`,
   close: '닫기',
+  bookmark: '즐겨찾기',
+  unbookmark: '즐겨찾기 해제',
+  signInToBookmark: '로그인하면 즐겨찾기할 수 있어요.',
+  bookmarkFailed: '저장하지 못했어요. 다시 시도해 주세요.',
 }

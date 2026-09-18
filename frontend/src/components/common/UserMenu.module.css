@@ -87,3 +87,25 @@
     top: calc(100% + 13px);
   }
 }
+
+/*
+ * The rail layout's panel (see UserMenu.jsx): portalled to body and centred on the
+ * screen, because the mark sits at the bottom of the rail and a dropdown from there would
+ * open past the viewport. `right: auto` undoes the dropdown anchor. Above the scene and
+ * the bar (z 10), below the settings overlay (z 40) it hands off to.
+ */
+.panelCentred {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  min-width: 240px;
+  padding: 10px;
+}
+
+.panelCentred .item {
+  padding: 11px 12px;
+  font-size: 15px;
+}

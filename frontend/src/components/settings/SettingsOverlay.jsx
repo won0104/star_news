@@ -2,8 +2,6 @@ import { useEffect, useRef } from 'react';
 import { settingsCopy, settingsPanes } from '../../data/settings';
 import { closeSettings, openSettings, useSettingsSection } from '../../store/settings';
 import { AccountPane } from './AccountPane';
-import { DislikesPane } from './DislikesPane';
-import { DisplayPane } from './DisplayPane';
 import { InterestPane } from './InterestPane';
 import styles from './SettingsOverlay.module.css';
 
@@ -14,7 +12,9 @@ import styles from './SettingsOverlay.module.css';
  * looking at and the top bar's account menu is the only thing that has to know it
  * exists. Renders nothing until a pane is asked for.
  *
- * All four panes are built.
+ * Two panes: 관심 관리 (both topic lists, written to the server) and 계정 (who is signed in,
+ * and 회원 탈퇴). What was taken out and why is in data/settings.js. The rail renders from
+ * `settingsPanes`, so adding a pane is a list entry there and a branch below.
  */
 export function SettingsOverlay() {
   const section = useSettingsSection();
@@ -94,10 +94,8 @@ export function SettingsOverlay() {
             </svg>
           </button>
 
-          {section === 'account' && <AccountPane />}
           {section === 'interest' && <InterestPane />}
-          {section === 'dislikes' && <DislikesPane />}
-          {section === 'display' && <DisplayPane />}
+          {section === 'account' && <AccountPane />}
         </div>
       </div>
     </div>

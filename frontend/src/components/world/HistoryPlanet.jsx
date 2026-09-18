@@ -26,7 +26,7 @@ const TOPIC_COLORS = {
   ECONOMY: 0xe7bc5b,
   SOCIETY: 0x80d7c1,
   CULTURE: 0xefb484,
-  WORLD: 0xc09bf4,
+  INTERNATIONAL: 0xc09bf4,
   SPORTS: 0x6fcde2,
   IT_SCIENCE: 0x7aa4ff,
 };
