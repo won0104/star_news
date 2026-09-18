@@ -3,7 +3,13 @@ package com.starlightnews.backend.domain.recommendation;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationRun;
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationRunChunk;
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationRunChunkStatus;
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationRunStatus;
 import com.starlightnews.backend.domain.recommendation.domain.UserRecommendation;
+import com.starlightnews.backend.domain.recommendation.repository.RecommendationRunChunkRepository;
+import com.starlightnews.backend.domain.recommendation.repository.RecommendationRunRepository;
 import com.starlightnews.backend.domain.recommendation.repository.UserRecommendationRepository;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationBatchResult;
 import com.starlightnews.backend.domain.recommendation.service.EventSummaryService;
@@ -100,6 +106,12 @@ class RecommendationBatchIntegrationTest {
 
 	@Autowired
 	private MockRestServiceServer fastApiMockServer;
+
+	@Autowired
+	private RecommendationRunRepository runRepository;
+
+	@Autowired
+	private RecommendationRunChunkRepository chunkRepository;
 
 	@Autowired
 	private FastApiProperties fastApiProperties;
@@ -225,5 +237,69 @@ class RecommendationBatchIntegrationTest {
 
 		assertThat(userRecommendationRepository.findByUserIdAndAvailableAtOrderByRankAsc(
 				1L, LocalDateTime.of(2026, 9, 15, 18, 0))).hasSize(1);
+	}
+
+	// --- 실행 기록 ---
+
+	private RecommendationRun latestRun() {
+		entityManager.flush();
+		entityManager.clear();
+		return runRepository.findAll().stream()
+				.filter(run -> run.getAvailableAt().equals(AVAILABLE_AT))
+				.reduce((first, second) -> second)
+				.orElseThrow();
+	}
+
+	@Test
+	void 모든_묶음이_성공하면_완료로_기록된다() {
+		expectCalculate(responseFor(1L));
+		expectCalculate(responseFor(2L));
+
+		batchService.generate(MORNING_RUN);
+
+		RecommendationRun run = latestRun();
+		assertThat(run.getStatus()).isEqualTo(RecommendationRunStatus.COMPLETED);
+		assertThat(run.getCycle()).isEqualTo(RecommendationCycle.AM);
+		assertThat(run.getStartedAt()).isEqualTo(MORNING_RUN);
+		assertThat(run.getFinishedAt()).isNotNull();
+		assertThat(run.getTotalChunks()).isEqualTo(2);
+		assertThat(run.getTargetUsers()).isEqualTo(2);
+		assertThat(run.getStoredUsers()).isEqualTo(2);
+	}
+
+	@Test
+	void 실패한_묶음은_사용자와_원인이_남고_회차는_부분_완료다() {
+		// 묶음 크기 1이라 사용자 1 묶음이 실패, 사용자 2 묶음이 성공한다.
+		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+				.andExpect(jsonPath("$.users[0].userId").value(1))
+				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+		expectCalculate(responseFor(2L));
+
+		batchService.generate(MORNING_RUN);
+
+		RecommendationRun run = latestRun();
+		assertThat(run.getStatus()).isEqualTo(RecommendationRunStatus.PARTIAL);
+		assertThat(run.getFailedChunks()).isEqualTo(1);
+		assertThat(run.getFailedUsers()).isEqualTo(1);
+
+		List<RecommendationRunChunk> chunks = chunkRepository.findByRunIdOrderByChunkNoAsc(run.getRunId());
+		assertThat(chunks).hasSize(2);
+		assertThat(chunks.get(0).getStatus()).isEqualTo(RecommendationRunChunkStatus.FAILED);
+		assertThat(chunks.get(0).getUserIds()).containsExactly(1L);
+		assertThat(chunks.get(0).getFailureCode()).isEqualTo("INTERNAL_API_UNAVAILABLE");
+		assertThat(chunks.get(1).getStatus()).isEqualTo(RecommendationRunChunkStatus.SUCCEEDED);
+		assertThat(chunks.get(1).getFailureCode()).isNull();
+	}
+
+	@Test
+	void 모든_묶음이_실패하면_실패로_기록된다() {
+		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+
+		batchService.generate(MORNING_RUN);
+
+		assertThat(latestRun().getStatus()).isEqualTo(RecommendationRunStatus.FAILED);
 	}
 }

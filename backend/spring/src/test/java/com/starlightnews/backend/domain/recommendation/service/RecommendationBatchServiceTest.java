@@ -2,13 +2,15 @@ package com.starlightnews.backend.domain.recommendation.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import com.starlightnews.backend.domain.recommendation.domain.RecommendationCycleWindow;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateRequest;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateResponse;
 import com.starlightnews.backend.domain.recommendation.repository.RecommendationTargetRepository;
+import com.starlightnews.backend.domain.recommendation.service.RecommendationCalculateOutcome.Calculated;
+import com.starlightnews.backend.domain.recommendation.service.RecommendationCalculateOutcome.Failed;
+import com.starlightnews.backend.global.client.InternalApiErrorCode;
 import com.starlightnews.backend.global.enums.RecommendationCycle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +22,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -31,6 +36,7 @@ class RecommendationBatchServiceTest {
 
 	private static final LocalDateTime MORNING_RUN = LocalDateTime.of(2026, 9, 15, 5, 30);
 	private static final LocalDateTime AVAILABLE_AT = LocalDateTime.of(2026, 9, 15, 6, 0);
+	private static final Long RUN_ID = 42L;
 
 	@Mock
 	private RecommendationTargetRepository targetRepository;
@@ -47,18 +53,29 @@ class RecommendationBatchServiceTest {
 	@Mock
 	private RecommendationRetentionService retentionService;
 
+	@Mock
+	private RecommendationRunRecorder runRecorder;
+
 	private RecommendationBatchService service;
 
 	@BeforeEach
 	void setUp() {
 		// 보관 7일, 묶음 2명, 사용자별 10건
 		service = new RecommendationBatchService(targetRepository, calculateClient, storeService,
-				summaryService, retentionService, new RecommendationProperties(7, 2, 10));
+				summaryService, retentionService, runRecorder, new RecommendationProperties(7, 2, 10));
 	}
 
 	private RecommendationCalculateResponse response() {
 		return new RecommendationCalculateResponse(
 				new RecommendationCalculateResponse.Data("AM", List.of()));
+	}
+
+	private RecommendationCalculateOutcome calculated() {
+		return new Calculated(response());
+	}
+
+	private RecommendationCalculateOutcome failed() {
+		return new Failed(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
 	}
 
 	@SafeVarargs
@@ -71,7 +88,7 @@ class RecommendationBatchServiceTest {
 	}
 
 	private void givenCalculateSucceeds() {
-		given(calculateClient.calculate(any())).willReturn(Optional.of(response()));
+		given(calculateClient.calculate(any())).willReturn(calculated());
 	}
 
 	@Test
@@ -127,7 +144,7 @@ class RecommendationBatchServiceTest {
 	void 묶음_계산이_실패해도_나머지를_계속한다() {
 		givenUserPages(List.of(1L, 2L), List.of(3L, 4L));
 		given(calculateClient.calculate(any()))
-				.willReturn(Optional.empty(), Optional.of(response()));
+				.willReturn(failed(), calculated());
 		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
 				.willReturn(new RecommendationStoreResult(2, 6, 0));
 
@@ -140,7 +157,7 @@ class RecommendationBatchServiceTest {
 	@Test
 	void 계산에_실패한_묶음은_저장하지_않는다() {
 		givenUserPages(List.of(1L, 2L));
-		given(calculateClient.calculate(any())).willReturn(Optional.empty());
+		given(calculateClient.calculate(any())).willReturn(failed());
 
 		service.generate(MORNING_RUN);
 
@@ -210,6 +227,83 @@ class RecommendationBatchServiceTest {
 		service.generate(MORNING_RUN);
 
 		verify(summaryService).generateForCycle(AVAILABLE_AT);
+	}
+
+	// --- 실행 기록 ---
+
+	@Test
+	void 회차_시작과_끝을_기록한다() {
+		given(runRecorder.start(any(), any())).willReturn(RUN_ID);
+		givenUserPages(List.of(1L, 2L), List.of(3L));
+		givenCalculateSucceeds();
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(new RecommendationStoreResult(2, 6, 0), new RecommendationStoreResult(1, 3, 0));
+
+		service.generate(MORNING_RUN);
+
+		verify(runRecorder).start(RecommendationCycleWindow.from(MORNING_RUN), MORNING_RUN);
+		verify(runRecorder).succeeded(RUN_ID, 0, List.of(1L, 2L));
+		verify(runRecorder).succeeded(RUN_ID, 1, List.of(3L));
+		verify(runRecorder).finish(eq(RUN_ID), eq(2), eq(0), eq(3),
+				eq(new RecommendationBatchResult(3, 9, 0, 0)), any());
+	}
+
+	@Test
+	void 계산에_실패한_묶음은_원인과_사용자를_기록한다() {
+		// 사용자 목록이 있어야 나중에 같은 사람들로 다시 보낼 수 있다.
+		given(runRecorder.start(any(), any())).willReturn(RUN_ID);
+		givenUserPages(List.of(1L, 2L), List.of(3L, 4L));
+		given(calculateClient.calculate(any())).willReturn(failed(), calculated());
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(new RecommendationStoreResult(2, 6, 0));
+
+		service.generate(MORNING_RUN);
+
+		verify(runRecorder).failed(RUN_ID, 0, List.of(1L, 2L), "INTERNAL_API_UNAVAILABLE");
+		verify(runRecorder).succeeded(RUN_ID, 1, List.of(3L, 4L));
+		verify(runRecorder).finish(eq(RUN_ID), eq(2), eq(1), eq(4), any(), any());
+	}
+
+	@Test
+	void 저장이_실패한_묶음도_실패로_기록하고_다음_묶음을_계속한다() {
+		// 저장은 묶음 단위 트랜잭션이라 이 묶음만 되돌아간다. 회차를 멈출 이유가 없다.
+		given(runRecorder.start(any(), any())).willReturn(RUN_ID);
+		givenUserPages(List.of(1L, 2L), List.of(3L));
+		givenCalculateSucceeds();
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willThrow(new IllegalStateException("저장 실패"))
+				.willReturn(new RecommendationStoreResult(1, 3, 0));
+
+		RecommendationBatchResult result = service.generate(MORNING_RUN);
+
+		assertThat(result).isEqualTo(new RecommendationBatchResult(1, 3, 0, 2));
+		verify(runRecorder).failed(RUN_ID, 0, List.of(1L, 2L), RecommendationBatchService.STORE_FAILED);
+		verify(runRecorder).succeeded(RUN_ID, 1, List.of(3L));
+	}
+
+	@Test
+	void 사용자가_없으면_묶음_없이_끝난_회차로_기록한다() {
+		given(runRecorder.start(any(), any())).willReturn(RUN_ID);
+		given(targetRepository.findTargetUserIds(any(Pageable.class))).willReturn(List.of());
+
+		service.generate(MORNING_RUN);
+
+		verify(runRecorder).finish(eq(RUN_ID), eq(0), eq(0), eq(0),
+				eq(RecommendationBatchResult.empty()), any());
+	}
+
+	@Test
+	void 묶음_바깥에서_실패하면_중단으로_기록하고_예외를_올린다() {
+		// RUNNING 으로 남기면 끝난 회차인지 도는 중인지 구분할 수 없다.
+		given(runRecorder.start(any(), any())).willReturn(RUN_ID);
+		given(targetRepository.findTargetUserIds(any(Pageable.class)))
+				.willThrow(new IllegalStateException("DB 연결 끊김"));
+
+		assertThatThrownBy(() -> service.generate(MORNING_RUN)).isInstanceOf(IllegalStateException.class);
+
+		verify(runRecorder).abort(eq(RUN_ID), any());
+		verify(runRecorder, never()).finish(any(), anyInt(), anyInt(), anyInt(), any(), any());
+		verify(summaryService, never()).generateForCycle(any());
 	}
 
 	@Test
