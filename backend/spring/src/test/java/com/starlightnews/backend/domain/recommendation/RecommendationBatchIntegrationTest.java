@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -55,7 +56,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 		// 키가 없으면 FastApiClient 가 호출 전에 끊는다. 테스트 환경에는 실제 키가 없다.
 		"app.fastapi.api-key=test-internal-key",
 		"app.recommendation.chunk-size=1",
-		"app.recommendation.limit-per-user=10"
+		"app.recommendation.limit-per-user=10",
+		"app.recommendation.max-attempts=3",
+		"app.recommendation.retry-delay=0s"
 })
 @ActiveProfiles("test")
 @Transactional
@@ -198,7 +201,9 @@ class RecommendationBatchIntegrationTest {
 
 	@Test
 	void 한_묶음이_실패해도_다른_묶음은_저장된다() {
-		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+		// 500 은 일시 실패로 보고 최대 시도 횟수만큼 다시 보낸다.
+		fastApiMockServer.expect(ExpectedCount.times(3), requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+				.andExpect(jsonPath("$.users[0].userId").value(1))
 				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
 		expectCalculate(responseFor(2L));
 
@@ -270,7 +275,7 @@ class RecommendationBatchIntegrationTest {
 	@Test
 	void 실패한_묶음은_사용자와_원인이_남고_회차는_부분_완료다() {
 		// 묶음 크기 1이라 사용자 1 묶음이 실패, 사용자 2 묶음이 성공한다.
-		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+		fastApiMockServer.expect(ExpectedCount.times(3), requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
 				.andExpect(jsonPath("$.users[0].userId").value(1))
 				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
 		expectCalculate(responseFor(2L));
@@ -287,19 +292,58 @@ class RecommendationBatchIntegrationTest {
 		assertThat(chunks.get(0).getStatus()).isEqualTo(RecommendationRunChunkStatus.FAILED);
 		assertThat(chunks.get(0).getUserIds()).containsExactly(1L);
 		assertThat(chunks.get(0).getFailureCode()).isEqualTo("INTERNAL_API_UNAVAILABLE");
+		assertThat(chunks.get(0).getAttempts()).isEqualTo(3);
 		assertThat(chunks.get(1).getStatus()).isEqualTo(RecommendationRunChunkStatus.SUCCEEDED);
 		assertThat(chunks.get(1).getFailureCode()).isNull();
 	}
 
 	@Test
 	void 모든_묶음이_실패하면_실패로_기록된다() {
-		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
-				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
-		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+		fastApiMockServer.expect(ExpectedCount.times(6), requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
 				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
 
 		batchService.generate(MORNING_RUN);
 
 		assertThat(latestRun().getStatus()).isEqualTo(RecommendationRunStatus.FAILED);
+	}
+
+	@Test
+	void 일시_실패한_묶음은_재시도로_살아나_완료로_기록된다() {
+		// 먼저 등록한 기대가 먼저 쓰인다. 사용자 1 은 처음에 503, 두 번째에 성공한다.
+		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+				.andExpect(jsonPath("$.users[0].userId").value(1))
+				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+		fastApiMockServer.expect(requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+				.andExpect(jsonPath("$.users[0].userId").value(1))
+				.andRespond(withSuccess(responseFor(1L), MediaType.APPLICATION_JSON));
+		expectCalculate(responseFor(2L));
+
+		RecommendationBatchResult result = batchService.generate(MORNING_RUN);
+
+		fastApiMockServer.verify();
+		assertThat(result.failedUsers()).isZero();
+		assertThat(storedFor(1L)).hasSize(1);
+
+		RecommendationRun run = latestRun();
+		assertThat(run.getStatus()).isEqualTo(RecommendationRunStatus.COMPLETED);
+		RecommendationRunChunk first = chunkRepository.findByRunIdOrderByChunkNoAsc(run.getRunId()).get(0);
+		assertThat(first.getStatus()).isEqualTo(RecommendationRunChunkStatus.SUCCEEDED);
+		assertThat(first.getAttempts()).isEqualTo(2);
+		assertThat(first.getFailureCode()).isNull();
+	}
+
+	@Test
+	void User_Graph가_없는_404는_다시_보내지_않는다() {
+		fastApiMockServer.expect(ExpectedCount.once(), requestTo(fastApiProperties.baseUrl() + CALCULATE_URL))
+				.andExpect(jsonPath("$.users[0].userId").value(1))
+				.andRespond(withStatus(HttpStatus.NOT_FOUND));
+		expectCalculate(responseFor(2L));
+
+		batchService.generate(MORNING_RUN);
+
+		// 한 번 더 부르면 기대 횟수를 넘겨 여기서 실패한다.
+		fastApiMockServer.verify();
+		assertThat(chunkRepository.findByRunIdOrderByChunkNoAsc(latestRun().getRunId()).get(0).getAttempts())
+				.isEqualTo(1);
 	}
 }

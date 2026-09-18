@@ -77,4 +77,18 @@ public class RecommendationRunChunk {
 		return new RecommendationRunChunk(runId, chunkNo, userIds, RecommendationRunChunkStatus.FAILED,
 				failureCode);
 	}
+
+	/** 다시 보내 성공했다. */
+	public void retrySucceeded() {
+		this.attempts++;
+		this.status = RecommendationRunChunkStatus.SUCCEEDED;
+		this.failureCode = null;
+	}
+
+	/** 다시 보냈지만 또 실패했다. 원인은 마지막 것으로 바꾼다. */
+	public void retryFailed(String failureCode) {
+		this.attempts++;
+		this.status = RecommendationRunChunkStatus.FAILED;
+		this.failureCode = failureCode;
+	}
 }

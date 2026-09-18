@@ -1,5 +1,6 @@
 package com.starlightnews.backend.domain.recommendation.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -60,9 +61,10 @@ class RecommendationBatchServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		// 보관 7일, 묶음 2명, 사용자별 10건
+		// 보관 7일, 묶음 2명, 사용자별 10건, 최대 3번 시도, 재시도 대기 없음
 		service = new RecommendationBatchService(targetRepository, calculateClient, storeService,
-				summaryService, retentionService, runRecorder, new RecommendationProperties(7, 2, 10));
+				summaryService, retentionService, runRecorder,
+				new RecommendationProperties(7, 2, 10, 3, Duration.ZERO));
 	}
 
 	private RecommendationCalculateResponse response() {
@@ -74,7 +76,13 @@ class RecommendationBatchServiceTest {
 		return new Calculated(response());
 	}
 
+	/** 다시 보내도 소용없는 실패. User Graph 가 없는 사용자가 섞인 경우다. */
 	private RecommendationCalculateOutcome failed() {
+		return new Failed(InternalApiErrorCode.INTERNAL_API_NOT_FOUND);
+	}
+
+	/** FastAPI 가 잠깐 막힌 실패. 같은 회차 안에서 다시 보낸다. */
+	private RecommendationCalculateOutcome unavailable() {
 		return new Failed(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
 	}
 
@@ -259,7 +267,7 @@ class RecommendationBatchServiceTest {
 
 		service.generate(MORNING_RUN);
 
-		verify(runRecorder).failed(RUN_ID, 0, List.of(1L, 2L), "INTERNAL_API_UNAVAILABLE");
+		verify(runRecorder).failed(RUN_ID, 0, List.of(1L, 2L), "INTERNAL_API_NOT_FOUND");
 		verify(runRecorder).succeeded(RUN_ID, 1, List.of(3L, 4L));
 		verify(runRecorder).finish(eq(RUN_ID), eq(2), eq(1), eq(4), any(), any());
 	}
@@ -276,9 +284,101 @@ class RecommendationBatchServiceTest {
 
 		RecommendationBatchResult result = service.generate(MORNING_RUN);
 
-		assertThat(result).isEqualTo(new RecommendationBatchResult(1, 3, 0, 2));
 		verify(runRecorder).failed(RUN_ID, 0, List.of(1L, 2L), RecommendationBatchService.STORE_FAILED);
 		verify(runRecorder).succeeded(RUN_ID, 1, List.of(3L));
+		// 저장 실패는 이 묶음만 되돌아가 있어 다시 보내도 안전하다. 재시도에서 살아난다.
+		verify(runRecorder).retried(RUN_ID, 0, null);
+		assertThat(result.failedUsers()).isZero();
+	}
+
+	// --- 재시도 ---
+
+	@Test
+	void 일시적으로_실패한_묶음을_다시_보내_살린다() {
+		given(runRecorder.start(any(), any())).willReturn(RUN_ID);
+		givenUserPages(List.of(1L, 2L), List.of(3L));
+		given(calculateClient.calculate(any())).willReturn(unavailable(), calculated(), calculated());
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(new RecommendationStoreResult(1, 3, 0), new RecommendationStoreResult(2, 6, 0));
+
+		RecommendationBatchResult result = service.generate(MORNING_RUN);
+
+		assertThat(result).isEqualTo(new RecommendationBatchResult(3, 9, 0, 0));
+		verify(runRecorder).failed(RUN_ID, 0, List.of(1L, 2L), "INTERNAL_API_UNAVAILABLE");
+		verify(runRecorder).retried(RUN_ID, 0, null);
+		verify(runRecorder).finish(eq(RUN_ID), eq(2), eq(0), eq(3), any(), any());
+	}
+
+	@Test
+	void 한_바퀴를_다_돈_뒤_실패한_사용자_그대로_다시_보낸다() {
+		// 실패 직후 바로 부르면 막힌 FastAPI 에 또 부딪치고 뒤 묶음이 밀린다.
+		givenUserPages(List.of(1L, 2L), List.of(3L));
+		given(calculateClient.calculate(any())).willReturn(unavailable(), calculated(), calculated());
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(RecommendationStoreResult.empty());
+
+		service.generate(MORNING_RUN);
+
+		ArgumentCaptor<RecommendationCalculateRequest> captor =
+				ArgumentCaptor.forClass(RecommendationCalculateRequest.class);
+		verify(calculateClient, times(3)).calculate(captor.capture());
+		assertThat(captor.getAllValues())
+				.extracting(request -> request.users().stream()
+						.map(RecommendationCalculateRequest.UserRequest::userId).toList())
+				.containsExactly(List.of(1L, 2L), List.of(3L), List.of(1L, 2L));
+	}
+
+	@Test
+	void 최대_시도_횟수까지만_보낸다() {
+		given(runRecorder.start(any(), any())).willReturn(RUN_ID);
+		givenUserPages(List.of(1L, 2L));
+		given(calculateClient.calculate(any())).willReturn(unavailable());
+
+		RecommendationBatchResult result = service.generate(MORNING_RUN);
+
+		// 첫 시도 포함 3번
+		verify(calculateClient, times(3)).calculate(any());
+		verify(runRecorder, times(2)).retried(RUN_ID, 0, "INTERNAL_API_UNAVAILABLE");
+		verify(runRecorder).finish(eq(RUN_ID), eq(1), eq(1), eq(2), any(), any());
+		assertThat(result.failedUsers()).isEqualTo(2);
+	}
+
+	@Test
+	void 다시_보내도_소용없는_실패는_재시도하지_않는다() {
+		// User Graph 가 없는 404 는 다음 동기화가 돌아야 풀린다. 공개까지 남은 시간만 쓴다.
+		givenUserPages(List.of(1L, 2L));
+		given(calculateClient.calculate(any())).willReturn(failed());
+
+		service.generate(MORNING_RUN);
+
+		verify(calculateClient, times(1)).calculate(any());
+		verify(runRecorder, never()).retried(any(), anyInt(), any());
+	}
+
+	@Test
+	void 성공한_묶음은_다시_보내지_않는다() {
+		givenUserPages(List.of(1L, 2L), List.of(3L));
+		givenCalculateSucceeds();
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(RecommendationStoreResult.empty());
+
+		service.generate(MORNING_RUN);
+
+		verify(calculateClient, times(2)).calculate(any());
+		verify(runRecorder, never()).retried(any(), anyInt(), any());
+	}
+
+	@Test
+	void 시도_횟수가_1이면_재시도하지_않는다() {
+		RecommendationBatchService noRetry = new RecommendationBatchService(targetRepository, calculateClient,
+				storeService, summaryService, retentionService, runRecorder,
+				new RecommendationProperties(7, 2, 10, 1, Duration.ZERO));
+		givenUserPages(List.of(1L, 2L));
+		given(calculateClient.calculate(any())).willReturn(unavailable());
+
+		noRetry.generate(MORNING_RUN);
+
+		verify(calculateClient, times(1)).calculate(any());
 	}
 
 	@Test

@@ -41,6 +41,22 @@ public class RecommendationRunRecorder {
 		chunkRepository.save(RecommendationRunChunk.failed(runId, chunkNo, userIds, failureCode));
 	}
 
+	/**
+	 * 실패했던 묶음을 다시 보낸 결과를 남긴다.
+	 *
+	 * @param failureCode 또 실패했으면 그 원인, 성공했으면 {@code null}
+	 */
+	@Transactional
+	public void retried(Long runId, int chunkNo, String failureCode) {
+		chunkRepository.findByRunIdAndChunkNo(runId, chunkNo).ifPresent(chunk -> {
+			if (failureCode == null) {
+				chunk.retrySucceeded();
+			} else {
+				chunk.retryFailed(failureCode);
+			}
+		});
+	}
+
 	@Transactional
 	public void finish(Long runId, int totalChunks, int failedChunks, int targetUsers,
 			RecommendationBatchResult result, LocalDateTime finishedAt) {
