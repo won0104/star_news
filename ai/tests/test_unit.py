@@ -28,6 +28,27 @@ def test_preprocess_keeps_sentence_lines():
     assert "@spam" not in out
 
 
+def test_preprocess_strips_emoji_and_symbols():
+    raw = "정부가 정책을 발표했다 😀🎉.\n★속보★ 금리가 인하됐다.\n😊😊😊"
+    out = preprocess_content(raw)
+    assert "정부가 정책을 발표했다." in out
+    assert "금리가 인하됐다." in out
+    assert "😀" not in out
+    assert "🎉" not in out
+    assert "★" not in out
+    assert "😊" not in out
+
+
+def test_preprocess_strips_triangle_keeps_hanja():
+    # 뉴스 불릿 △는 제거하고 이름만 남긴다. 한자는 유지.
+    raw = "△최영상 기자가 전했다.\n金正恩 위원장이 방문했다."
+    out = preprocess_content(raw)
+    assert "최영상 기자가 전했다." in out
+    assert "△" not in out
+    assert "金正恩 위원장이 방문했다." in out
+    assert "金正恩" in out
+
+
 def test_noise_entity_filter():
     assert is_noise_entity_name('"')
     assert is_noise_entity_name('""')
