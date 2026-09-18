@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
 import com.starlightnews.backend.global.enums.SummaryStatus;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
@@ -133,6 +134,108 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	/** articleId 목록으로 기사를 언론사와 함께(JOIN FETCH) 조회한다. */
 	@Query("SELECT a FROM Article a JOIN FETCH a.organization WHERE a.articleId IN :articleIds")
 	List<Article> findAllWithOrganizationByArticleIdIn(@Param("articleIds") Collection<Long> articleIds);
+
+	/**
+	 * AI 분석 결과를 반영한다.
+	 *
+	 * <p>분석 대기(PROCESSING) 중인 기사만 바꾼다. 그사이 다른 경로가 상태를 바꿨으면 덮어쓰지 않는다.
+	 *
+	 * @return 바뀐 행 수. 0 이면 이미 분석 대기가 아니었다
+	 */
+	@Modifying
+	@Query("UPDATE Article a SET a.nodeId = :nodeId, a.topicCode = :topicCode, "
+			+ "a.subtopicCode = :subtopicCode, "
+			+ "a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.COMPLETED "
+			+ "WHERE a.articleId = :articleId "
+			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
+	int markAnalyzed(@Param("articleId") Long articleId,
+			@Param("nodeId") String nodeId,
+			@Param("topicCode") String topicCode,
+			@Param("subtopicCode") String subtopicCode);
+
+	/**
+	 * 분석할 수 없는 기사로 표시한다. 다시 불러도 같은 결과라 분석 대상에서 뺀다.
+	 *
+	 * @return 바뀐 행 수. 0 이면 이미 분석 대기가 아니었다
+	 */
+	@Modifying
+	@Query("UPDATE Article a "
+			+ "SET a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.DROPPED "
+			+ "WHERE a.articleId = :articleId "
+			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
+	int markAnalysisRejected(@Param("articleId") Long articleId);
+
+	/**
+	 * 일시 실패를 한 번 센다. 한도에 닿으면 FAILED 로 두어 더 부르지 않는다.
+	 *
+	 * <p><b>상태를 먼저 대입해야 한다.</b> MySQL 은 SET 을 왼쪽부터 평가하고 앞에서 바꾼 값을 뒤에서
+	 * 그대로 본다. 횟수를 먼저 올리면 뒤의 비교가 이미 올라간 값에 다시 1 을 더해, 한도보다 한 번
+	 * 일찍 FAILED 가 된다.
+	 *
+	 * @return 바뀐 행 수. 0 이면 이미 분석 대기가 아니었다
+	 */
+	@Modifying
+	@Query("UPDATE Article a "
+			+ "SET a.analysisStatus = CASE WHEN a.analysisAttempts + 1 >= :maxAttempts "
+			+ "        THEN com.starlightnews.backend.global.enums.AnalysisStatus.FAILED "
+			+ "        ELSE com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING END, "
+			+ "    a.analysisAttempts = a.analysisAttempts + 1 "
+			+ "WHERE a.articleId = :articleId "
+			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
+	int recordAnalysisFailure(@Param("articleId") Long articleId, @Param("maxAttempts") int maxAttempts);
+
+	/** 기사의 현재 분석 상태. */
+	@Query("SELECT a.analysisStatus FROM Article a WHERE a.articleId = :articleId")
+	Optional<AnalysisStatus> findAnalysisStatus(@Param("articleId") Long articleId);
+
+	/** AI 분석에 넘길 기사 한 건. */
+	interface AnalysisTarget {
+		Long getArticleId();
+
+		String getTitle();
+
+		String getContent();
+
+		Long getOrganizationId();
+
+		String getOrganizationName();
+
+		LocalDateTime getPublishedAt();
+	}
+
+	/**
+	 * 분석 대기 중인 기사를 오래된 순으로 고른다.
+	 *
+	 * <p>node_id 가 이미 있으면 뺀다. Spring 이 응답을 받기 전에 끊겼어도 FastAPI 는 끝까지 반영하므로,
+	 * 다음 회차에 같은 기사를 다시 부를 수는 있다. 그때 MERGE 라 노드가 늘지는 않지만, 이미 반영된
+	 * 기사를 굳이 다시 부를 이유는 없다.
+	 */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.content AS content, "
+			+ "o.id AS organizationId, o.name AS organizationName, a.publishedAt AS publishedAt "
+			+ "FROM Article a JOIN a.organization o "
+			+ "WHERE a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING "
+			+ "AND a.nodeId IS NULL "
+			+ "AND a.analysisAttempts < :maxAttempts "
+			+ "ORDER BY a.articleId ASC")
+	List<AnalysisTarget> findAnalysisQueue(@Param("maxAttempts") int maxAttempts, Limit limit);
+
+	/** 분석 대기 중인 기사 전체 수. 회차당 상한과 무관하게 얼마나 밀렸는지 본다. */
+	@Query("SELECT COUNT(a) FROM Article a "
+			+ "WHERE a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING "
+			+ "AND a.nodeId IS NULL "
+			+ "AND a.analysisAttempts < :maxAttempts")
+	long countAnalysisQueue(@Param("maxAttempts") int maxAttempts);
+
+	/**
+	 * 분석 대기 중인 기사 중 가장 오래 기다린 것이 수집된 지 몇 분 됐는지. 대기가 없으면 null.
+	 *
+	 * <p>DB 안에서 뺀다. created_at 은 컬럼 기본값(DB 서버 시각)으로 찍혀, 애플리케이션 시각과
+	 * 견주면 서버 시간대가 다를 때 몇 시간씩 어긋난다.
+	 */
+	@Query(value = "SELECT TIMESTAMPDIFF(MINUTE, MIN(created_at), NOW()) FROM articles "
+			+ "WHERE analysis_status = 'PROCESSING' AND node_id IS NULL "
+			+ "AND analysis_attempts < :maxAttempts", nativeQuery = true)
+	Long findOldestAnalysisWaitMinutes(@Param("maxAttempts") int maxAttempts);
 
 	/** 주어진 ID 중 지정한 분석 상태의 기사 ID만 반환한다. */
 	@Query("SELECT a.articleId FROM Article a "

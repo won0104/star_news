@@ -72,6 +72,10 @@ public class Article {
 	@Column(name = "topic_code", length = 32)
 	private String topicCode;
 
+	/** 분석 단계가 채우는 세부 분야. 수집 시점에는 비어 있다. */
+	@Column(name = "subtopic_code", length = 64)
+	private String subtopicCode;
+
 	@JdbcTypeCode(SqlTypes.LONGVARCHAR)
 	@Column(nullable = false)
 	private String content;
@@ -100,6 +104,10 @@ public class Article {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "analysis_status", nullable = false, length = 32)
 	private AnalysisStatus analysisStatus;
+
+	/** AI 분석이 일시적으로 실패한 횟수. 한도에 닿으면 FAILED 가 된다. */
+	@Column(name = "analysis_attempts", nullable = false)
+	private int analysisAttempts;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")
