@@ -4,11 +4,11 @@ import java.time.OffsetDateTime;
 
 import com.starlightnews.backend.domain.article.dto.ArticleDetailResponse;
 import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryStatus;
 import com.starlightnews.backend.domain.article.exception.ArticleErrorCode;
 import com.starlightnews.backend.domain.article.service.ArticleDetailService;
 import com.starlightnews.backend.domain.article.service.ArticleSummaryService;
 import com.starlightnews.backend.global.config.SecurityConfig;
-import com.starlightnews.backend.global.enums.SummaryStatus;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.request.RequestIdFilter;
 import com.starlightnews.backend.global.security.InMemoryTokenBlacklist;
@@ -57,7 +57,7 @@ class ArticleControllerTest {
 	@Test
 	void 비회원도_기사_요약을_생성하고_200을_응답받는다() throws Exception {
 		given(articleSummaryService.generate(101L)).willReturn(new ArticleSummaryResponse(
-				101L, "생성된 기사 요약", SummaryStatus.COMPLETED));
+				101L, "생성된 기사 요약", ArticleSummaryStatus.COMPLETED));
 
 		mockMvc.perform(post(SUMMARY_PATH, 101L).header(RequestIdFilter.HEADER_NAME, REQUEST_ID))
 				.andExpect(status().isOk())
@@ -71,7 +71,7 @@ class ArticleControllerTest {
 	@Test
 	void 이미_요약_생성중이면_202_PROCESSING을_응답한다() throws Exception {
 		given(articleSummaryService.generate(101L)).willReturn(new ArticleSummaryResponse(
-				101L, null, SummaryStatus.PROCESSING));
+				101L, null, ArticleSummaryStatus.PROCESSING));
 
 		mockMvc.perform(post(SUMMARY_PATH, 101L))
 				.andExpect(status().isAccepted())
@@ -171,7 +171,7 @@ class ArticleControllerTest {
 				"연합뉴스",
 				OffsetDateTime.parse("2026-08-31T10:00:00+09:00"),
 				null,
-				SummaryStatus.PROCESSING,
+				ArticleSummaryStatus.PROCESSING,
 				"https://news.example.com/articles/101",
 				false));
 
@@ -218,7 +218,7 @@ class ArticleControllerTest {
 				"연합뉴스",
 				OffsetDateTime.parse("2026-08-31T10:00:00+09:00"),
 				"저장된 요약",
-				SummaryStatus.COMPLETED,
+				ArticleSummaryStatus.COMPLETED,
 				"https://news.example.com/articles/101",
 				bookmarked);
 	}

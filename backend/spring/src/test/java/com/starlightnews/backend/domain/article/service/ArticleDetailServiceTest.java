@@ -8,6 +8,7 @@ import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.domain.NewsOrganization;
 import com.starlightnews.backend.domain.article.dto.ArticleDetailResponse;
 import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryStatus;
 import com.starlightnews.backend.domain.article.exception.ArticleErrorCode;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
@@ -61,7 +62,7 @@ class ArticleDetailServiceTest {
 		assertThat(response.organizationName()).isEqualTo("연합뉴스");
 		assertThat(response.publishedAt()).isEqualTo(OffsetDateTime.parse("2026-08-31T10:00:00+09:00"));
 		assertThat(response.summary()).isEqualTo("저장된 요약");
-		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.COMPLETED);
+		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.COMPLETED);
 		assertThat(response.originalUrl()).isEqualTo("https://news.example.com/articles/101");
 		assertThat(response.bookmarked()).isFalse();
 		verifyNoInteractions(userArticleFavoriteRepository);
@@ -76,12 +77,12 @@ class ArticleDetailServiceTest {
 		given(userArticleFavoriteRepository.existsById(
 				new UserArticleFavoriteId(USER_ID, ARTICLE_ID))).willReturn(true);
 		given(articleSummaryService.generate(ARTICLE_ID)).willReturn(new ArticleSummaryResponse(
-				ARTICLE_ID, "생성된 요약", SummaryStatus.COMPLETED));
+				ARTICLE_ID, "생성된 요약", ArticleSummaryStatus.COMPLETED));
 
 		ArticleDetailResponse response = articleDetailService.getDetail(ARTICLE_ID, USER_ID);
 
 		assertThat(response.summary()).isEqualTo("생성된 요약");
-		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.COMPLETED);
+		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.COMPLETED);
 		assertThat(response.bookmarked()).isTrue();
 		verify(articleSummaryService).generate(ARTICLE_ID);
 	}
@@ -93,12 +94,12 @@ class ArticleDetailServiceTest {
 		given(articleRepository.findDetailByArticleId(ARTICLE_ID, AnalysisStatus.COMPLETED))
 				.willReturn(Optional.of(article));
 		given(articleSummaryService.generate(ARTICLE_ID)).willReturn(new ArticleSummaryResponse(
-				ARTICLE_ID, null, SummaryStatus.PROCESSING));
+				ARTICLE_ID, null, ArticleSummaryStatus.PROCESSING));
 
 		ArticleDetailResponse response = articleDetailService.getDetail(ARTICLE_ID, null);
 
 		assertThat(response.summary()).isNull();
-		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.PROCESSING);
+		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.PROCESSING);
 	}
 
 	@Test

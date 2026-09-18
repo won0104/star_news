@@ -1,5 +1,8 @@
 package com.starlightnews.backend.global.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -50,6 +53,20 @@ class OpenApiSchemaComponentTest {
 		assertThat(schemas.has("Node")).isFalse();
 		assertThat(schemas.has("Edge")).isFalse();
 		assertThat(schemas.has("NodeSummary")).isFalse();
+
+		assertEnumValues(schemas, "ArticleSummaryResponse", "summaryStatus");
+		assertEnumValues(schemas, "ArticleDetailResponse", "summaryStatus");
+	}
+
+	private void assertEnumValues(JsonNode schemas, String responseSchema, String property) {
+		List<String> values = new ArrayList<>();
+		schemas.path(responseSchema)
+				.path("properties")
+				.path(property)
+				.path("enum")
+				.forEach(value -> values.add(value.asText()));
+
+		assertThat(values).containsExactly("PROCESSING", "COMPLETED");
 	}
 
 	private void assertRef(JsonNode schemas, String responseSchema, String property, String componentSchema) {
