@@ -43,9 +43,6 @@ public record PersonalGraphSummaryResponse(
 			@Schema(description = "화면 표시 이름 (Cluster 는 Topic 한글명, Node 는 node_label)", example = "경제")
 			String title,
 
-			@Schema(description = "Entity.entityType 또는 Statement.statementType. 그 외 null", nullable = true)
-			String type,
-
 			@Schema(description = "연결된 읽은 기사 수", example = "5")
 			int sourceArticleCount,
 

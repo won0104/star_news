@@ -83,9 +83,9 @@ class UserGraphControllerTest {
 				OffsetDateTime.of(2026, 9, 11, 17, 30, 0, 0, ZoneOffset.ofHours(9)),
 				List.of(
 						new PersonalGraphSummaryResponse.Node(
-								"topic:ECONOMY", "TOPIC_CLUSTER", null, null, "ECONOMY", "경제", null, 20, 1.0),
+								"topic:ECONOMY", "TOPIC_CLUSTER", null, null, "ECONOMY", "경제", 20, 1.0),
 						new PersonalGraphSummaryResponse.Node(
-								"ENTITY:" + NODE_KEY, "NODE", "ENTITY", NODE_KEY, "ECONOMY", "한국은행", null, 8, 1.0)),
+								"ENTITY:" + NODE_KEY, "NODE", "ENTITY", NODE_KEY, "ECONOMY", "한국은행", 8, 1.0)),
 				List.of(new PersonalGraphSummaryResponse.Edge(
 						"topic:ECONOMY", "ENTITY:" + NODE_KEY, "BELONGS_TO_TOPIC", 1.0)));
 	}
@@ -94,7 +94,7 @@ class UserGraphControllerTest {
 		List<PersonalGraphSummaryResponse.Node> topicClusters = Arrays.stream(TopicCode.values())
 				.map(topic -> new PersonalGraphSummaryResponse.Node(
 						"topic:" + topic.name(), "TOPIC_CLUSTER", null, null,
-						topic.name(), topic.labelKo(), null, 0, 0.0))
+						topic.name(), topic.labelKo(), 0, 0.0))
 				.toList();
 
 		return new PersonalGraphSummaryResponse(

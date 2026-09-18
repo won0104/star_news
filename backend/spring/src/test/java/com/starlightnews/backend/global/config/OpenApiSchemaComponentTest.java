@@ -45,6 +45,7 @@ class OpenApiSchemaComponentTest {
 		assertArrayItemRef(schemas, "PersonalGraphMapResponse", "edges", "PersonalGraphMapEdge");
 		assertArrayItemRef(schemas, "PersonalGraphSummaryResponse", "nodes", "PersonalGraphSummaryNode");
 		assertArrayItemRef(schemas, "PersonalGraphSummaryResponse", "edges", "PersonalGraphSummaryEdge");
+		assertThat(schemas.path("PersonalGraphSummaryNode").path("properties").has("type")).isFalse();
 		assertRef(schemas, "GraphNeighborsResponse", "centerNode", "GraphNeighborNodeSummary");
 		assertArrayItemRef(schemas, "GraphNeighborsResponse", "nodes", "GraphNeighborNodeSummary");
 		assertArrayItemRef(schemas, "GraphNeighborsResponse", "edges", "GraphNeighborEdge");
@@ -56,6 +57,29 @@ class OpenApiSchemaComponentTest {
 
 		assertEnumValues(schemas, "ArticleSummaryResponse", "summaryStatus");
 		assertEnumValues(schemas, "ArticleDetailResponse", "summaryStatus");
+		assertThat(schemas.path("ArticleHistoryItem")
+				.path("properties")
+				.path("clickCount")
+				.path("description")
+				.asText())
+				.isEqualTo("사용자가 이 기사를 열람한 횟수 (뉴스 카드 클릭 기준)");
+	}
+
+	@Test
+	void 공개_Home_API는_인증을_요구하지_않는다() throws Exception {
+		String document = mockMvc.perform(get("/v3/api-docs"))
+				.andExpect(status().isOk())
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+		JsonNode security = objectMapper.readTree(document)
+				.path("paths")
+				.path("/api/v1/home")
+				.path("get")
+				.path("security");
+
+		assertThat(security.isArray()).isTrue();
+		assertThat(security).isEmpty();
 	}
 
 	private void assertEnumValues(JsonNode schemas, String responseSchema, String property) {
