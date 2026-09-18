@@ -15,12 +15,13 @@ public class Neo4jEventArticleRepository implements EventArticleRepository {
 	/**
 	 * 관련도 높은 순, 같으면 최신 순.
 	 *
-	 * <p>같은 기사가 여러 관계로 이어질 수 있어 기사마다 가장 높은 관련도만 남긴다.
+	 * <p>관련도는 COVERS 의 confidence 다. COVERS 에는 relevance 가 없다.
+	 * 같은 기사가 여러 관계로 이어질 수 있어 기사마다 가장 높은 값만 남긴다.
 	 */
 	private static final String ARTICLES_CYPHER = """
 			MATCH (a:Article)-[r:COVERS]->(e:Event {nodeId: $eventId})
 			WITH a.mysqlArticleId AS articleId,
-			     max(coalesce(r.relevance, 0.0)) AS relevance,
+			     max(coalesce(r.confidence, 0.0)) AS relevance,
 			     max(a.publishedAt) AS publishedAt
 			RETURN articleId
 			ORDER BY relevance DESC, publishedAt DESC, articleId DESC
