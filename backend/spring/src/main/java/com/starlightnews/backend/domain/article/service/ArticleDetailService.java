@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.dto.ArticleDetailResponse;
 import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryStatus;
 import com.starlightnews.backend.domain.article.exception.ArticleErrorCode;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.user.domain.UserArticleFavoriteId;
@@ -52,7 +53,7 @@ public class ArticleDetailService {
 	private ArticleSummaryResponse resolveSummary(Article article) {
 		if (article.getSummaryStatus() == SummaryStatus.COMPLETED) {
 			return new ArticleSummaryResponse(
-					article.getArticleId(), article.getSummary(), article.getSummaryStatus());
+					article.getArticleId(), article.getSummary(), ArticleSummaryStatus.COMPLETED);
 		}
 		return articleSummaryService.generate(article.getArticleId());
 	}

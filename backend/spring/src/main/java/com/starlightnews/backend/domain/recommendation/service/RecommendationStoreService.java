@@ -137,7 +137,7 @@ public class RecommendationStoreService {
 
 			eventRepository.upsert(item.eventId(), item.label(), item.topicCode());
 			recommendations.add(new UserRecommendation(
-					result.userId(), item.eventId(), type, item.score(), item.rank(), item.reason(),
+					result.userId(), item.eventId(), type, item.score(), item.rank(),
 					window.recommendedAt(), window.cycle(), window.availableAt()));
 		}
 		return recommendations;

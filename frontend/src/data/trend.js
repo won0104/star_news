@@ -592,6 +592,11 @@ export const panelCopy = {
   recentre: '이 사건을 가운데로',
   save: '기사 저장',
   unsave: '저장 해제',
+  saveNode: '이 사건 즐겨찾기',
+  unsaveNode: '즐겨찾기 해제',
+  /** 저장 버튼 옆 한 줄. 로그인 없이 누르면 요청 없이 이것만 뜬다. */
+  signInToSave: '로그인하면 저장할 수 있어요.',
+  saveFailed: '저장하지 못했어요. 다시 시도해 주세요.',
   fieldLabel: '사건 별자리',
   articlesLoading: '관련 기사를 불러오는 중…',
   articlesFailed: '관련 기사를 불러오지 못했어요.',

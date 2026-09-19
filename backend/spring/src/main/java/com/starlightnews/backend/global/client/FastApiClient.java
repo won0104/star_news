@@ -116,6 +116,11 @@ public class FastApiClient {
 		if (status.value() == 503) {
 			return InternalApiErrorCode.INTERNAL_API_UNAVAILABLE;
 		}
+		if (status.value() == 400) {
+			// FastAPI 가 내용을 보고 거부한 경우다(AppException 400). 요청 형식이 틀린 경우는 FastAPI 가
+			// 422 로 따로 준다.
+			return InternalApiErrorCode.INTERNAL_API_REJECTED;
+		}
 		if (status.is4xxClientError()) {
 			return InternalApiErrorCode.INTERNAL_API_BAD_REQUEST;
 		}

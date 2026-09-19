@@ -13,7 +13,7 @@ export const TOPICS = [
   { topicCode: 'ECONOMY', topicName: '경제', tone: 'gold' },
   { topicCode: 'SOCIETY', topicName: '사회', tone: 'mint' },
   { topicCode: 'CULTURE', topicName: '문화', tone: 'peach' },
-  { topicCode: 'WORLD', topicName: '국제', tone: 'violet' },
+  { topicCode: 'INTERNATIONAL', topicName: '국제', tone: 'violet' },
   { topicCode: 'SPORTS', topicName: '스포츠', tone: 'cyan' },
   { topicCode: 'IT_SCIENCE', topicName: 'IT·과학', tone: 'blue' },
 ]

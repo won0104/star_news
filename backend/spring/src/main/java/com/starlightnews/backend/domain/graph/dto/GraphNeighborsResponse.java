@@ -29,6 +29,7 @@ public record GraphNeighborsResponse(
 		String nextCursor
 ) {
 
+	@Schema(name = "GraphNeighborNodeSummary")
 	public record NodeSummary(
 
 			@Schema(description = "Node 유형 (EVENT·ENTITY·STATEMENT·TIME)", example = "EVENT")
@@ -42,6 +43,7 @@ public record GraphNeighborsResponse(
 	) {
 	}
 
+	@Schema(name = "GraphNeighborEdge")
 	public record Edge(
 
 			@Schema(description = "출발 Node 유형", example = "EVENT")

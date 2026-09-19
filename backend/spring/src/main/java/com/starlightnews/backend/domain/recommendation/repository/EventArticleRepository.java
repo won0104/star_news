@@ -10,8 +10,8 @@ public interface EventArticleRepository {
 	/**
 	 * Event 를 다루는 기사의 MySQL PK 를 관련도 높은 순으로 조회한다.
 	 *
-	 * <p>{@code (:Article)-[:COVERS {relevance}]->(:Event)} 의 relevance 를 쓴다. 같은 관련도면
-	 * 최신 기사를 앞에 둔다. 관련도가 없는 관계도 있을 수 있어 없으면 0 으로 본다.
+	 * <p>{@code (:Article)-[:COVERS {confidence}]->(:Event)} 의 confidence 를 관련도로 쓴다. 같은
+	 * 관련도면 최신 기사를 앞에 둔다. confidence 가 없는 관계도 있을 수 있어 없으면 0 으로 본다.
 	 *
 	 * @return 기사가 없거나 Event 가 없으면 빈 목록
 	 */

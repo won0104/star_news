@@ -390,6 +390,7 @@ export function TrendConstellation({
       data={articleIsCurrent ? articles : null}
       state={open && !articleIsCurrent ? 'loading' : articlesState}
       title={centre.label}
+      node={{ nodeType: centreType, nodeKey: centre.event }}
       open={open}
       onClose={() => setOpen(false)}
       onMore={() => loadMoreArticles(articles?.nextCursor)}

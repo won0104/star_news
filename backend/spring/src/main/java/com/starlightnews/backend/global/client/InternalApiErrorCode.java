@@ -14,8 +14,19 @@ public enum InternalApiErrorCode implements ErrorCode {
 	/** 내부 API 키가 없거나 FastAPI 의 값과 다르다. 설정을 고치기 전에는 재시도해도 소용없다. */
 	INTERNAL_API_UNAUTHORIZED(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버 인증에 실패했습니다."),
 
-	/** 요청 형식이 FastAPI 가 받는 형태와 맞지 않다. 재시도해도 같은 결과다. */
+	/**
+	 * 요청 형식이 FastAPI 가 받는 형태와 맞지 않다(422 등). 재시도해도 같은 결과다.
+	 */
 	INTERNAL_API_BAD_REQUEST(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버가 요청을 거부했습니다."),
+
+	/**
+	 * FastAPI 가 요청의 내용을 보고 처리할 수 없다고 판단했다(400). 재시도해도 같은 결과다.
+	 *
+	 * <p>{@link #INTERNAL_API_BAD_REQUEST} 와 반대로 대상 데이터의 문제다. 기사 분석이라면 본문이
+	 * 분석할 수 없는 내용이라는 뜻이라 그 기사를 분석 대상에서 빼도 된다. 둘을 섞으면 우리 쪽 버그
+	 * 하나로 멀쩡한 기사가 전부 버려진다.
+	 */
+	INTERNAL_API_REJECTED(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버가 처리할 수 없는 내용입니다."),
 
 	/**
 	 * 보낸 것보다 최신 상태가 이미 반영돼 있다.

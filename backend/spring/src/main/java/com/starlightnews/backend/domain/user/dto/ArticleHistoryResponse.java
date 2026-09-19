@@ -19,6 +19,7 @@ public record ArticleHistoryResponse(
 		String nextCursor
 ) {
 
+	@Schema(name = "ArticleHistoryItem")
 	public record Item(
 
 			@Schema(description = "MySQL Article PK", example = "930001")
@@ -39,7 +40,7 @@ public record ArticleHistoryResponse(
 			@Schema(description = "사용자가 이 기사를 마지막으로 읽은 시각", example = "2026-08-31T09:10:00+09:00")
 			OffsetDateTime lastReadAt,
 
-			@Schema(description = "이 기사와 연결된 Node 를 클릭한 횟수", example = "3")
+			@Schema(description = "사용자가 이 기사를 열람한 횟수 (뉴스 카드 클릭 기준)", example = "3")
 			int clickCount,
 
 			@Schema(description = "저장된 요약 앞부분. 요약이 없으면 null (이 API 에서 요약을 생성하지 않음)",

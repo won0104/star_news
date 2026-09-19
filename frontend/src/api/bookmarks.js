@@ -43,3 +43,39 @@ export async function fetchNodeBookmarks({ nodeType, size, cursor, signal } = {}
   const suffix = query.size > 0 ? `?${query}` : ''
   return request(`/users/me/bookmarks/nodes${suffix}`, { signal })
 }
+
+/**
+ * `PATCH /users/me/bookmarks/articles` — 기사 북마크의 **최종 상태**를 지정한다.
+ *
+ *   changes: [{ articleId, bookmarked }]   →   { results: [{ articleId, bookmarked }] }
+ *
+ * 토글이 아니라 목표 상태다. 같은 상태를 두 번 보내도 오류가 아니고, 응답의 `results` 가
+ * 서버가 확정한 값이므로 화면은 그것으로 맞춘다. 빈 배열은 400 EMPTY_CHANGES, 한 기사가
+ * 두 번 들어 있으면 DUPLICATED_ARTICLE_CHANGE.
+ */
+export async function updateArticleBookmarks(changes, { signal } = {}) {
+  return request('/users/me/bookmarks/articles', { method: 'PATCH', body: { changes }, signal })
+}
+
+/**
+ * `PATCH /users/me/bookmarks/nodes` — Node 즐겨찾기의 최종 상태.
+ *
+ *   changes: [{ nodeType, nodeId, bookmarked }]   →   { results: [{ nodeType, nodeId, bookmarked }] }
+ *
+ * `nodeId` 는 그래프 API 의 `nodeKey` 와 같은 값이다(이름만 다르다). EVENT·STORY·ENTITY·
+ * STATEMENT 를 받고, 그 밖은 400 INVALID_NODE_TYPE.
+ */
+export async function updateNodeBookmarks(changes, { signal } = {}) {
+  return request('/users/me/bookmarks/nodes', { method: 'PATCH', body: { changes }, signal })
+}
+
+/** 한 건짜리 편의 함수. 응답에서 그 항목의 확정 상태를 꺼내 돌려준다. */
+export async function setArticleBookmark(articleId, bookmarked) {
+  const payload = await updateArticleBookmarks([{ articleId, bookmarked }])
+  return payload?.results?.find((r) => r.articleId === articleId)?.bookmarked ?? bookmarked
+}
+
+export async function setNodeBookmark(nodeType, nodeId, bookmarked) {
+  const payload = await updateNodeBookmarks([{ nodeType, nodeId, bookmarked }])
+  return payload?.results?.find((r) => r.nodeId === nodeId)?.bookmarked ?? bookmarked
+}

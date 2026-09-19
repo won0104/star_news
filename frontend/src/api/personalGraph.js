@@ -9,7 +9,7 @@
  *
  *   요약   PersonalGraphSummaryResponse
  *          { generatedAt,
- *            nodes: [{ id, kind, nodeType, nodeKey, topicCode, title, type,
+ *            nodes: [{ id, kind, nodeType, nodeKey, topicCode, title,
  *                      sourceArticleCount, weight }],
  *            edges: [{ sourceId, targetId, relationship, weight }] }
  *

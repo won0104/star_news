@@ -21,6 +21,7 @@ public record PersonalNodeArticlesResponse(
 		String nextCursor
 ) {
 
+	@Schema(name = "PersonalNodeArticleNodeSummary")
 	public record NodeSummary(
 
 			@Schema(description = "Node 유형 (EVENT·ENTITY·STATEMENT)", example = "ENTITY")
@@ -34,6 +35,7 @@ public record PersonalNodeArticlesResponse(
 	) {
 	}
 
+	@Schema(name = "PersonalNodeArticleItem")
 	public record Item(
 
 			@Schema(description = "MySQL Article PK", example = "930001")

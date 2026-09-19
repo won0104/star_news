@@ -112,3 +112,52 @@
     padding: 14px 16px 16px;
   }
 }
+
+/* ---- 즐겨찾기 ------------------------------------------------------------------ */
+.bookmarkRow {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(226, 197, 126, 0.2);
+}
+
+/* 카드의 다른 글자와 같은 크기의 조용한 버튼. 켜지면 금색 별과 글자. */
+.bookmarkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid rgba(226, 197, 126, 0.32);
+  border-radius: 999px;
+  background: none;
+  font: 600 11px var(--font-sans);
+  color: rgba(238, 207, 132, 0.86);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.bookmarkButton:hover {
+  background: rgba(255, 244, 222, 0.08);
+  border-color: rgba(226, 197, 126, 0.6);
+}
+
+.bookmarkButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.bookmarkButton:focus-visible {
+  outline: 2px solid #e4c679;
+  outline-offset: 2px;
+}
+
+.bookmarkOn {
+  border-color: rgba(255, 207, 114, 0.8);
+  background: rgba(255, 207, 114, 0.14);
+  color: #ffcf72;
+}
+
+.hint {
+  margin: 6px 0 0;
+  font: 10.5px var(--font-sans);
+  color: rgba(214, 199, 172, 0.75);
+}

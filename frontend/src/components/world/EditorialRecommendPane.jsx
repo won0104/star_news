@@ -8,7 +8,7 @@ const TOPIC_LABEL = {
   ECONOMY: '경제',
   SOCIETY: '사회',
   CULTURE: '문화',
-  WORLD: '국제',
+  INTERNATIONAL: '국제',
   SPORTS: '스포츠',
   IT_SCIENCE: 'IT·과학',
 }
@@ -20,7 +20,7 @@ const EVENT_TOPIC = {
   'nk-defence': 'POLITICS',
   'won-rate': 'ECONOMY',
   'house-debt': 'ECONOMY',
-  'semi-equip': 'WORLD',
+  'semi-equip': 'INTERNATIONAL',
   'ev-battery': 'IT_SCIENCE',
   'ai-rule': 'IT_SCIENCE',
   shipbuilding: 'ECONOMY',

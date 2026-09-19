@@ -31,6 +31,7 @@ public record PersonalGraphMapResponse(
 	) {
 	}
 
+	@Schema(name = "PersonalGraphMapNode")
 	public record Node(
 
 			@Schema(description = "그래프 내 Node 식별자 (nodeType:nodeKey)", example = "ENTITY:00000024-0920-4000-8000-000000000001")
@@ -53,6 +54,7 @@ public record PersonalGraphMapResponse(
 	) {
 	}
 
+	@Schema(name = "PersonalGraphMapEdge")
 	public record Edge(
 
 			@Schema(description = "출발 Node id", example = "ENTITY:00000024-0920-4000-8000-000000000001")

@@ -24,6 +24,8 @@ public class Neo4jGraphNeighborRepository implements GraphNeighborRepository {
 	 * 중심 Node 에서 depth Hop 이내 주변 Node 를 조회한다.
 	 * - 경로의 마지막·중간 Node 는 모두 표시 유형(Event·Entity·Statement·Time)이어야 한다.
 	 * - neighborScore = 각 연결 경로의 (관계 가중치 곱 / Hop 수) 중 최댓값.
+	 * - 관계 가중치는 KG 추출 모델이 준 confidence 다. 표시 Node 사이 관계(ACTOR·TARGET·PLACE·OCCURRED_ON)에는
+	 *   relevance·weight 가 없다. confidence 가 비어 있으면 0.5 로 본다.
 	 */
 	private static final String NEIGHBORS_CYPHER = """
 			MATCH path = (c)-[*%d..%d]-(n)
@@ -32,7 +34,7 @@ public class Neo4jGraphNeighborRepository implements GraphNeighborRepository {
 			  AND (n:Event OR n:Entity OR n:Statement OR n:Time)
 			  AND all(x IN nodes(path)[1..-1] WHERE x:Event OR x:Entity OR x:Statement OR x:Time)
 			WITH n, reduce(s = 1.0, r IN relationships(path) |
-			              s * coalesce(r.relevance, r.weight, r.confidence, 0.5)) / length(path) AS pathScore
+			              s * coalesce(r.confidence, 0.5)) / length(path) AS pathScore
 			WITH n, max(pathScore) AS neighborScore
 			WITH n, neighborScore,
 			     [lbl IN labels(n) WHERE lbl IN ['Event', 'Entity', 'Statement', 'Time']][0] AS primaryLabel
@@ -58,7 +60,7 @@ public class Neo4jGraphNeighborRepository implements GraphNeighborRepository {
 			MATCH (a)-[r]->(b)
 			WHERE a.nodeId IN $nodeKeys AND b.nodeId IN $nodeKeys AND a.nodeId <> b.nodeId
 			RETURN a.nodeId AS sourceNodeKey, b.nodeId AS targetNodeKey, type(r) AS edgeType,
-			       coalesce(r.relevance, r.weight, r.confidence, 0.5) AS weight
+			       coalesce(r.confidence, 0.5) AS weight
 			""";
 
 	private final Neo4jClient neo4jClient;

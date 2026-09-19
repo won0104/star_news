@@ -2,10 +2,10 @@ package com.starlightnews.backend.domain.article.controller;
 
 import com.starlightnews.backend.domain.article.dto.ArticleDetailResponse;
 import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryStatus;
 import com.starlightnews.backend.domain.article.service.ArticleDetailService;
 import com.starlightnews.backend.domain.article.service.ArticleSummaryService;
 import com.starlightnews.backend.global.constant.ApiPaths;
-import com.starlightnews.backend.global.enums.SummaryStatus;
 import com.starlightnews.backend.global.error.ErrorResponse;
 import com.starlightnews.backend.global.request.RequestIdFilter;
 import com.starlightnews.backend.global.response.ApiResponse;
@@ -108,7 +108,7 @@ public class ArticleController {
 			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
 	) {
 		ArticleSummaryResponse response = articleSummaryService.generate(articleId);
-		HttpStatus status = response.summaryStatus() == SummaryStatus.PROCESSING
+		HttpStatus status = response.summaryStatus() == ArticleSummaryStatus.PROCESSING
 				? HttpStatus.ACCEPTED : HttpStatus.OK;
 		return ResponseEntity.status(status).body(ApiResponse.success(response, requestId));
 	}

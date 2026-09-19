@@ -1,13 +1,11 @@
 /**
  * Auth API boundary.
  *
- * 회원가입·로그인·아이디 중복확인은 실제 엔드포인트에 연결돼 있고, 계정 설정 쪽
- * (changeEmail / changePassword)은 아직 엔드포인트가 없어 목업으로 남아 있다.
+ * 회원가입·로그인·아이디 중복확인·로그아웃 — 전부 배포 엔드포인트에 연결돼 있다.
+ * 회원 정보 변경(이메일·비밀번호)은 API 에 없어 여기에도 없다. 생기면 그때 붙인다.
  */
 
 import { ApiError, request } from './client';
-
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * `GET /auth/login-id/availability`.
@@ -61,15 +59,4 @@ export async function signUp({ id, nickname, password }) {
 /** `POST /auth/logout`. Clears the refresh cookie; answers 204. */
 export async function signOut() {
   return request('/auth/logout', { method: 'POST' });
-}
-
-// eslint-disable-next-line no-unused-vars -- 엔드포인트가 아직 없다. 시그니처만 유지.
-export async function changeEmail(next) {
-  await wait(500);
-}
-
-/** `change` is `{ current, next }`. A real endpoint rejects a wrong `current`. */
-// eslint-disable-next-line no-unused-vars -- 엔드포인트가 아직 없다. 시그니처만 유지.
-export async function changePassword(change) {
-  await wait(500);
 }

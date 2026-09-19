@@ -1,10 +1,11 @@
 /* ---- Cards ----------------------------------------------------------------- */
-/* Two columns for both the topics and the nodes. An odd count leaves the last card
-   alone in the left column, which is what the frame does. */
+/* Two columns, seven cards: the odd one sits alone in the left column, as the frame does.
+   The same grid serves both lists (관심 · 관심 없음). */
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  margin-bottom: 26px;
 }
 
 .card {
@@ -53,154 +54,44 @@
   color: var(--ink-faint);
 }
 
-/* ---- Adding a node -------------------------------------------------------- */
-.addRow {
-  display: flex;
-  gap: 12px;
-}
+/* ---- 상태 ------------------------------------------------------------------- */
 
-.input {
-  flex: 1;
-  min-width: 0;
-  height: 46px;
-  padding: 0 14px;
-  border: 1px solid var(--auth-border);
-  border-radius: 8px;
-  background: var(--auth-input-bg);
-  font: inherit;
+/* 불러오는 중 · 로그인 필요 · 실패. 목록이 설 자리에 한 줄로. */
+.notice {
+  margin: 8px 0 0;
+  padding: 18px;
+  border: 1px dashed var(--paper-edge);
+  border-radius: 10px;
   font-family: var(--font-sans);
   font-size: 14px;
-  color: var(--auth-title);
-  outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
-}
-
-.input::placeholder {
-  color: var(--auth-muted);
-}
-
-.input:focus {
-  border-color: var(--brass-b);
-  box-shadow: 0 0 0 3px var(--auth-focus-ring);
-}
-
-/* ---- Suggestions ---------------------------------------------------------- */
-.suggested {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0 18px;
-}
-
-.suggestedLabel {
-  margin: 0 8px 0 0;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  color: var(--ink-faint);
-}
-
-.chip {
-  padding: 6px 13px;
-  border: 0.7px solid var(--chip-solid-border);
-  border-radius: 16px;
-  background: var(--chip-ghost-bg);
-  font-family: var(--font-sans);
-  font-size: 13px;
   color: var(--ink-muted);
-  white-space: nowrap;
-  cursor: pointer;
+  text-align: center;
 }
 
-.chip:hover {
-  color: var(--headline-ink);
-  background: var(--chip-solid-bg);
-}
-
-/* ---- Node cards ----------------------------------------------------------- */
-.node {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
-  gap: 4px 8px;
-  padding: 14px 14px 14px 16px;
-  border: 1px solid var(--paper-edge);
-  border-radius: 10px;
-  background: var(--auth-input-bg);
-}
-
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-/* The graph view's own type colours, so a keyword kept here is the same colour when
-   you meet it again on /explore. */
-.entity {
-  background: var(--entity-color);
-}
-
-.topic {
-  background: var(--topic-color);
-}
-
-.story {
-  background: var(--story-color);
-}
-
-.nodeTitle {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--headline-ink);
-  overflow-wrap: anywhere;
-}
-
-.kind {
-  padding: 3px 9px;
-  border: 0.7px solid var(--chip-solid-border);
-  border-radius: 5px;
-  background: var(--chip-solid-bg);
-  font-family: var(--font-sans);
-  font-size: 11.5px;
-  color: var(--ink-faint);
-  white-space: nowrap;
-}
-
-.remove {
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--ink-faint);
-  cursor: pointer;
-}
-
-.remove:hover {
-  color: var(--accent-event);
-  background: rgba(120, 102, 82, 0.08);
-}
-
-.remove svg {
-  width: 15px;
-  height: 15px;
-  display: block;
-  margin: 0 auto;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-}
-
-/* Meta sits under the title, clear of the dot's column. */
-.nodeMeta {
-  grid-column: 2 / -1;
+/* 두 목록이 겹칠 수 없다는 규칙. 눈에 띄되 경고는 아니다. */
+.rule {
+  margin: -8px 0 0;
   font-family: var(--font-sans);
   font-size: 12.5px;
   color: var(--ink-faint);
+}
+
+/* 저장 상태 한 줄. 비어 있으면 자리만 지킨다 — 문구가 생겼다 없어지며 아래가 튀지 않게. */
+.status {
+  min-height: 1.4em;
+  margin: 14px 0 0;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  text-align: right;
+}
+
+.status[data-state='saved'] {
+  color: var(--brass-b);
+}
+
+.status[data-state='failed'] {
+  color: var(--accent-event);
 }
 
 @media (max-width: 900px) {

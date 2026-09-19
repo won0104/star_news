@@ -3,6 +3,7 @@ package com.starlightnews.backend.domain.article.service;
 import java.util.Optional;
 
 import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryStatus;
 import com.starlightnews.backend.domain.article.exception.ArticleErrorCode;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository.ArticleSummaryTarget;
@@ -53,7 +54,7 @@ class ArticleSummaryServiceTest {
 		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
 
 		assertThat(response.summary()).isEqualTo("기존 요약");
-		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.COMPLETED);
+		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.COMPLETED);
 		verifyNoInteractions(writer, gmsClient);
 	}
 
@@ -64,7 +65,7 @@ class ArticleSummaryServiceTest {
 		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
 
 		assertThat(response.summary()).isNull();
-		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.PROCESSING);
+		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.PROCESSING);
 		verifyNoInteractions(writer, gmsClient);
 	}
 
@@ -77,7 +78,7 @@ class ArticleSummaryServiceTest {
 		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
 
 		assertThat(response.summary()).isEqualTo("생성된 기사 요약이다.");
-		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.COMPLETED);
+		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.COMPLETED);
 		verify(writer).complete(ARTICLE_ID, "생성된 기사 요약이다.");
 
 		ArgumentCaptor<String> instruction = ArgumentCaptor.forClass(String.class);
@@ -115,7 +116,7 @@ class ArticleSummaryServiceTest {
 
 		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
 
-		assertThat(response.summaryStatus()).isEqualTo(SummaryStatus.PROCESSING);
+		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.PROCESSING);
 		verifyNoInteractions(gmsClient);
 	}
 

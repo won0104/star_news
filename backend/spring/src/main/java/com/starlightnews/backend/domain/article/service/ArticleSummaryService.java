@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.starlightnews.backend.domain.article.dto.ArticleSummaryResponse;
+import com.starlightnews.backend.domain.article.dto.ArticleSummaryStatus;
 import com.starlightnews.backend.domain.article.exception.ArticleErrorCode;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository.ArticleSummaryTarget;
@@ -143,11 +144,11 @@ public class ArticleSummaryService {
 	}
 
 	private ArticleSummaryResponse completedResponse(Long articleId, String summary) {
-		return new ArticleSummaryResponse(articleId, summary, SummaryStatus.COMPLETED);
+		return new ArticleSummaryResponse(articleId, summary, ArticleSummaryStatus.COMPLETED);
 	}
 
 	private ArticleSummaryResponse processingResponse(Long articleId) {
-		return new ArticleSummaryResponse(articleId, null, SummaryStatus.PROCESSING);
+		return new ArticleSummaryResponse(articleId, null, ArticleSummaryStatus.PROCESSING);
 	}
 
 	private static String normalizeSummary(String summary) {

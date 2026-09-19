@@ -1,6 +1,7 @@
 # 기사 분석 도메인의 Neo4j 쿼리 (Node/Edge 생성·조회).
 import math
 from datetime import datetime, timedelta
+from uuid import UUID
 
 from neo4j import ManagedTransaction, Session
 
@@ -24,6 +25,20 @@ STORY_CANDIDATE_TOP_K = 8
 STORY_EMBEDDING_EMA_WEIGHT = 0.15
 # 이보다 오래 새 Event가 안 붙은 Story/외톨이 Event는 후보에서 제외 (죽은 흐름으로 간주)
 STORY_STALE_DAYS = 30
+
+
+class ArticleIdentityConflictError(RuntimeError):
+    """실제 MySQL 기사 ID가 레거시 비UUID Article에 잘못 연결된 경우."""
+
+
+def _is_uuid(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        UUID(value)
+    except (ValueError, AttributeError):
+        return False
+    return True
 
 
 # 1. Article
@@ -54,7 +69,15 @@ def merge_article_node(
         subtopicCode=subtopic_code,
         analyzedAt=analyzed_at,
     ).single()
-    return result["nodeId"]
+    node_id = result["nodeId"]
+    if not _is_uuid(node_id):
+        # 이 예외는 execute_write 콜백 밖으로 전파되어 위 SET까지 포함한 전체
+        # 기사 분석 트랜잭션을 롤백한다. ART-* 번들 노드에 운영 기사를
+        # 덮어쓰는 과거 사고를 조용히 반복하지 않기 위한 fail-fast 방어다.
+        raise ArticleIdentityConflictError(
+            f"mysqlArticleId={mysql_article_id} is already bound to non-UUID nodeId={node_id!r}"
+        )
+    return node_id
 
 
 # Year 노드를 생성하거나 갱신한다.
@@ -476,7 +499,7 @@ def merge_statement_node(
         // 처음 생성될 때만 CREATE 
         ON CREATE SET s.nodeId = randomUUID(), s.createdAt = $createdAt
         SET s.statementType = $statementType, s.updatedAt = $createdAt,
-            r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+            r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         RETURN s.nodeId AS nodeId
         """,
         articleId=article_node_id,
@@ -489,47 +512,50 @@ def merge_statement_node(
 
 
 # 7. Edge
+# 같은 관계가 여러 기사에서 다시 나오면 confidence 는 가장 높은 값을 남긴다.
+# 덮어쓰면 확신 높게 여러 번 나온 관계가 마지막 기사 하나 때문에 낮아진다.
+# 이 값은 Spring 주변 그래프의 순위·선 굵기와 추천 상세의 기사 순서에 쓰인다.
 # 엣지 타입별 Cypher 쿼리 모음 - merge_simple_edge가 여기서 타입에 맞는 쿼리를 찾아 실행
 _SIMPLE_EDGE_QUERIES: dict[str, str] = {
     "MENTIONS": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:MENTIONS]->(b)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         """,
     "ACTOR": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:ACTOR]->(b)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         """,
     "TARGET": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:TARGET]->(b)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         """,
     "PLACE": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:PLACE]->(b)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         """,
     "OCCURRED_ON": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:OCCURRED_ON]->(b)
-        SET r.confidence = $confidence, r.extractedAt = coalesce(r.extractedAt, $createdAt)
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.extractedAt = coalesce(r.extractedAt, $createdAt)
         """,
     "ASSERTED_BY": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:ASSERTED_BY]->(b)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         """,
     "ABOUT": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:ABOUT]->(b)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         """,
     "CAUSES": """
         MATCH (a {nodeId: $startId}), (b {nodeId: $endId})
         MERGE (a)-[r:CAUSES]->(b)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt), r.updatedAt = $createdAt
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt), r.updatedAt = $createdAt
         """,
 }
 
@@ -545,6 +571,19 @@ def merge_simple_edge(
 
 
 # Article -> Event COVERS
+def reset_covers_primary(
+    session: Neo4jRunner,
+    article_node_id: str,
+) -> None:
+    session.run(
+        """
+        MATCH (:Article {nodeId: $articleId})-[r:COVERS]->(:Event)
+        SET r.isPrimary = false
+        """,
+        articleId=article_node_id,
+    )
+
+
 def merge_covers_edge(
     session: Neo4jRunner,
     article_node_id: str,
@@ -557,7 +596,7 @@ def merge_covers_edge(
         """
         MATCH (a:Article {nodeId: $articleId}), (e:Event {nodeId: $eventId})
         MERGE (a)-[r:COVERS]->(e)
-        SET r.confidence = $confidence, r.createdAt = coalesce(r.createdAt, $createdAt)
+        SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         FOREACH (_ IN CASE WHEN $isPrimary IS NOT NULL THEN [1] ELSE [] END | SET r.isPrimary = $isPrimary)
         """,
         articleId=article_node_id,
