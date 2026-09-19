@@ -6,6 +6,7 @@ import { nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
 import { TopBar } from '../components/common/TopBar'
 import { ViewPane } from '../components/world/ViewPane'
+import { useSession } from '../store/session'
 import { useSettingsValues } from '../store/settings'
 import { SCREEN_TRANSITIONS } from '../utils/motion'
 
@@ -77,6 +78,7 @@ const SCENE_BY_VIEW = {
  * which is every case but an arrival.
  */
 export function AppScene() {
+  const account = useSession()
   const navigate = useNavigate()
   const location = useLocation()
   const { reduceMotion } = useSettingsValues()
@@ -129,7 +131,12 @@ export function AppScene() {
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
       />
-      <ViewPane view={view} settled={settled} playTrendTransition={arriving && view === 'trend'} />
+      <ViewPane
+        key={account?.user?.userId ?? (account ? 'signed-in' : 'guest')}
+        view={view}
+        settled={settled}
+        playTrendTransition={arriving && view === 'trend'}
+      />
     </PhotoBackdrop>
   )
 }
