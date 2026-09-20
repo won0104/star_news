@@ -1,0 +1,157 @@
+{
+  "external_base_model": {
+    "bundled": false,
+    "license": "MIT",
+    "model_id": "kakaobank/kf-deberta-base",
+    "revision": "363b171d71443b0874b0bf9cea053eb5b1650633",
+    "weight_sha256": "3cd6cd7811b3c9190e97cae7eb41571c2bc0076431baae7d41d449a8c1c18c6c"
+  },
+  "packaging": "COMPONENT_BUNDLE",
+  "parent_release_bundle": "release/kf-deberta-base-kg-extractor",
+  "release_generation": "GOLD380_TRAIN341_DEV39",
+  "schema_version": "articlelocal-release-checkpoint-manifest-v2",
+  "weights": [
+    {
+      "architecture_signature": "90e6e70d5ced536dba975621dfaeb68e611e77ff64d82e015654175f416686a9",
+      "component": "same-seed canonical-A DCE and JointSpanProposer",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/semantic_proposer.pt",
+      "selected_epoch": 5,
+      "selected_seed": 3008,
+      "sha256": "679d4b7d8cac2fefcabeda69d73c32b2645c7fc7fe16685e4da06e845d33f299",
+      "size_bytes": 8445864,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "architecture_signature": "90e6e70d5ced536dba975621dfaeb68e611e77ff64d82e015654175f416686a9",
+      "component": "Canonical Span Representation V3",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/semantic_v3.pt",
+      "selected_epoch": 5,
+      "selected_seed": 3008,
+      "sha256": "91a754aa75b53598f69c0f1921bff111dcc9d363c4f6e7ab9f28e08e5dabe042",
+      "size_bytes": 3049364,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "trainable_parameter_count": 760226,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Event-conditioned Participant B2",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/participant_b2.pt",
+      "selected_epoch": 4,
+      "selected_seed": 1008,
+      "sha256": "a2ef878a266e35aab075a1e5ba5b56aaf585f91ec260d31e44b1c0fb06715192",
+      "size_bytes": 11947089,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Trigger boundary evidence",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/trigger.pt",
+      "selected_epoch": 5,
+      "selected_seed": 1008,
+      "sha256": "ab2565fa37228cc3b7e02dfd29c4c4ef1fe6b6cad4e43508432120340174acc2",
+      "size_bytes": 798293,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "StatementType classifier",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/statement_type.pt",
+      "selected_epoch": 7,
+      "selected_seed": 1008,
+      "sha256": "e0aa644af66dee0c5202a5ab3bb5815a032bff16d0c5927a265d6bb8ab9f7c17",
+      "size_bytes": 11675509,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Nested-capable Entity Mention",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/entity.pt",
+      "selected_epoch": 7,
+      "selected_seed": 1008,
+      "sha256": "8437157e51f42973c0c61fa4c0b7f5d466ceb9480f118044f13ad6790920fc96",
+      "size_bytes": 11809509,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "threshold": 0.7,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Entity Candidate Soft Priority",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/entity_candidate_restriction.pt",
+      "selected_epoch": 5,
+      "selected_seed": 1008,
+      "sha256": "544fa6f1570c6bbb7808be6d72db0710a472417ff5066f955a87831701ff93f6",
+      "size_bytes": 944017,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "threshold": 0.3,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Article-local Entity coreference",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/entity_coreference.pt",
+      "selected_epoch": 7,
+      "selected_seed": 1008,
+      "sha256": "5b7a84bbd6a82c15b657c0119da6fcd290bbac441dae2f4d640a4d4eb8c22b30",
+      "size_bytes": 1374702,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "threshold": 0.3,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Participant to Entity resolution",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/participant_entity_resolution.pt",
+      "selected_epoch": 8,
+      "selected_seed": 1008,
+      "sha256": "035ad448ee92f909bf9a54c241df96aab1d825d3b804bea5f29affd6e55e95d8",
+      "size_bytes": 1721566,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "threshold": 0.3,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Generic TimeExpression",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/time_expression.pt",
+      "selected_epoch": 6,
+      "selected_seed": 1008,
+      "sha256": "f612b9db0363dfe68868f949ea88b70aeaaba763e4892fc4e6f70eccf0999de5",
+      "size_bytes": 11810889,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "threshold": 0.9,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Event to TimeExpression attachment",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/event_time_attachment.pt",
+      "selected_epoch": 8,
+      "selected_seed": 1008,
+      "sha256": "ca96e2fb85ef0f4e4d40d3504e27d82b2567c5f7463e7c989b6ba851b6543303",
+      "size_bytes": 13108610,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "threshold": 0.3,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    },
+    {
+      "component": "Article-local Event coreference interaction scorer",
+      "readiness_status": "REFRESHED_GOLD380",
+      "relative_path": "weights/event_coreference.pt",
+      "selected_epoch": 7,
+      "selected_seed": 1008,
+      "sha256": "dad6750973649b66d9a249b283e0b125d3dd99a68d7168536ddb28d2d3faa5e0",
+      "size_bytes": 5755986,
+      "source": "release-v2-gold380-full-refresh-v1",
+      "threshold": 0.4,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39"
+    }
+  ]
+}

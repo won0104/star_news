@@ -1,0 +1,141 @@
+{
+  "active_components": [
+    {
+      "name": "same-seed canonical-A DCE and JointSpanProposer",
+      "selected_epoch": 5,
+      "selected_seed": 3008,
+      "sha256": "679d4b7d8cac2fefcabeda69d73c32b2645c7fc7fe16685e4da06e845d33f299",
+      "threshold": null,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/semantic_proposer.pt"
+    },
+    {
+      "name": "Canonical Span Representation V3",
+      "selected_epoch": 5,
+      "selected_seed": 3008,
+      "sha256": "91a754aa75b53598f69c0f1921bff111dcc9d363c4f6e7ab9f28e08e5dabe042",
+      "threshold": null,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/semantic_v3.pt"
+    },
+    {
+      "name": "Event-conditioned Participant B2",
+      "selected_epoch": 4,
+      "selected_seed": 1008,
+      "sha256": "a2ef878a266e35aab075a1e5ba5b56aaf585f91ec260d31e44b1c0fb06715192",
+      "threshold": null,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/participant_b2.pt"
+    },
+    {
+      "name": "Trigger boundary evidence",
+      "selected_epoch": 5,
+      "selected_seed": 1008,
+      "sha256": "ab2565fa37228cc3b7e02dfd29c4c4ef1fe6b6cad4e43508432120340174acc2",
+      "threshold": null,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/trigger.pt"
+    },
+    {
+      "name": "StatementType classifier",
+      "selected_epoch": 7,
+      "selected_seed": 1008,
+      "sha256": "e0aa644af66dee0c5202a5ab3bb5815a032bff16d0c5927a265d6bb8ab9f7c17",
+      "threshold": null,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/statement_type.pt"
+    },
+    {
+      "name": "Nested-capable Entity Mention",
+      "selected_epoch": 7,
+      "selected_seed": 1008,
+      "sha256": "8437157e51f42973c0c61fa4c0b7f5d466ceb9480f118044f13ad6790920fc96",
+      "threshold": 0.7,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/entity.pt"
+    },
+    {
+      "name": "Entity Candidate Soft Priority",
+      "selected_epoch": 5,
+      "selected_seed": 1008,
+      "sha256": "544fa6f1570c6bbb7808be6d72db0710a472417ff5066f955a87831701ff93f6",
+      "threshold": 0.3,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/entity_candidate_restriction.pt"
+    },
+    {
+      "name": "Article-local Entity coreference",
+      "selected_epoch": 7,
+      "selected_seed": 1008,
+      "sha256": "5b7a84bbd6a82c15b657c0119da6fcd290bbac441dae2f4d640a4d4eb8c22b30",
+      "threshold": 0.3,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/entity_coreference.pt"
+    },
+    {
+      "name": "Participant to Entity resolution",
+      "selected_epoch": 8,
+      "selected_seed": 1008,
+      "sha256": "035ad448ee92f909bf9a54c241df96aab1d825d3b804bea5f29affd6e55e95d8",
+      "threshold": 0.3,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/participant_entity_resolution.pt"
+    },
+    {
+      "name": "Generic TimeExpression",
+      "selected_epoch": 6,
+      "selected_seed": 1008,
+      "sha256": "f612b9db0363dfe68868f949ea88b70aeaaba763e4892fc4e6f70eccf0999de5",
+      "threshold": 0.9,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/time_expression.pt"
+    },
+    {
+      "name": "Event to TimeExpression attachment",
+      "selected_epoch": 8,
+      "selected_seed": 1008,
+      "sha256": "ca96e2fb85ef0f4e4d40d3504e27d82b2567c5f7463e7c989b6ba851b6543303",
+      "threshold": 0.3,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/event_time_attachment.pt"
+    },
+    {
+      "name": "Article-local Event coreference interaction scorer",
+      "selected_epoch": 7,
+      "selected_seed": 1008,
+      "sha256": "dad6750973649b66d9a249b283e0b125d3dd99a68d7168536ddb28d2d3faa5e0",
+      "threshold": 0.4,
+      "training_data_generation": "GOLD380_TRAIN341_DEV39",
+      "weight_file": "weights/event_coreference.pt"
+    }
+  ],
+  "article_inference_this_step": 0,
+  "checkpoint_manifest": {
+    "path": "checkpoint_manifest.json",
+    "sha256": "567ef8da0f3aa087b9b45a9077dc2f2efcb864888c21f33767f2577f51b9c1f4"
+  },
+  "external_backbone": {
+    "cache_root_env": "ARTICLELOCAL_HF_CACHE",
+    "files_sha256": {
+      "config.json": "4cba21a6fb53b5d75e2b7af83756eeb6d5e8a471164130999be395e1b8ff0848",
+      "pytorch_model.bin": "3cd6cd7811b3c9190e97cae7eb41571c2bc0076431baae7d41d449a8c1c18c6c",
+      "special_tokens_map.json": "311de3f4eed9d76a43bf0d71f10e62e086ca65ccce9f15d5da0d2098bf519ecc",
+      "tokenizer.json": "915388090e2d63e3869c54b5334d6005e453a51de12088d908175dd765fd8372",
+      "tokenizer_config.json": "d9273237da0f2143974a8eccdc50a733fcda064528299f7295e6434226cdbda1",
+      "vocab.txt": "f0b8ae70418060f22ec301511a6337ad49a7fb0f60a8bf9091b373aba9c0c3e0"
+    },
+    "local_files_only": false,
+    "model_id": "kakaobank/kf-deberta-base",
+    "packaging": "EXTERNAL_HF_DEPENDENCY",
+    "revision": "363b171d71443b0874b0bf9cea053eb5b1650633"
+  },
+  "fine_checkpoint_and_threshold_status": "FROZEN_V22_UNCHANGED",
+  "model_load_this_step": 0,
+  "output_profile_contract": "ASSEMBLY_OUTPUT_PROFILE_V3",
+  "parent_release": "2.2",
+  "public_schema": "articlelocal-kg-public-v2.2",
+  "published": false,
+  "release_candidate": "v2.3",
+  "release_status": "PENDING_STEP12_FINAL_VALIDATION",
+  "schema_version": "articlelocal-bcr-v23-candidate-model-manifest-v1"
+}
