@@ -13,6 +13,7 @@ import {
 } from '../../data/recommendBoard'
 import { topicName } from '../../data/topics'
 import { useDraggableCard } from '../../hooks/useDraggableCard'
+import { useSession } from '../../store/session'
 import styles from './RecommendPane.module.css'
 
 /**
@@ -31,13 +32,13 @@ import styles from './RecommendPane.module.css'
  * 보드 위로 올라온다 — 다른 화면으로 가지 않는다. 열 장을 훑는 게 이 화면의 일이라,
  * 하나를 보고 돌아올 때마다 판이 다시 그려지면 안 된다.
  *
- * 로그인이 필요하다. 비로그인(401)·회차 없음·실패는 오류가 아니라 상태다 — 종이를
- * 비워두면 사진만 남아 화면이 뭘 하는 곳인지 알 수 없으니, 표본 카드를 걸고 표본임을
- * 밝힌다. SAMPLE_WHEN_EMPTY 를 끄면 그 자리에 상태 문구만 선다.
+ * 로그인이 필요하다. 비로그인(401)일 때만 표본 카드를 걸고 표본임을 밝힌다.
+ * 로그인 후 추천 목록이 비어 있으면 정해진 업데이트 시각만 안내한다.
  */
 const SAMPLE_WHEN_EMPTY = true
 
 export function RecommendPane({ settled = true }) {
+  const account = useSession()
   const [board, setBoard] = useState(null)
   const [state, setState] = useState('loading')
   const [openId, setOpenId] = useState(null)
@@ -56,23 +57,18 @@ export function RecommendPane({ settled = true }) {
     return () => controller.abort()
   }, [])
 
-  const live = board?.items ?? []
-  const sample = SAMPLE_WHEN_EMPTY && state !== 'loading' && live.length === 0
+  const sample = SAMPLE_WHEN_EMPTY && !account && state === 'signedOut'
   const source = sample ? sampleBoard : board
   const items = source?.items ?? []
   const open = items.find((item) => item.userRecommendationId === openId) ?? null
 
-  // 상태 문구는 표본을 걸지 않을 때만 종이 자리를 대신한다.
+  // 인증된 사용자의 요청 실패를 표본으로 가리지 않는다.
   const notice = !sample && state !== 'ready'
-    ? { loading: boardCopy.loading, signedOut: boardCopy.signedOut, failed: boardCopy.failed }[state]
-    : !sample && items.length === 0
-      ? boardCopy.empty
-      : null
+    ? { loading: boardCopy.loading, signedOut: account ? boardCopy.failed : boardCopy.signedOut, failed: boardCopy.failed }[state]
+    : null
   const noticeHint = notice === boardCopy.signedOut
     ? boardCopy.signedOutHint
-    : notice === boardCopy.empty
-      ? boardCopy.emptyHint
-      : null
+    : null
 
   return (
     <section
@@ -96,7 +92,7 @@ export function RecommendPane({ settled = true }) {
           <span className={styles.bannerCopy}>
             <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
             <h1 id="recommend-board-title">{boardCopy.title}</h1>
-            <span className={styles.cycle}>{cycleLine(source, sample)}</span>
+            <span className={styles.cycle}>{boardCopy.updateSchedule}</span>
           </span>
         </header>
 
@@ -266,21 +262,6 @@ function DetailSheet({ item, sample, onClose }) {
       )}
     </aside>
   )
-}
-
-/** "아침 추천 · 06:00 공개". 표본이면 시각을 말하지 않는다 — 없는 회차의 시각은 거짓이다. */
-function cycleLine(source, sample) {
-  if (!source?.cycle) return ''
-  const cycle = boardCopy.cycle[source.cycle] ?? source.cycle
-  if (sample) return cycle
-  const time = formatTime(source.availableAt)
-  return time ? `${cycle} · ${boardCopy.availableAt(time)}` : cycle
-}
-
-/** `2026-09-17T06:00:00+09:00` → `06:00`. 서버 오프셋을 그대로 읽는다. */
-function formatTime(value) {
-  const match = /T(\d{2}):(\d{2})/.exec(value ?? '')
-  return match ? `${match[1]}:${match[2]}` : ''
 }
 
 /** ISO 든 `2026.09.10 08:55` 든, 월·일만 뽑는다. */

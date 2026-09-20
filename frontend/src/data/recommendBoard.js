@@ -84,13 +84,10 @@ export const placement = ({ x, y, w, h }) => ({
 export const boardCopy = {
   title: '나를 위한 추천',
   eyebrow: 'PINNED FOR YOU',
-  cycle: { AM: '아침 추천', PM: '저녁 추천' },
-  availableAt: (time) => `${time} 공개`,
+  updateSchedule: '매일 06:00 · 18:00 업데이트',
   loading: '추천을 불러오는 중…',
   signedOut: '로그인하면 나만의 추천이 걸려요',
   signedOutHint: '읽은 기사와 관심 분야로 하루 두 번 골라 드립니다.',
-  empty: '아직 공개된 추천 회차가 없어요',
-  emptyHint: '06:00 · 18:00 에 새 추천이 걸립니다.',
   failed: '추천을 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.',
   sampleNote: '로그인 전이라 예시 카드를 보여드려요',
   reasonLabel: '추천 이유',
@@ -119,7 +116,7 @@ const EVENT_TOPIC = {
 }
 
 /**
- * RecommendationBoardResponse 모양의 표본. 로그인 전이나 회차가 없을 때 판을 비워두지
+ * RecommendationBoardResponse 모양의 표본. 비로그인일 때 판을 비워두지
  * 않기 위한 것이고, 화면은 표본임을 밝힌다. 제목·요약은 data/events.js 의 것을 그대로 써서
  * 카드와 /event/:id 가 다른 말을 하지 않게 한다.
  */
