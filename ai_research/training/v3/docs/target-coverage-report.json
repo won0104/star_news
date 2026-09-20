@@ -1,0 +1,159 @@
+{
+  "bridge_stride_source_tokens": 64,
+  "candidate_negative_policy": "Only complete article-local coreference/attachment/resolution and explicit ABOUT/CAUSES eligible pairs; arbitrary unannotated semantic spans are not labeled negative",
+  "engineering50_articles_in_census": 50,
+  "forward_backward": 0,
+  "full_gold_ready": false,
+  "head_support_for_signed_boundary_and_cross_window_link": "NOT_IMPLEMENTED_STAGE_5_PLUS",
+  "layout_policy": "v3-source-window-sentence-and-bridge-v1",
+  "max_abs_boundary_char_delta": 4,
+  "max_model_tokens": 128,
+  "max_window_tokens_observed": 128,
+  "model_load": 0,
+  "optimizer_step": 0,
+  "scope": "existing train split only; current validated Gold; no dev/test annotations loaded",
+  "source_alignment": {
+    "article": 400,
+    "bridge_window": 4897,
+    "cross_sentence_span": 161,
+    "cross_window_link_span": 11,
+    "sentence_overflow": 16,
+    "sentence_window": 10610,
+    "source_span": 42132,
+    "subtoken_or_gap_boundary_span": 1118
+  },
+  "status": "BLOCKED_UPSTREAM_GOLD",
+  "task_counts": {
+    "about": {
+      "ignored": 0,
+      "negative": 63756,
+      "positive": 1772,
+      "unrepresentable": 0
+    },
+    "assertor_entity": {
+      "ignored": 0,
+      "negative": 60390,
+      "positive": 3032,
+      "unrepresentable": 0
+    },
+    "assertor_resolution": {
+      "ignored": 3132,
+      "negative": 0,
+      "positive": 3032,
+      "unrepresentable": 0
+    },
+    "assertor_source": {
+      "ignored": 2817,
+      "negative": 0,
+      "positive": 3347,
+      "unrepresentable": 0
+    },
+    "causes": {
+      "ignored": 0,
+      "negative": 53355,
+      "positive": 615,
+      "unrepresentable": 0
+    },
+    "entity_coreference": {
+      "ignored": 0,
+      "negative": 300281,
+      "positive": 26622,
+      "unrepresentable": 0
+    },
+    "entity_mention": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 13864,
+      "unrepresentable": 0
+    },
+    "entity_priority": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 13864,
+      "unrepresentable": 0
+    },
+    "event_coreference": {
+      "ignored": 0,
+      "negative": 33399,
+      "positive": 675,
+      "unrepresentable": 0
+    },
+    "event_time": {
+      "ignored": 0,
+      "negative": 43256,
+      "positive": 2302,
+      "unrepresentable": 0
+    },
+    "participant": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 6656,
+      "unrepresentable": 0
+    },
+    "place_resolution": {
+      "ignored": 52,
+      "negative": 0,
+      "positive": 297,
+      "unrepresentable": 0
+    },
+    "primary": {
+      "ignored": 56859,
+      "negative": 0,
+      "positive": 103114,
+      "unrepresentable": 0
+    },
+    "role_entity": {
+      "ignored": 0,
+      "negative": 145917,
+      "positive": 6604,
+      "unrepresentable": 0
+    },
+    "semantic_boundary": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 10586,
+      "unrepresentable": 0
+    },
+    "semantic_proposer": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 10586,
+      "unrepresentable": 0
+    },
+    "semantic_validity": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 10586,
+      "unrepresentable": 0
+    },
+    "statement_type": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 6164,
+      "unrepresentable": 0
+    },
+    "time_mention": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 3257,
+      "unrepresentable": 0
+    },
+    "time_normalization": {
+      "ignored": 1524,
+      "negative": 0,
+      "positive": 1733,
+      "unrepresentable": 0
+    },
+    "trigger": {
+      "ignored": 0,
+      "negative": 0,
+      "positive": 4422,
+      "unrepresentable": 0
+    }
+  },
+  "tokenizer_json_sha256": "915388090e2d63e3869c54b5334d6005e453a51de12088d908175dd765fd8372",
+  "tokenizer_revision": "363b171d71443b0874b0bf9cea053eb5b1650633",
+  "train_gold_articles_compiled": 400,
+  "unrepresentable_meaning": "zero source spans lost by compiler coordinate contract; trained head support not claimed",
+  "upstream_gold_status": "BLOCKED"
+}

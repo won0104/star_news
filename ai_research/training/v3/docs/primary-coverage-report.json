@@ -1,0 +1,31 @@
+{
+  "all_valid_train": {
+    "articles": 400,
+    "cross_kind_strict_pairs": 44274,
+    "event_only_articles": 3,
+    "final_event_clusters": 3908,
+    "statement_only_articles": 0,
+    "statements": 6164,
+    "strict_pairs": 103114,
+    "ties_ignored": 56859,
+    "zero_strict_articles": 0
+  },
+  "engineering50": {
+    "articles": 50,
+    "cross_kind_strict_pairs": 12104,
+    "event_only_articles": 1,
+    "final_event_clusters": 741,
+    "statement_only_articles": 0,
+    "statements": 1017,
+    "strict_pairs": 26996,
+    "ties_ignored": 12363,
+    "zero_strict_articles": 0
+  },
+  "note": "Ordinal Gold coverage, not trained Primary quality or final 1K distribution",
+  "optimizer_step": 0,
+  "pretrained_model_load": 0,
+  "selected_dev": 0,
+  "selected_test": 0,
+  "service_threshold_selection": 0,
+  "status": "STATIC_TRAIN_ONLY_UPSTREAM_GOLD_BLOCKED"
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "articlelocal-bcr-event-block-shadow-v1",
+  "mode": "SHADOW_ONLY",
+  "policy": {
+    "policy_id": "SHADOW_PROBE_C_B12_R3_M96_P2048_V1",
+    "block_size": 12,
+    "membership_per_event": 3,
+    "visit_per_event": 96,
+    "fine_pair_per_article": 2048,
+    "posting_cap": 24,
+    "global_reserve": 3
+  },
+  "source_scope": "CURRENT_PHASE_B_SIX_EVENT_MENTION_INVENTORY_WITH_UNCAPTURED_ROLE_TIME_HANDOFF",
+  "fine_pair_scoring": false,
+  "production_pair_deletion": false,
+  "status": "PROVISIONAL_SHADOW_PROBE_NOT_SELECTED_FOR_STEP10",
+  "published": false
+}
