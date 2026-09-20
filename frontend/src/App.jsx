@@ -25,8 +25,8 @@ function isPublicLocation({ pathname, search }) {
 /**
  * The settings overlay is a sibling of the routes rather than part of any screen: it
  * opens over whatever you were looking at, from the top bar that every screen shares.
- * Private screens wait for token restoration. Public screens stay usable if the API is
- * unavailable, and remount with the restored session once the check finishes.
+ * Private screens wait while token restoration is in progress. If that check fails,
+ * screens still mount and show their own unavailable or sample states.
  */
 export default function App() {
   const location = useLocation();
@@ -63,19 +63,11 @@ export default function App() {
     restoreSession();
   };
 
-  const showRoute =
-    sessionState === 'ready' || (isPublic && (sessionState === 'failed' || !isAuthForm));
+  const showRoute = sessionState !== 'checking' || (isPublic && !isAuthForm);
   if (!showRoute) {
     return (
       <main className={styles.sessionGate}>
-        {sessionState === 'checking' ? (
-          <p role="status">로그인 상태를 확인하는 중…</p>
-        ) : (
-          <div role="alert">
-            <p>서버에 연결하지 못했어요.</p>
-            <button type="button" onClick={retrySessionCheck}>다시 시도</button>
-          </div>
-        )}
+        <p role="status">로그인 상태를 확인하는 중…</p>
       </main>
     );
   }
