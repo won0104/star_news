@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { fetchRecommendationBoard, fetchRecommendationDetail } from '../../api/recommendations'
 import {
   BOARD_ASSETS,
@@ -36,6 +36,9 @@ import styles from './RecommendPane.module.css'
  * 로그인 후 추천 목록이 비어 있으면 정해진 업데이트 시각만 안내한다.
  */
 const SAMPLE_WHEN_EMPTY = true
+const RECOMMENDATION_COLUMN_COUNT = 5
+const SHEET_ANCHOR_GAP = 14
+const SHEET_EDGE_GAP = 16
 
 export function RecommendPane({ settled = true }) {
   const account = useSession()
@@ -60,7 +63,22 @@ export function RecommendPane({ settled = true }) {
   const sample = SAMPLE_WHEN_EMPTY && !account && state === 'signedOut'
   const source = sample ? sampleBoard : board
   const items = source?.items ?? []
-  const open = items.find((item) => item.userRecommendationId === openId) ?? null
+  const openIndex = items.findIndex((item) => item.userRecommendationId === openId)
+  const open = openIndex >= 0 ? items[openIndex] : null
+  // 다섯 열 중 오른쪽 두 열만 상세 종이를 왼쪽에 띄운다. 가운데 열은 사용자가
+  // 요청한 대로 왼쪽 카드와 함께 오른쪽에 띄워 중심 Event를 가리지 않는다.
+  const detailSide = openIndex >= 0 && openIndex % RECOMMENDATION_COLUMN_COUNT > 2
+    ? 'left'
+    : 'right'
+
+  const handleCardToggle = (item) => {
+    const isOpen = openId === item.userRecommendationId
+    setOpenId(isOpen ? null : item.userRecommendationId)
+  }
+
+  const handleSheetClose = () => {
+    setOpenId(null)
+  }
 
   // 인증된 사용자의 요청 실패를 표본으로 가리지 않는다.
   const notice = !sample && state !== 'ready'
@@ -110,22 +128,23 @@ export function RecommendPane({ settled = true }) {
                   <button
                     type="button"
                     className={styles.card}
+                    data-recommendation-index={index}
                     aria-pressed={openId === item.userRecommendationId}
                     aria-label={`${index + 1}위. ${boardCopy.open(item.label)}`}
-                    onClick={() =>
-                      setOpenId(openId === item.userRecommendationId ? null : item.userRecommendationId)
-                    }
+                    onClick={() => handleCardToggle(item)}
                   >
-                    <img className={styles.cardPaper} src={BOARD_ASSETS.paper} alt="" aria-hidden />
-                    <img className={styles.cardPin} src={BOARD_ASSETS.pin} alt="" aria-hidden />
-                    <span className={styles.cardCopy}>
-                      <span className={styles.cardHead}>
-                        <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
-                        <span className={styles.topic}>{topicName(item.topicCode)}</span>
+                    <span className={styles.cardFace}>
+                      <img className={styles.cardPaper} src={BOARD_ASSETS.paper} alt="" aria-hidden />
+                      <span className={styles.cardCopy}>
+                        <span className={styles.cardHead}>
+                          <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
+                          <span className={styles.topic}>{topicName(item.topicCode)}</span>
+                        </span>
+                        <strong className={styles.label}>{item.label}</strong>
+                        {item.reason && <span className={styles.reason}>{item.reason}</span>}
                       </span>
-                      <strong className={styles.label}>{item.label}</strong>
-                      {item.reason && <span className={styles.reason}>{item.reason}</span>}
                     </span>
+                    <img className={styles.cardPin} src={BOARD_ASSETS.pin} alt="" aria-hidden />
                   </button>
                 ) : (
                   <span className={styles.blank} aria-hidden="true" />
@@ -152,7 +171,9 @@ export function RecommendPane({ settled = true }) {
           key={open.userRecommendationId}
           item={open}
           sample={sample}
-          onClose={() => setOpenId(null)}
+          side={detailSide}
+          anchorIndex={openIndex}
+          onClose={handleSheetClose}
         />
       )}
     </section>
@@ -168,10 +189,11 @@ export function RecommendPane({ settled = true }) {
  * `contextSummary` 가 null 인 것은 정상이다. 공개 시각까지 요약이 안 만들어지는 회차가
  * 있어서, 그때는 "준비 중"이라고 말하고 기사만 보여준다.
  */
-function DetailSheet({ item, sample, onClose }) {
+function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
   const [detail, setDetail] = useState(sample ? sampleDetail(item) : null)
   const [state, setState] = useState(sample ? 'ready' : 'loading')
   const { cardRef, cardStyle, dragging, handleProps } = useDraggableCard()
+  const anchorStyle = useDetailSheetAnchor(cardRef, anchorIndex, side)
 
   useEffect(() => {
     if (sample) return undefined
@@ -202,8 +224,9 @@ function DetailSheet({ item, sample, onClose }) {
     <aside
       ref={cardRef}
       className={styles.sheet}
-      style={cardStyle}
+      style={{ ...anchorStyle, ...cardStyle }}
       data-dragging={dragging}
+      data-side={side}
       aria-labelledby="recommend-sheet-title"
     >
       <button type="button" className={styles.sheetClose} aria-label={boardCopy.close} onClick={onClose}>
@@ -262,6 +285,86 @@ function DetailSheet({ item, sample, onClose }) {
       )}
     </aside>
   )
+}
+
+/**
+ * 상세 종이를 화면 모서리가 아니라 선택한 추천 종이에 붙인다.
+ *
+ * 오른쪽으로 열 때는 선택 종이의 오른쪽 변, 왼쪽으로 열 때는 왼쪽 변에서 시작한다.
+ * 상세 내용이 늦게 도착해 높이가 바뀌어도 화면 밖으로 밀리지 않도록 두 요소의 크기를
+ * 다시 관찰한다. 모바일은 별도 하단 sheet 레이아웃이 있으므로 위치를 덮어쓰지 않는다.
+ */
+function useDetailSheetAnchor(cardRef, anchorIndex, side) {
+  const [anchorStyle, setAnchorStyle] = useState(null)
+
+  useLayoutEffect(() => {
+    const sheet = cardRef.current
+    const anchorElement = document.querySelector(`[data-recommendation-index="${anchorIndex}"]`)
+    if (!sheet || !anchorElement) return undefined
+
+    const placeBesideCard = () => {
+      if (window.innerWidth <= 900) {
+        setAnchorStyle(null)
+        return
+      }
+
+      const anchorRect = anchorElement.getBoundingClientRect()
+      const sheetRect = sheet.getBoundingClientRect()
+      const boundaryElement = sheet.offsetParent
+      const boundaryRect = boundaryElement?.getBoundingClientRect() ?? {
+        left: 0,
+        top: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight,
+      }
+      // 데스크톱 rail 너비의 token 식과 같다. 카드 옆에 붙이더라도 내비게이션 위로
+      // 침범하지 않게 실제 viewport 너비로 계산한다.
+      const navigationInset = window.innerWidth >= 1024
+        ? Math.min(208, Math.max(176, window.innerWidth * 0.135))
+        : 0
+      const minLeft = Math.max(boundaryRect.left, navigationInset) + SHEET_EDGE_GAP
+      const maxRight = Math.min(boundaryRect.right, window.innerWidth) - SHEET_EDGE_GAP
+      const minTop = Math.max(boundaryRect.top, 0) + SHEET_EDGE_GAP
+      const maxBottom = Math.min(boundaryRect.bottom, window.innerHeight) - SHEET_EDGE_GAP
+      const desiredLeft = side === 'left'
+        ? anchorRect.left - sheetRect.width - SHEET_ANCHOR_GAP
+        : anchorRect.right + SHEET_ANCHOR_GAP
+      const maxLeft = Math.max(minLeft, maxRight - sheetRect.width)
+      const maxTop = Math.max(minTop, maxBottom - sheetRect.height)
+      // 브라우저가 키보드 포커스나 자동 scroll-into-view 때문에 overflow 컨테이너를
+      // 내부 스크롤한 경우에도 viewport에서 보이는 카드 옆에 그대로 붙인다.
+      const left = clamp(desiredLeft, minLeft, maxLeft)
+        - boundaryRect.left + (boundaryElement?.scrollLeft ?? 0)
+      const top = clamp(anchorRect.top - SHEET_EDGE_GAP, minTop, maxTop)
+        - boundaryRect.top + (boundaryElement?.scrollTop ?? 0)
+      const nextStyle = { top, right: 'auto', bottom: 'auto', left }
+
+      setAnchorStyle((current) => (
+        current?.top === nextStyle.top && current?.left === nextStyle.left
+          ? current
+          : nextStyle
+      ))
+    }
+
+    placeBesideCard()
+    window.addEventListener('resize', placeBesideCard)
+    const resizeObserver = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(placeBesideCard)
+    resizeObserver?.observe(anchorElement)
+    resizeObserver?.observe(sheet)
+
+    return () => {
+      window.removeEventListener('resize', placeBesideCard)
+      resizeObserver?.disconnect()
+    }
+  }, [anchorIndex, cardRef, side])
+
+  return anchorStyle
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value))
 }
 
 /** ISO 든 `2026.09.10 08:55` 든, 월·일만 뽑는다. */

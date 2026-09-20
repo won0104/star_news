@@ -178,7 +178,19 @@
   text-align: left;
   cursor: pointer;
   pointer-events: auto;
-  transition: transform 170ms ease;
+  perspective: 700px;
+}
+
+/* 핀은 그대로 두고 종이와 글자만 함께 움직인다. 윗변을 회전축으로 삼아 아래쪽이
+   보드에서 살짝 들리는 깊이와 그림자를 만든다. */
+.cardFace {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  transform-origin: 50% 4%;
+  transform-style: preserve-3d;
+  transition: transform 180ms cubic-bezier(0.2, 0.72, 0.28, 1);
 }
 
 .cardPaper {
@@ -191,7 +203,7 @@
   object-fit: fill;
   pointer-events: none;
   filter: drop-shadow(0 7px 7px rgb(72 43 24 / 0.2));
-  transition: filter 170ms ease, transform 170ms ease;
+  transition: filter 180ms ease;
 }
 
 /* 원본 핀은 정사각 투명 캔버스 중앙 1/3에 구가 있다. 56px 캔버스를 쓰면 실제 핀은
@@ -224,21 +236,20 @@
   pointer-events: none;
 }
 
-.card:hover,
-.card:focus-visible {
-  transform: translateY(-2px);
-}
-
 .card:focus-visible {
   border-radius: 5px;
   outline: 2px solid rgb(var(--tone-rgb) / 0.9);
   outline-offset: 4px;
 }
 
+.card:hover .cardFace,
+.card:focus-visible .cardFace {
+  transform: rotateX(3.2deg);
+}
+
 .card:hover .cardPaper,
 .card:focus-visible .cardPaper {
-  filter: brightness(1.025) drop-shadow(0 10px 10px rgb(72 43 24 / 0.3));
-  transform: scale(1.012);
+  filter: brightness(1.018) drop-shadow(0 15px 9px rgb(72 43 24 / 0.34));
 }
 
 .card[aria-pressed='true'] .cardPaper {
@@ -343,24 +354,36 @@
 
 /* ---- 요약 · 기사 종이 (뷰포트 기준) ------------------------------------------- */
 
-/* 오른쪽 벽에 종이 한 장이 새로 꽂힌 것처럼. */
+/* JS가 누른 종이의 실제 viewport 좌표를 재서 이 큰 종이를 바로 옆에 붙인다.
+   아래 top/right는 측정 전 첫 렌더와 anchor를 찾지 못한 경우의 안전한 기본 위치다. */
 .sheet {
   position: absolute;
   z-index: 6;
-  top: 14%;
-  right: 3%;
+  top: 10%;
+  right: 2.5%;
   display: flex;
   flex-direction: column;
-  gap: 0.55cqw;
-  width: min(30cqw, 440px);
-  max-height: 72%;
-  padding: 1.5cqw 1.5cqw 1.3cqw;
+  gap: 0.68cqw;
+  width: min(38cqw, 560px);
+  max-height: 80%;
+  padding: 1.7cqw 1.7cqw 1.5cqw;
   overflow-y: auto;
   border-radius: 3px;
   background: #fbf6ea;
   box-shadow: 0 16px 34px rgb(50 30 14 / 0.36), 0 2px 6px rgb(50 30 14 / 0.18);
   color: #3b3128;
   scrollbar-width: thin;
+}
+
+.sheet[data-side='left'] {
+  right: auto;
+  left: 2.5%;
+}
+
+@media (min-width: 1024px) {
+  .sheet[data-side='left'] {
+    left: calc(var(--desktop-nav-width) + 2.5%);
+  }
 }
 
 .sheet[data-dragging='true'] {
@@ -397,14 +420,14 @@
 .sheetClose:focus-visible { outline: 2px solid #3b3128; outline-offset: 2px; }
 
 .sheetKind {
-  font: 700 0.6cqw var(--font-sans);
+  font: 700 0.65cqw var(--font-sans);
   letter-spacing: 0.12em;
   color: #9b7a63;
 }
 
 .sheet h2 {
   margin: 0;
-  font: 700 1.2cqw/1.35 var(--font-serif-kr);
+  font: 700 1.35cqw/1.35 var(--font-serif-kr);
   word-break: keep-all;
 }
 
@@ -413,27 +436,27 @@
   padding: 0.55cqw 0.75cqw;
   border-left: 2px solid #d9a765;
   background: rgb(217 167 101 / 0.12);
-  font: 0.7cqw/1.5 var(--font-serif-kr);
+  font: 0.78cqw/1.5 var(--font-serif-kr);
   color: #6b5a4a;
   word-break: keep-all;
 }
 
 .sheetReason b {
   margin-right: 0.3cqw;
-  font: 700 0.58cqw var(--font-sans);
+  font: 700 0.62cqw var(--font-sans);
   color: #9b7a63;
 }
 
 .summary {
   margin: 0;
-  font: 0.78cqw/1.7 var(--font-serif-kr);
+  font: 0.85cqw/1.7 var(--font-serif-kr);
   color: #4a3d32;
   word-break: keep-all;
 }
 
 .sheetNote {
   margin: 0;
-  font: italic 0.72cqw/1.6 var(--font-serif-kr);
+  font: italic 0.78cqw/1.6 var(--font-serif-kr);
   color: #9b8672;
 }
 
@@ -444,11 +467,11 @@
   margin: 0.4cqw 0 0;
   padding-top: 0.65cqw;
   border-top: 1px solid rgb(59 49 40 / 0.16);
-  font: 700 0.78cqw var(--font-serif-kr);
+  font: 700 0.86cqw var(--font-serif-kr);
 }
 
 .articles h3 b {
-  font: 600 0.64cqw var(--font-sans);
+  font: 600 0.68cqw var(--font-sans);
   font-variant-numeric: tabular-nums;
   color: #9b7a63;
 }
@@ -463,13 +486,13 @@
 
 .articles small {
   display: block;
-  font: 0.58cqw var(--font-sans);
+  font: 0.62cqw var(--font-sans);
   color: #9b8672;
 }
 
 .articles p {
   margin: 0.15cqw 0 0;
-  font: 0.74cqw/1.45 var(--font-serif-kr);
+  font: 0.8cqw/1.45 var(--font-serif-kr);
   color: #3b3128;
   word-break: keep-all;
 }
@@ -477,7 +500,7 @@
 .articles a {
   display: inline-block;
   margin-top: 0.2cqw;
-  font: 600 0.62cqw var(--font-sans);
+  font: 600 0.66cqw var(--font-sans);
   color: #2e415b;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -568,7 +591,8 @@
     margin-top: 12px;
   }
 
-  .sheet {
+  .sheet,
+  .sheet[data-side='left'] {
     position: fixed;
     inset: auto 0 0 0;
     z-index: 40;
@@ -601,5 +625,5 @@
     opacity: 1;
   }
 
-  .card { transition: none; }
+  .cardFace { transition: none; }
 }
