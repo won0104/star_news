@@ -1,0 +1,112 @@
+{
+  "backbone": {
+    "frozen": true,
+    "model_id": "kakaobank/kf-deberta-base",
+    "revision": "363b171d71443b0874b0bf9cea053eb5b1650633",
+    "stored_in_checkpoint": false,
+    "weights_sha256": "3cd6cd7811b3c9190e97cae7eb41571c2bc0076431baae7d41d449a8c1c18c6c"
+  },
+  "checkpoint_sha256": "fbf6e8e8779b184fd08c690317592bf41e3d3104816c5761fc319402f8bb4a8f",
+  "config_path": "training/configs/v3-harness-engineering-v1.json",
+  "config_sha256": "65155e1367282b8d66d6cf444f14aefb3767befb2ada744bdf2158c05702fbfb",
+  "db_writes": 0,
+  "dev_test_articles": 0,
+  "label_mappings": {
+    "entity_types": [
+      "PERSON",
+      "ORGANIZATION",
+      "LOCATION",
+      "PRODUCT",
+      "GENERIC"
+    ],
+    "participant_roles": [
+      "ACTOR",
+      "TARGET",
+      "PLACE"
+    ],
+    "statement_types": [
+      "FORECAST",
+      "CLAIM",
+      "EVALUATION"
+    ],
+    "time_characters": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "F",
+      "Y",
+      "-",
+      "/"
+    ],
+    "time_formats": [
+      "YEAR",
+      "MONTH",
+      "DAY",
+      "FISCAL_YEAR",
+      "INTERVAL_YEAR",
+      "INTERVAL_MONTH",
+      "INTERVAL_DAY"
+    ]
+  },
+  "main_training": 0,
+  "mode": "ENGINEERING_SMOKE_ONLY",
+  "optimizer_steps": 1,
+  "parameter_manifest_sha256": "9594e204c1361795dd0a2756538c1fdf3ed5068f85c84e4fb1b523bb82718f47",
+  "producer_hashes": {
+    "models/backbone.py": "4af21adf0742e3ffab17590040881dbe0379ed90961a86d7f6864e6b798cd557",
+    "models/v3_pretraining/architecture.py": "a764c3a4051f3c30bc1cc9b51e03a62c473be787f0922a77dfaeb546cc039977",
+    "runtime/v3_pretraining/source_layout.py": "03c1430ce8ea5892d35460447bc1ea9a7e80f3bbbc6ad23e9521a0b68fbb241b",
+    "training/v3_pretraining/checkpoint.py": "265cf608664569f8315ed40b2e2b4f4c98d360949a509cc1ec8e1410f0482e61",
+    "training/v3_pretraining/harness.py": "2faded1dd8355e48cf463e358bda8ced97495bf5fb093dafa86502a573727c6b",
+    "training/v3_pretraining/targets.py": "b0aec1e0eb8ebd3590fcca2d64159cafe302809335ea5b1b3d749894a14349b3"
+  },
+  "run_id": "v3-step13-fresh-smoke-20260921",
+  "schema_version": "v3-train-run-exposure-v1",
+  "seed": 1008,
+  "service_threshold_selected": false,
+  "source_snapshot": {
+    "exposure": [
+      {
+        "article_id": "GNEWS-cd62da87b3b7f539bf205f9df7db8ff1",
+        "gold_file": "955.json",
+        "gold_sha256": "5ad3238734d33cd0129e91e98fac43515000ce3f2561eb856a02b1cda122132d",
+        "source_sha256": "8880dc693d99748a0b4dedaf8d64ade525679096451b6db52f481639b37410ac",
+        "split": "train"
+      }
+    ],
+    "source_join_sha256": "5b50a4333bf1449058b605940da1d03954238509cac67106d5dc960a4f6209a3",
+    "split_sha256": "613f6a2add082ac71589633a78396ea1175088acf03b216ad3d3ce251b94ceed"
+  },
+  "task_registry": [
+    "semantic_proposer",
+    "semantic_boundary",
+    "semantic_validity",
+    "trigger",
+    "participant",
+    "entity_mention",
+    "time_mention",
+    "assertor_source",
+    "entity_coreference",
+    "event_coreference",
+    "role_entity",
+    "event_time",
+    "assertor_entity",
+    "about",
+    "causes",
+    "statement_type",
+    "entity_priority",
+    "time_normalization",
+    "primary"
+  ],
+  "tokenizer": {
+    "revision": "363b171d71443b0874b0bf9cea053eb5b1650633",
+    "sha256": "915388090e2d63e3869c54b5334d6005e453a51de12088d908175dd765fd8372"
+  }
+}

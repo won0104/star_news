@@ -1,0 +1,2383 @@
+{
+  "parameter_manifest_sha256": "9594e204c1361795dd0a2756538c1fdf3ed5068f85c84e4fb1b523bb82718f47",
+  "parameters": [
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.token_projection.weight",
+      "owner": "document_context",
+      "shape": [
+        256,
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.token_projection.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.pool_projection.weight",
+      "owner": "document_context",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.pool_projection.bias",
+      "owner": "document_context",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.pool_score.weight",
+      "owner": "document_context",
+      "shape": [
+        1,
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.relative_position.0.weight",
+      "owner": "document_context",
+      "shape": [
+        256,
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.relative_position.0.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.relative_position.2.weight",
+      "owner": "document_context",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.relative_position.2.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.self_attn.in_proj_weight",
+      "owner": "document_context",
+      "shape": [
+        768,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.self_attn.in_proj_bias",
+      "owner": "document_context",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.self_attn.out_proj.weight",
+      "owner": "document_context",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.self_attn.out_proj.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.linear1.weight",
+      "owner": "document_context",
+      "shape": [
+        1024,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.linear1.bias",
+      "owner": "document_context",
+      "shape": [
+        1024
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.linear2.weight",
+      "owner": "document_context",
+      "shape": [
+        256,
+        1024
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.linear2.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.norm1.weight",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.norm1.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.norm2.weight",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.0.norm2.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.self_attn.in_proj_weight",
+      "owner": "document_context",
+      "shape": [
+        768,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.self_attn.in_proj_bias",
+      "owner": "document_context",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.self_attn.out_proj.weight",
+      "owner": "document_context",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.self_attn.out_proj.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.linear1.weight",
+      "owner": "document_context",
+      "shape": [
+        1024,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.linear1.bias",
+      "owner": "document_context",
+      "shape": [
+        1024
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.linear2.weight",
+      "owner": "document_context",
+      "shape": [
+        256,
+        1024
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.linear2.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.norm1.weight",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.norm1.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.norm2.weight",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.layers.1.norm2.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.norm.weight",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.document_encoder.norm.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.reinjection_gate.weight",
+      "owner": "document_context",
+      "shape": [
+        256,
+        512
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.reinjection_gate.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.token_norm.weight",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.token_norm.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.sentence_norm.weight",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "document_context.sentence_norm.bias",
+      "owner": "document_context",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.span_attention.0.weight",
+      "owner": "candidate_span",
+      "shape": [
+        128,
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.span_attention.0.bias",
+      "owner": "candidate_span",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.span_attention.2.weight",
+      "owner": "candidate_span",
+      "shape": [
+        1,
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.width_embedding.weight",
+      "owner": "candidate_span",
+      "shape": [
+        97,
+        32
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.kind_embedding.weight",
+      "owner": "candidate_span",
+      "shape": [
+        7,
+        24
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.output.0.weight",
+      "owner": "candidate_span",
+      "shape": [
+        256,
+        2616
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.output.0.bias",
+      "owner": "candidate_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.output.3.weight",
+      "owner": "candidate_span",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.output.3.bias",
+      "owner": "candidate_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.output.4.weight",
+      "owner": "candidate_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "candidate_span.output.4.bias",
+      "owner": "candidate_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.cross_projection.0.weight",
+      "owner": "exact_source_span",
+      "shape": [
+        256,
+        2306
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.cross_projection.0.bias",
+      "owner": "exact_source_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.cross_projection.2.weight",
+      "owner": "exact_source_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.cross_projection.2.bias",
+      "owner": "exact_source_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.kind_embedding.weight",
+      "owner": "exact_source_span",
+      "shape": [
+        6,
+        16
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.endpoint.weight",
+      "owner": "exact_source_span",
+      "shape": [
+        12,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.endpoint.bias",
+      "owner": "exact_source_span",
+      "shape": [
+        12
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.residual.0.weight",
+      "owner": "exact_source_span",
+      "shape": [
+        256,
+        784
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.residual.0.bias",
+      "owner": "exact_source_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.residual.2.weight",
+      "owner": "exact_source_span",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.residual.2.bias",
+      "owner": "exact_source_span",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.link.0.weight",
+      "owner": "exact_source_span",
+      "shape": [
+        256,
+        784
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.link.0.bias",
+      "owner": "exact_source_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.link.2.weight",
+      "owner": "exact_source_span",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "exact_source_span.link.2.bias",
+      "owner": "exact_source_span",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "semantic_proposer.biaffine",
+      "owner": "semantic_proposer",
+      "shape": [
+        2,
+        128,
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "semantic_proposer.label_bias",
+      "owner": "semantic_proposer",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "semantic_proposer.start_projection.0.weight",
+      "owner": "semantic_proposer",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "semantic_proposer.start_projection.0.bias",
+      "owner": "semantic_proposer",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "semantic_proposer.end_projection.0.weight",
+      "owner": "semantic_proposer",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "semantic_proposer.end_projection.0.bias",
+      "owner": "semantic_proposer",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.bos_boundary",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.eos_boundary",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.token_fusion.raw_projection.weight",
+      "owner": "canonical_span",
+      "shape": [
+        256,
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.token_fusion.raw_projection.bias",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.token_fusion.dce_projection.weight",
+      "owner": "canonical_span",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.token_fusion.dce_projection.bias",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.token_fusion.fusion_norm.weight",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.token_fusion.fusion_norm.bias",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.span_encoder.span_attention.0.weight",
+      "owner": "canonical_span",
+      "shape": [
+        128,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.span_encoder.span_attention.0.bias",
+      "owner": "canonical_span",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.span_encoder.span_attention.2.weight",
+      "owner": "canonical_span",
+      "shape": [
+        1,
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.span_encoder.width_embedding.weight",
+      "owner": "canonical_span",
+      "shape": [
+        97,
+        32
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.span_encoder.span_projection.0.weight",
+      "owner": "canonical_span",
+      "shape": [
+        256,
+        800
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.span_encoder.span_projection.0.bias",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.span_encoder.span_projection.3.weight",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.span_encoder.span_projection.3.bias",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.label_embedding.weight",
+      "owner": "canonical_span",
+      "shape": [
+        2,
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.semantic_head.network.0.weight",
+      "owner": "canonical_span",
+      "shape": [
+        128,
+        320
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.semantic_head.network.0.bias",
+      "owner": "canonical_span",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.semantic_head.network.3.weight",
+      "owner": "canonical_span",
+      "shape": [
+        1,
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.semantic_head.network.3.bias",
+      "owner": "canonical_span",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.boundary_head.network.0.weight",
+      "owner": "canonical_span",
+      "shape": [
+        256,
+        832
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.boundary_head.network.0.bias",
+      "owner": "canonical_span",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.boundary_head.network.3.weight",
+      "owner": "canonical_span",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "canonical_span.boundary_head.network.3.bias",
+      "owner": "canonical_span",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "primary_adapter.0.weight",
+      "owner": "primary_adapter",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "primary_adapter.0.bias",
+      "owner": "primary_adapter",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "primary_adapter.2.weight",
+      "owner": "primary_adapter",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "primary_adapter.2.bias",
+      "owner": "primary_adapter",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_boundary.delta.0.weight",
+      "owner": "semantic_boundary",
+      "shape": [
+        258
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_boundary.delta.0.bias",
+      "owner": "semantic_boundary",
+      "shape": [
+        258
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_boundary.delta.1.weight",
+      "owner": "semantic_boundary",
+      "shape": [
+        256,
+        258
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_boundary.delta.1.bias",
+      "owner": "semantic_boundary",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_boundary.delta.3.weight",
+      "owner": "semantic_boundary",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_boundary.delta.3.bias",
+      "owner": "semantic_boundary",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_validity.classifier.0.weight",
+      "owner": "semantic_validity",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_validity.classifier.0.bias",
+      "owner": "semantic_validity",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_validity.classifier.1.weight",
+      "owner": "semantic_validity",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_validity.classifier.1.bias",
+      "owner": "semantic_validity",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_validity.classifier.3.weight",
+      "owner": "semantic_validity",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.semantic_validity.classifier.3.bias",
+      "owner": "semantic_validity",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.trigger.boundary.network.0.weight",
+      "owner": "trigger",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.trigger.boundary.network.0.bias",
+      "owner": "trigger",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.trigger.boundary.network.1.weight",
+      "owner": "trigger",
+      "shape": [
+        256,
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.trigger.boundary.network.1.bias",
+      "owner": "trigger",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.trigger.boundary.network.4.weight",
+      "owner": "trigger",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.trigger.boundary.network.4.bias",
+      "owner": "trigger",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.trigger.span_score.weight",
+      "owner": "trigger",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.trigger.span_score.bias",
+      "owner": "trigger",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.event_projection.weight",
+      "owner": "participant",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.event_projection.bias",
+      "owner": "participant",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.token_projection.weight",
+      "owner": "participant",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.token_projection.bias",
+      "owner": "participant",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.position_projection.weight",
+      "owner": "participant",
+      "shape": [
+        256,
+        3
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.norm.weight",
+      "owner": "participant",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.norm.bias",
+      "owner": "participant",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.branches.0.weight",
+      "owner": "participant",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.branches.0.bias",
+      "owner": "participant",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.branches.1.weight",
+      "owner": "participant",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.branches.1.bias",
+      "owner": "participant",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.branches.2.weight",
+      "owner": "participant",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.boundary.branches.2.bias",
+      "owner": "participant",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.span_score.0.weight",
+      "owner": "participant",
+      "shape": [
+        256,
+        512
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.span_score.0.bias",
+      "owner": "participant",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.span_score.2.weight",
+      "owner": "participant",
+      "shape": [
+        3,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.participant.span_score.2.bias",
+      "owner": "participant",
+      "shape": [
+        3
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.boundary.network.0.weight",
+      "owner": "entity_mention",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.boundary.network.0.bias",
+      "owner": "entity_mention",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.boundary.network.1.weight",
+      "owner": "entity_mention",
+      "shape": [
+        256,
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.boundary.network.1.bias",
+      "owner": "entity_mention",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.boundary.network.4.weight",
+      "owner": "entity_mention",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.boundary.network.4.bias",
+      "owner": "entity_mention",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.boundary_projection.0.weight",
+      "owner": "entity_mention",
+      "shape": [
+        64,
+        4
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.boundary_projection.0.bias",
+      "owner": "entity_mention",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.boundary_projection.2.weight",
+      "owner": "entity_mention",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.boundary_projection.2.bias",
+      "owner": "entity_mention",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.classifier.0.weight",
+      "owner": "entity_mention",
+      "shape": [
+        320
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.classifier.0.bias",
+      "owner": "entity_mention",
+      "shape": [
+        320
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.classifier.1.weight",
+      "owner": "entity_mention",
+      "shape": [
+        128,
+        320
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.classifier.1.bias",
+      "owner": "entity_mention",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.classifier.4.weight",
+      "owner": "entity_mention",
+      "shape": [
+        5,
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_mention.typing.classifier.4.bias",
+      "owner": "entity_mention",
+      "shape": [
+        5
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.boundary.network.0.weight",
+      "owner": "time_mention",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.boundary.network.0.bias",
+      "owner": "time_mention",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.boundary.network.1.weight",
+      "owner": "time_mention",
+      "shape": [
+        256,
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.boundary.network.1.bias",
+      "owner": "time_mention",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.boundary.network.4.weight",
+      "owner": "time_mention",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.boundary.network.4.bias",
+      "owner": "time_mention",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.boundary_projection.0.weight",
+      "owner": "time_mention",
+      "shape": [
+        64,
+        4
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.boundary_projection.0.bias",
+      "owner": "time_mention",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.boundary_projection.2.weight",
+      "owner": "time_mention",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.boundary_projection.2.bias",
+      "owner": "time_mention",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.classifier.0.weight",
+      "owner": "time_mention",
+      "shape": [
+        320
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.classifier.0.bias",
+      "owner": "time_mention",
+      "shape": [
+        320
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.classifier.1.weight",
+      "owner": "time_mention",
+      "shape": [
+        128,
+        320
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.classifier.1.bias",
+      "owner": "time_mention",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.classifier.4.weight",
+      "owner": "time_mention",
+      "shape": [
+        1,
+        128
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_mention.span.classifier.4.bias",
+      "owner": "time_mention",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.statement_type.classifier.0.weight",
+      "owner": "statement_type",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.statement_type.classifier.0.bias",
+      "owner": "statement_type",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.statement_type.classifier.1.weight",
+      "owner": "statement_type",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.statement_type.classifier.1.bias",
+      "owner": "statement_type",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.statement_type.classifier.4.weight",
+      "owner": "statement_type",
+      "shape": [
+        3,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.statement_type.classifier.4.bias",
+      "owner": "statement_type",
+      "shape": [
+        3
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_priority.classifier.0.weight",
+      "owner": "entity_priority",
+      "shape": [
+        259
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_priority.classifier.0.bias",
+      "owner": "entity_priority",
+      "shape": [
+        259
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_priority.classifier.1.weight",
+      "owner": "entity_priority",
+      "shape": [
+        256,
+        259
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_priority.classifier.1.bias",
+      "owner": "entity_priority",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_priority.classifier.3.weight",
+      "owner": "entity_priority",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_priority.classifier.3.bias",
+      "owner": "entity_priority",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.role_entity.classifier.0.weight",
+      "owner": "role_entity",
+      "shape": [
+        1284
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.role_entity.classifier.0.bias",
+      "owner": "role_entity",
+      "shape": [
+        1284
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.role_entity.classifier.1.weight",
+      "owner": "role_entity",
+      "shape": [
+        256,
+        1284
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.role_entity.classifier.1.bias",
+      "owner": "role_entity",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.role_entity.classifier.3.weight",
+      "owner": "role_entity",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.role_entity.classifier.3.bias",
+      "owner": "role_entity",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_coreference.classifier.0.weight",
+      "owner": "entity_coreference",
+      "shape": [
+        772
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_coreference.classifier.0.bias",
+      "owner": "entity_coreference",
+      "shape": [
+        772
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_coreference.classifier.1.weight",
+      "owner": "entity_coreference",
+      "shape": [
+        256,
+        772
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_coreference.classifier.1.bias",
+      "owner": "entity_coreference",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_coreference.classifier.3.weight",
+      "owner": "entity_coreference",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.entity_coreference.classifier.3.bias",
+      "owner": "entity_coreference",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_time.classifier.0.weight",
+      "owner": "event_time",
+      "shape": [
+        1284
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_time.classifier.0.bias",
+      "owner": "event_time",
+      "shape": [
+        1284
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_time.classifier.1.weight",
+      "owner": "event_time",
+      "shape": [
+        256,
+        1284
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_time.classifier.1.bias",
+      "owner": "event_time",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_time.classifier.3.weight",
+      "owner": "event_time",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_time.classifier.3.bias",
+      "owner": "event_time",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.format.0.weight",
+      "owner": "time_normalization",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.format.0.bias",
+      "owner": "time_normalization",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.format.1.weight",
+      "owner": "time_normalization",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.format.1.bias",
+      "owner": "time_normalization",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.format.3.weight",
+      "owner": "time_normalization",
+      "shape": [
+        7,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.format.3.bias",
+      "owner": "time_normalization",
+      "shape": [
+        7
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.character.0.weight",
+      "owner": "time_normalization",
+      "shape": [
+        288
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.character.0.bias",
+      "owner": "time_normalization",
+      "shape": [
+        288
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.character.1.weight",
+      "owner": "time_normalization",
+      "shape": [
+        256,
+        288
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.character.1.bias",
+      "owner": "time_normalization",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.character.3.weight",
+      "owner": "time_normalization",
+      "shape": [
+        14,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.time_normalization.character.3.bias",
+      "owner": "time_normalization",
+      "shape": [
+        14
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.member_encoder.0.weight",
+      "owner": "event_coreference",
+      "shape": [
+        2056
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.member_encoder.0.bias",
+      "owner": "event_coreference",
+      "shape": [
+        2056
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.member_encoder.1.weight",
+      "owner": "event_coreference",
+      "shape": [
+        256,
+        2056
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.member_encoder.1.bias",
+      "owner": "event_coreference",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.member_encoder.3.weight",
+      "owner": "event_coreference",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.member_encoder.3.bias",
+      "owner": "event_coreference",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.pair.0.weight",
+      "owner": "event_coreference",
+      "shape": [
+        772
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.pair.0.bias",
+      "owner": "event_coreference",
+      "shape": [
+        772
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.pair.1.weight",
+      "owner": "event_coreference",
+      "shape": [
+        256,
+        772
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.pair.1.bias",
+      "owner": "event_coreference",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.pair.3.weight",
+      "owner": "event_coreference",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.event_coreference.pair.3.bias",
+      "owner": "event_coreference",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.token.0.weight",
+      "owner": "assertor_source",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.token.0.bias",
+      "owner": "assertor_source",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.token.1.weight",
+      "owner": "assertor_source",
+      "shape": [
+        256,
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.token.1.bias",
+      "owner": "assertor_source",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.token.3.weight",
+      "owner": "assertor_source",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.token.3.bias",
+      "owner": "assertor_source",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.exists.weight",
+      "owner": "assertor_source",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.exists.bias",
+      "owner": "assertor_source",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.span.0.weight",
+      "owner": "assertor_source",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.span.0.bias",
+      "owner": "assertor_source",
+      "shape": [
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.span.1.weight",
+      "owner": "assertor_source",
+      "shape": [
+        256,
+        768
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.span.1.bias",
+      "owner": "assertor_source",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.span.3.weight",
+      "owner": "assertor_source",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.span.3.bias",
+      "owner": "assertor_source",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.residual.0.weight",
+      "owner": "assertor_source",
+      "shape": [
+        514
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.residual.0.bias",
+      "owner": "assertor_source",
+      "shape": [
+        514
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.residual.1.weight",
+      "owner": "assertor_source",
+      "shape": [
+        256,
+        514
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.residual.1.bias",
+      "owner": "assertor_source",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.residual.3.weight",
+      "owner": "assertor_source",
+      "shape": [
+        2,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_source.residual.3.bias",
+      "owner": "assertor_source",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_entity.scorer.0.weight",
+      "owner": "assertor_entity",
+      "shape": [
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_entity.scorer.0.bias",
+      "owner": "assertor_entity",
+      "shape": [
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_entity.scorer.1.weight",
+      "owner": "assertor_entity",
+      "shape": [
+        256,
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_entity.scorer.1.bias",
+      "owner": "assertor_entity",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_entity.scorer.3.weight",
+      "owner": "assertor_entity",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.assertor_entity.scorer.3.bias",
+      "owner": "assertor_entity",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.about.scorer.0.weight",
+      "owner": "about",
+      "shape": [
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.about.scorer.0.bias",
+      "owner": "about",
+      "shape": [
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.about.scorer.1.weight",
+      "owner": "about",
+      "shape": [
+        256,
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.about.scorer.1.bias",
+      "owner": "about",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.about.scorer.3.weight",
+      "owner": "about",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.about.scorer.3.bias",
+      "owner": "about",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.causes.scorer.0.weight",
+      "owner": "causes",
+      "shape": [
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.causes.scorer.0.bias",
+      "owner": "causes",
+      "shape": [
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.causes.scorer.1.weight",
+      "owner": "causes",
+      "shape": [
+        256,
+        1280
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.causes.scorer.1.bias",
+      "owner": "causes",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.causes.scorer.3.weight",
+      "owner": "causes",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.causes.scorer.3.bias",
+      "owner": "causes",
+      "shape": [
+        1
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.member_adapter.0.weight",
+      "owner": "primary",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.member_adapter.0.bias",
+      "owner": "primary",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.member_adapter.1.weight",
+      "owner": "primary",
+      "shape": [
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.member_adapter.1.bias",
+      "owner": "primary",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.member_gate.weight",
+      "owner": "primary",
+      "shape": [
+        64,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.document_gate.weight",
+      "owner": "primary",
+      "shape": [
+        64,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.document_gate.bias",
+      "owner": "primary",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.gate_scalar.weight",
+      "owner": "primary",
+      "shape": [
+        1,
+        64
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.event_adapter.0.weight",
+      "owner": "primary",
+      "shape": [
+        2314
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.event_adapter.0.bias",
+      "owner": "primary",
+      "shape": [
+        2314
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.event_adapter.1.weight",
+      "owner": "primary",
+      "shape": [
+        256,
+        2314
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.event_adapter.1.bias",
+      "owner": "primary",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.statement_adapter.0.weight",
+      "owner": "primary",
+      "shape": [
+        1025
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.statement_adapter.0.bias",
+      "owner": "primary",
+      "shape": [
+        1025
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.statement_adapter.1.weight",
+      "owner": "primary",
+      "shape": [
+        256,
+        1025
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.statement_adapter.1.bias",
+      "owner": "primary",
+      "shape": [
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.shared_scalar.weight",
+      "owner": "primary",
+      "shape": [
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "torch.float32",
+      "name": "task_modules.primary.shared_scalar.bias",
+      "owner": "primary",
+      "shape": [
+        1
+      ]
+    }
+  ],
+  "run_id": "v3-step13-fresh-smoke-20260921",
+  "schema_version": "v3-train-parameter-manifest-v1",
+  "task_registry": [
+    "semantic_proposer",
+    "semantic_boundary",
+    "semantic_validity",
+    "trigger",
+    "participant",
+    "entity_mention",
+    "time_mention",
+    "assertor_source",
+    "entity_coreference",
+    "event_coreference",
+    "role_entity",
+    "event_time",
+    "assertor_entity",
+    "about",
+    "causes",
+    "statement_type",
+    "entity_priority",
+    "time_normalization",
+    "primary"
+  ],
+  "trainable_parameter_count": 10211761,
+  "trainable_parameter_tensors": 281
+}

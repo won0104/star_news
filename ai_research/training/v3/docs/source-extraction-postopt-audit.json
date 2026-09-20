@@ -1,0 +1,141 @@
+{
+  "cold_model_load_excluded": true,
+  "environment": {
+    "device": "cpu",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.12.13",
+    "torch": "2.13.0",
+    "torch_threads": 4
+  },
+  "fixture": {
+    "article_id": "GNEWS-78d586610b9d7bc0008f37d79e823c0c",
+    "characters": 1102,
+    "content_sha256": "530b73c3641819ded0d6106b9e96642ff7c5ae296f297810b3867abebe80a8cd"
+  },
+  "latency_ms": {
+    "primary_off": [
+      1706.079,
+      1714.215,
+      1738.616
+    ],
+    "primary_off_median": 1714.215,
+    "primary_on": [
+      1762.302,
+      1765.363,
+      1786.455
+    ],
+    "primary_on_median": 1765.363,
+    "stage_medians_primary_on": {
+      "entity_resolution": 12.133,
+      "event_identity": 2.188,
+      "primary": 0.759,
+      "public_projection": 3.141,
+      "relations": 0.517,
+      "source_backbone_shared": 1092.784,
+      "source_extraction": 644.359,
+      "time_attachment": 8.763
+    }
+  },
+  "memory": {
+    "note": "ru_maxrss is process high-water mark; Python tracing excludes native PyTorch tensor allocation",
+    "peak_process_rss_bytes_after_load": 1371652096,
+    "peak_process_rss_bytes_before_warmup": 1336688640,
+    "peak_rss_delta_bytes_upper_bound": 34963456,
+    "tracemalloc_python_peak_bytes": 1136257
+  },
+  "mode": "STEP14_GOLD_FREE_DIAGNOSTIC",
+  "ownership": {
+    "all_tensor_leases_closed": true,
+    "backbone_calls": 1,
+    "capture_hook_count": 3,
+    "captured_layers": [
+      8,
+      10,
+      12
+    ],
+    "dce_calls": 1,
+    "source_representation_reused": true
+  },
+  "pair_budget": {
+    "about_pairs_eligible": 9,
+    "about_pairs_scored": 9,
+    "causes_pairs_eligible": 6,
+    "causes_pairs_scored": 6,
+    "entity_candidates": 13,
+    "entity_candidates_dropped_ner": 0,
+    "entity_candidates_dropped_role": 0,
+    "entity_coreference_pairs_scored": 78,
+    "entity_role_pairs_scored": 7,
+    "event_coreference_pairs_eligible": 3,
+    "event_coreference_pairs_scored": 3,
+    "event_time_pairs_eligible": 12,
+    "event_time_pairs_scored": 12,
+    "participant_candidate_pairs": {
+      "eligible": 212,
+      "scored": 72
+    },
+    "source_candidate_pairs": {
+      "ENTITY": {
+        "eligible": 22,
+        "retained": 6,
+        "scored": 22
+      },
+      "EVENT": {
+        "eligible": 82,
+        "retained": 6,
+        "scored": 32
+      },
+      "STATEMENT": {
+        "eligible": 36,
+        "retained": 3,
+        "scored": 32
+      },
+      "TIME": {
+        "eligible": 22,
+        "retained": 4,
+        "scored": 22
+      },
+      "TRIGGER": {
+        "eligible": 109,
+        "retained": 16,
+        "scored": 32
+      }
+    }
+  },
+  "primary_toggle_structural_parity": true,
+  "public": {
+    "edge_count": 22,
+    "event_clusters": 3,
+    "node_count": 13,
+    "persistence_ready": false,
+    "statement_count": 3
+  },
+  "status": "PASS",
+  "storage_census": {
+    "backbone_shared": {
+      "tensor_views": 7,
+      "unique_storage_bytes": 40399872,
+      "unique_storage_count": 7
+    },
+    "event_member": {
+      "tensor_views": 13,
+      "unique_storage_bytes": 58464,
+      "unique_storage_count": 5
+    },
+    "event_time": {
+      "tensor_views": 69,
+      "unique_storage_bytes": 31068,
+      "unique_storage_count": 4
+    },
+    "final_cluster": {
+      "tensor_views": 9,
+      "unique_storage_bytes": 41095,
+      "unique_storage_count": 9
+    },
+    "statement_assertor": {
+      "tensor_views": 4,
+      "unique_storage_bytes": 4096,
+      "unique_storage_count": 2
+    }
+  }
+}

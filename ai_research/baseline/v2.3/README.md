@@ -6,3 +6,7 @@ v2.3 릴리스의 모델·런타임 코드 사본입니다.
 https://huggingface.co/sysy9292/kf-deberta-base-kg-extractor
 
 이 코드에 대응하는 체크포인트는 `checkpoint_manifest.json`의 SHA로 확인할 수 있습니다.
+
+`environment_manifest.json`과 `model_manifest.json`의 `"published": false`는
+freeze 시점 상태를 기록한 값입니다. v2.3은 이후 실제로 배포되었으며,
+배포 기록은 `ai_research/docs/95-release-v23/release-v23/publish-summary.md`에 있습니다.

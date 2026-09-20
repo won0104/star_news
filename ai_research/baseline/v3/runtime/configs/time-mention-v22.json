@@ -1,0 +1,8 @@
+{
+  "schema_version": "articlelocal-time-mention-policy-v22-v1",
+  "policy_id": "V22_TIME_OCCURRENCE_CONSOLIDATION_V1",
+  "normalization_acceptance_gate": false,
+  "identity_before_attachment": false,
+  "learned_scores": "FROZEN_TIME_AND_EVENT_TIME_ONLY",
+  "calibration_status": "PROVISIONAL_DECODER_REQUIRES_STEP12_VALIDATION"
+}
