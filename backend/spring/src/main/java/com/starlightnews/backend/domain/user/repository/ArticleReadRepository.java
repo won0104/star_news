@@ -78,6 +78,55 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 		String getSummary();
 	}
 
+	/** 뉴스 리포트의 언론사별 고유 기사 수 한 행. */
+	interface SourceReadCount {
+		Long getOrganizationId();
+
+		String getOrganizationName();
+
+		long getCount();
+	}
+
+	/** 뉴스 리포트의 최초 열람 시각과 기사 Topic 한 행. 주차 묶음은 애플리케이션에서 계산한다. */
+	interface FirstReadTopicRow {
+		LocalDateTime getFirstReadAt();
+
+		String getTopicCode();
+	}
+
+	/** 최근 기간 안에 마지막으로 읽은 고유 기사 수를 센다. */
+	@Query("SELECT COUNT(r) FROM ArticleRead r "
+			+ "WHERE r.id.userId = :userId "
+			+ "AND r.lastReadAt >= :fromInclusive AND r.lastReadAt < :toExclusive")
+	long countRecentReadArticles(@Param("userId") Long userId,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive);
+
+	/** 최근 기간 안에 마지막으로 읽은 고유 기사를 언론사별로 집계한다. */
+	@Query("SELECT a.organization.id AS organizationId, a.organization.name AS organizationName, "
+			+ "COUNT(r) AS count "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId "
+			+ "AND r.id.userId = :userId "
+			+ "AND r.lastReadAt >= :fromInclusive AND r.lastReadAt < :toExclusive "
+			+ "GROUP BY a.organization.id, a.organization.name "
+			+ "ORDER BY COUNT(r) DESC, a.organization.id ASC")
+	List<SourceReadCount> countRecentReadArticlesBySource(@Param("userId") Long userId,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive);
+
+	/** 최근 12개 주차에 최초로 읽은 기사 중 Topic이 있는 행만 조회한다. */
+	@Query("SELECT r.firstReadAt AS firstReadAt, a.topicCode AS topicCode "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId "
+			+ "AND r.id.userId = :userId "
+			+ "AND r.firstReadAt >= :fromInclusive AND r.firstReadAt < :toExclusive "
+			+ "AND a.topicCode IS NOT NULL "
+			+ "ORDER BY r.firstReadAt ASC, r.id.articleId ASC")
+	List<FirstReadTopicRow> findFirstReadTopics(@Param("userId") Long userId,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive);
+
 	/**
 	 * 해당 사용자가 읽은 기사를 articles.topic_code 기준으로 묶어 Topic 별 개수를 센다.
 	 * topic_code 가 없는 기사는 집계에서 제외한다.

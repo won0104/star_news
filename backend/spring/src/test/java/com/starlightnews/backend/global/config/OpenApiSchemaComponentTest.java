@@ -39,6 +39,20 @@ class OpenApiSchemaComponentTest {
 		assertArrayItemRef(schemas, "RelatedArticlesResponse", "articles", "RelatedArticleItem");
 		assertArrayItemRef(schemas, "RecommendationBoardResponse", "items", "RecommendationBoardItem");
 		assertArrayItemRef(schemas, "ArticleHistoryResponse", "items", "ArticleHistoryItem");
+		assertRef(schemas, "NewsReportResponse", "period", "NewsReportPeriod");
+		assertArrayItemRef(schemas, "NewsReportResponse", "sourceReads", "NewsReportSourceRead");
+		assertArrayItemRef(schemas, "NewsReportResponse", "weeklyTopicTrend", "NewsReportWeeklyTopicTrend");
+		assertArrayItemRef(schemas, "NewsReportWeeklyTopicTrend", "topics", "NewsReportWeeklyTopic");
+		assertArrayItemRef(schemas, "NewsReportResponse", "topicLandscape", "NewsReportTopicLandscapeNode");
+		assertThat(schemas.path("NewsReportTopicLandscapeNode").path("properties")
+				.has("userReadArticleCount")).isTrue();
+		assertThat(schemas.path("NewsReportTopicLandscapeNode").path("properties")
+				.has("globalReadArticleCount")).isTrue();
+		assertThat(schemas.path("NewsReportTopicLandscapeNode").path("properties").has("x")).isTrue();
+		assertThat(schemas.path("NewsReportTopicLandscapeNode").path("properties").has("y")).isTrue();
+		assertThat(schemas.path("NewsReportTopicLandscapeNode").path("properties").has("strong")).isTrue();
+		assertThat(schemas.path("NewsReportTopicLandscapeNode").path("properties")
+				.has("readArticleCount")).isFalse();
 		assertRef(schemas, "PersonalNodeArticlesResponse", "node", "PersonalNodeArticleNodeSummary");
 		assertArrayItemRef(schemas, "PersonalNodeArticlesResponse", "items", "PersonalNodeArticleItem");
 		assertArrayItemRef(schemas, "PersonalGraphMapResponse", "nodes", "PersonalGraphMapNode");
