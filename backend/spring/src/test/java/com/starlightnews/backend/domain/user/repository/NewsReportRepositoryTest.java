@@ -70,6 +70,34 @@ class NewsReportRepositoryTest {
 	}
 
 	@Test
+	void 기사_열람_기간은_시작_경계를_포함하고_종료_경계를_제외한다() {
+		NewsOrganization organization = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article beforeFrom = article(organization, "시작 경계 직전", "ECONOMY");
+		Article atFrom = article(organization, "시작 경계", "ECONOMY");
+		Article beforeTo = article(organization, "종료 경계 직전", "ECONOMY");
+		Article atTo = article(organization, "종료 경계", "ECONOMY");
+
+		entityManager.persist(read(1L, beforeFrom, "2026-06-01T23:59:59", "2026-06-01T23:59:59"));
+		entityManager.persist(read(1L, atFrom, "2026-06-02T00:00:00", "2026-06-02T00:00:00"));
+		entityManager.persist(read(1L, beforeTo, "2026-09-02T23:59:59", "2026-09-02T23:59:59"));
+		entityManager.persist(read(1L, atTo, "2026-09-03T00:00:00", "2026-09-03T00:00:00"));
+		entityManager.flush();
+		entityManager.clear();
+
+		LocalDateTime from = LocalDateTime.parse("2026-06-02T00:00:00");
+		LocalDateTime to = LocalDateTime.parse("2026-09-03T00:00:00");
+
+		assertThat(articleReadRepository.countRecentReadArticles(1L, from, to)).isEqualTo(2L);
+		assertThat(articleReadRepository.countRecentReadArticlesBySource(1L, from, to))
+				.extracting(ArticleReadRepository.SourceReadCount::getOrganizationName,
+						ArticleReadRepository.SourceReadCount::getCount)
+				.containsExactly(tuple("연합뉴스", 2L));
+		assertThat(articleReadRepository.findFirstReadTopics(1L, from, to))
+				.extracting(ArticleReadRepository.FirstReadTopicRow::getFirstReadAt)
+				.containsExactly(from, to.minusSeconds(1));
+	}
+
+	@Test
 	void 주간_분야_행은_firstReadAt_기준이며_Topic이_없는_기사를_제외한다() {
 		NewsOrganization organization = entityManager.persist(new NewsOrganization("연합뉴스"));
 		Article included = article(organization, "기간 내 최초 열람", "ECONOMY");
