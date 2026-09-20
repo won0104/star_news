@@ -31,6 +31,12 @@ class SearchRequestTest {
 		assertInvalidRequest(catchThrowable(() -> SearchRequest.of("검색", null, "51")));
 	}
 
+	@Test
+	void size의_최솟값과_최댓값을_허용한다() {
+		assertThat(SearchRequest.of("검색", null, "1").size()).isEqualTo(1);
+		assertThat(SearchRequest.of("검색", null, "50").size()).isEqualTo(50);
+	}
+
 	private void assertInvalidRequest(Throwable throwable) {
 		assertThat(throwable).isInstanceOf(BusinessException.class);
 		assertThat(((BusinessException) throwable).getErrorCode()).isEqualTo(SearchErrorCode.INVALID_REQUEST);

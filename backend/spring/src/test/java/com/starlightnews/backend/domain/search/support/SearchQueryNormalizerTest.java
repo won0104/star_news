@@ -46,6 +46,30 @@ class SearchQueryNormalizerTest {
 	}
 
 	@Test
+	void 이모지만_있으면_INVALID_REQUEST() {
+		Throwable thrown = catchThrowable(() -> normalizer.normalize("🔥 🚀"));
+
+		assertInvalidRequest(thrown);
+	}
+
+	@Test
+	void 제어_문자만_있으면_INVALID_REQUEST() {
+		Throwable thrown = catchThrowable(() -> normalizer.normalize("\u0000\u0007\u001B"));
+
+		assertInvalidRequest(thrown);
+	}
+
+	@Test
+	void 인젝션_형태의_특수문자를_제거해_안전한_Fulltext_Query를_만든다() {
+		NormalizedSearchQuery query = normalizer.normalize("한국은행') MATCH (n) DETACH DELETE n // 🔥");
+
+		assertThat(query.tokens()).containsExactly("한국은행", "match", "n", "detach", "delete");
+		assertThat(query.fulltextQuery())
+				.isEqualTo("*한국은행* OR *match* OR *n* OR *detach* OR *delete*")
+				.doesNotContain("'", "(", ")", "/");
+	}
+
+	@Test
 	void Token이_20개를_초과하면_INVALID_REQUEST() {
 		String input = String.join(" ", IntStream.rangeClosed(1, 21).mapToObj(number -> "토큰" + number).toList());
 

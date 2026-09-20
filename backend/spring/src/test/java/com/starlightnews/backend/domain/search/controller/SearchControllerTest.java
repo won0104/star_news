@@ -103,6 +103,10 @@ class SearchControllerTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
 
+		mockMvc.perform(get(PATH).param("query", "검색").param("size", "0"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+
 		mockMvc.perform(get(PATH).param("query", "검색").param("size", "51"))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
