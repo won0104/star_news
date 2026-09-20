@@ -198,6 +198,7 @@ def merge_extracted_entity(
         FOREACH (_ IN CASE WHEN e.entityType = 'PERSON' THEN [1] ELSE [] END | SET e:Person)
         FOREACH (_ IN CASE WHEN e.entityType = 'LOCATION' THEN [1] ELSE [] END | SET e:Location)
         FOREACH (_ IN CASE WHEN e.entityType = 'ORGANIZATION' THEN [1] ELSE [] END | SET e:Organization)
+        FOREACH (_ IN CASE WHEN e.entityType = 'PRODUCT' THEN [1] ELSE [] END | SET e:Product)
         RETURN e.nodeId AS nodeId
         """,
         canonicalName=normalized_name,
