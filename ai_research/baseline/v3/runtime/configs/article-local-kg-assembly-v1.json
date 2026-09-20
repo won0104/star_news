@@ -1,0 +1,57 @@
+{
+  "schema_version": "articlelocal-kg-assembly-config-v1",
+  "assembly_config_id": "eventframe_partial_kg_assembly_v3_event_identity",
+  "status": "EXPERIMENTAL_EVENT_IDENTITY_LIMITED_ASSEMBLY",
+  "input_schema_version": "articlelocal-eventframe-runtime-result-v1",
+  "source_runtime_config_id": "eventframe_runtime_candidate_v3_event_identity_limited_activation",
+  "output_schema_version": "articlelocal-kg-runtime-graph-v1",
+  "materialized_node_kinds": [
+    "ARTICLE",
+    "EVENT",
+    "LOCAL_EVENT",
+    "STATEMENT",
+    "TIME",
+    "LOCAL_ENTITY"
+  ],
+  "materialized_edge_types": [
+    "COVERS",
+    "MEMBER_OF_EVENT",
+    "CONTAINS_STATEMENT",
+    "OCCURRED_ON",
+    "MENTIONS",
+    "ACTOR",
+    "TARGET",
+    "PLACE"
+  ],
+  "unmaterialized_participant_roles": [
+    "ACTOR",
+    "TARGET",
+    "PLACE"
+  ],
+  "participant_evidence_policy": "PRESERVE_RAW_WITH_SOURCE_EVENTFRAME_ID",
+  "participant_role_edge_policy": "MATERIALIZE_ONLY_PREDICTED_ENTITY_RESOLVED",
+  "entity_candidate_priority_policy": "PRESERVE_TIER1_AND_TIER2_METADATA_ONLY",
+  "entity_candidate_hard_deletion_authorized": false,
+  "entity_candidate_hard_identity_eligibility_gate_authorized": false,
+  "tier2_rescue_policy": "COREFERENCE_WITH_TIER1_OR_HIGH_CONFIDENCE_PARTICIPANT_TARGET",
+  "entity_materialization_policy": "TIER1_PRIMARY_COMPLETE_LINK_CLUSTER_PLUS_BOUNDED_TIER2_RESCUE",
+  "raw_entity_evidence_preserved": true,
+  "raw_participant_evidence_preserved": true,
+  "fake_entity_fallback": false,
+  "mix_node_enabled": false,
+  "presence_hard_gate": false,
+  "time_materialization_policy": "ATTACHED_AND_NORMALIZED_ONLY",
+  "unresolved_time_evidence_preserved": true,
+  "fake_time_fallback": false,
+  "not_run_is_absent": false,
+  "disabled_lanes": [
+    "ASSERTOR",
+    "ABOUT",
+    "CAUSES",
+    "SUBEVENT_OF"
+  ],
+  "event_identity_materialization_policy": "PRESERVE_RAW_EVENTFRAME_AND_ADD_ARTICLE_LOCAL_EVENT_WITH_MEMBER_PROVENANCE",
+  "event_identity_clustering_policy": "COMPLETE_LINK_EXACT_TIME_CONFLICT",
+  "raw_eventframe_evidence_preserved": true,
+  "event_identity_cross_article": false
+}
