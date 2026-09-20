@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -81,12 +82,10 @@ public class NewsReportService {
 
 			LocalDate currentWeekStart = to.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 			LocalDate weeklyFrom = currentWeekStart.minusWeeks(WEEK_COUNT - 1L);
-			if (weeklyFrom.isBefore(from)) {
-				weeklyFrom = from;
-			}
 
 			List<WeeklyTopicTrend> weeklyTopicTrend = buildWeeklyTopicTrend(
-					articleReadRepository.findFirstReadTopics(userId, weeklyFrom.atStartOfDay(), toExclusive));
+					articleReadRepository.findFirstReadTopics(userId, weeklyFrom.atStartOfDay(), toExclusive),
+					weeklyFrom);
 			List<TopicLandscapeNode> topicLandscape = buildTopicLandscape(
 					userKnowledgeNodeRepository.findEntityLandscapeForNewsReport(
 							userId, fromInclusive, toExclusive, TOPIC_LANDSCAPE_LIMIT),
@@ -115,14 +114,21 @@ public class NewsReportService {
 				.doubleValue();
 	}
 
-	private List<WeeklyTopicTrend> buildWeeklyTopicTrend(List<FirstReadTopicRow> rows) {
+	private List<WeeklyTopicTrend> buildWeeklyTopicTrend(List<FirstReadTopicRow> rows,
+			LocalDate weeklyFrom) {
 		Map<LocalDate, EnumMap<TopicCode, Long>> countsByWeek = new TreeMap<>();
+		for (int weekIndex = 0; weekIndex < WEEK_COUNT; weekIndex++) {
+			countsByWeek.put(weeklyFrom.plusWeeks(weekIndex), new EnumMap<>(TopicCode.class));
+		}
+
 		for (FirstReadTopicRow row : rows) {
 			TopicCode.from(row.getTopicCode()).ifPresent(topicCode -> {
 				LocalDate weekStart = row.getFirstReadAt().toLocalDate()
 						.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-				countsByWeek.computeIfAbsent(weekStart, ignored -> new EnumMap<>(TopicCode.class))
-						.merge(topicCode, 1L, Long::sum);
+				EnumMap<TopicCode, Long> weeklyCounts = countsByWeek.get(weekStart);
+				if (weeklyCounts != null) {
+					weeklyCounts.merge(topicCode, 1L, Long::sum);
+				}
 			});
 		}
 
@@ -132,9 +138,9 @@ public class NewsReportService {
 	}
 
 	private List<WeeklyTopic> toWeeklyTopics(EnumMap<TopicCode, Long> counts) {
-		return counts.entrySet().stream()
-				.map(entry -> new WeeklyTopic(
-						entry.getKey().name(), entry.getKey().labelKo(), entry.getValue()))
+		return Arrays.stream(TopicCode.values())
+				.map(topicCode -> new WeeklyTopic(
+						topicCode.name(), topicCode.labelKo(), counts.getOrDefault(topicCode, 0L)))
 				.toList();
 	}
 

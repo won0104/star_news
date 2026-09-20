@@ -20,7 +20,7 @@ public record NewsReportResponse(
 		@Schema(description = "언론사별 읽은 기사 수와 전체 대비 비율")
 		List<SourceRead> sourceReads,
 
-		@Schema(description = "최근 12개 주차의 분야별 최초 열람 기사 수. 데이터가 있는 주차만 포함")
+		@Schema(description = "최근 12개 주차의 분야별 최초 열람 기사 수. 빈 주차와 0건 분야도 포함")
 		List<WeeklyTopicTrend> weeklyTopicTrend,
 
 		@Schema(description = "최근 3개월 동안 접한 ENTITY 중 누적 읽기 상위 Node")
@@ -61,7 +61,7 @@ public record NewsReportResponse(
 			@Schema(description = "주차 시작일(월요일)", example = "2026-08-17")
 			LocalDate weekStart,
 
-			@Schema(description = "해당 주차의 분야별 최초 열람 기사 수")
+			@Schema(description = "7개 공식 Topic의 최초 열람 기사 수. TopicCode 선언 순서로 모두 반환")
 			List<WeeklyTopic> topics
 	) {
 	}

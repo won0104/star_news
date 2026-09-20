@@ -88,13 +88,27 @@ class NewsReportServiceTest {
 						NewsReportResponse.SourceRead::readArticleCount,
 						NewsReportResponse.SourceRead::ratio)
 				.containsExactly(tuple("연합뉴스", 18L, 26.9), tuple("테크뉴스", 3L, 4.5));
-		assertThat(response.weeklyTopicTrend()).hasSize(1);
-		assertThat(response.weeklyTopicTrend().getFirst().weekStart()).isEqualTo(LocalDate.of(2026, 8, 17));
-		assertThat(response.weeklyTopicTrend().getFirst().topics())
+		assertThat(response.weeklyTopicTrend()).hasSize(12);
+		assertThat(response.weeklyTopicTrend().getFirst().weekStart())
+				.isEqualTo(LocalDate.of(2026, 6, 15));
+		assertThat(response.weeklyTopicTrend().getLast().weekStart())
+				.isEqualTo(LocalDate.of(2026, 8, 31));
+		NewsReportResponse.WeeklyTopicTrend weekOfAugust17 = response.weeklyTopicTrend().stream()
+				.filter(week -> week.weekStart().equals(LocalDate.of(2026, 8, 17)))
+				.findFirst()
+				.orElseThrow();
+		assertThat(weekOfAugust17.topics())
 				.extracting(NewsReportResponse.WeeklyTopic::topicCode,
 						NewsReportResponse.WeeklyTopic::topicName,
 						NewsReportResponse.WeeklyTopic::readArticleCount)
-				.containsExactly(tuple("ECONOMY", "경제", 2L), tuple("IT_SCIENCE", "IT·과학", 1L));
+				.containsExactly(
+						tuple("POLITICS", "정치", 0L),
+						tuple("ECONOMY", "경제", 2L),
+						tuple("SOCIETY", "사회", 0L),
+						tuple("CULTURE", "문화", 0L),
+						tuple("INTERNATIONAL", "국제", 0L),
+						tuple("SPORTS", "스포츠", 0L),
+						tuple("IT_SCIENCE", "IT·과학", 1L));
 		assertThat(response.topicLandscape())
 				.extracting(NewsReportResponse.TopicLandscapeNode::nodeType,
 						NewsReportResponse.TopicLandscapeNode::topicCode,
@@ -127,7 +141,14 @@ class NewsReportServiceTest {
 
 		assertThat(response.totalReadArticleCount()).isZero();
 		assertThat(response.sourceReads()).isEmpty();
-		assertThat(response.weeklyTopicTrend()).isEmpty();
+		assertThat(response.weeklyTopicTrend()).hasSize(12);
+		assertThat(response.weeklyTopicTrend())
+				.allSatisfy(week -> {
+					assertThat(week.topics()).hasSize(7);
+					assertThat(week.topics())
+							.extracting(NewsReportResponse.WeeklyTopic::readArticleCount)
+							.containsOnly(0L);
+				});
 		assertThat(response.topicLandscape()).isEmpty();
 	}
 
