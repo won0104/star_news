@@ -177,6 +177,17 @@ class TopicPreferenceServiceTest {
 	}
 
 	@Test
+	void null_Topic이면_INVALID_TOPIC_예외() {
+		UpdateTopicPreferenceRequest request = new UpdateTopicPreferenceRequest(
+				java.util.Arrays.asList("POLITICS", null));
+
+		Throwable thrown = catchThrowable(() -> topicPreferenceService.replaceInterests(1L, request));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(UserErrorCode.INVALID_TOPIC);
+		verify(userRepository, never()).findById(anyLong());
+	}
+
+	@Test
 	void 정규화한_Topic이_중복이면_DUPLICATED_TOPIC_예외() {
 		UpdateTopicPreferenceRequest request = new UpdateTopicPreferenceRequest(
 				List.of("POLITICS", " politics "));

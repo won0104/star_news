@@ -34,19 +34,18 @@
  * H.264 with an audio track the element mutes. scripts/encode-clip.ps1 has the recipe.
  */
 /**
- * 나를 위한 추천의 방 — 코르크 보드가 걸린 벽 사진 한 장.
+ * 나를 위한 추천의 방 — 비어 있는 코르크 보드가 걸린 벽 사진 한 장.
  *
- * 이 화면은 공용 햇살 방(data/home.js 의 backdrop) 위에 보드를 얹지 않는다. 사진 자체가 방이고
- * 보드고 종이라서, <PhotoBackdrop> 이 이 사진을 바닥으로 깔고 <RecommendPane> 은 그 위 종이
- * 자리에 글자만 쓴다. 도착 영상(arrival.mp4)과 그 마지막 프레임(desk-still.webp)은 옛 방을
- * 찍은 것이라 여기 맞지 않아 뗐다 — `loop: null` 이면 <PhotoBackdrop> 이 첫 프레임부터
- * 정착(settled)으로 친다.
+ * <PhotoBackdrop> 은 방과 빈 보드만 바닥으로 깔고, <RecommendPane> 이 제목 종이·추천 종이·핀을
+ * 별도 에셋으로 올린다. 카드 자체가 버튼이므로 종이 전체를 눌러 상세를 열 수 있다. 도착
+ * 영상(arrival.mp4)과 그 마지막 프레임(desk-still.webp)은 옛 방을 찍은 것이라 여기 맞지 않아
+ * 뗐다 — `loop: null` 이면 <PhotoBackdrop> 이 첫 프레임부터 정착(settled)으로 친다.
  *
  * 1672×941. 종이 열 장의 자리는 data/recommendBoard.js 가 이 사진의 비율 좌표로 갖는다.
  */
 export const arrivalScene = {
   id: 'foryou',
-  src: '/assets/board/corkboard-notes.png',
+  src: '/assets/board/recommend-board-empty.png',
   loop: null,
   /**
    * 사진을 어디에 맞춰 걸지.

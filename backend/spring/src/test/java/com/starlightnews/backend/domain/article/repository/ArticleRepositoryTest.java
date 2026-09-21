@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.starlightnews.backend.domain.article.domain.Article;
 import com.starlightnews.backend.domain.article.domain.NewsOrganization;
+import com.starlightnews.backend.domain.article.support.ArticleContents;
 import com.starlightnews.backend.domain.article.support.ArticleUrls;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
 import com.starlightnews.backend.global.enums.ContentType;
@@ -221,7 +222,8 @@ class ArticleRepositoryTest {
 	private void insertCollected(Long orgId, String title, String url, String category) {
 		articleRepository.insertIfAbsent(orgId, title, url, ArticleUrls.hash(url),
 				LocalDateTime.of(2026, 9, 14, 14, 0), category, "본문입니다.",
-				ContentType.FULL_TEXT.name(), AnalysisStatus.PROCESSING.name());
+				ContentType.FULL_TEXT.name(), ArticleContents.hash("본문입니다."),
+				AnalysisStatus.PROCESSING.name());
 	}
 
 	@Test

@@ -19,7 +19,7 @@ import styles from './TrendStage.module.css';
  * configured; otherwise the screen settles immediately instead of cross-fading between
  * unrelated rooms.
  */
-export function TrendStage({ playTransition = false }) {
+export function TrendStage({ playTransition = false, selectedNode }) {
   const [ready, setReady] = useState(false);
   const [ended, setEnded] = useState(false);
   const [overlayRoot, setOverlayRoot] = useState(null);
@@ -77,7 +77,7 @@ export function TrendStage({ playTransition = false }) {
 
         {settled && (
           <div className={styles.windowGlass}>
-            <TrendSky overlayRoot={overlayRoot} />
+            <TrendSky overlayRoot={overlayRoot} selectedNode={selectedNode} />
           </div>
         )}
 

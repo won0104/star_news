@@ -52,6 +52,7 @@ export const authActions = {
  */
 export const accountMenu = {
   label: '계정 메뉴',
+  unknownUser: '내 계정',
   items: [
     {
       id: 'interest',
@@ -63,6 +64,8 @@ export const accountMenu = {
     },
   ],
   signOut: '로그아웃',
+  signingOut: '로그아웃 중…',
+  signOutFailed: '로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.',
 }
 
 /**

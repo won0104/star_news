@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { settingsCopy, settingsPanes } from '../../data/settings';
+import { useSession } from '../../store/session';
 import { closeSettings, openSettings, useSettingsSection } from '../../store/settings';
 import { AccountPane } from './AccountPane';
 import { InterestPane } from './InterestPane';
@@ -17,14 +18,20 @@ import styles from './SettingsOverlay.module.css';
  * `settingsPanes`, so adding a pane is a list entry there and a branch below.
  */
 export function SettingsOverlay() {
+  const account = useSession();
   const section = useSettingsSection();
   const modalRef = useRef(null);
   const openerRef = useRef(null);
 
   const open = section !== null;
+  const visible = open && !!account;
 
   useEffect(() => {
-    if (!open) return undefined;
+    if (!account && open) closeSettings();
+  }, [account, open]);
+
+  useEffect(() => {
+    if (!visible) return undefined;
 
     // Whatever was focused when this opened is where focus goes back to on close —
     // the account mark, since UserMenu hands focus back to it before opening.
@@ -39,9 +46,9 @@ export function SettingsOverlay() {
       document.removeEventListener('keydown', closeOnEscape);
       if (openerRef.current instanceof HTMLElement) openerRef.current.focus();
     };
-  }, [open]);
+  }, [visible]);
 
-  if (!open) return null;
+  if (!visible) return null;
 
   return (
     <div

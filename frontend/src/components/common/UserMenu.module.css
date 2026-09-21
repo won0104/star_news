@@ -48,8 +48,7 @@
   box-shadow: var(--glass-shadow);
 }
 
-/* Whose account this is. A label, not a control — the id is the only thing the session
-   knows about the user until the real endpoint returns a display name. */
+/* Whose account this is. After a refresh, the session may have no display name. */
 .who {
   margin: 0;
   padding: 6px 10px 10px;
@@ -74,6 +73,19 @@
 
 .item:hover {
   background: rgba(120, 102, 82, 0.08);
+}
+
+.item:disabled,
+.mark:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.error {
+  margin: 4px 10px 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--auth-error);
 }
 
 .divider {
