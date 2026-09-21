@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 
 from neo4j import Session
 
+from app.database import _driver
 from app.recommendations import repository
 from app.recommendations.schemas import (
     CBFCandidate,
@@ -40,8 +41,14 @@ def calculate_recommendations(
         is_cold_start = not repository.has_consumption_history(session, user.user_id)
         recommendation_type = "COLD_START" if is_cold_start else "NORMAL"
 
-        # 3) 실제 추천 계산 
-        scored = calculate_interest_based_recommendations(user.user_id, session, is_cold_start=is_cold_start)
+        # 3) 실제 추천 계산 - 요청에 재튜닝된 가중치가 실려있으면 그걸 쓰고, 없으면 기본값 사용
+        scored = calculate_interest_based_recommendations(
+            user.user_id,
+            session,
+            cbf_weight=request.cbf_weight if request.cbf_weight is not None else DEFAULT_CBF_WEIGHT,
+            cf_weight=request.cf_weight if request.cf_weight is not None else DEFAULT_CF_WEIGHT,
+            is_cold_start=is_cold_start,
+        )
 
         # 후보가 하나도 없으면 (신규 Topic이라 인기 Event도 없는 등) 빈 목록으로 응답
         if not scored:
@@ -67,9 +74,10 @@ def calculate_recommendations(
 
     return RecommendationCalculateResponse(cycle=request.cycle, results=results)
 
-# CF/CBF 결합 가중치 기본값. 나중에 -84에서 튜닝.
-DEFAULT_CBF_WEIGHT = 0.5
-DEFAULT_CF_WEIGHT = 0.5
+# CF/CBF 결합 가중치 기본값
+# 초기 서비스라 유저 수가 적어 CF(유사 유저 기반)가 구조적으로 불리하므로 CBF 쪽으로 기울여 시작한다
+DEFAULT_CBF_WEIGHT = 0.7
+DEFAULT_CF_WEIGHT = 0.3
 
 # 1. 협업 필터링(CF) 공용 모듈
 def calculate_cf_scores(
@@ -243,3 +251,132 @@ def calculate_interest_based_recommendations(
     scored.sort(key=lambda s: s.score, reverse=True)
     # 상위 FINAL_RECOMMENDATION_LIMIT개만 반환
     return scored[: repository.FINAL_RECOMMENDATION_LIMIT]
+
+
+# 5. 가중치 재튜닝 (적응형 holdout 평가)
+# CF/CBF 가중치 그리드서치용 오프라인 평가
+# 유저별 CONSUMED 이력 중 최근 일부를 "정답"으로 숨기고, 나머지 이력만으로 추천을 계산해서 정답을 맞히는지로 채점
+
+# holdout 비율 - "정답 후보(최근성 자격 있는 것)" 중 최근 20%를 정답으로 뗀다
+HOLD_OUT_RATIO = 0.2
+# 추천 Top-K - 지표(NDCG/HitRate/Recall) 계산 시 몇 등까지 볼지
+EVAL_TOP_K = 10
+# 그리드서치 대상 (cbf_weight, cf_weight) 조합 - cbf_weight + cf_weight = 1 고정, 0.1 단위로 11개
+WEIGHT_GRID = [(round(1 - i * 0.1, 1), round(i * 0.1, 1)) for i in range(11)]
+
+
+# 유저별 (event_id, 최근성 자격) 이력을 받아서, 평가 가능한 유저만 남기고 (정답 목록, 학습용 목록)으로 나눈다
+def build_holdout_splits(all_histories: dict[int, list[dict]]) -> dict[int, tuple[list[str], list[str]]]:
+    splits = {}
+    for user_id, history in all_histories.items():
+        # 정답은 최근성 자격 있는 것 중에서만 고르고(안 그러면 절대 못 맞힐 정답을 놓고 채점하게 됨),
+        # 학습용은 원래 이력 전체를 그대로 둔다(프로필 벡터 계산은 실제 서비스도 기간 제한이 없어서)
+        full_ids = [item["eventId"] for item in history]
+        eligible_ids = [item["eventId"] for item in history if item["isRecencyEligible"]]
+        if not eligible_ids:
+            continue
+        # 자격 있는 이력 개수의 20%를 정답 개수로 - 소수점은 반올림하되 최소 1개는 보장
+        hold_out_count = max(1, round(len(eligible_ids) * HOLD_OUT_RATIO))
+        # eligible_ids는 최근순 정렬이라 앞쪽 hold_out_count개 = 가장 최근 정답
+        held_out = eligible_ids[:hold_out_count]
+        held_out_set = set(held_out)
+        # 학습용은 정답으로 뽑히지 않은 나머지 전체(오래된 것 포함)
+        visible = [eid for eid in full_ids if eid not in held_out_set]
+        if not visible:
+            continue
+
+        splits[user_id] = (held_out, visible)
+    return splits
+
+
+# 추천 Top-K와 정답(held_out) 집합을 비교해서 채점하는 지표 3개
+# 1) NDCG@10 (순위까지 반영) - 앞쪽에서 맞힐수록 점수가 높음, 자기 정답 개수 기준 이상적인 순위(IDCG)로 나눠 정규화
+def calculate_ndcg_at_k(recommended_ids: list[str], held_out: set[str], k: int = EVAL_TOP_K) -> float:
+    dcg = sum(1 / math.log2(i + 2) for i, eid in enumerate(recommended_ids[:k]) if eid in held_out)
+    idcg = sum(1 / math.log2(i + 2) for i in range(min(len(held_out), k)))
+    return dcg / idcg if idcg else 0.0
+
+
+# 2) Hit Rate@10 - Top-K 안에 정답이 하나라도 있으면 1, 없으면 0 (이진값)
+def calculate_hit_rate_at_k(recommended_ids: list[str], held_out: set[str], k: int = EVAL_TOP_K) -> float:
+    return 1.0 if set(recommended_ids[:k]) & held_out else 0.0
+
+
+# 3) Recall@10 - Top-K 중 정답을 몇 % 맞혔는지 (숨긴 정답 개수 대비)
+def calculate_recall_at_k(recommended_ids: list[str], held_out: set[str], k: int = EVAL_TOP_K) -> float:
+    return len(set(recommended_ids[:k]) & held_out) / len(held_out) if held_out else 0.0
+
+
+# 정답(held_out) 이벤트의 CONSUMED 관계를 트랜잭션 안에서만 지우고,추천을 계산한 뒤 롤백
+def evaluate_user_across_weight_grid(user_id: int, held_out_ids: list[str]) -> dict[tuple[float, float], list[str]]:
+    with _driver.session() as session:
+        tx = session.begin_transaction()
+        try:
+            tx.run(
+                """
+                MATCH (:User {userId: $userId})-[r:CONSUMED]->(e:Event)
+                WHERE e.nodeId IN $heldOutIds
+                DELETE r
+                """,
+                userId=user_id,
+                heldOutIds=held_out_ids,
+            )
+            return {
+                (cbf_weight, cf_weight): [
+                    s.event_id
+                    for s in calculate_interest_based_recommendations(
+                        user_id, tx, cbf_weight=cbf_weight, cf_weight=cf_weight
+                    )
+                ]
+                for cbf_weight, cf_weight in WEIGHT_GRID
+            }
+        finally:
+            tx.rollback()
+
+
+# 재튜닝 메인 함수 - 그리드서치 전체를 돌려서 NDCG@10이 가장 높은 (cbf_weight, cf_weight) 조합을 고른다
+def select_best_weights() -> tuple[float, float, float, float, float]:
+    # 홀드아웃 정답 자격 판단에도 실제 추천 후보 조건과 같은 최근성 기준을 쓴다
+    recency_threshold = datetime.now(timezone.utc) - timedelta(days=repository.RECENCY_WINDOW_DAYS)
+    with _driver.session() as session:
+        all_histories = repository.find_users_eligible_for_evaluation(session, recency_threshold)
+    splits = build_holdout_splits(all_histories)
+
+    # 평가 가능한 유저가 없으면 그리드서치가 무의미하니 현재 기본값을 그대로 반환
+    if not splits:
+        return DEFAULT_CBF_WEIGHT, DEFAULT_CF_WEIGHT, 0.0, 0.0, 0.0
+
+    # 가중치 조합별로 유저들의 (ndcg, hit_rate, recall)을 누적
+    metrics_by_weight: dict[tuple[float, float], list[tuple[float, float, float]]] = {
+        combo: [] for combo in WEIGHT_GRID
+    }
+    for user_id, (held_out, _visible) in splits.items():
+        held_out_set = set(held_out)
+        try:
+            recommended_by_weight = evaluate_user_across_weight_grid(user_id, held_out)
+        except Exception:
+            continue  # 이 유저 처리 중 에러나도 나머지는 계속 진행
+        for combo, recommended in recommended_by_weight.items():
+            metrics_by_weight[combo].append(
+                (
+                    calculate_ndcg_at_k(recommended, held_out_set),
+                    calculate_hit_rate_at_k(recommended, held_out_set),
+                    calculate_recall_at_k(recommended, held_out_set),
+                )
+            )
+
+    if all(not scores for scores in metrics_by_weight.values()):
+        return DEFAULT_CBF_WEIGHT, DEFAULT_CF_WEIGHT, 0.0, 0.0, 0.0
+
+    best = None  # (cbf_weight, cf_weight, ndcg, hit_rate, recall) - NDCG 기준 최고 조합
+    for cbf_weight, cf_weight in WEIGHT_GRID:
+        scores = metrics_by_weight[(cbf_weight, cf_weight)]
+        avg_ndcg = sum(s[0] for s in scores) / len(scores) if scores else 0.0
+        avg_hit = sum(s[1] for s in scores) / len(scores) if scores else 0.0
+        avg_recall = sum(s[2] for s in scores) / len(scores) if scores else 0.0
+
+        if best is None or avg_ndcg > best[2]:
+            best = (cbf_weight, cf_weight, avg_ndcg, avg_hit, avg_recall)
+
+    cbf_weight, cf_weight, ndcg, hit_rate, recall = best
+    return cbf_weight, cf_weight, ndcg, hit_rate, recall
