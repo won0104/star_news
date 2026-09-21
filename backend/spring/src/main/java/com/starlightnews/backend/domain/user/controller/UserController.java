@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +39,25 @@ public class UserController {
 	private static final String REFRESH_TOKEN_COOKIE_PATH = ApiPaths.API_V1 + "/auth";
 
 	private final UserService userService;
+
+	@Operation(summary = "내 정보 조회",
+			description = "현재 로그인한 사용자의 기본 정보와 관심·비관심 Topic 설정을 조회한다. Access Token 필요.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
+					description = "Access Token 오류 (code: UNAUTHORIZED / INVALID_ACCESS_TOKEN / EXPIRED_ACCESS_TOKEN)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+					description = "사용자를 찾을 수 없음 (code: USER_NOT_FOUND)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	@GetMapping("/me")
+	public ApiResponse<UserProfileResponse> getMyProfile(
+			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
+			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+	) {
+		return ApiResponse.success(userService.getMyProfile(user.userId()), requestId);
+	}
 
 	@Operation(summary = "내 닉네임 수정",
 			description = "현재 로그인한 사용자의 닉네임을 변경하고 최신 사용자 정보를 반환한다. Access Token 필요.")

@@ -26,13 +26,25 @@ public class UserService {
 	private final RefreshSessionStore refreshSessionStore;
 	private final TokenBlacklist tokenBlacklist;
 
+	@Transactional(readOnly = true)
+	public UserProfileResponse getMyProfile(long userId) {
+		return toProfileResponse(findActiveUser(userId));
+	}
+
 	@Transactional
 	public UserProfileResponse updateNickname(long userId, String nickname) {
-		User user = userRepository.findById(userId)
+		User user = findActiveUser(userId);
+		user.changeNickname(nickname);
+		return toProfileResponse(user);
+	}
+
+	private User findActiveUser(long userId) {
+		return userRepository.findById(userId)
 				.filter(found -> !found.isDeleted())
 				.orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+	}
 
-		user.changeNickname(nickname);
+	private UserProfileResponse toProfileResponse(User user) {
 		return new UserProfileResponse(
 				user.getId(),
 				user.getLoginId(),
