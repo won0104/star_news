@@ -1,16 +1,12 @@
 package com.starlightnews.backend.domain.topic.dto;
 
-import java.util.Arrays;
 import java.util.List;
 
-import com.starlightnews.backend.global.enums.TopicCode;
-
+/** 회원가입·사용자 설정에서 선택 가능한 전체 Topic 목록. */
 public record TopicListResponse(List<TopicItem> topics) {
 
-	public static TopicListResponse all() {
-		return new TopicListResponse(Arrays.stream(TopicCode.values())
-				.map(topic -> new TopicItem(topic.name(), topic.labelKo()))
-				.toList());
+	public TopicListResponse {
+		topics = topics == null ? List.of() : List.copyOf(topics);
 	}
 
 	public record TopicItem(String code, String labelKo) {

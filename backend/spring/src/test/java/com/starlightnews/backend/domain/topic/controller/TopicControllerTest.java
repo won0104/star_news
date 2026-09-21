@@ -1,5 +1,6 @@
 package com.starlightnews.backend.domain.topic.controller;
 
+import com.starlightnews.backend.domain.topic.service.TopicService;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.security.InMemoryTokenBlacklist;
 import com.starlightnews.backend.global.security.JwtProvider;
@@ -15,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TopicController.class)
-@Import({SecurityConfig.class, JwtProvider.class, InMemoryTokenBlacklist.class})
+@Import({SecurityConfig.class, JwtProvider.class, InMemoryTokenBlacklist.class, TopicService.class})
 @ActiveProfiles("test")
 class TopicControllerTest {
 

@@ -5,7 +5,10 @@ import java.time.Instant;
 
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
 import com.starlightnews.backend.domain.user.domain.User;
+import com.starlightnews.backend.domain.user.dto.UserProfileResponse;
+import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.repository.UserRepository;
+import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
 import com.starlightnews.backend.global.security.TokenBlacklist;
@@ -22,6 +25,21 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final RefreshSessionStore refreshSessionStore;
 	private final TokenBlacklist tokenBlacklist;
+
+	@Transactional
+	public UserProfileResponse updateNickname(long userId, String nickname) {
+		User user = userRepository.findById(userId)
+				.filter(found -> !found.isDeleted())
+				.orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+		user.changeNickname(nickname);
+		return new UserProfileResponse(
+				user.getId(),
+				user.getLoginId(),
+				user.getNickname(),
+				user.getTopicCodes(InterestType.INTEREST),
+				user.getTopicCodes(InterestType.DISLIKE));
+	}
 
 	/**
 	 * 회원 탈퇴. 계정을 soft delete(deleted_at)로 비활성화하고, 해당 사용자의 모든 Refresh 세션을 삭제하며,

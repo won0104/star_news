@@ -71,6 +71,11 @@ public class User extends BaseTimeEntity {
 		this.deletedAt = LocalDateTime.now();
 	}
 
+	/** 화면에 표시할 닉네임만 변경한다. */
+	public void changeNickname(String nickname) {
+		this.nickname = Objects.requireNonNull(nickname, "nickname must not be null");
+	}
+
 	/**
 	 * 관심(INTEREST) 또는 비관심(DISLIKE) 분야를 추가한다. 저장은 User 저장 시 cascade 로 함께 처리된다.
 	 */
