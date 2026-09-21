@@ -37,9 +37,9 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	@Modifying
 	@Query(value = "INSERT INTO articles "
 			+ "(organization_id, title, url, url_hash, published_at, source_category, content, "
-			+ " content_type, analysis_status) "
+			+ " content_type, content_hash, analysis_status) "
 			+ "VALUES (:organizationId, :title, :url, :urlHash, :publishedAt, :sourceCategory, "
-			+ " :content, :contentType, :analysisStatus) "
+			+ " :content, :contentType, :contentHash, :analysisStatus) "
 			+ "ON DUPLICATE KEY UPDATE article_id = article_id",
 			nativeQuery = true)
 	void insertIfAbsent(@Param("organizationId") Long organizationId,
@@ -50,7 +50,17 @@ public interface ArticleRepository extends Repository<Article, Long> {
 			@Param("sourceCategory") String sourceCategory,
 			@Param("content") String content,
 			@Param("contentType") String contentType,
+			@Param("contentHash") byte[] contentHash,
 			@Param("analysisStatus") String analysisStatus);
+
+	/**
+	 * 같은 본문으로 이미 저장된 기사들의 제목.
+	 *
+	 * <p>본문이 같은데 제목이 다르면 그 본문은 기사 본문이 아니다. 사이트의 추천 기사 목록 같은
+	 * 것이 본문 자리에 들어온 경우라, 저장하지 않는다.
+	 */
+	@Query("SELECT DISTINCT a.title FROM Article a WHERE a.contentHash = :contentHash")
+	List<String> findTitlesByContentHash(@Param("contentHash") byte[] contentHash);
 
 	/** url 해시로 기사 ID 를 찾는다. 저장 여부 확인용. */
 	@Query("SELECT a.articleId FROM Article a WHERE a.urlHash = :urlHash")
@@ -144,7 +154,7 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	 */
 	@Modifying
 	@Query("UPDATE Article a SET a.nodeId = :nodeId, a.topicCode = :topicCode, "
-			+ "a.subtopicCode = :subtopicCode, "
+			+ "a.subtopicCode = :subtopicCode, a.analysisFailureCode = NULL, "
 			+ "a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.COMPLETED "
 			+ "WHERE a.articleId = :articleId "
 			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
@@ -160,10 +170,12 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	 */
 	@Modifying
 	@Query("UPDATE Article a "
-			+ "SET a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.DROPPED "
+			+ "SET a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.DROPPED, "
+			+ "    a.analysisFailureCode = :failureCode "
 			+ "WHERE a.articleId = :articleId "
 			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
-	int markAnalysisRejected(@Param("articleId") Long articleId);
+	int markAnalysisRejected(@Param("articleId") Long articleId,
+			@Param("failureCode") String failureCode);
 
 	/**
 	 * 일시 실패를 한 번 센다. 한도에 닿으면 FAILED 로 두어 더 부르지 않는다.
@@ -179,10 +191,12 @@ public interface ArticleRepository extends Repository<Article, Long> {
 			+ "SET a.analysisStatus = CASE WHEN a.analysisAttempts + 1 >= :maxAttempts "
 			+ "        THEN com.starlightnews.backend.global.enums.AnalysisStatus.FAILED "
 			+ "        ELSE com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING END, "
-			+ "    a.analysisAttempts = a.analysisAttempts + 1 "
+			+ "    a.analysisAttempts = a.analysisAttempts + 1, "
+			+ "    a.analysisFailureCode = :failureCode "
 			+ "WHERE a.articleId = :articleId "
 			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
-	int recordAnalysisFailure(@Param("articleId") Long articleId, @Param("maxAttempts") int maxAttempts);
+	int recordAnalysisFailure(@Param("articleId") Long articleId, @Param("maxAttempts") int maxAttempts,
+			@Param("failureCode") String failureCode);
 
 	/** 기사의 현재 분석 상태. */
 	@Query("SELECT a.analysisStatus FROM Article a WHERE a.articleId = :articleId")
@@ -204,11 +218,8 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	}
 
 	/**
-	 * 분석 대기 중인 기사를 오래된 순으로 고른다.
+	 * 분석 대기 중인 기사를 시도 횟수가 적은 순, 같으면 오래된 순으로 고른다.
 	 *
-	 * <p>node_id 가 이미 있으면 뺀다. Spring 이 응답을 받기 전에 끊겼어도 FastAPI 는 끝까지 반영하므로,
-	 * 다음 회차에 같은 기사를 다시 부를 수는 있다. 그때 MERGE 라 노드가 늘지는 않지만, 이미 반영된
-	 * 기사를 굳이 다시 부를 이유는 없다.
 	 */
 	@Query("SELECT a.articleId AS articleId, a.title AS title, a.content AS content, "
 			+ "o.id AS organizationId, o.name AS organizationName, a.publishedAt AS publishedAt "
@@ -216,7 +227,7 @@ public interface ArticleRepository extends Repository<Article, Long> {
 			+ "WHERE a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING "
 			+ "AND a.nodeId IS NULL "
 			+ "AND a.analysisAttempts < :maxAttempts "
-			+ "ORDER BY a.articleId ASC")
+			+ "ORDER BY a.analysisAttempts ASC, a.articleId ASC")
 	List<AnalysisTarget> findAnalysisQueue(@Param("maxAttempts") int maxAttempts, Limit limit);
 
 	/** 분석 대기 중인 기사 전체 수. 회차당 상한과 무관하게 얼마나 밀렸는지 본다. */

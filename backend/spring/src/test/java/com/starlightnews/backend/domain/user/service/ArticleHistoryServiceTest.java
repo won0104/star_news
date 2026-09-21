@@ -1,5 +1,6 @@
 package com.starlightnews.backend.domain.user.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -12,6 +13,7 @@ import com.starlightnews.backend.domain.user.repository.ArticleReadRepository;
 import com.starlightnews.backend.domain.user.repository.ArticleReadRepository.HistoryRow;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository;
 import com.starlightnews.backend.domain.user.support.ArticleReadCursor;
+import com.starlightnews.backend.domain.user.support.GraphReadPeriod;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.error.ErrorCode;
 import org.junit.jupiter.api.Test;
@@ -147,6 +149,19 @@ class ArticleHistoryServiceTest {
 
 		verify(articleReadRepository).findNextHistoryPage(
 				eq(USER_ID), eq("ECONOMY"), eq(cursorTime.toLocalDateTime()), eq(102L), eq(PageRequest.of(0, 21)));
+	}
+
+	@Test
+	void 기간이_있으면_기간용_첫_페이지_쿼리를_호출한다() {
+		GraphReadPeriod period = new GraphReadPeriod(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+		given(articleReadRepository.findFirstHistoryPageInPeriod(USER_ID, "ECONOMY",
+				period.fromInclusive(), period.toExclusive(), PageRequest.of(0, 21))).willReturn(List.of());
+
+		articleHistoryService.getHistory(USER_ID, "economy", 20, null, period);
+
+		verify(articleReadRepository).findFirstHistoryPageInPeriod(USER_ID, "ECONOMY",
+				period.fromInclusive(), period.toExclusive(), PageRequest.of(0, 21));
+		verify(articleReadRepository, never()).findFirstHistoryPage(any(), any(), any());
 	}
 
 	@Test

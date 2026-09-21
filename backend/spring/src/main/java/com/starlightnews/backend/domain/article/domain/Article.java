@@ -84,6 +84,15 @@ public class Article {
 	@Column(name = "content_type", nullable = false, length = 32)
 	private ContentType contentType;
 
+	/**
+	 * 본문의 SHA-256. 같은 본문이 다른 제목으로 다시 들어오는지 저장 전에 보는 데 쓴다.
+	 *
+	 * <p>수집 경로가 직접 채운다. 이 엔티티로 저장하는 경로는 없어 읽기 전용이다.
+	 */
+	@JdbcTypeCode(SqlTypes.BINARY)
+	@Column(name = "content_hash", length = 32)
+	private byte[] contentHash;
+
 	@JdbcTypeCode(SqlTypes.LONGVARCHAR)
 	@Column(name = "summary")
 	private String summary;
@@ -108,6 +117,10 @@ public class Article {
 	/** AI 분석이 일시적으로 실패한 횟수. 한도에 닿으면 FAILED 가 된다. */
 	@Column(name = "analysis_attempts", nullable = false)
 	private int analysisAttempts;
+
+	/** 마지막 분석 실패 원인. 성공하면 비운다. 어떤 기사가 왜 밀리는지 보는 데 쓴다. */
+	@Column(name = "analysis_failure_code", length = 64)
+	private String analysisFailureCode;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")

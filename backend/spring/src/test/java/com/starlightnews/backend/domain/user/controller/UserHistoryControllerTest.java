@@ -1,5 +1,6 @@
 package com.starlightnews.backend.domain.user.controller;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -8,6 +9,7 @@ import com.starlightnews.backend.domain.graph.exception.GraphErrorCode;
 import com.starlightnews.backend.domain.user.dto.ArticleHistoryResponse;
 import com.starlightnews.backend.domain.user.exception.PersonalGraphErrorCode;
 import com.starlightnews.backend.domain.user.service.ArticleHistoryService;
+import com.starlightnews.backend.domain.user.support.GraphReadPeriod;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.request.RequestIdFilter;
@@ -93,6 +95,32 @@ class UserHistoryControllerTest {
 				.andExpect(status().isOk());
 
 		verify(articleHistoryService).getHistory(eq(1L), eq("ECONOMY"), eq(5), eq("opaque-cursor"));
+	}
+
+	@Test
+	void 기간을_서비스에_전달한다() throws Exception {
+		GraphReadPeriod period = new GraphReadPeriod(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+		given(articleHistoryService.getHistory(1L, "ECONOMY", 5, null, period)).willReturn(sampleHistory());
+
+		mockMvc.perform(get(HISTORY_PATH).param("topicCode", "ECONOMY").param("size", "5")
+						.param("from", "2026-09-01").param("to", "2026-09-30")
+						.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk());
+
+		verify(articleHistoryService).getHistory(1L, "ECONOMY", 5, null, period);
+	}
+
+	@Test
+	void 기간이_불완전하거나_역순이면_400을_응답한다() throws Exception {
+		mockMvc.perform(get(HISTORY_PATH).param("from", "2026-09-01")
+						.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+
+		mockMvc.perform(get(HISTORY_PATH).param("from", "2026-09-30").param("to", "2026-09-01")
+						.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
 	}
 
 	@Test

@@ -5,8 +5,12 @@ import java.time.Instant;
 
 import com.starlightnews.backend.domain.auth.exception.AuthErrorCode;
 import com.starlightnews.backend.domain.user.domain.User;
+import com.starlightnews.backend.domain.user.dto.UserProfileResponse;
+import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.repository.UserRepository;
+import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.error.BusinessException;
+import com.starlightnews.backend.global.error.CommonErrorCode;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
 import com.starlightnews.backend.global.security.TokenBlacklist;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,54 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final RefreshSessionStore refreshSessionStore;
 	private final TokenBlacklist tokenBlacklist;
+
+	@Transactional(readOnly = true)
+	public UserProfileResponse getMyProfile(long userId) {
+		return toProfileResponse(findActiveUser(userId));
+	}
+
+	@Transactional
+	public UserProfileResponse updateNickname(long userId, String nickname) {
+		User user = findActiveUser(userId);
+		user.changeNickname(nickname);
+		return toProfileResponse(user);
+	}
+
+	private User findActiveUser(long userId) {
+		return userRepository.findById(userId)
+				.filter(found -> !found.isDeleted())
+				.orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+	}
+
+	private UserProfileResponse toProfileResponse(User user) {
+		return new UserProfileResponse(
+				user.getId(),
+				user.getLoginId(),
+				user.getNickname(),
+				user.getTopicCodes(InterestType.INTEREST),
+				user.getTopicCodes(InterestType.DISLIKE));
+	}
+
+	@Transactional
+	public void changePassword(
+			long userId,
+			String accessTokenJti,
+			Instant accessTokenExpiresAt,
+			String currentPassword,
+			String newPassword
+	) {
+		User user = findActiveUser(userId);
+		if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+			throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
+		}
+		if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+			throw new BusinessException(CommonErrorCode.INVALID_INPUT_VALUE);
+		}
+
+		user.changePasswordHash(passwordEncoder.encode(newPassword));
+		refreshSessionStore.deleteAllByUserId(userId);
+		blacklistAccessToken(accessTokenJti, accessTokenExpiresAt);
+	}
 
 	/**
 	 * 회원 탈퇴. 계정을 soft delete(deleted_at)로 비활성화하고, 해당 사용자의 모든 Refresh 세션을 삭제하며,
@@ -41,7 +93,10 @@ public class UserService {
 
 		user.markDeleted();
 		refreshSessionStore.deleteAllByUserId(userId);
+		blacklistAccessToken(accessTokenJti, accessTokenExpiresAt);
+	}
 
+	private void blacklistAccessToken(String accessTokenJti, Instant accessTokenExpiresAt) {
 		Duration remaining = Duration.between(Instant.now(), accessTokenExpiresAt);
 		if (remaining.isNegative()) {
 			remaining = Duration.ZERO;

@@ -46,6 +46,15 @@ public enum InternalApiErrorCode implements ErrorCode {
 	/** FastAPI 또는 그 뒤의 Neo4j 가 일시적으로 응답하지 못한다. 다음 주기에 다시 시도한다. */
 	INTERNAL_API_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버를 호출할 수 없습니다."),
 
+	/**
+	 * 정해 둔 시간 안에 응답을 다 받지 못했다.
+	 *
+	 * <p>연결 자체가 안 되는 {@link #INTERNAL_API_UNAVAILABLE} 과 나눈다. 대응이 다르다. 상대는
+	 * 살아 있고 오래 걸렸을 뿐이라, 기다릴 시간을 늘리면 풀리는 경우가 있다. 어떤 기사가 늘 시간을
+	 * 넘기는지도 이 코드로 가려낸다.
+	 */
+	INTERNAL_API_TIMEOUT(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버 응답이 제한 시간을 넘겼습니다."),
+
 	/** FastAPI 내부 처리가 실패했다(분석 실패 등). 원인은 응답 code 로 구분한다. */
 	INTERNAL_API_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버 처리에 실패했습니다.");
 

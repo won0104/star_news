@@ -32,6 +32,9 @@ class UserRecommendationRequest(CamelModel):
 class RecommendationCalculateRequest(CamelModel):
     cycle: Literal["AM", "PM"]
     users: list[UserRecommendationRequest]
+    # 재튜닝된 가중치 - 없으면 서비스 쪽 기본값(DEFAULT_CBF_WEIGHT/DEFAULT_CF_WEIGHT)
+    cbf_weight: float | None = None
+    cf_weight: float | None = None
 
 
 # 추천 결과 하나(Event 하나) - 화면 표시에 필요한 정보
@@ -54,3 +57,12 @@ class UserRecommendationResult(CamelModel):
 class RecommendationCalculateResponse(CamelModel):
     cycle: Literal["AM", "PM"]
     results: list[UserRecommendationResult]
+
+
+# POST /internal/v1/recommendations/retune 응답 스키마
+class RecommendationRetuneResult(CamelModel):
+    cbf_weight: float
+    cf_weight: float
+    ndcg_at_10: float
+    hit_rate_at_10: float
+    recall_at_10: float

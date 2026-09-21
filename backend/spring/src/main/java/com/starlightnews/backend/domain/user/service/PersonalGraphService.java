@@ -25,6 +25,7 @@ import com.starlightnews.backend.domain.user.repository.ArticleReadRepository;
 import com.starlightnews.backend.domain.user.repository.ArticleReadRepository.TopicReadCount;
 import com.starlightnews.backend.domain.user.repository.UserKnowledgeNodeRepository;
 import com.starlightnews.backend.domain.user.repository.UserKnowledgeNodeRepository.TopicNodeCount;
+import com.starlightnews.backend.domain.user.support.GraphReadPeriod;
 import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
@@ -67,6 +68,15 @@ public class PersonalGraphService {
 	private final ArticleReadRepository articleReadRepository;
 	private final GraphNeighborRepository graphNeighborRepository;
 	private final ExploredNodeCountCache exploredNodeCountCache;
+	private final PeriodPersonalGraphService periodPersonalGraphService;
+
+	public PersonalGraphMapResponse getTopicMap(Long userId, String rawTopicCode, GraphReadPeriod period) {
+		return periodPersonalGraphService.getTopicMap(userId, rawTopicCode, period);
+	}
+
+	public PersonalGraphSummaryResponse getSummary(Long userId, GraphReadPeriod period) {
+		return periodPersonalGraphService.getSummary(userId, period);
+	}
 
 	/**
 	 * 선택한 Topic 의 개인 Node·Edge 스냅샷을 반환한다.

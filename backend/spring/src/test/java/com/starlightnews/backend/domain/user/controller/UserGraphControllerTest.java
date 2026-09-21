@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.user.controller;
 
 import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.starlightnews.backend.domain.user.exception.PersonalGraphErrorCode;
 import com.starlightnews.backend.domain.user.service.GraphNodeClickService;
 import com.starlightnews.backend.domain.user.service.PersonalGraphService;
 import com.starlightnews.backend.domain.user.service.PersonalNodeArticleService;
+import com.starlightnews.backend.domain.user.support.GraphReadPeriod;
 import com.starlightnews.backend.global.config.SecurityConfig;
 import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.enums.TopicCode;
@@ -197,6 +199,19 @@ class UserGraphControllerTest {
 	}
 
 	@Test
+	void Topic_스냅샷에_기간을_전달한다() throws Exception {
+		GraphReadPeriod period = new GraphReadPeriod(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+		given(personalGraphService.getTopicMap(1L, "ECONOMY", period)).willReturn(sampleMap());
+
+		mockMvc.perform(get(MAP_PATH).param("topicCode", "ECONOMY")
+				.param("from", "2026-09-01").param("to", "2026-09-30")
+				.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk());
+
+		verify(personalGraphService).getTopicMap(1L, "ECONOMY", period);
+	}
+
+	@Test
 	void topicCode_쿼리파라미터가_없으면_400을_응답한다() throws Exception {
 		mockMvc.perform(get(MAP_PATH).header(HttpHeaders.AUTHORIZATION, bearer()))
 				.andExpect(status().isBadRequest());
@@ -237,6 +252,26 @@ class UserGraphControllerTest {
 				.andExpect(jsonPath("$.data.nodes[1].kind").value("NODE"))
 				.andExpect(jsonPath("$.data.edges[0].relationship").value("BELONGS_TO_TOPIC"))
 				.andExpect(jsonPath("$.meta.requestId").isString());
+	}
+
+	@Test
+	void 요약에_기간을_전달하고_누락이나_역순은_거부한다() throws Exception {
+		GraphReadPeriod period = new GraphReadPeriod(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+		given(personalGraphService.getSummary(1L, period)).willReturn(sampleSummary());
+
+		mockMvc.perform(get(SUMMARY_PATH).param("from", "2026-09-01").param("to", "2026-09-30")
+				.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk());
+		verify(personalGraphService).getSummary(1L, period);
+
+		mockMvc.perform(get(SUMMARY_PATH).param("from", "2026-09-01")
+				.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+		mockMvc.perform(get(SUMMARY_PATH).param("from", "2026-09-30").param("to", "2026-09-01")
+				.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
 	}
 
 	@Test
@@ -281,6 +316,19 @@ class UserGraphControllerTest {
 				.andExpect(jsonPath("$.meta.requestId").isString());
 
 		verify(personalNodeArticleService).getReadArticles(eq(1L), eq(NodeType.ENTITY), eq(NODE_KEY), eq(20), isNull());
+	}
+
+	@Test
+	void 노드별_읽은_기사에도_같은_기간을_전달한다() throws Exception {
+		GraphReadPeriod period = new GraphReadPeriod(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+		given(personalNodeArticleService.getReadArticles(1L, NodeType.ENTITY, NODE_KEY, 5, null, period))
+				.willReturn(sampleArticles());
+
+		mockMvc.perform(get(ARTICLES_PATH).param("size", "5")
+				.param("from", "2026-09-01").param("to", "2026-09-30")
+				.header(HttpHeaders.AUTHORIZATION, bearer()))
+				.andExpect(status().isOk());
+		verify(personalNodeArticleService).getReadArticles(1L, NodeType.ENTITY, NODE_KEY, 5, null, period);
 	}
 
 	@Test
