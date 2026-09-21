@@ -258,11 +258,13 @@ def _ema_update_embedding(old_embedding: list[float], new_embedding: list[float]
 
 
 # 매칭된 기존 Event를 갱신 - 임베딩은 이미 EMA로 섞인 값을 받고, 제목은 새로운 표현이면 aliases에 추가
-def _update_matched_event(session: Neo4jRunner, node_id: str, title: str, blended_embedding: list[float], updated_at: datetime) -> str:
+def _update_matched_event(
+    session: Neo4jRunner, node_id: str, title: str, blended_embedding: list[float], occurred_at: datetime, updated_at: datetime
+) -> str:
     result = session.run(
         """
         MATCH (e:Event {nodeId: $nodeId})
-        SET e.embedding = $embedding, e.updatedAt = $updatedAt,
+        SET e.embedding = $embedding, e.updatedAt = $updatedAt, e.occurredAt = $occurredAt,
             e.aliases = CASE WHEN $title IN coalesce(e.aliases, []) OR $title = e.title
                              THEN coalesce(e.aliases, [])
                              ELSE coalesce(e.aliases, []) + $title END
@@ -271,26 +273,29 @@ def _update_matched_event(session: Neo4jRunner, node_id: str, title: str, blende
         nodeId=node_id,
         embedding=blended_embedding,
         updatedAt=updated_at,
+        occurredAt=occurred_at,
         title=title,
     ).single()
     return result["nodeId"]
 
 
 # 매칭되는 기존 Event가 없을 때 새로 생성
+# occurredAt은 기사 발행 시각을 그대로 씀 - AI가 문장 단위 실제 발생 시각을 안 주기 때문
 def _create_new_event_node(
-    session: Neo4jRunner, title: str, embedding: list[float], embedding_model: str, created_at: datetime
+    session: Neo4jRunner, title: str, embedding: list[float], embedding_model: str, occurred_at: datetime, created_at: datetime
 ) -> str:
     result = session.run(
         """
         CREATE (e:Event {
             nodeId: randomUUID(), title: $title, embedding: $embedding, embeddingModel: $embeddingModel,
-            createdAt: $createdAt, updatedAt: $createdAt
+            occurredAt: $occurredAt, createdAt: $createdAt, updatedAt: $createdAt
         })
         RETURN e.nodeId AS nodeId
         """,
         title=title,
         embedding=embedding,
         embeddingModel=embedding_model,
+        occurredAt=occurred_at,
         createdAt=created_at,
     ).single()
     return result["nodeId"]
@@ -303,6 +308,7 @@ def merge_event_node(
     title: str,
     embedding: list[float],
     embedding_model: str,
+    occurred_at: datetime,
     created_at: datetime,
     candidate_actor_names: list[str],
     candidate_target_names: list[str],
@@ -331,10 +337,10 @@ def merge_event_node(
 
         # 매칭 확정 - 기존 Event를 재사용하고 대표 벡터(centroid)만 갱신
         blended_embedding = _ema_update_embedding(signals["embedding"], embedding, EVENT_EMBEDDING_EMA_WEIGHT)
-        return _update_matched_event(session, row["nodeId"], title, blended_embedding, created_at), False
+        return _update_matched_event(session, row["nodeId"], title, blended_embedding, occurred_at, created_at), False
 
     # 후보가 하나도 없거나 전부 충돌 -> 매칭되는 기존 Event가 없는 것이므로 새로 생성
-    return _create_new_event_node(session, title, embedding, embedding_model, created_at), True
+    return _create_new_event_node(session, title, embedding, embedding_model, occurred_at, created_at), True
 
 
 # 5. Story

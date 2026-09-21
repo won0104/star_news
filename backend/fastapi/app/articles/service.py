@@ -153,7 +153,8 @@ def _apply_analysis(
             target_names = _linked_entity_names(edges, "TARGET", props["nodeId"], id_map, normalized_name_by_ai_id)
 
             real_id, is_new_event = repository.merge_event_node(
-                tx, props["title"], props["embedding"], props["embeddingModel"], now, actor_names, target_names
+                tx, props["title"], props["embedding"], props["embeddingModel"],
+                request.published_at, now, actor_names, target_names
             )
             id_map[props["nodeId"]] = real_id
             event_node_ids.add(real_id)
