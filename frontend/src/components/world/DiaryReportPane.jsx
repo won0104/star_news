@@ -34,13 +34,12 @@ export function DiaryReportPane() {
   return (
     <section className={styles.page} aria-label={report.title}>
       <DiaryShell
-        frameSrc="/assets/history/diary-report-frame.png"
         stageClassName={styles.diaryStage}
         frameClassName={styles.diaryFrame}
       >
         {/* Each screen's outer bookmark points at the other one, so the two read as one book. */}
         <Link className={styles.historyBookmark} to="/app?view=log">
-          <img src={`${BOOKMARK_ASSET}/bookmark-report-blank.svg`} alt="" aria-hidden="true" />
+          <img src={`${BOOKMARK_ASSET}/report-v2.webp`} alt="" aria-hidden="true" />
           <span>나의 기록</span>
         </Link>
 
@@ -57,7 +56,7 @@ export function DiaryReportPane() {
                 onClick={() => setTab(item.id)}
               >
                 <img
-                  src={`${BOOKMARK_ASSET}/tab-${selected ? 'selected' : 'default'}-blank.svg`}
+                  src={`${BOOKMARK_ASSET}/right-${selected ? 'active' : 'idle'}-v2.webp`}
                   alt=""
                   aria-hidden="true"
                 />

@@ -1,6 +1,6 @@
 import styles from './DiaryShell.module.css'
 
-const DIARY_FRAME_URL = '/assets/history/diary-observatory-window-transparent.png'
+const DIARY_FRAME_URL = '/assets/history/diary-spread-v2.webp'
 
 /**
  * The single diary object shared by 나의 기록 and 나의 리포트.

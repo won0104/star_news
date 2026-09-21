@@ -27,14 +27,20 @@
   --tone: 128, 215, 193;
 }
 
+/*
+ * 책갈피는 책 가장자리 "위에" 얹힌다 — 종이와 가죽 사이에 꽂히는 것이 아니다. 참고 시안에서
+ * 잰 관계가 그렇다: 탭이 종이 위에서 시작해 가죽을 덮고, 가죽 바깥으로 조금만 나온다.
+ *
+ * 시안 기준 종이끝 87.4% · 가죽끝 89.0% · 탭 86.3→90.0%. 이 책은 종이끝 89.69% ·
+ * 가죽끝 91.69% 로 가죽이 1.25배 두꺼우므로 같은 비로 옮겼다. 자르지 않는다.
+ */
 .reportBookmark {
   position: absolute;
   z-index: 6;
-  top: 10%;
-  left: 5.6%;
-  width: 6.35%;
-  aspect-ratio: 92 / 260;
-  clip-path: inset(0 28% 0 0);
+  top: 9%;
+  left: 6.99%;
+  width: 4.57%;
+  aspect-ratio: 437 / 1909;
   color: #faf7ef;
   text-decoration: none;
   transition: filter 160ms ease;
@@ -50,9 +56,10 @@
   user-select: none;
 }
 
+/* 별 두 개가 위아래에 있으므로 글자는 그 사이에 앉힌다. */
 .reportBookmark span {
   position: absolute;
-  inset: 25% 27% 24% 19%;
+  inset: 15% 10% 15% 10%;
   display: grid;
   font: 700 clamp(10px, 1.05vw, 17px)/1.05 var(--font-sans);
   letter-spacing: 0.08em;
@@ -62,19 +69,27 @@
   place-items: center;
 }
 
-.reportBookmark:hover {
-  filter: brightness(1.08);
+/* 왼쪽 책갈피는 왼쪽이 바깥이다 — 같은 "뽑히는" 동작이 반대 방향이 된다. */
+.reportBookmark {
+  transition:
+    transform 220ms cubic-bezier(0.16, 0.84, 0.3, 1),
+    filter 180ms ease;
 }
 
+.reportBookmark:hover {
+  transform: translateX(-13%);
+  filter: brightness(1.06) drop-shadow(2px 1px 3px rgb(52 32 16 / 0.3));
+}
+
+/* 오른쪽도 같은 규칙 — 88.34% 에서 시작해 가죽(91.69%) 을 덮고 92.94% 까지 나온다. */
 .categoryBookmarks {
   position: absolute;
   z-index: 6;
   top: 9.5%;
-  right: 6.8%;
+  right: 7.06%;
   display: flex;
-  width: 6.6%;
+  width: 4.6%;
   flex-direction: column;
-  clip-path: inset(0 0 0 40%);
 }
 
 .categoryBookmarks button {
@@ -82,32 +97,45 @@
   display: block;
   width: 100%;
   flex: 0 0 auto;
-  aspect-ratio: 96 / 112;
+  aspect-ratio: 681 / 892;
   padding: 0;
   border: 0;
   background: transparent;
   color: #44392f;
   cursor: pointer;
-  transition: transform 160ms ease;
+  /*
+   * 뽑히는 방향은 책 바깥쪽 — 오른쪽 책갈피는 오른쪽으로 나온다. px 로 두면 책이 커져도
+   * 같은 거리만 움직여 큰 화면에서는 멈춘 것처럼 보이므로 자기 폭의 백분율로 둔다.
+   */
+  transition:
+    transform 220ms cubic-bezier(0.16, 0.84, 0.3, 1),
+    filter 180ms ease;
 }
 
+/* 탭끼리 살짝 겹쳐 책등에서 이어진 한 줄로 읽히게 한다. */
 .categoryBookmarks button + button {
-  margin-top: -8%;
+  margin-top: -6%;
 }
 
 .categoryBookmarks button:hover {
-  transform: translateX(3px);
+  transform: translateX(13%);
 }
 
+/*
+ * 선택된 책갈피는 더 뽑혀 나오고 그림자를 얻는다. 예전에는 5px 만 움직이고 색만 남색으로
+ * 짙어져, 나온 것이 아니라 눌려 들어간 것처럼 보였다.
+ */
 .categoryBookmarks button[aria-current='true'] {
   z-index: 1;
   color: #faf7ef;
-  transform: translateX(5px);
+  transform: translateX(32%);
+  filter: drop-shadow(-2px 1px 3px rgb(52 32 16 / 0.32));
 }
 
+/* 별이 탭 오른쪽에 그려져 있으므로 글자는 그 왼쪽에 둔다 — 겹치면 둘 다 안 읽힌다. */
 .categoryBookmarks span {
   position: absolute;
-  inset: 15% 30%;
+  inset: 8% 38% 8% 8%;
   display: grid;
   font: 700 clamp(7px, 0.78vw, 13px)/1 var(--font-sans);
   letter-spacing: 0.04em;
@@ -621,19 +649,55 @@
   font: 700 clamp(16px, 1.6vw, 25px) var(--font-serif-kr);
 }
 
+/*
+ * 종이 층. 가로 화면에서는 자리를 차지하지 않는 투명한 층이라, 안쪽 요소들이 예전처럼
+ * 책(=.diaryStage)에 대한 좌표로 그대로 앉는다. 세로 화면에서만 실제 상자가 되어 스크롤을
+ * 맡는다 — 탭은 이 밖에 있으므로 책 가장자리에 남는다.
+ */
+.pageScroll {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pageScroll > * {
+  pointer-events: auto;
+}
+
 @media (max-width: 850px) {
+  /*
+   * 세로 화면에서는 펼친 책 대신 한 페이지 책이다. 책은 화면에 고정하고, 행성과 기록을
+   * 위아래로 이어 붙여 종이 안에서 스크롤시킨다 — 책이 내용 길이만큼 늘어나면 가죽과
+   * 책등이 함께 늘어나 책처럼 보이지 않는다.
+   *
+   * padding 은 종이 영역이다. 876×1274 에서 잰 가죽 두께를 폭에 대한 백분율로 환산했다
+   * (백분율 padding 은 위아래도 폭을 기준으로 하므로 세로 값은 비율로 고쳐 넣는다).
+   * 배경은 스크롤을 따라가지 않으므로 종이는 제자리에 남고 글만 흐른다.
+   */
   .diaryStage {
-    display: grid;
-    width: 100%;
+    position: relative;
+    display: block;
+    width: min(100%, calc((100svh - 132px) * 876 / 1274));
     height: auto;
-    min-height: calc(100vh - 116px);
-    aspect-ratio: auto;
-    grid-template-rows: auto;
-    gap: 18px;
-    padding: 24px 18px 30px;
+    aspect-ratio: 876 / 1274;
+    margin-inline: auto;
+    padding: 0;
     overflow: visible;
-    background: #ead8b9;
+    background: url('/assets/history/diary-single-v2.webp') center / 100% 100% no-repeat;
     filter: drop-shadow(0 18px 32px rgba(42, 25, 12, 0.24));
+  }
+
+  /* 종이 영역 = 가죽 두께를 뺀 안쪽. 876×1274 에서 잰 값이다. */
+  .pageScroll {
+    position: absolute;
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    inset: 2.2% 3.88% 4.95% 11.19%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
   }
 
   .diaryFrame {
@@ -669,7 +733,6 @@
     order: 4;
     justify-self: start;
     margin-left: 6px;
-    clip-path: none;
   }
 
   .categoryBookmarks {
@@ -677,7 +740,6 @@
     width: 100%;
     order: 5;
     flex-direction: row;
-    clip-path: none;
     overflow-x: auto;
     padding: 2px 0 5px;
     scrollbar-width: thin;
@@ -726,24 +788,25 @@
   }
 
   .planetPortal {
-    width: min(82vw, 460px);
+    width: 100%;
     height: auto;
     aspect-ratio: 1;
-    border-radius: 12px;
-    justify-self: center;
+    border-radius: 10px;
+    justify-self: stretch;
   }
 
   .planetCaption {
     display: none;
   }
 
+  /* 종이 위에 또 종이를 얹지 않는다 — 책의 페이지가 이미 그 역할을 한다. */
   .recordPage {
-    min-height: 520px;
-    padding: 22px 18px;
-    border: 1px solid rgba(99, 73, 51, 0.2);
-    border-radius: 4px;
-    background: #f3e6cf;
-    box-shadow: 0 12px 24px rgba(67, 43, 25, 0.14);
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
 
   .recordHeader span,
