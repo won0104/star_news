@@ -37,9 +37,9 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	@Modifying
 	@Query(value = "INSERT INTO articles "
 			+ "(organization_id, title, url, url_hash, published_at, source_category, content, "
-			+ " content_type, analysis_status) "
+			+ " content_type, content_hash, analysis_status) "
 			+ "VALUES (:organizationId, :title, :url, :urlHash, :publishedAt, :sourceCategory, "
-			+ " :content, :contentType, :analysisStatus) "
+			+ " :content, :contentType, :contentHash, :analysisStatus) "
 			+ "ON DUPLICATE KEY UPDATE article_id = article_id",
 			nativeQuery = true)
 	void insertIfAbsent(@Param("organizationId") Long organizationId,
@@ -50,7 +50,17 @@ public interface ArticleRepository extends Repository<Article, Long> {
 			@Param("sourceCategory") String sourceCategory,
 			@Param("content") String content,
 			@Param("contentType") String contentType,
+			@Param("contentHash") byte[] contentHash,
 			@Param("analysisStatus") String analysisStatus);
+
+	/**
+	 * 같은 본문으로 이미 저장된 기사들의 제목.
+	 *
+	 * <p>본문이 같은데 제목이 다르면 그 본문은 기사 본문이 아니다. 사이트의 추천 기사 목록 같은
+	 * 것이 본문 자리에 들어온 경우라, 저장하지 않는다.
+	 */
+	@Query("SELECT DISTINCT a.title FROM Article a WHERE a.contentHash = :contentHash")
+	List<String> findTitlesByContentHash(@Param("contentHash") byte[] contentHash);
 
 	/** url 해시로 기사 ID 를 찾는다. 저장 여부 확인용. */
 	@Query("SELECT a.articleId FROM Article a WHERE a.urlHash = :urlHash")
