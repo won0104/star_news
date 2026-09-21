@@ -64,23 +64,10 @@
  * 바꾸면 글자가 종이에서 벗어난다.
  */
 .photoFramed {
-  --anchor-x: 50%;
-  inset: auto;
-  top: 50%;
-  left: var(--anchor-x);
-  width: calc(max(100%, 100vh * var(--frame-w) / var(--frame-h)) * var(--frame-zoom));
-  height: auto;
-  aspect-ratio: var(--frame-w) / var(--frame-h);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: fill;
-  object-position: center;
-  transform: translate(calc(-100% * var(--frame-focus-x)), calc(-100% * var(--frame-focus-y)));
-}
-
-/* 데스크톱에서는 왼쪽 내비가 화면을 가리므로, 초점을 내비를 뺀 영역의 가운데에 건다. */
-@media (min-width: 1024px) {
-  .photoFramed {
-    --anchor-x: calc(var(--desktop-nav-width) + (100% - var(--desktop-nav-width)) / 2);
-  }
 }
 
 /* Optional soft dark veil so light-on-photo chrome (a form card, a headline) stays
@@ -89,7 +76,11 @@
 .veil {
   position: fixed;
   inset: 0;
-  background: radial-gradient(120% 90% at 50% 38%, rgba(43, 33, 22, 0) 40%, rgba(43, 33, 22, 0.16) 100%);
+  background: radial-gradient(
+    120% 90% at 50% 38%,
+    rgba(43, 33, 22, 0) 40%,
+    rgba(43, 33, 22, 0.16) 100%
+  );
   pointer-events: none;
 }
 
@@ -116,3 +107,4 @@
 .loopHome {
   filter: brightness(1.22) saturate(1.12);
 }
+
