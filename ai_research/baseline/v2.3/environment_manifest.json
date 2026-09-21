@@ -1,0 +1,11 @@
+{
+  "backbone_cache_root_env": "ARTICLELOCAL_HF_CACHE",
+  "backbone_revision": "363b171d71443b0874b0bf9cea053eb5b1650633",
+  "device": "cpu",
+  "dtype": "float32",
+  "network_download_in_timed_worker": false,
+  "published": false,
+  "release_candidate": "v2.3",
+  "runtime_requirements": "requirements.txt",
+  "status": "PENDING_STEP12_FINAL_VALIDATION"
+}

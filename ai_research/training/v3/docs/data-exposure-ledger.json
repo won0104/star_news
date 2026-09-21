@@ -1,0 +1,21 @@
+{
+  "all_gold_use": "read-only JSON/schema/source/hash/offset/reference static validation and split counts",
+  "current_gold_by_split": {
+    "dev": 51,
+    "test": 49,
+    "train": 400
+  },
+  "db_write": 0,
+  "dev_gold_use": "static validation/count and inspection of quarantined 136.json TM6 to identify the contract violation; no implementation tuning, tiny-fit or selection",
+  "forward_backward": 0,
+  "main_training": 0,
+  "model_load": 0,
+  "old_gold_annotation_use": "NONE",
+  "optimizer_step": 0,
+  "remote_publish": 0,
+  "service_threshold_selection": 0,
+  "split_change": 0,
+  "status": "BLOCKED",
+  "test_gold_use": "static validity and article count only; no architecture/threshold/checkpoint/selection",
+  "train_gold_use": "feature census, coverage selection, fit40/canary10, future tiny candidates"
+}

@@ -95,6 +95,25 @@ public interface UserKnowledgeNodeRepository
 		long getCount();
 	}
 
+	/** 최근 주제 지형 Entity와 개인·전체 사용자의 전 기간 누적 기사 수. */
+	interface NewsReportEntityLandscapeRow {
+		String getNodeType();
+
+		String getNodeKey();
+
+		String getNodeLabel();
+
+		String getTopicCode();
+
+		long getUserReadArticleCount();
+
+		long getGlobalReadArticleCount();
+
+		LocalDateTime getFirstSeenAt();
+
+		LocalDateTime getLastSeenAt();
+	}
+
 	/**
 	 * 사용자의 특정 Topic·nodeType 범위에서 중요도(읽은 기사 수+클릭 수) 상위 Node 만 가져온다.
 	 * (개인 그래프 요약의 Topic 별 대표 Node 조회용. 전체를 끌어와 자바에서 자르지 않고 DB에서 상위 N개만 받는다.)
@@ -118,4 +137,29 @@ public interface UserKnowledgeNodeRepository
 			+ "GROUP BY u.topicCode")
 	List<TopicNodeCount> countExploredNodesByTopic(@Param("userId") Long userId,
 			@Param("nodeTypes") Collection<NodeType> nodeTypes);
+
+	/**
+	 * 최근 기간에 다시 접한 Entity 중 개인 누적 읽기 상위 Node와 전체 사용자 누적 읽기 합계를 조회한다.
+	 * 기간은 후보를 고르는 데만 사용하며 두 읽기 수는 전 기간 누적값이다.
+	 */
+	@Query(value = "SELECT candidate.node_type AS nodeType, candidate.node_id AS nodeKey, "
+			+ "candidate.node_label AS nodeLabel, candidate.topic_code AS topicCode, "
+			+ "candidate.read_article_count AS userReadArticleCount, "
+			+ "COALESCE(SUM(all_users.read_article_count), 0) AS globalReadArticleCount, "
+			+ "candidate.first_seen_at AS firstSeenAt, candidate.last_seen_at AS lastSeenAt "
+			+ "FROM user_knowledge_nodes AS candidate "
+			+ "JOIN user_knowledge_nodes AS all_users FORCE INDEX (idx_user_knowledge_nodes_node_user) "
+			+ "ON all_users.node_type = candidate.node_type AND all_users.node_id = candidate.node_id "
+			+ "WHERE candidate.user_id = :userId AND candidate.node_type = 'ENTITY' "
+			+ "AND candidate.read_article_count > 0 "
+			+ "AND candidate.last_seen_at >= :fromInclusive AND candidate.last_seen_at < :toExclusive "
+			+ "GROUP BY candidate.user_id, candidate.node_type, candidate.node_id, candidate.node_label, "
+			+ "candidate.topic_code, candidate.read_article_count, candidate.first_seen_at, candidate.last_seen_at "
+			+ "ORDER BY candidate.read_article_count DESC, globalReadArticleCount DESC, candidate.node_id ASC "
+			+ "LIMIT :limit", nativeQuery = true)
+	List<NewsReportEntityLandscapeRow> findEntityLandscapeForNewsReport(
+			@Param("userId") Long userId,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive,
+			@Param("limit") int limit);
 }

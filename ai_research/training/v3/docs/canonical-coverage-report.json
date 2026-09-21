@@ -1,0 +1,30 @@
+{
+  "all_valid_train": {
+    "articles": 400,
+    "event_FALLBACK_SOURCE_SPAN": 829,
+    "event_INSUFFICIENT_CONTEXT": 661,
+    "event_SOURCE_CLAUSE_EXPANDED": 957,
+    "event_SOURCE_COMPLETE": 1461,
+    "statement_FALLBACK_SOURCE_SPAN": 560,
+    "statement_INSUFFICIENT_CONTEXT": 204,
+    "statement_SOURCE_CLAUSE_EXPANDED": 1085,
+    "statement_SOURCE_COMPLETE": 4315
+  },
+  "canonical_training_targets": 0,
+  "engineering50": {
+    "articles": 50,
+    "event_FALLBACK_SOURCE_SPAN": 143,
+    "event_INSUFFICIENT_CONTEXT": 112,
+    "event_SOURCE_CLAUSE_EXPANDED": 208,
+    "event_SOURCE_COMPLETE": 278,
+    "statement_FALLBACK_SOURCE_SPAN": 113,
+    "statement_INSUFFICIENT_CONTEXT": 23,
+    "statement_SOURCE_CLAUSE_EXPANDED": 174,
+    "statement_SOURCE_COMPLETE": 707
+  },
+  "generative_calls": 0,
+  "note": "Extractive source audit, not semantic quality approval",
+  "selected_dev": 0,
+  "selected_test": 0,
+  "status": "STATIC_TRAIN_ONLY_UPSTREAM_GOLD_BLOCKED"
+}

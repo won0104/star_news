@@ -1,0 +1,33 @@
+{
+  "all_valid_train": {
+    "about_negative_eligible": 63756,
+    "about_positive": 1772,
+    "articles": 400,
+    "assertor_absent": 2817,
+    "assertor_entity_negative_eligible": 60390,
+    "assertor_entity_positive": 3032,
+    "assertor_sources": 3347,
+    "assertor_span_only": 315,
+    "causes_negative_eligible": 53355,
+    "causes_positive": 615
+  },
+  "engineering50": {
+    "about_negative_eligible": 16745,
+    "about_positive": 251,
+    "articles": 50,
+    "assertor_absent": 405,
+    "assertor_entity_negative_eligible": 14694,
+    "assertor_entity_positive": 520,
+    "assertor_sources": 612,
+    "assertor_span_only": 92,
+    "causes_negative_eligible": 12908,
+    "causes_positive": 124
+  },
+  "note": "Gold target/identity census; not predicted relation quality",
+  "optimizer_step": 0,
+  "pretrained_model_load": 0,
+  "selected_dev": 0,
+  "selected_test": 0,
+  "service_threshold_selection": 0,
+  "status": "STATIC_TRAIN_ONLY_UPSTREAM_GOLD_BLOCKED"
+}
