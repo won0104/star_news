@@ -41,6 +41,21 @@
       "scope": "foryou2",
       "decision": "Use a warm-ivory editorial recommendation feed with border-separated rows, serif titles, navy actions, and a small gold star.",
       "rationale": "Keeps the original cork-board recommendation page intact while providing the requested quiet magazine-style comparison view."
+    },
+    {
+      "scope": "app-node-search",
+      "decision": "Place graph Node search as persistent top-right app chrome, using the existing paper glass by day and night glass on the trend view.",
+      "rationale": "Keeps search available across current /app destinations without displacing the fixed navigation rail or covering the trend constellation."
+    },
+    {
+      "scope": "graph-exploration-trail",
+      "decision": "Show the current graph session as a horizontally scrollable breadcrumb at the upper left, with graph actions grouped at the upper right.",
+      "rationale": "Keeps the user's entry point and traversal sequence visible while separating navigation history from view-level actions; narrow screens stack the two controls to preserve usable widths."
+    },
+    {
+      "scope": "graph-node-navigation",
+      "decision": "Every visible EVENT, ENTITY, and STATEMENT neighbor recenters the graph immediately when its star is selected.",
+      "rationale": "A single direct interaction keeps graph traversal consistent across Node types and removes the extra detail-card confirmation step."
     }
   ],
   "evidence": [
