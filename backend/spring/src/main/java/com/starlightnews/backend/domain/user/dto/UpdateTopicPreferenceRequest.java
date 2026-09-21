@@ -1,5 +1,7 @@
 package com.starlightnews.backend.domain.user.dto;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,6 +22,7 @@ public record UpdateTopicPreferenceRequest(
 ) {
 
 	public UpdateTopicPreferenceRequest {
-		topicCodes = topicCodes == null ? null : List.copyOf(topicCodes);
+		// null 항목은 서비스에서 INVALID_TOPIC으로 처리할 수 있도록 유지한다.
+		topicCodes = topicCodes == null ? null : Collections.unmodifiableList(new ArrayList<>(topicCodes));
 	}
 }

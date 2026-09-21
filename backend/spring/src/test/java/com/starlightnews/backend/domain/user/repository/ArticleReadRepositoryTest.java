@@ -167,6 +167,51 @@ class ArticleReadRepositoryTest {
 	}
 
 	@Test
+	void 기간_조회는_마지막_열람일의_양끝을_포함하고_다음날_자정은_제외한다() {
+		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
+		Article before = article(org, "전날", "ECONOMY");
+		Article first = article(org, "시작일", "ECONOMY");
+		Article last = article(org, "종료일", "SOCIETY");
+		Article after = article(org, "다음날", "SOCIETY");
+		ReflectionTestUtils.setField(first, "nodeId", "00000000-0000-4000-8000-000000000001");
+		ReflectionTestUtils.setField(last, "nodeId", "00000000-0000-4000-8000-000000000002");
+		LocalDateTime firstAt = LocalDateTime.of(2026, 9, 1, 0, 0);
+		LocalDateTime lastAt = LocalDateTime.of(2026, 9, 30, 23, 59, 59);
+		entityManager.persist(new ArticleRead(new ArticleReadId(1L, before.getArticleId()),
+				LocalDateTime.of(2026, 8, 31, 23, 59), LocalDateTime.of(2026, 8, 31, 23, 59), 1));
+		entityManager.persist(new ArticleRead(new ArticleReadId(1L, first.getArticleId()),
+				LocalDateTime.of(2026, 8, 1, 0, 0), firstAt, 2));
+		entityManager.persist(new ArticleRead(new ArticleReadId(1L, last.getArticleId()), lastAt, lastAt, 1));
+		entityManager.persist(new ArticleRead(new ArticleReadId(1L, after.getArticleId()),
+				LocalDateTime.of(2026, 10, 1, 0, 0), LocalDateTime.of(2026, 10, 1, 0, 0), 1));
+		entityManager.flush();
+		entityManager.clear();
+
+		LocalDateTime endExclusive = LocalDateTime.of(2026, 10, 1, 0, 0);
+		assertThat(articleReadRepository.findGraphReadsInPeriod(1L, firstAt, endExclusive))
+				.extracting(ArticleReadRepository.GraphReadRow::getArticleNodeKey)
+				.containsExactlyInAnyOrder(first.getNodeId(), last.getNodeId());
+		assertThat(articleReadRepository.findFirstReadPageInPeriod(1L,
+				List.of(before.getArticleId(), first.getArticleId(), last.getArticleId(), after.getArticleId()),
+				firstAt, endExclusive, PageRequest.of(0, 10)))
+				.extracting(ArticleReadRepository.ReadArticleRow::getArticleId)
+				.containsExactly(last.getArticleId(), first.getArticleId());
+		assertThat(articleReadRepository.findNextReadPageInPeriod(1L,
+				List.of(before.getArticleId(), first.getArticleId(), last.getArticleId(), after.getArticleId()),
+				firstAt, endExclusive, lastAt, last.getArticleId(), PageRequest.of(0, 10)))
+				.extracting(ArticleReadRepository.ReadArticleRow::getArticleId)
+				.containsExactly(first.getArticleId());
+		assertThat(articleReadRepository.findFirstHistoryPageInPeriod(1L, null,
+				firstAt, endExclusive, PageRequest.of(0, 10)))
+				.extracting(ArticleReadRepository.HistoryRow::getArticleId)
+				.containsExactly(last.getArticleId(), first.getArticleId());
+		assertThat(articleReadRepository.findNextHistoryPageInPeriod(1L, null,
+				firstAt, endExclusive, lastAt, last.getArticleId(), PageRequest.of(0, 10)))
+				.extracting(ArticleReadRepository.HistoryRow::getArticleId)
+				.containsExactly(first.getArticleId());
+	}
+
+	@Test
 	void findFirstHistoryPage는_topicCode_없으면_전체_열람기록을_최신순으로_반환한다() {
 		NewsOrganization org = entityManager.persist(new NewsOrganization("연합뉴스"));
 		Article a1 = article(org, "기준금리 동결", "ECONOMY");
