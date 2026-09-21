@@ -1,14 +1,13 @@
 /**
- * 나를 위한 추천 — 코르크 보드 사진 위의 자리표와, 로그인 전에 보여줄 표본.
+ * 나를 위한 추천 — 빈 코르크 보드 위에 에셋 카드를 거는 자리표와 로그인 전 표본.
  *
- * 사진(1680×944)에는 종이 열 장, 핀, 테이프, 낙서가 이미 찍혀 있다. 그래서 화면은 종이를
- * 그리지 않고 **종이가 있는 자리에 글자만 얹는다.** 아래 좌표는 사진의 각 종이가 차지하는
- * 사각형을 사진 크기에 대한 비율로 적은 것이다 — 사진이 어떤 크기로 늘어나도 글자가 종이
- * 안에 머물도록.
+ * 배경 사진(1672×941)에는 빈 보드만 있다. 제목 종이, 추천 종이, 핀은 각각 투명 PNG 에셋이며
+ * 아래 좌표에 독립적으로 놓인다. 이 구조 덕분에 종이 전체가 버튼이 되고, 추천 수가 줄면 빈
+ * 종이가 배경에 문신처럼 남지 않는다.
  *
  * 열 자리 = 추천 열 개. 서버가 사용자당 최대 10개를 주므로(app.recommendation.limit-per-user)
- * 자리가 남거나 모자라는 일은 정상 범위에서 생기지 않는다. 적게 오면 빈 종이가 남고, 그건
- * 사진 그대로라 어색하지 않다.
+ * 자리가 남거나 모자라는 일은 정상 범위에서 생기지 않는다. 적게 오면 사용하지 않는 슬롯에는
+ * 아무 에셋도 그리지 않는다.
  */
 
 import { events } from './events'
@@ -26,15 +25,20 @@ export const BOARD_IMAGE = arrivalScene.src
 export const BOARD_FRAME = arrivalScene.frame
 export const BOARD_SIZE = { width: BOARD_FRAME.width, height: BOARD_FRAME.height }
 
-/** 위쪽 분홍 테이프 — 제목이 앉는 자리. */
+export const BOARD_ASSETS = {
+  title: '/assets/board/recommend-title-paper.png',
+  paper: '/assets/board/recommend-paper.png',
+  pin: '/assets/board/recommend-pin-red.png',
+}
+
+/** 위쪽 제목 종이 에셋이 앉는 자리. */
 export const BANNER_FRAME = { x: 632, y: 120, w: 436, h: 70 }
 
 /**
  * 종이 열 장. 왼쪽 위부터 읽는 순서 = 추천 순위.
  *
- * `tone` 은 사진 속 테이프 색이다. 종이 위 글자에는 쓰지 않고(사진에 이미 색이 있다),
- * 마우스를 올렸을 때의 테두리와 좁은 화면의 대체 목록에서 그 카드를 같은 색으로 잇는 데 쓴다.
- * `doodle` 은 종이 오른쪽 위에 그려진 낙서 — 스크린 리더에게 어느 종이인지 말해줄 이름.
+ * `tone` 은 순위 글자와 핀의 색을 함께 정한다. 핀은 붉은 원본 하나에 hue filter를 적용해 기존
+ * 장면의 rose/sky/mint/sand/lilac/coral 순서를 보존한다. `doodle` 은 슬롯의 안정적인 key다.
  */
 const COLUMNS = [
   { x: 305, w: 205 },
@@ -80,13 +84,10 @@ export const placement = ({ x, y, w, h }) => ({
 export const boardCopy = {
   title: '나를 위한 추천',
   eyebrow: 'PINNED FOR YOU',
-  cycle: { AM: '아침 추천', PM: '저녁 추천' },
-  availableAt: (time) => `${time} 공개`,
+  updateSchedule: '매일 06:00 · 18:00 업데이트',
   loading: '추천을 불러오는 중…',
   signedOut: '로그인하면 나만의 추천이 걸려요',
   signedOutHint: '읽은 기사와 관심 분야로 하루 두 번 골라 드립니다.',
-  empty: '아직 공개된 추천 회차가 없어요',
-  emptyHint: '06:00 · 18:00 에 새 추천이 걸립니다.',
   failed: '추천을 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.',
   sampleNote: '로그인 전이라 예시 카드를 보여드려요',
   reasonLabel: '추천 이유',
@@ -115,7 +116,7 @@ const EVENT_TOPIC = {
 }
 
 /**
- * RecommendationBoardResponse 모양의 표본. 로그인 전이나 회차가 없을 때 판을 비워두지
+ * RecommendationBoardResponse 모양의 표본. 비로그인일 때 판을 비워두지
  * 않기 위한 것이고, 화면은 표본임을 밝힌다. 제목·요약은 data/events.js 의 것을 그대로 써서
  * 카드와 /event/:id 가 다른 말을 하지 않게 한다.
  */
