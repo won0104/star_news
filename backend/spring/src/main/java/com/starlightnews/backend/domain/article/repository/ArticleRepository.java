@@ -204,11 +204,8 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	}
 
 	/**
-	 * 분석 대기 중인 기사를 오래된 순으로 고른다.
+	 * 분석 대기 중인 기사를 시도 횟수가 적은 순, 같으면 오래된 순으로 고른다.
 	 *
-	 * <p>node_id 가 이미 있으면 뺀다. Spring 이 응답을 받기 전에 끊겼어도 FastAPI 는 끝까지 반영하므로,
-	 * 다음 회차에 같은 기사를 다시 부를 수는 있다. 그때 MERGE 라 노드가 늘지는 않지만, 이미 반영된
-	 * 기사를 굳이 다시 부를 이유는 없다.
 	 */
 	@Query("SELECT a.articleId AS articleId, a.title AS title, a.content AS content, "
 			+ "o.id AS organizationId, o.name AS organizationName, a.publishedAt AS publishedAt "
@@ -216,7 +213,7 @@ public interface ArticleRepository extends Repository<Article, Long> {
 			+ "WHERE a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING "
 			+ "AND a.nodeId IS NULL "
 			+ "AND a.analysisAttempts < :maxAttempts "
-			+ "ORDER BY a.articleId ASC")
+			+ "ORDER BY a.analysisAttempts ASC, a.articleId ASC")
 	List<AnalysisTarget> findAnalysisQueue(@Param("maxAttempts") int maxAttempts, Limit limit);
 
 	/** 분석 대기 중인 기사 전체 수. 회차당 상한과 무관하게 얼마나 밀렸는지 본다. */
