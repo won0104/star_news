@@ -1,5 +1,22 @@
 import { historyGraphMock } from './historyGraphMock.js';
 
+/**
+ * 나의 기록의 책상.
+ *
+ * 사진은 <PhotoBackdrop> 이 cover 로 깔므로 어느 비율에서도 화면을 덮지만, 비율이 멀수록
+ * 커피잔과 사진, 별자리 도판처럼 모서리에 놓인 것들이 잘려 나간다. 그래서 비율별로 한 장씩
+ * 두고 가장 가까운 것을 고른다 — 나를 위한 추천의 보드, 오늘의 트렌드의 창틀과 같은 방식.
+ *
+ * 책은 이 사진 위 좌표에 놓이지 않고 자기 상자를 갖는다. 그래서 책상만 갈아끼워도 책과
+ * 탭은 움직이지 않는다.
+ */
+export const desks = [
+  { ratio: 1672 / 941, src: '/assets/history/desk-16x9-v2.webp' },
+  { ratio: 1448 / 1086, src: '/assets/history/desk-4x3-v2.webp' },
+  { ratio: 1086 / 1448, src: '/assets/history/desk-3x4-v2.webp' },
+  { ratio: 941 / 1672, src: '/assets/history/desk-9x16-v2.webp' },
+];
+
 export const historyOverview = {
   generatedAt: '2026.09.14 00:00',
   periodLabel: '최근 90일',
