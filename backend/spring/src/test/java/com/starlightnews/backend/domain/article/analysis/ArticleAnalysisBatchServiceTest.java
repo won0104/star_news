@@ -24,10 +24,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Limit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -35,6 +37,8 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ArticleAnalysisBatchServiceTest {
+
+	private static final Long RUN_ID = 77L;
 
 	@Mock
 	private ArticleRepository articleRepository;
@@ -45,6 +49,9 @@ class ArticleAnalysisBatchServiceTest {
 	@Mock
 	private ArticleAnalysisRecorder recorder;
 
+	@Mock
+	private ArticleAnalysisRunRecorder runRecorder;
+
 	private ArticleAnalysisBatchService service;
 
 	@BeforeEach
@@ -54,7 +61,7 @@ class ArticleAnalysisBatchServiceTest {
 
 	/** 시도 3회, 회차당 300건, 연속 실패 5건에서 중단 */
 	private ArticleAnalysisBatchService service(Duration timeBudget) {
-		return new ArticleAnalysisBatchService(articleRepository, analyzeClient, recorder,
+		return new ArticleAnalysisBatchService(articleRepository, analyzeClient, recorder, runRecorder,
 				new ArticleAnalysisProperties(Duration.ofSeconds(180), 300, 3, timeBudget, 5));
 	}
 
@@ -282,5 +289,50 @@ class ArticleAnalysisBatchServiceTest {
 		verify(analyzeClient, times(3)).analyze(requests.capture());
 		assertThat(requests.getAllValues()).extracting(ArticleAnalyzeRequest::articleId)
 				.isEqualTo(List.of(1L, 2L, 3L));
+	}
+
+	// --- 실행 기록 ---
+
+	@Test
+	void 회차_시작과_끝을_기록한다() {
+		given(runRecorder.start(anyInt(), any())).willReturn(RUN_ID);
+		given(articleRepository.findAnalysisQueue(anyInt(), any())).willReturn(List.of(target(1L)));
+		given(articleRepository.countAnalysisQueue(anyInt())).willReturn(5L, 4L);
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+		given(articleRepository.findOldestAnalysisWaitMinutes(anyInt())).willReturn(95L);
+
+		service.analyzePending();
+
+		verify(runRecorder).start(eq(5), any());
+		verify(runRecorder).finish(eq(RUN_ID), any(ArticleAnalysisBatchResult.class), eq(4), eq(95L), any());
+	}
+
+	@Test
+	void 대기가_없어도_회차를_남긴다() {
+		// 기록이 비면 배치가 멈춘 것과 할 일이 없던 것을 가를 수 없다.
+		given(runRecorder.start(anyInt(), any())).willReturn(RUN_ID);
+		given(articleRepository.findAnalysisQueue(anyInt(), any())).willReturn(List.of());
+
+		service.analyzePending();
+
+		verify(runRecorder).start(eq(0), any());
+		verify(runRecorder).finish(eq(RUN_ID), eq(ArticleAnalysisBatchResult.empty()), eq(0), isNull(), any());
+	}
+
+	@Test
+	void 회차가_예외로_끊기면_중단으로_기록하고_예외를_올린다() {
+		// 기사 한 건의 실패는 회차 안에서 삼킨다. 여기까지 오는 것은 DB 가 끊기는 것 같은 경우다.
+		given(runRecorder.start(anyInt(), any())).willReturn(RUN_ID);
+		given(articleRepository.findAnalysisQueue(anyInt(), any())).willReturn(List.of(target(1L)));
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+		given(articleRepository.countAnalysisQueue(anyInt()))
+				.willReturn(1L).willThrow(new IllegalStateException("DB 연결 끊김"));
+
+		assertThatThrownBy(() -> service.analyzePending()).isInstanceOf(IllegalStateException.class);
+
+		verify(runRecorder).abort(eq(RUN_ID), any());
+		verify(runRecorder, never()).finish(any(), any(), anyInt(), any(), any());
 	}
 }

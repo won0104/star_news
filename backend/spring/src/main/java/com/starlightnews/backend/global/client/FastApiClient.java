@@ -1,6 +1,7 @@
 package com.starlightnews.backend.global.client;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -73,6 +74,12 @@ public class FastApiClient {
 		} catch (RestClientException callFailure) {
 			// 연결 실패·타임아웃뿐 아니라 응답을 읽지 못한 경우도 여기서 막는다. 그냥 두면 호출한
 			// 배치의 회차 전체가 죽는다. 묶음 하나의 실패로 격리하려면 예외가 넘어가면 안 된다.
+			if (isTimeout(callFailure)) {
+				// 읽는 도중 끊기면 "응답을 읽지 못했다"로만 남아 시간 초과인지 응답이 깨진 것인지
+				// 구분할 수 없다. 대응이 다르므로(기다릴 시간을 늘릴지, 응답 형식을 고칠지) 나눠 남긴다.
+				log.warn("FastAPI 응답 시간 초과 (path={})", path);
+				throw new BusinessException(InternalApiErrorCode.INTERNAL_API_TIMEOUT);
+			}
 			log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, callFailure.getMessage());
 			throw new BusinessException(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
 		}
@@ -96,6 +103,24 @@ public class FastApiClient {
 			log.warn("FastAPI 헬스체크 실패 (원인={})", unreachable.getMessage());
 			return false;
 		}
+	}
+
+	/**
+	 * 정해 둔 시간 안에 응답을 다 받지 못한 실패인지.
+	 *
+	 * <p>연결 단계에서 끊기면 {@code ResourceAccessException} 으로 오지만, 헤더를 받은 뒤 본문을
+	 * 읽다가 끊기면 응답 변환 실패로 감싸여 온다. 그래서 원인 사슬을 따라가 확인한다.
+	 */
+	static boolean isTimeout(Throwable failure) {
+		for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+			if (cause instanceof InterruptedIOException) {
+				return true;
+			}
+			if (cause.getCause() == cause) {
+				break;
+			}
+		}
+		return false;
 	}
 
 	private InternalApiErrorCode toErrorCode(String path, ClientHttpResponse response) {
