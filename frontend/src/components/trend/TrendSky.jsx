@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { recordNodeClick } from '../../api/personalGraph'
 import { fetchHomeTrends, fetchNeighbors } from '../../api/trend'
 import { stars } from '../../data/trend'
 import {
@@ -8,6 +9,7 @@ import {
   trendSkyExpandCopy,
 } from '../../data/trendNeighbors'
 import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlots } from '../../data/trendTop'
+import { useSession } from '../../store/session'
 import { TrendConstellation } from './TrendConstellation'
 import styles from './TrendSky.module.css'
 
@@ -39,6 +41,7 @@ import styles from './TrendSky.module.css'
  */
 const SAMPLE_WHEN_EMPTY = true
 export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }) {
+  const account = useSession()
   const [home, setHome] = useState(given ?? null)
   const [homeState, setHomeState] = useState(given ? 'ready' : 'loading')
   const [openKey, setOpenKey] = useState(null)
@@ -98,6 +101,12 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
   const open = (trend, { preserveGraph = false } = {}) => {
     activeKeyRef.current = trend.nodeKey
     setOpenKey(trend.nodeKey)
+
+    // 사용자가 실제 EVENT 별을 선택한 순간만 개인 그래프 탐색 기록으로 남긴다.
+    // 샘플 별은 Neo4j에 없는 키이고, 비로그인 사용자는 개인 기록의 주체가 없으므로 제외한다.
+    if (!sample && account && (trend.nodeType ?? 'EVENT') === 'EVENT') {
+      recordNodeClick('EVENT', trend.nodeKey).catch(() => {})
+    }
 
     // A sampled sky's keys are not in Neo4j, so asking for them would only 404.
     const ready = sample
