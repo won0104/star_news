@@ -42,6 +42,23 @@ def _is_uuid(value: object) -> bool:
 
 
 # 1. Article
+# 이미 완전히 분석 완료된 기사인지 확인
+# Spring 타임아웃 후 재시도가 들어와도 AI를 또 부르지 않기 위한 단축 경로
+def find_completed_analysis(session: Neo4jRunner, mysql_article_id: int) -> dict | None:
+    result = session.run(
+        """
+        MATCH (a:Article {mysqlArticleId: $mysqlArticleId})-[:CLASSIFIED_AS]->(t:Topic)
+        WHERE a.subtopicCode IS NOT NULL AND EXISTS { (a)-[:COVERS]->(:Event) }
+        RETURN a.nodeId AS nodeId, a.subtopicCode AS subtopicCode, t.topicCode AS topicCode
+        LIMIT 1
+        """,
+        mysqlArticleId=mysql_article_id,
+    ).single()
+    if result is None:
+        return None
+    return {"nodeId": result["nodeId"], "subtopicCode": result["subtopicCode"], "topicCode": result["topicCode"]}
+
+
 # Article 노드를 생성하거나 이미 있으면 갱신한다
 def merge_article_node(
     session: Neo4jRunner,

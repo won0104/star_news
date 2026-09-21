@@ -13,6 +13,17 @@ from app.exceptions import AppException
 
 # 기사 분석 요청 하나를 처리: AI 호출 -> topic/subtopic 매핑 확인 -> Neo4j 반영(트랜잭션)
 def analyze_article(request: ArticleAnalyzeRequest, session) -> ArticleAnalyzeResult:
+    # Spring이 타임아웃으로 포기한 뒤 재시도해도, 이전 요청이 이미 커밋까지 끝났으면 AI를 또 부르지 않고 저장된 값을 그대로 돌려준다
+    existing = repository.find_completed_analysis(session, request.article_id)
+    if existing is not None:
+        return ArticleAnalyzeResult(
+            article_id=request.article_id,
+            article_node_id=existing["nodeId"],
+            status="COMPLETED",
+            primary_topic_code=existing["topicCode"],
+            subtopic_code=existing["subtopicCode"],
+        )
+
     ai_result = _call_ai(request)
     classification = ai_result["classification"]
     ai_topic = classification.get("topic")
