@@ -729,26 +729,58 @@
     filter: drop-shadow(0 18px 32px rgba(42, 25, 12, 0.24));
   }
 
-  /* 종이 영역 = 가죽 두께를 뺀 안쪽. 876×1274 에서 잰 값이다. */
+  /*
+   * 종이 영역 = 평평한 종이 그 자체. diary-single-v2.webp 에서 잰 값이다 —
+   * 왼쪽 11.8% · 위 2.7% · 오른쪽 94.8% · 아래 94.4% 부터 바깥은 책배·가죽이다.
+   * 이전 값(11.19 / 2.2 / 96.12 / 95.05)은 네 면 모두 0.5~1%p 씩 종이를 넘어 책배 위에
+   * 글이 얹혀 있었다.
+   *
+   * padding 은 책의 판면 여백이다. inset 이 "종이가 어디까지인가"를, padding 이 "글을 종이
+   * 어디까지 앉히는가"를 말한다 — 둘을 섞으면 에셋이 바뀔 때 어느 쪽을 고쳐야 할지 알 수
+   * 없다. 백분율 padding 은 위아래도 폭을 기준으로 한다.
+   */
   .pageScroll {
     position: absolute;
-    display: grid;
-    align-content: start;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
-    inset: 2.2% 3.88% 4.95% 11.19%;
+    inset: 2.7% 5.2% 5.6% 11.8%;
+    padding: 4.5% 5.5% 6%;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     pointer-events: auto;
+    scrollbar-width: none;
+  }
+
+  /* 책장에 브라우저 스크롤바가 서 있으면 책이 아니라 창이 된다. 스크롤은 그대로 둔다. */
+  .pageScroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  /*
+   * grid 가 아니라 flex 다. grid 일 때는 행성(.planetPortal)의 aspect-ratio 로 정해지는 높이가
+   * 행 크기 계산에 들어가지 않아, 행은 145px 인데 상자는 285px 이 되어 아래 기록 위로 넘쳤다.
+   * flex 컬럼에서는 주축이 세로라 aspect-ratio 가 그대로 높이가 된다.
+   *
+   * flex: 0 0 auto 는 내용이 길어질 때 항목이 눌리지 않게 한다 — 눌리면 종이 안 스크롤이
+   * 생기지 않고 글이 찌그러진다.
+   */
+  .pageScroll > * {
+    flex: 0 0 auto;
   }
 
   .diaryFrame {
     display: none;
   }
 
+  /*
+   * 종이 안에 흐르는 것만 .pageScroll 의 흐름에 들어간다. 책갈피는 여기 없다 — 책 가장자리에
+   * 절대 배치로 남는다. 이전에는 둘도 이 목록에 있어서 position: relative 로 풀렸고, 부모가
+   * flex/grid 가 아닌 .diaryStage(display: block) 라 order 가 무시됐다. 그래서 책갈피가
+   * 위쪽에 블록 순서대로 눕고, 절대 배치된 .pageScroll 이 그 위를 덮었다.
+   */
   .diaryTitle,
-  .reportSlot,
-  .categoryBookmarks,
   .planetPortal,
   .planetActions,
   .planetCaption,
@@ -770,44 +802,93 @@
     order: 3;
   }
 
+  /*
+   * 리본은 책 위로 올린다 — 길쭉해서 책배에 세우면 탭 기둥과 자리를 다툰다. 위에서는 실제
+   * 책갈피처럼 책 위쪽으로 삐져나온다.
+   *
+   * transform-origin: 0 0 + rotate(90deg) 이면 자리 계산이 단순하다: 지역 +x 가 화면 아래로,
+   * 지역 +y 가 화면 왼쪽으로 간다. 그래서 상자의 왼쪽 위 꼭지점(left/top)이 회전 뒤 보이는
+   * 영역의 오른쪽 위 꼭지점이 되고, 보이는 영역은
+   *   화면 x : left − 폭×4.368 → left      (46.4%W → 39.6~86%)
+   *   화면 y : top → top + 폭×0.6876      ( 7.31%H → −2.5~4.81%)
+   * 이 된다. clip 도 함께 돌아가므로 지역 오른쪽 22% 를 자르면 화면에서는 아래 22% 가 잘려
+   * 꽂히는 끝이 아래를 본다. 잘리는 선 3.20%H 는 위쪽 가죽(0.1~2.2%)·책배(2.2~2.7%)를 지나
+   * 종이로 0.5%p 들어간 자리다. 숨은 깊이 1.61%H 가 호버 이동 0.73%H 보다 크다.
+   */
   .reportSlot {
-    width: 58px;
-    order: 4;
-    justify-self: start;
-    margin-left: 6px;
-    clip-path: none;
+    top: -2.5%;
+    left: 86%;
+    width: 10.63%;
+    transform-origin: 0 0;
+    transform: rotate(90deg);
+    clip-path: inset(-2% 22% -2% -25%);
   }
 
-  .categoryBookmarks {
-    display: flex;
-    width: 100%;
-    order: 5;
-    flex-direction: row;
-    clip-path: none;
-    overflow-x: auto;
-    padding: 2px 0 5px;
-    scrollbar-width: thin;
-  }
-
-  .categoryBookmarks button {
-    width: 84px;
-  }
-
-  .categoryBookmarks button + button {
-    margin-top: 0;
-    margin-left: -5px;
-  }
-
-  .categoryBookmarks span {
-    inset: 15% 26% 15% 9%;
-    font-size: 10px;
-    letter-spacing: 0;
+  /*
+   * 글자는 상자와 함께 돌아가므로 그대로 두면 옆으로 눕고 읽는 방향도 뒤집힌다. 자기 중심을
+   * 기준으로 −90도 되돌리면 합이 0 이 되어 똑바로 서고 왼쪽→오른쪽으로 읽힌다. 되돌린 상자는
+   * 가로로 길어져 리본 방향과 맞는다. 지역 오른쪽 26% 를 비워 글자 중심이 잘리는 78% 안쪽에
+   * 오게 한다.
+   */
+  .reportBookmark span {
+    inset: 0 26% 0 0;
+    font-size: clamp(9px, 2.6vw, 13px);
+    letter-spacing: 0.06em;
     text-orientation: mixed;
+    transform: rotate(-90deg);
+    transform-origin: center;
     writing-mode: horizontal-tb;
   }
 
+  /*
+   * 세로에서는 책배가 왼쪽이다 — 오른쪽은 제본(스티치)이다. 그래서 가로와 좌우가 반대다:
+   * 꽂혀 잘리는 끝이 오른쪽, 둥근 끝이 왼쪽이다.
+   *
+   * diary-single-v2.webp 에서 잰 값 — 책 바깥끝 0.5% · 가죽 0.5~5.2% · 책배 5.2~11.8% ·
+   * 평평한 종이 11.8% 부터. 리본이 위로 갔으므로 책배 전체가 탭 기둥이다.
+   *
+   * 35% → 1.5% + 13%×0.65 = 9.95%, 책배 안이고 종이까지 1.85%p 남는다. 숨은 깊이 4.55%p 는
+   * 선택 이동 0.91%p 보다 넉넉하다. 탭 높이 13%×0.6876×1.3098 = 11.71%H 라 7개면
+   * 8% → 86.75% 로 끝난다(책 아래끝 99.3%).
+   *
+   * 책이 화면을 거의 꽉 채우므로(바깥끝 0.5%) 책 밖으로 크게 내밀 자리가 없다. 세로에서는
+   * 책배에 물린 채로 두고, 선택은 색(남색 에셋)이 알린다 — 이동은 거드는 정도다.
+   */
+  .categoryBookmarks {
+    top: 8%;
+    right: auto;
+    left: 1.5%;
+    width: 13%;
+    flex-direction: column;
+    clip-path: inset(-2% 35% -2% -25%);
+  }
+
+  /* 탭 그림은 오른쪽 가장자리용으로 그려져 있다 — 둥근 끝이 오른쪽이다. 왼쪽 책배에 꽂으려면
+     좌우를 뒤집어야 둥근 끝이 바깥(왼쪽)을 본다. 글자는 뒤집지 않으므로 별이 27% 로 옮겨
+     가고 글자는 그 오른쪽, 잘리는 65% 안쪽에 남는다. */
+  .categoryBookmarks img {
+    transform: scaleX(-1);
+  }
+
+  /* 뽑히는 방향도 반대다 — 바깥이 왼쪽이다. */
+  .categoryBookmarks button:hover {
+    transform: translateX(-4%);
+  }
+
+  .categoryBookmarks button[aria-current='true'] {
+    transform: translateX(-7%);
+    filter: drop-shadow(-1px 2px 3px rgb(52 32 16 / 0.34));
+  }
+
+  /* 세로 5자("IT·과학")가 들어가야 하므로 상하 여백을 8%→4% 로 열고 자간을 없앤다. */
+  .categoryBookmarks span {
+    inset: 4% 34% 4% 34%;
+    font-size: clamp(8px, 2.4vw, 12px);
+    letter-spacing: 0;
+  }
+
   .recordPage {
-    order: 6;
+    order: 4;
   }
 
   /* No torn-paper photograph in this layout, so nothing to lift the heading off. */
@@ -819,8 +900,9 @@
     justify-content: center;
   }
 
+  /* 좌우 여백은 .pageScroll 의 padding 이 준다 — 여기서 또 주면 제목만 더 들어간다. */
   .diaryTitle {
-    padding: 2px 6px 0;
+    padding: 0;
   }
 
   .diaryTitle span {
