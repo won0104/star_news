@@ -1,7 +1,9 @@
 package com.starlightnews.backend.domain.recommendation.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationWeights;
 import com.starlightnews.backend.global.enums.RecommendationCycle;
 
 /**
@@ -9,11 +11,15 @@ import com.starlightnews.backend.global.enums.RecommendationCycle;
  *
  * <p>사용자별로 따로 호출하지 않고 여러 명을 한 요청에 묶어 보낸다.
  *
- * @param cycle 이 회차가 오전인지 오후인지. 응답에도 같은 값이 실려 온다
+ * @param cycle     이 회차가 오전인지 오후인지. 응답에도 같은 값이 실려 온다
+ * @param cbfWeight 콘텐츠 기반 점수 가중치. 주 1회 재튜닝으로 정해진다
+ * @param cfWeight  협업 필터링 점수 가중치
  */
 public record RecommendationCalculateRequest(
 		RecommendationCycle cycle,
-		List<UserRequest> users
+		List<UserRequest> users,
+		BigDecimal cbfWeight,
+		BigDecimal cfWeight
 ) {
 
 	/**
@@ -25,8 +31,10 @@ public record RecommendationCalculateRequest(
 	}
 
 	/** 사용자 ID 목록으로 요청을 만든다. */
-	public static RecommendationCalculateRequest of(List<Long> userIds, RecommendationCycle cycle, int limit) {
+	public static RecommendationCalculateRequest of(List<Long> userIds, RecommendationCycle cycle, int limit,
+			RecommendationWeights weights) {
 		return new RecommendationCalculateRequest(cycle,
-				userIds.stream().map(userId -> new UserRequest(userId, limit)).toList());
+				userIds.stream().map(userId -> new UserRequest(userId, limit)).toList(),
+				weights.cbf(), weights.cf());
 	}
 }
