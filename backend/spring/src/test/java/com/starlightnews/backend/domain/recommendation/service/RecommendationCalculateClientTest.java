@@ -2,6 +2,7 @@ package com.starlightnews.backend.domain.recommendation.service;
 
 import java.util.List;
 
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationWeights;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateRequest;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateResponse;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationCalculateOutcome.Calculated;
@@ -40,7 +41,8 @@ class RecommendationCalculateClientTest {
 
 	private RecommendationCalculateRequest requestFor(long... userIds) {
 		List<Long> ids = java.util.Arrays.stream(userIds).boxed().toList();
-		return RecommendationCalculateRequest.of(ids, RecommendationCycle.AM, 10);
+		return RecommendationCalculateRequest.of(ids, RecommendationCycle.AM, 10,
+				RecommendationWeights.DEFAULT);
 	}
 
 	private RecommendationCalculateResponse response() {

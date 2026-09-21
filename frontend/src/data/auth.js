@@ -4,6 +4,24 @@ export const authBrand = {
   name: '별빛 뉴스',
   tagline: '당신만의 뉴스 우주'
 };
+
+/**
+ * 로그인·회원가입이 놓인 방. 다른 화면들과 같은 16:9 캔버스(1672×941)에 그린 일러스트다.
+ *
+ * <PhotoBackdrop> 의 scene 모양을 따른다. 비율은 하나뿐이라 cover 로 잘라 쓴다 — 이 화면
+ * 위에 놓이는 것은 클립보드 하나뿐이고, 그 자리를 방 안의 무엇에 맞출 필요가 없다.
+ * 책상·보드·창틀처럼 비율마다 한 장씩 필요한 화면이 아니다.
+ *
+ * `loop` 는 없다. 이 방의 움직이는 클립이 없고, 다른 방의 클립을 붙이면 전혀 다른 방으로
+ * 넘어가는 컷이 된다.
+ *
+ * 클립보드는 CSS 만 쓰므로 여기 두지 않는다 — 자리와 조각 기하는 Auth.module.css 에 있다.
+ */
+export const authScene = {
+  id: 'auth',
+  src: '/assets/auth/room-16x9-v2.webp',
+  loop: null
+};
 export const loginCopy = {
   title: '로그인',
   subtitle: '나만의 뉴스 우주로 다시 돌아오세요',
