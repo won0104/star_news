@@ -19,7 +19,7 @@ const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
  * simply arrived on without one — which is every destination but 나를 위한 추천 today.
  */
 const ARRIVAL = { foryou: arrivalScene }
-const TREND_BACKDROP = { id: 'trend', src: nightfall.still, loop: null }
+const TREND_BACKDROP = { id: 'trend', src: nightfall.backdrops.landscape, loop: null }
 const HISTORY_BACKDROP = {
   id: 'history',
   src: '/assets/history/history-desk-background.png',
