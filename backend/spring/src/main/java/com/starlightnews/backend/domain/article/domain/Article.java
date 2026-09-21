@@ -118,6 +118,10 @@ public class Article {
 	@Column(name = "analysis_attempts", nullable = false)
 	private int analysisAttempts;
 
+	/** 마지막 분석 실패 원인. 성공하면 비운다. 어떤 기사가 왜 밀리는지 보는 데 쓴다. */
+	@Column(name = "analysis_failure_code", length = 64)
+	private String analysisFailureCode;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "organization_id")
 	private NewsOrganization organization;

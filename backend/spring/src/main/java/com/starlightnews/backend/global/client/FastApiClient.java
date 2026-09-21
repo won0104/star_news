@@ -78,9 +78,9 @@ public class FastApiClient {
 				// 읽는 도중 끊기면 "응답을 읽지 못했다"로만 남아 시간 초과인지 응답이 깨진 것인지
 				// 구분할 수 없다. 대응이 다르므로(기다릴 시간을 늘릴지, 응답 형식을 고칠지) 나눠 남긴다.
 				log.warn("FastAPI 응답 시간 초과 (path={})", path);
-			} else {
-				log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, callFailure.getMessage());
+				throw new BusinessException(InternalApiErrorCode.INTERNAL_API_TIMEOUT);
 			}
+			log.warn("FastAPI 호출 실패 (path={}, 원인={})", path, callFailure.getMessage());
 			throw new BusinessException(InternalApiErrorCode.INTERNAL_API_UNAVAILABLE);
 		}
 	}

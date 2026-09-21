@@ -21,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ArticleAnalysisRecorder {
 
+	/** 분석은 됐는데 우리가 모르는 분류가 온 경우. 실패 원인으로 남긴다. */
+	static final String UNKNOWN_TOPIC = "UNKNOWN_TOPIC";
+
 	private final ArticleRepository articleRepository;
 	private final ArticleAnalysisProperties properties;
 
@@ -33,8 +36,8 @@ public class ArticleAnalysisRecorder {
 	public Recorded record(long articleId, ArticleAnalysisOutcome outcome) {
 		return switch (outcome) {
 			case Analyzed analyzed -> recordAnalyzed(articleId, analyzed.result());
-			case Rejected rejected -> recordRejected(articleId);
-			case Retryable retryable -> recordFailure(articleId);
+			case Rejected rejected -> recordRejected(articleId, rejected.reason());
+			case Retryable retryable -> recordFailure(articleId, retryable.reason());
 			// 기사 탓이 아니다. 시도 횟수를 올리면 설정을 고치는 사이 멀쩡한 기사가 FAILED 가 된다.
 			case Halt halt -> Recorded.UNCHANGED;
 		};
@@ -44,7 +47,7 @@ public class ArticleAnalysisRecorder {
 		if (TopicCode.from(result.primaryTopicCode()).isEmpty()) {
 			log.warn("알 수 없는 분류라 반영하지 않습니다. (articleId={}, topicCode={})",
 					articleId, result.primaryTopicCode());
-			return recordFailure(articleId);
+			return recordFailure(articleId, UNKNOWN_TOPIC);
 		}
 
 		int updated = articleRepository.markAnalyzed(articleId, result.articleNodeId(),
@@ -52,13 +55,14 @@ public class ArticleAnalysisRecorder {
 		return updated == 0 ? Recorded.UNCHANGED : Recorded.COMPLETED;
 	}
 
-	private Recorded recordRejected(long articleId) {
-		int updated = articleRepository.markAnalysisRejected(articleId);
+	private Recorded recordRejected(long articleId, String failureCode) {
+		int updated = articleRepository.markAnalysisRejected(articleId, failureCode);
 		return updated == 0 ? Recorded.UNCHANGED : Recorded.DROPPED;
 	}
 
-	private Recorded recordFailure(long articleId) {
-		int updated = articleRepository.recordAnalysisFailure(articleId, properties.maxAttempts());
+	private Recorded recordFailure(long articleId, String failureCode) {
+		int updated = articleRepository.recordAnalysisFailure(articleId, properties.maxAttempts(),
+				failureCode);
 		if (updated == 0) {
 			return Recorded.UNCHANGED;
 		}

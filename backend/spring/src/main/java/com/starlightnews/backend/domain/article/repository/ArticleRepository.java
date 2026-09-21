@@ -154,7 +154,7 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	 */
 	@Modifying
 	@Query("UPDATE Article a SET a.nodeId = :nodeId, a.topicCode = :topicCode, "
-			+ "a.subtopicCode = :subtopicCode, "
+			+ "a.subtopicCode = :subtopicCode, a.analysisFailureCode = NULL, "
 			+ "a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.COMPLETED "
 			+ "WHERE a.articleId = :articleId "
 			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
@@ -170,10 +170,12 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	 */
 	@Modifying
 	@Query("UPDATE Article a "
-			+ "SET a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.DROPPED "
+			+ "SET a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.DROPPED, "
+			+ "    a.analysisFailureCode = :failureCode "
 			+ "WHERE a.articleId = :articleId "
 			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
-	int markAnalysisRejected(@Param("articleId") Long articleId);
+	int markAnalysisRejected(@Param("articleId") Long articleId,
+			@Param("failureCode") String failureCode);
 
 	/**
 	 * 일시 실패를 한 번 센다. 한도에 닿으면 FAILED 로 두어 더 부르지 않는다.
@@ -189,10 +191,12 @@ public interface ArticleRepository extends Repository<Article, Long> {
 			+ "SET a.analysisStatus = CASE WHEN a.analysisAttempts + 1 >= :maxAttempts "
 			+ "        THEN com.starlightnews.backend.global.enums.AnalysisStatus.FAILED "
 			+ "        ELSE com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING END, "
-			+ "    a.analysisAttempts = a.analysisAttempts + 1 "
+			+ "    a.analysisAttempts = a.analysisAttempts + 1, "
+			+ "    a.analysisFailureCode = :failureCode "
 			+ "WHERE a.articleId = :articleId "
 			+ "AND a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING")
-	int recordAnalysisFailure(@Param("articleId") Long articleId, @Param("maxAttempts") int maxAttempts);
+	int recordAnalysisFailure(@Param("articleId") Long articleId, @Param("maxAttempts") int maxAttempts,
+			@Param("failureCode") String failureCode);
 
 	/** 기사의 현재 분석 상태. */
 	@Query("SELECT a.analysisStatus FROM Article a WHERE a.articleId = :articleId")

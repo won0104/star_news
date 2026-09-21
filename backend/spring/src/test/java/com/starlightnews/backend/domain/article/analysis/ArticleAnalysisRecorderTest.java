@@ -69,6 +69,14 @@ class ArticleAnalysisRecorderTest {
 				.setParameter(1, articleId).getSingleResult();
 	}
 
+	private String failureCode() {
+		entityManager.flush();
+		entityManager.clear();
+		return (String) entityManager.createNativeQuery(
+						"SELECT analysis_failure_code FROM articles WHERE article_id = ?1")
+				.setParameter(1, articleId).getSingleResult();
+	}
+
 	private Analyzed analyzed(String topicCode) {
 		return new Analyzed(new ArticleAnalyzeResponse.Data(articleId, NODE_ID, "COMPLETED",
 				topicCode, "ECONOMY_FINANCE"));
@@ -150,6 +158,55 @@ class ArticleAnalysisRecorderTest {
 		assertThat(row[0]).isNull();
 		assertThat(row[1]).isNull();
 		assertThat(((Number) row[4]).intValue()).isEqualTo(1);
+	}
+
+	// --- 실패 원인 ---
+
+	@Test
+	void 일시_실패는_원인을_남긴다() {
+		// 원인이 없으면 FAILED 로 굳은 기사를 보고 시간 초과인지 분석 실패인지 알 수 없다.
+		recorder.record(articleId, new Retryable("INTERNAL_API_TIMEOUT"));
+
+		assertThat(failureCode()).isEqualTo("INTERNAL_API_TIMEOUT");
+	}
+
+	@Test
+	void 실패_원인은_마지막_것으로_바뀐다() {
+		recorder.record(articleId, new Retryable("INTERNAL_API_TIMEOUT"));
+		recorder.record(articleId, new Retryable("INTERNAL_API_FAILED"));
+
+		assertThat(failureCode()).isEqualTo("INTERNAL_API_FAILED");
+	}
+
+	@Test
+	void 분석할_수_없는_기사도_원인을_남긴다() {
+		recorder.record(articleId, new Rejected("INTERNAL_API_REJECTED"));
+
+		assertThat(failureCode()).isEqualTo("INTERNAL_API_REJECTED");
+	}
+
+	@Test
+	void 모르는_분류로_실패하면_그_원인을_남긴다() {
+		recorder.record(articleId, analyzed("UNKNOWN_TOPIC_CODE"));
+
+		assertThat(failureCode()).isEqualTo("UNKNOWN_TOPIC");
+	}
+
+	@Test
+	void 분석에_성공하면_지난_실패_원인을_지운다() {
+		recorder.record(articleId, new Retryable("INTERNAL_API_TIMEOUT"));
+
+		recorder.record(articleId, analyzed("ECONOMY"));
+
+		assertThat(failureCode()).isNull();
+	}
+
+	@Test
+	void 회차를_멈추는_실패는_원인도_남기지_않는다() {
+		// 기사 탓이 아니다. 설정을 고치면 그대로 분석된다.
+		recorder.record(articleId, new Halt("INTERNAL_API_UNAUTHORIZED"));
+
+		assertThat(failureCode()).isNull();
 	}
 
 	@Test
