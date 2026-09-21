@@ -1,0 +1,24 @@
+{
+  "schema_version": "articlelocal-bcr-entity-span-budget-v1",
+  "mode": "EXPLICIT_BOUNDED_ONLY",
+  "budget": {
+    "policy_id": "STRUCTURAL_T14_C6",
+    "token_multiplier": 14,
+    "window_cap": 1536,
+    "global_reserve_fraction": 0.125,
+    "boundary_options": 6
+  },
+  "selector_source_path": "runtime/candidate_routing/span_budget.py",
+  "selector_source_sha256": "3075314c81e3942018fe7ad97ef3d54c7cb1eacc4b8c81409ab7d564c9b03322",
+  "source_step65_recommendation": "RECOMMEND_FOR_STEP7",
+  "source_step65_recommendation_sha256": "c61b911eec83557582e7347b0ec390dc240e32e95ed9fd9cecd414b03a150ee7",
+  "fine_checkpoint_sha256": "8437157e51f42973c0c61fa4c0b7f5d466ceb9480f118044f13ad6790920fc96",
+  "priority_checkpoint_sha256": "544fa6f1570c6bbb7808be6d72db0710a472417ff5066f955a87831701ff93f6",
+  "fine_threshold": 0.7,
+  "priority_threshold": 0.3,
+  "fine_feature_denominator_tokens": 20,
+  "fine_feature_denominator_characters": 56,
+  "projection_cache_scope": "SELECTED_CHUNK_ONLY",
+  "status": "IMPLEMENTED_PENDING_PHASE_B_GATE",
+  "published": false
+}

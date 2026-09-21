@@ -1,0 +1,1014 @@
+{
+  "all_valid_train_oracle": {
+    "actor_target_resolved": 6307,
+    "articles": 400,
+    "oracle_candidates": 13868,
+    "span_only": 52,
+    "type_conflict_endpoints": 3
+  },
+  "budget": {
+    "max_candidates": 128,
+    "status": "PROVISIONAL_ENGINEERING_ONLY"
+  },
+  "counts": {
+    "actor_target_required": 1187,
+    "actor_target_resolved": 1187,
+    "articles": 50,
+    "both": 1063,
+    "bounded_dropped_ner": 0,
+    "bounded_dropped_role": 0,
+    "bounded_partial_articles": 0,
+    "ner_only": 1244,
+    "oracle_candidates": 2308,
+    "role_only": 1,
+    "span_only": 52
+  },
+  "head_forward": 0,
+  "measurement": "Gold oracle structure and optimistic bounded candidate cardinality; no predicted recall or threshold selection",
+  "model_load": 0,
+  "optimizer_step": 0,
+  "rows": [
+    {
+      "actor_target_required": 13,
+      "actor_target_resolved": 13,
+      "article_id": "GNEWS-78d586610b9d7bc0008f37d79e823c0c",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 41,
+      "origin_cohorts": {
+        "both": 13,
+        "ner_only": 28
+      },
+      "role_status": {
+        "RESOLVED": 13
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 29,
+      "actor_target_resolved": 29,
+      "article_id": "GNEWS-52b1af55ea94ac0398ff06a2228158f8",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 49,
+      "origin_cohorts": {
+        "both": 26,
+        "ner_only": 23
+      },
+      "role_status": {
+        "RESOLVED": 29
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 32,
+      "actor_target_resolved": 32,
+      "article_id": "GNEWS-3bc5d20e0da2722ae155911a7654f20e",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 49,
+      "origin_cohorts": {
+        "both": 24,
+        "ner_only": 25
+      },
+      "role_status": {
+        "RESOLVED": 33,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 15,
+      "actor_target_resolved": 15,
+      "article_id": "GNEWS-bd030392c118ba48b9523a2cf375eceb",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 25,
+      "origin_cohorts": {
+        "both": 18,
+        "ner_only": 6,
+        "role_only": 1
+      },
+      "role_status": {
+        "RESOLVED": 19,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 44,
+      "actor_target_resolved": 44,
+      "article_id": "GNEWS-67368fd4f3c93f1673776596b913cb29",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 67,
+      "origin_cohorts": {
+        "both": 43,
+        "ner_only": 24
+      },
+      "role_status": {
+        "RESOLVED": 44,
+        "SPAN_ONLY": 8
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 42,
+      "actor_target_resolved": 42,
+      "article_id": "GNEWS-68b13340323be6878b7008a68d91e34d",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 45,
+      "origin_cohorts": {
+        "both": 31,
+        "ner_only": 14
+      },
+      "role_status": {
+        "RESOLVED": 45,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 35,
+      "actor_target_resolved": 35,
+      "article_id": "GNEWS-6e984d41466593e158a654bf0e172301",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 127,
+      "origin_cohorts": {
+        "both": 32,
+        "ner_only": 95
+      },
+      "role_status": {
+        "RESOLVED": 35,
+        "SPAN_ONLY": 2
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 33,
+      "actor_target_resolved": 33,
+      "article_id": "GNEWS-18bb79d26eafbd551685e67ba67b6040",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 56,
+      "origin_cohorts": {
+        "both": 27,
+        "ner_only": 29
+      },
+      "role_status": {
+        "RESOLVED": 33,
+        "SPAN_ONLY": 3
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 7,
+      "actor_target_resolved": 7,
+      "article_id": "GNEWS-81cf4d274099ec6acdbf11083e0be6df",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 17,
+      "origin_cohorts": {
+        "both": 7,
+        "ner_only": 10
+      },
+      "role_status": {
+        "RESOLVED": 7
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 33,
+      "actor_target_resolved": 33,
+      "article_id": "GNEWS-f7fb3a5b269fded6dc57ea446fe667a4",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 30,
+      "origin_cohorts": {
+        "both": 24,
+        "ner_only": 6
+      },
+      "role_status": {
+        "RESOLVED": 33,
+        "SPAN_ONLY": 2
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 25,
+      "actor_target_resolved": 25,
+      "article_id": "GNEWS-3384d1e810cbdad2ce0ce35d944aa73b",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 50,
+      "origin_cohorts": {
+        "both": 24,
+        "ner_only": 26
+      },
+      "role_status": {
+        "RESOLVED": 25,
+        "SPAN_ONLY": 2
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 8,
+      "actor_target_resolved": 8,
+      "article_id": "GNEWS-6f5e81cd76581ca26e3e63dd00bafd7b",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 24,
+      "origin_cohorts": {
+        "both": 7,
+        "ner_only": 17
+      },
+      "role_status": {
+        "RESOLVED": 8,
+        "SPAN_ONLY": 2
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 38,
+      "actor_target_resolved": 38,
+      "article_id": "GNEWS-33aa29c0b3577fa030cb5a9701ce49e0",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 66,
+      "origin_cohorts": {
+        "both": 40,
+        "ner_only": 26
+      },
+      "role_status": {
+        "RESOLVED": 41,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 32,
+      "actor_target_resolved": 32,
+      "article_id": "GNEWS-b95cd19841597017656c5590167f645f",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 32,
+      "origin_cohorts": {
+        "both": 28,
+        "ner_only": 4
+      },
+      "role_status": {
+        "RESOLVED": 32,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 9,
+      "actor_target_resolved": 9,
+      "article_id": "GNEWS-81b789043a08105ff6dc58d7debc4951",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 19,
+      "origin_cohorts": {
+        "both": 7,
+        "ner_only": 12
+      },
+      "role_status": {
+        "RESOLVED": 9,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 23,
+      "actor_target_resolved": 23,
+      "article_id": "GNEWS-9c3ae29820f0b8c16958f74e02e05ab5",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 33,
+      "origin_cohorts": {
+        "both": 22,
+        "ner_only": 11
+      },
+      "role_status": {
+        "RESOLVED": 23
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 18,
+      "actor_target_resolved": 18,
+      "article_id": "GNEWS-ac1ab54a2281977768d45c5cb6ff4081",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 25,
+      "origin_cohorts": {
+        "both": 17,
+        "ner_only": 8
+      },
+      "role_status": {
+        "RESOLVED": 18,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 47,
+      "actor_target_resolved": 47,
+      "article_id": "GNEWS-b27ef158a9f73939179fa1e7d17a32fb",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 107,
+      "origin_cohorts": {
+        "both": 41,
+        "ner_only": 66
+      },
+      "role_status": {
+        "RESOLVED": 48
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 23,
+      "actor_target_resolved": 23,
+      "article_id": "GNEWS-6a3319899453f9be1a75efbc93eef02e",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 53,
+      "origin_cohorts": {
+        "both": 24,
+        "ner_only": 29
+      },
+      "role_status": {
+        "RESOLVED": 26,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 30,
+      "actor_target_resolved": 30,
+      "article_id": "GNEWS-730b7df3f75eb65c691a312773a5caaf",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 92,
+      "origin_cohorts": {
+        "both": 27,
+        "ner_only": 65
+      },
+      "role_status": {
+        "RESOLVED": 30,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 22,
+      "actor_target_resolved": 22,
+      "article_id": "GNEWS-e073697edd0b061fcbafbff8ba203e5d",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 73,
+      "origin_cohorts": {
+        "both": 31,
+        "ner_only": 42
+      },
+      "role_status": {
+        "RESOLVED": 39,
+        "SPAN_ONLY": 4
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 58,
+      "actor_target_resolved": 58,
+      "article_id": "GNEWS-ea6ea53b018a1795d7d2313b60e8990c",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 62,
+      "origin_cohorts": {
+        "both": 37,
+        "ner_only": 25
+      },
+      "role_status": {
+        "RESOLVED": 60,
+        "SPAN_ONLY": 4
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 20,
+      "actor_target_resolved": 20,
+      "article_id": "GNEWS-63543c51f3d13108f1efb2882f8201d2",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 27,
+      "origin_cohorts": {
+        "both": 14,
+        "ner_only": 13
+      },
+      "role_status": {
+        "RESOLVED": 20,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 12,
+      "actor_target_resolved": 12,
+      "article_id": "GNEWS-947b599e2021a6a440682ecaef245227",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 25,
+      "origin_cohorts": {
+        "both": 9,
+        "ner_only": 16
+      },
+      "role_status": {
+        "RESOLVED": 12,
+        "SPAN_ONLY": 2
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 29,
+      "actor_target_resolved": 29,
+      "article_id": "GNEWS-e0dfb22667ff1e3c2c541cf6f64efc00",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 45,
+      "origin_cohorts": {
+        "both": 32,
+        "ner_only": 13
+      },
+      "role_status": {
+        "RESOLVED": 33
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 29,
+      "actor_target_resolved": 29,
+      "article_id": "GNEWS-e227958cf43d4b574669c93e83b56aa4",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 127,
+      "origin_cohorts": {
+        "both": 24,
+        "ner_only": 103
+      },
+      "role_status": {
+        "RESOLVED": 29
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 26,
+      "actor_target_resolved": 26,
+      "article_id": "GNEWS-c0fb8c34994386c3dafc9b882edf548f",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 48,
+      "origin_cohorts": {
+        "both": 22,
+        "ner_only": 26
+      },
+      "role_status": {
+        "RESOLVED": 26
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 13,
+      "actor_target_resolved": 13,
+      "article_id": "GNEWS-ec468e974fafbc73c13307abf275d3cb",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 44,
+      "origin_cohorts": {
+        "both": 12,
+        "ner_only": 32
+      },
+      "role_status": {
+        "RESOLVED": 13,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 16,
+      "actor_target_resolved": 16,
+      "article_id": "GNEWS-c15b1f5c8928eef654f42609372c2e75",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 28,
+      "origin_cohorts": {
+        "both": 14,
+        "ner_only": 14
+      },
+      "role_status": {
+        "RESOLVED": 18,
+        "SPAN_ONLY": 3
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 40,
+      "actor_target_resolved": 40,
+      "article_id": "GNEWS-17aa6423079c6532776b019c3f0ab912",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 35,
+      "origin_cohorts": {
+        "both": 27,
+        "ner_only": 8
+      },
+      "role_status": {
+        "RESOLVED": 41,
+        "SPAN_ONLY": 3
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 29,
+      "actor_target_resolved": 29,
+      "article_id": "GNEWS-bafc15e1e28497c44f4b6112df807f04",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 30,
+      "origin_cohorts": {
+        "both": 28,
+        "ner_only": 2
+      },
+      "role_status": {
+        "RESOLVED": 29
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 22,
+      "actor_target_resolved": 22,
+      "article_id": "GNEWS-b9911901b13539d5e5c5a65c8a8ea06a",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 32,
+      "origin_cohorts": {
+        "both": 14,
+        "ner_only": 18
+      },
+      "role_status": {
+        "RESOLVED": 22,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 21,
+      "actor_target_resolved": 21,
+      "article_id": "GNEWS-f8f08c376dab6be2aa547a84e1e543dd",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 23,
+      "origin_cohorts": {
+        "both": 14,
+        "ner_only": 9
+      },
+      "role_status": {
+        "RESOLVED": 21,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 15,
+      "actor_target_resolved": 15,
+      "article_id": "GNEWS-0deeecf9b35321c17bad4c11e105836e",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 32,
+      "origin_cohorts": {
+        "both": 15,
+        "ner_only": 17
+      },
+      "role_status": {
+        "RESOLVED": 15
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 15,
+      "actor_target_resolved": 15,
+      "article_id": "GNEWS-4a09b59398cb3a30ed90768daf564333",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 44,
+      "origin_cohorts": {
+        "both": 14,
+        "ner_only": 30
+      },
+      "role_status": {
+        "RESOLVED": 15
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 32,
+      "actor_target_resolved": 32,
+      "article_id": "GNEWS-4341a6752bdda136491068b332069437",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 65,
+      "origin_cohorts": {
+        "both": 30,
+        "ner_only": 35
+      },
+      "role_status": {
+        "RESOLVED": 32
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 4,
+      "actor_target_resolved": 4,
+      "article_id": "GNEWS-6074bb5b702e91c0bc67d3315b2cc50c",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 9,
+      "origin_cohorts": {
+        "both": 4,
+        "ner_only": 5
+      },
+      "role_status": {
+        "RESOLVED": 4,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 10,
+      "actor_target_resolved": 10,
+      "article_id": "GNEWS-6b3aed551d071f1aced7828fca620ad4",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 18,
+      "origin_cohorts": {
+        "both": 7,
+        "ner_only": 11
+      },
+      "role_status": {
+        "RESOLVED": 10,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 7,
+      "actor_target_resolved": 7,
+      "article_id": "GNEWS-e305a9b92a7e03677862c9a53e9d3df6",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 22,
+      "origin_cohorts": {
+        "both": 7,
+        "ner_only": 15
+      },
+      "role_status": {
+        "RESOLVED": 7,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 16,
+      "actor_target_resolved": 16,
+      "article_id": "GNEWS-f3f72dc1ce59a42f5beef4ab0d55671e",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_fit40",
+      "oracle_candidates": 24,
+      "origin_cohorts": {
+        "both": 14,
+        "ner_only": 10
+      },
+      "role_status": {
+        "RESOLVED": 16
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 26,
+      "actor_target_resolved": 26,
+      "article_id": "GNEWS-f0587f4f3d962753112cd1decfdbebc2",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 56,
+      "origin_cohorts": {
+        "both": 23,
+        "ner_only": 33
+      },
+      "role_status": {
+        "RESOLVED": 29
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 28,
+      "actor_target_resolved": 28,
+      "article_id": "GNEWS-d4cb5c5088455b3600ac26e91a79a4a5",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 39,
+      "origin_cohorts": {
+        "both": 25,
+        "ner_only": 14
+      },
+      "role_status": {
+        "RESOLVED": 28
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 11,
+      "actor_target_resolved": 11,
+      "article_id": "GNEWS-3edb9035805e0e9fddac8944a5e2e764",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 21,
+      "origin_cohorts": {
+        "both": 12,
+        "ner_only": 9
+      },
+      "role_status": {
+        "RESOLVED": 12
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 13,
+      "actor_target_resolved": 13,
+      "article_id": "GNEWS-77fd32e491ea552ad85aa93114260c73",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 31,
+      "origin_cohorts": {
+        "both": 13,
+        "ner_only": 18
+      },
+      "role_status": {
+        "RESOLVED": 13
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 16,
+      "actor_target_resolved": 16,
+      "article_id": "GNEWS-90b6cff7ce3c21cd9489dd6d76a0ee5e",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 28,
+      "origin_cohorts": {
+        "both": 14,
+        "ner_only": 14
+      },
+      "role_status": {
+        "RESOLVED": 16
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 20,
+      "actor_target_resolved": 20,
+      "article_id": "GNEWS-4441e9555b361ccec206c33b9adc94f4",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 50,
+      "origin_cohorts": {
+        "both": 25,
+        "ner_only": 25
+      },
+      "role_status": {
+        "RESOLVED": 25
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 16,
+      "actor_target_resolved": 16,
+      "article_id": "GNEWS-c2fd40ebab4f87f76128a614c3c2256c",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 46,
+      "origin_cohorts": {
+        "both": 16,
+        "ner_only": 30
+      },
+      "role_status": {
+        "RESOLVED": 16
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 49,
+      "actor_target_resolved": 49,
+      "article_id": "GNEWS-7aef60434a4df7e8753e062acfa5eacb",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 119,
+      "origin_cohorts": {
+        "both": 50,
+        "ner_only": 69
+      },
+      "role_status": {
+        "RESOLVED": 55
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 6,
+      "actor_target_resolved": 6,
+      "article_id": "GNEWS-31dc7de5371a0a7ec49eec692c2c940a",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 10,
+      "origin_cohorts": {
+        "both": 6,
+        "ner_only": 4
+      },
+      "role_status": {
+        "RESOLVED": 6,
+        "SPAN_ONLY": 1
+      },
+      "split": "train",
+      "type_conflicts": 0
+    },
+    {
+      "actor_target_required": 30,
+      "actor_target_resolved": 30,
+      "article_id": "GNEWS-b78b1e1c73d8315ac06db1001e644bcd",
+      "bounded_dropped_ner": 0,
+      "bounded_dropped_role": 0,
+      "bounded_status": "READY",
+      "engineering_subset": "engineering_canary10",
+      "oracle_candidates": 88,
+      "origin_cohorts": {
+        "both": 28,
+        "ner_only": 60
+      },
+      "role_status": {
+        "RESOLVED": 31
+      },
+      "split": "train",
+      "type_conflicts": 0
+    }
+  ],
+  "split": "existing_train_only",
+  "status": "STATIC_TRAIN_ONLY_UPSTREAM_GOLD_BLOCKED",
+  "training_target_dropped": 0
+}

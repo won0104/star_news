@@ -1,0 +1,583 @@
+{
+  "branch": "master",
+  "counts_this_step": {
+    "db_write": 0,
+    "forward_backward": 0,
+    "main_training": 0,
+    "model_load": "MULTIPLE_LOCAL_DIAGNOSTIC_NOT_CENSUSED",
+    "optimizer_step": 0,
+    "pretrained_smoke_invocations": 0,
+    "raw_article_inference": "MULTIPLE_LOCAL_DIAGNOSTIC_NOT_CENSUSED",
+    "remote_publish": 0,
+    "selected_dev": 0,
+    "selected_test": 0,
+    "service_threshold_selection": 0,
+    "tiny_fit": 0
+  },
+  "current_step": 14,
+  "document_id": "ARTICLELOCAL_V3_PRETRAINING_CODEX_PLAN_V1",
+  "head_at_start": "d756efb1953619a4a1a9b0e1d01c2f98e23eebbf",
+  "initialized_at_utc": "2026-09-20T14:08:26.127796+00:00",
+  "measurement_this_step": {
+    "cuda": "NOT_AVAILABLE",
+    "memory": "serving-audit-report.json: ru_maxrss process high-water and Python tracemalloc",
+    "timing": "serving-audit-report.json: warmup then three on/three off CPU requests"
+  },
+  "next_step_requires_user_request": 15,
+  "overall_status": "STEP_14_GOLD_FREE_SERVING_VERIFIED_UPSTREAM_GOLD_BLOCKED",
+  "schema_version": "articlelocal-v3-pretraining-execution-state-v1",
+  "scope": {
+    "documentation_root": "ArticleLocal-KG-DeBERTa/docs/v3-pretraining",
+    "remote_hf_byte_parity": "NOT_CHECKED",
+    "v3_code_namespace": "models/v3_pretraining; runtime/v3_pretraining; training/v3_pretraining"
+  },
+  "source_manifest_sha256": "24325825a3251788ced174eec08d41d3b8064705a07a93029e183edb642f5098",
+  "steps": {
+    "1": {
+      "artifacts": [
+        "source-manifest.json",
+        "baseline-map.md",
+        "task-contract-matrix.md",
+        "implementation-state.md",
+        "execution-state.json",
+        "decisions.md"
+      ],
+      "completed_at_utc": "2026-09-20T14:08:26.127796+00:00",
+      "initial_status": "NOT_STARTED",
+      "name": "현재 소스·rc2·범위 동결",
+      "prerequisites": [],
+      "status": "VERIFIED_PRETRAINING",
+      "verification": {
+        "actual_model_forward": "NOT_RUN_STEP_1",
+        "fixture_unittest": "7_PASS",
+        "gold_byte_hash": "RECORDED",
+        "gold_schema_join_offset_census": "NOT_RUN_STEP_2",
+        "rc2_static": "PASS",
+        "rc2_tree_and_weight_hash": "PASS"
+      }
+    },
+    "10": {
+      "artifacts": [
+        "primary-design-and-paper-adaptation.md",
+        "primary-coverage-report.json",
+        "primary-initialization-manifest.json",
+        "models/v3_pretraining/primary_head.py",
+        "runtime/v3_pretraining/primary_scoring.py",
+        "training/v3_pretraining/primary.py",
+        "tests/test_v3_primary.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T16:45:20Z",
+      "initial_status": "NOT_STARTED",
+      "name": "Post-cluster Primary Scorer·상대순위 loss 구현",
+      "prerequisites": [
+        9
+      ],
+      "status": "IMPLEMENTED_TARGET_CONNECTED",
+      "verification": {
+        "all_valid_train_articles": 400,
+        "cross_kind_strict_pairs": 44274,
+        "final_event_clusters": 3908,
+        "fresh_parameter_count": 10211761,
+        "optimizer_step": 0,
+        "pretrained_model_load": 0,
+        "rc2_and_prior_regression": "44_PASS",
+        "ready_tasks": 19,
+        "selected_dev": 0,
+        "selected_test": 0,
+        "service_threshold_selected": false,
+        "statements": 6164,
+        "strict_pairs": 103114,
+        "synthetic_backbone_and_train_gold_gradient": "PASS",
+        "ties_ignored": 56859,
+        "unimplemented_tasks": 0
+      }
+    },
+    "11": {
+      "artifacts": [
+        "canonical-text-policy.md",
+        "canonical-coverage-report.json",
+        "runtime/v3_pretraining/canonical_text.py",
+        "training/scripts/v3_canonical_coverage.py",
+        "tests/test_v3_canonical_text.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T17:02:29Z",
+      "initial_status": "NOT_STARTED",
+      "name": "원문 근거 기반 canonical text 정규화",
+      "prerequisites": [
+        10
+      ],
+      "status": "IMPLEMENTED_DETERMINISTIC",
+      "verification": {
+        "all_valid_train_articles": 400,
+        "canonical_training_targets": 0,
+        "event_source_round_trip": 3908,
+        "generative_calls": 0,
+        "new_unit_test": "7_PASS",
+        "rc2_and_prior_regression": "51_PASS",
+        "selected_dev": 0,
+        "selected_test": 0,
+        "statement_source_round_trip": 6164
+      }
+    },
+    "12": {
+      "artifacts": [
+        "public-v3-projection-contract.md",
+        "public-graph-v3.schema.json",
+        "public-v3-package-mapping.json",
+        "runtime/v3_pretraining/public_graph.py",
+        "runtime/v3_pretraining/neo4j_projection.py",
+        "viewer/adapters/json_result.py",
+        "tests/test_v3_public_graph.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T17:13:55+00:00",
+      "initial_status": "NOT_STARTED",
+      "name": "PUBLIC 계약·선택 후 연결성·Neo4j adapter 경계",
+      "prerequisites": [
+        7,
+        9,
+        10,
+        11
+      ],
+      "status": "IMPLEMENTED_PURE_PROJECTION",
+      "verification": {
+        "actual_model_load": 0,
+        "dangling_edge_count": 0,
+        "db_write": 0,
+        "e2e_fixture": "PUBLIC_SCHEMA_VIEWER_NEO4J_DRY_RUN_PASS",
+        "new_unit_tests": "7_PASS",
+        "optimizer_step": 0,
+        "quota_three_and_ten": "PASS",
+        "selected_dev": 0,
+        "selected_test": 0,
+        "service_threshold_selected": false,
+        "v3_v22_regression": "39_PASS"
+      }
+    },
+    "13": {
+      "artifacts": [
+        "training-harness-usage.md",
+        "checkpoint-reload-manifest.json",
+        "training-run-exposure-manifest.json",
+        "training-parameter-manifest.json",
+        "training/configs/v3-harness-engineering-v1.json",
+        "training/v3_pretraining/harness.py",
+        "training/v3_pretraining/checkpoint.py",
+        "training/v3_pretraining/metric_policy.py",
+        "training/scripts/v3_train.py",
+        "training/scripts/v3_harness_manifest.py",
+        "tests/test_v3_harness.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T17:41:19+00:00",
+      "initial_status": "NOT_STARTED",
+      "name": "Fresh-init training harness·재현·저장/재로딩",
+      "prerequisites": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "status": "IMPLEMENTED_SMOKE_VERIFIED",
+      "verification": {
+        "backbone_unchanged": true,
+        "changed_parameter_tensors": 271,
+        "checkpoint_format": "v3-fresh-train-checkpoint-v1",
+        "checkpoint_sha256": "fbf6e8e8779b184fd08c690317592bf41e3d3104816c5761fc319402f8bb4a8f",
+        "db_writes": 0,
+        "final_checkpoint_optimizer_steps": 1,
+        "final_event_ids_and_target_contract_equal": true,
+        "fresh_process_eval_losses_equal": 20,
+        "fresh_process_primary_outputs_equal": 15,
+        "frozen_backbone_parameter_tensors": 198,
+        "gradient_owners": 24,
+        "independent_pretrained_smoke_invocations": 5,
+        "loss_channels_finite": 20,
+        "main_training": 0,
+        "masked_time_and_partial_accumulation": "PASS",
+        "new_unit_tests": "5_PASS",
+        "old_partial_other_run_config_rejected": "PASS",
+        "optimizer_owner_groups": 24,
+        "optimizer_steps": 1,
+        "rc2_and_prior_regression": "82_PASS",
+        "selected_dev": 0,
+        "selected_test": 0,
+        "service_threshold_selected": false,
+        "task_registry": 19,
+        "tiny_fit": 0,
+        "trainable_parameter_count": 10211761,
+        "trainable_parameter_tensors": 281,
+        "two_article_full_accumulation": "PASS_ONE_OPTIMIZER_STEP",
+        "verified_train_articles_exposed": 1
+      }
+    },
+    "14": {
+      "artifacts": [
+        "serving-integration-contract.md",
+        "v3-lifecycle-contract.md",
+        "optimization-regression-plan.md",
+        "entity-type-annotation-audit.md",
+        "serving-audit-report.json",
+        "runtime/v3_pretraining/serving.py",
+        "runtime/v3_pretraining/serve_cli.py",
+        "runtime/v3_pretraining/extraction_decode.py",
+        "runtime/v3_pretraining/entity_union.py",
+        "runtime/v3_pretraining/entity_scoring.py",
+        "runtime/v3_pretraining/entity_identity.py",
+        "runtime/v3_pretraining/attribution_scoring.py",
+        "training/scripts/v3_serving_audit.py",
+        "tests/test_v3_serving.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T18:21:27Z",
+      "initial_status": "NOT_STARTED",
+      "name": "Serving 통합·activation 소유권·rc2 최적화 회귀",
+      "prerequisites": [
+        13
+      ],
+      "status": "IMPLEMENTED_DIAGNOSTIC_VERIFIED",
+      "verification": {
+        "actual_db_write": 0,
+        "additional_backbone_calls": 0,
+        "additional_dce_calls": 0,
+        "backbone_capture_hooks": 3,
+        "checkpoint_loaded_public_parity": "PASS",
+        "dangling_public_endpoints": 0,
+        "dev_test_tuning": 0,
+        "gold_free_predicted_fixture": "PASS",
+        "main_training": 0,
+        "new_unit_tests": "10_PASS",
+        "optimizer_step": 0,
+        "primary_smoke_persistence_ready": false,
+        "rc2_dynamic_tests": "7_PASS",
+        "rc2_static_package_audit": "HISTORICAL_SOURCE_MAPPING_MISMATCH_models/context.py",
+        "selected_dev": 0,
+        "selected_test": 0,
+        "service_threshold_selected": false,
+        "source_representation_reused": true,
+        "tensor_leases_closed": true,
+        "v3_prior_rc2_regression": "85_PASS"
+      }
+    },
+    "15": {
+      "initial_status": "NOT_STARTED",
+      "name": "Engineering50 smoke·소규모 tiny-fit·성능/메모리 검증",
+      "prerequisites": [
+        14
+      ],
+      "status": "NOT_STARTED"
+    },
+    "16": {
+      "initial_status": "NOT_STARTED",
+      "name": "진단 bundle·본학습 준비 상태·최종 인수",
+      "prerequisites": [
+        15
+      ],
+      "status": "NOT_STARTED"
+    },
+    "2": {
+      "artifacts": [
+        "corpus-inventory.json",
+        "gold-validation.json",
+        "source-join-manifest.json",
+        "engineering50-manifest.json",
+        "coverage-matrix.md",
+        "data-exposure-ledger.json",
+        "decisions.md",
+        "implementation-state.md",
+        "execution-state.json"
+      ],
+      "blocked_at_utc": "2026-09-20T14:21:14Z",
+      "blocker": "gold_verified/136.json TM6 normalized_value 2025-11/2026-01-23 mixes month/day interval granularity; existing dev split; source left unchanged",
+      "counts": {
+        "current_gold_articles": 500,
+        "current_gold_by_existing_split": {
+          "dev": 51,
+          "test": 49,
+          "train": 400
+        },
+        "engineering_canary": 10,
+        "engineering_fit": 40,
+        "quarantined_articles": 1,
+        "validated_articles": 499
+      },
+      "initial_status": "NOT_STARTED",
+      "name": "Gold intake·전체 정적 census·engineering50 선정",
+      "prerequisites": [
+        1
+      ],
+      "status": "BLOCKED",
+      "verification": {
+        "input_hashes_unchanged": true,
+        "model_load": 0,
+        "selected_dev": 0,
+        "selected_test": 0,
+        "unit_test": "8_PASS"
+      }
+    },
+    "3": {
+      "artifacts": [
+        "target-coverage-report.json",
+        "negative-universe-contract.md",
+        "training/v3_pretraining/*",
+        "runtime/v3_pretraining/source_layout.py",
+        "runtime/v3_pretraining/tokenizer.py",
+        "tests/test_v3_target_compiler.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T14:44:04Z",
+      "initial_status": "NOT_STARTED",
+      "name": "학습 target compiler·offset 정렬·평가기 기반",
+      "prerequisites": [
+        2
+      ],
+      "source_spans_round_tripped": 42132,
+      "status": "IMPLEMENTED_STATIC",
+      "train_only_compiled_articles": 400,
+      "verification": {
+        "compiler_source_loss": 0,
+        "cross_sentence_spans": 161,
+        "cross_window_link_spans": 11,
+        "head_support": "NOT_IMPLEMENTED_STAGE_5_PLUS",
+        "selected_dev": 0,
+        "selected_test": 0,
+        "subtoken_or_gap_boundary_spans": 1118,
+        "unit_test": "5_PASS"
+      }
+    },
+    "4": {
+      "artifacts": [
+        "initialization-manifest.json",
+        "task-contract-matrix.md",
+        "representation-and-gradient-contract.md",
+        "models/v3_pretraining/*",
+        "runtime/v3_pretraining/source_batch.py",
+        "runtime/v3_pretraining/handoff.py",
+        "training/scripts/v3_architecture_manifest.py",
+        "tests/test_v3_architecture.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T15:03:33Z",
+      "initial_status": "NOT_STARTED",
+      "name": "v3 학습 가능 구조·표현 및 초기화 계약",
+      "prerequisites": [
+        3
+      ],
+      "status": "IMPLEMENTED_STATIC",
+      "verification": {
+        "fresh_parameter_count": 3772012,
+        "fresh_parameter_tensors": 87,
+        "full_model_ready": false,
+        "legacy_task_weight_load": 0,
+        "optimizer_step": 0,
+        "runtime_pretrained_load": 0,
+        "selected_dev": 0,
+        "selected_test": 0,
+        "step3_regression": "5_PASS",
+        "synthetic_forward_backward": "PASS",
+        "train_gold_source_only": true,
+        "unimplemented_tasks": 18,
+        "unit_test": "5_PASS"
+      }
+    },
+    "5": {
+      "artifacts": [
+        "extraction-head-migration.md",
+        "extraction-coverage-report.json",
+        "extraction-initialization-manifest.json",
+        "models/v3_pretraining/exact_span.py",
+        "models/v3_pretraining/extraction_heads.py",
+        "runtime/v3_pretraining/extraction_decode.py",
+        "training/v3_pretraining/extraction.py",
+        "tests/test_v3_extraction.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T15:24:28Z",
+      "initial_status": "NOT_STARTED",
+      "name": "추출·속성 head를 r05.3 학습 계약에 연결",
+      "prerequisites": [
+        4
+      ],
+      "status": "IMPLEMENTED_TARGET_CONNECTED",
+      "verification": {
+        "cross_window_span_targets": 1,
+        "engineering_source_span_targets": 6906,
+        "engineering_train_articles_censused": 50,
+        "new_unit_test": "8_PASS",
+        "optimizer_step": 0,
+        "pretrained_model_load": 0,
+        "rc2_and_prior_regression": "17_PASS",
+        "ready_tasks": 8,
+        "selected_dev": 0,
+        "selected_test": 0,
+        "signed_residual_span_targets": 204,
+        "training_target_dropped": 0,
+        "unimplemented_tasks": 11
+      }
+    },
+    "6": {
+      "artifacts": [
+        "entity-union-closure-contract.md",
+        "entity-union-coverage-report.json",
+        "entity-initialization-manifest.json",
+        "runtime/v3_pretraining/entity_union.py",
+        "runtime/v3_pretraining/entity_identity.py",
+        "runtime/v3_pretraining/entity_scoring.py",
+        "models/v3_pretraining/entity_heads.py",
+        "training/v3_pretraining/entity.py",
+        "tests/test_v3_entity_union.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T15:43:45Z",
+      "initial_status": "NOT_STARTED",
+      "name": "Role-derived Entity 후보 통합·동일성·endpoint 복원",
+      "prerequisites": [
+        5
+      ],
+      "status": "IMPLEMENTED_TARGET_CONNECTED",
+      "verification": {
+        "all_valid_train_actor_target_endpoints_retained": 6307,
+        "all_valid_train_mixed_type_endpoints_retained": 3,
+        "all_valid_train_oracle_articles": 400,
+        "engineering50_actor_target_endpoints_retained": 1187,
+        "engineering50_both_origin_candidates": 1063,
+        "engineering50_ner_only_candidates": 1244,
+        "engineering50_role_only_candidates": 1,
+        "engineering50_span_only_roles": 52,
+        "fresh_parameter_count": 6517653,
+        "new_unit_test": "13_PASS",
+        "optimizer_step": 0,
+        "oracle_training_target_dropped": 0,
+        "pretrained_model_load": 0,
+        "ready_tasks": 11,
+        "selected_dev": 0,
+        "selected_test": 0,
+        "service_threshold_selected": false,
+        "unimplemented_tasks": 8
+      }
+    },
+    "7": {
+      "artifacts": [
+        "temporal-contract.md",
+        "time-coverage-report.json",
+        "time-initialization-manifest.json",
+        "models/v3_pretraining/time_heads.py",
+        "runtime/v3_pretraining/temporal.py",
+        "runtime/v3_pretraining/temporal_scoring.py",
+        "training/v3_pretraining/time.py",
+        "tests/test_v3_time.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T16:04:26Z",
+      "initial_status": "NOT_STARTED",
+      "name": "Time 학습·attachment·정규화 경계 정비",
+      "prerequisites": [
+        6
+      ],
+      "status": "IMPLEMENTED_TARGET_CONNECTED",
+      "verification": {
+        "all_valid_train_articles": 400,
+        "attached_null_normalization": 900,
+        "attachment_positive_dropped": 0,
+        "event_time_positive": 2302,
+        "fresh_parameter_count": 6995699,
+        "new_unit_test": "5_PASS",
+        "normalization_null_ignored": 1524,
+        "normalized_supervised": 1733,
+        "optimizer_step": 0,
+        "pretrained_model_load": 0,
+        "ready_tasks": 13,
+        "selected_dev": 0,
+        "selected_test": 0,
+        "service_threshold_selected": false,
+        "time_span_targets": 3257,
+        "unimplemented_tasks": 6
+      }
+    },
+    "8": {
+      "artifacts": [
+        "cluster-representation-contract.md",
+        "event-coverage-report.json",
+        "event-initialization-manifest.json",
+        "models/v3_pretraining/event_heads.py",
+        "runtime/v3_pretraining/event_identity.py",
+        "runtime/v3_pretraining/event_features.py",
+        "runtime/v3_pretraining/event_scoring.py",
+        "training/v3_pretraining/event.py",
+        "tests/test_v3_event_identity.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T16:18:02Z",
+      "initial_status": "NOT_STARTED",
+      "name": "최종 Event identity·cluster feature·handoff 경계",
+      "prerequisites": [
+        7
+      ],
+      "status": "IMPLEMENTED_TARGET_CONNECTED",
+      "verification": {
+        "about_causes_primary_implemented": false,
+        "all_valid_train_articles": 400,
+        "event_mentions": 4422,
+        "final_event_clusters": 3908,
+        "fresh_parameter_count": 7726861,
+        "multi_member_clusters": 401,
+        "new_unit_test": "8_PASS",
+        "optimizer_step": 0,
+        "pretrained_model_load": 0,
+        "ready_tasks": 14,
+        "role_evidence_retained": "6656/6656",
+        "same_event_positive_pairs": 675,
+        "selected_dev": 0,
+        "selected_test": 0,
+        "service_threshold_selected": false,
+        "time_attachment_support_retained": "2302/2302",
+        "unassessed_oracle_pairs": 0,
+        "unimplemented_tasks": 5
+      }
+    },
+    "9": {
+      "artifacts": [
+        "attribution-relation-contract.md",
+        "attribution-coverage-report.json",
+        "attribution-initialization-manifest.json",
+        "models/v3_pretraining/attribution_heads.py",
+        "runtime/v3_pretraining/attribution_scoring.py",
+        "training/v3_pretraining/attribution.py",
+        "tests/test_v3_attribution.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T16:36:18Z",
+      "initial_status": "NOT_STARTED",
+      "name": "Assertor·ASSERTED_BY·ABOUT·CAUSES 경로 구현",
+      "prerequisites": [
+        8
+      ],
+      "status": "IMPLEMENTED_TARGET_CONNECTED",
+      "verification": {
+        "about_positive": 1772,
+        "all_valid_train_articles": 400,
+        "assertor_entity_positive": 3032,
+        "assertor_sources": 3347,
+        "assertor_span_only": 315,
+        "causes_positive": 615,
+        "fresh_parameter_count": 9250330,
+        "optimizer_step": 0,
+        "pretrained_model_load": 0,
+        "ready_tasks": 18,
+        "selected_dev": 0,
+        "selected_test": 0,
+        "service_threshold_selected": false,
+        "synthetic_backbone_and_train_gold_gradient": "PASS",
+        "unimplemented_tasks": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "fatal": [],
+  "fresh_validation": true,
+  "historical_report": "validation_report.json",
+  "historical_report_used_as_authority": false,
+  "input_hashes_unchanged": true,
+  "quarantine": [
+    {
+      "article_ids": [
+        "GNEWS-16483dcf7e12279c6e2333af4e335fa7"
+      ],
+      "file": "136.json",
+      "reasons": [
+        "TM6: interval granularity/order mismatch"
+      ]
+    }
+  ],
+  "schema": "data/gold/schema/articlelocal-semantic-gold-v1.3.schema.json",
+  "schema_sha256": "154e6c9c79f5b9444876dffaba6048d98c729041c8d0c703f40856c661804b3d",
+  "semantic_relation_completeness": "NOT_MECHANICALLY_CERTIFIED",
+  "status": "BLOCKED",
+  "valid_article_count": 499,
+  "validated_file_count": 500
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "articlelocal-bcr-event-monotonic-bounded-v1",
+  "mode": "EXPLICIT_BOUNDED",
+  "production_policy_id": "BCR_C_MONOTONIC_SEED_CLIQUE_V1",
+  "source_shadow_policy_id": "SHADOW_C_MONOTONIC_SEED_CLIQUE_V1",
+  "source_shadow_policy_sha256": "53a3c8b72d4a1017f17f8612344a6e92a543ca0db40572d9ce55503170e5a23f",
+  "numerical_contract": {
+    "local_quota": 3,
+    "lexical_quota": 5,
+    "trigger_quota": 2,
+    "entity_quota": 3,
+    "temporal_quota": 2,
+    "local_visit_cap": 24,
+    "lexical_visit_cap": 64,
+    "trigger_visit_cap": 24,
+    "entity_visit_cap": 48,
+    "temporal_visit_cap": 24,
+    "neighborhood_size": 12,
+    "article_pair_hard_cap": 3072,
+    "article_pair_linear_factor": 32
+  },
+  "published": false
+}

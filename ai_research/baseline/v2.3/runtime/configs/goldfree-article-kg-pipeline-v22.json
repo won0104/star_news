@@ -1,0 +1,33 @@
+{
+  "assembly_config": {
+    "path": "runtime/configs/compact-graph-assembly-v22.json",
+    "sha256": "e71ca78146c1f8a4cfee9306be847b5453d897a844acee1f79ae2cc5a4788ff6"
+  },
+  "assembly_config_id": "articlelocal_compact_assembly_v22_v1",
+  "checkpoint_manifest": {
+    "path": "checkpoint_manifest.json",
+    "sha256": "567ef8da0f3aa087b9b45a9077dc2f2efcb864888c21f33767f2577f51b9c1f4"
+  },
+  "compact_public_enabled": true,
+  "default_output_profile": "PUBLIC",
+  "gold_runtime_dependency_allowed": false,
+  "neo4j_projection": {
+    "credentials_in_config": false,
+    "enabled": false,
+    "mode": "OFFLINE_PREPARATION_ONLY"
+  },
+  "output_profile_contract": "ASSEMBLY_OUTPUT_PROFILE_V3",
+  "pipeline_config_id": "articlelocal_kg_pipeline_v22_compact_default",
+  "public_output_schema_version": "articlelocal-kg-public-v2.2",
+  "published": false,
+  "release_validation_status": "PENDING_STEP12_FINAL_VALIDATION",
+  "release_version": "2.2",
+  "runtime_config": {
+    "path": "runtime/configs/article-local-runtime-v22.json",
+    "sha256": "e48047f62d0d0ea4e4968c6f37d1618d59189559d0125314aec394267de6b948"
+  },
+  "runtime_config_id": "eventframe_runtime_v22_compact",
+  "runtime_validation_status": "FINAL_RUNTIME_EXECUTED_REVIEW_PENDING",
+  "schema_version": "articlelocal-goldfree-kg-pipeline-config-v1",
+  "status": "V22_COMPACT_DEFAULT_FINAL_RUNTIME_EXECUTED_REVIEW_PENDING"
+}

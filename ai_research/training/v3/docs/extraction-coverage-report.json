@@ -1,0 +1,1719 @@
+{
+  "articles": 50,
+  "budget_measurement": "optimistic Gold endpoint cardinality only; no predicted recall or threshold selection",
+  "by_engineering_subset": {
+    "engineering_canary10": 10,
+    "engineering_fit40": 40
+  },
+  "by_task": {
+    "entity_mention": {
+      "cross_window": 0,
+      "max_article_targets": 127,
+      "max_unique_end_tokens": 125,
+      "max_unique_start_tokens": 126,
+      "oracle_budget_structural_impossible_articles": 10,
+      "signed_residual": 80,
+      "targets": 2307
+    },
+    "participant": {
+      "cross_window": 0,
+      "max_article_targets": 64,
+      "max_unique_end_tokens": 51,
+      "max_unique_start_tokens": 51,
+      "oracle_budget_structural_impossible_articles": 0,
+      "signed_residual": 65,
+      "targets": 1296
+    },
+    "semantic_proposer": {
+      "cross_window": 1,
+      "max_article_targets": 103,
+      "max_unique_end_tokens": 103,
+      "max_unique_start_tokens": 103,
+      "oracle_budget_structural_impossible_articles": 4,
+      "signed_residual": 50,
+      "targets": 1844
+    },
+    "time_mention": {
+      "cross_window": 0,
+      "max_article_targets": 32,
+      "max_unique_end_tokens": 32,
+      "max_unique_start_tokens": 32,
+      "oracle_budget_structural_impossible_articles": 0,
+      "signed_residual": 4,
+      "targets": 632
+    },
+    "trigger": {
+      "cross_window": 0,
+      "max_article_targets": 41,
+      "max_unique_end_tokens": 41,
+      "max_unique_start_tokens": 41,
+      "oracle_budget_structural_impossible_articles": 0,
+      "signed_residual": 5,
+      "targets": 827
+    }
+  },
+  "decode_budget": {
+    "max_ends": 64,
+    "max_pairs": 256,
+    "max_starts": 64,
+    "status": "PROVISIONAL_ENGINEERING_ONLY"
+  },
+  "head_forward": 0,
+  "model_load": 0,
+  "optimizer_step": 0,
+  "rows": [
+    {
+      "article_id": "GNEWS-78d586610b9d7bc0008f37d79e823c0c",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 41,
+        "participant": 13,
+        "semantic_proposer": 27,
+        "time_mention": 17,
+        "trigger": 13
+      }
+    },
+    {
+      "article_id": "GNEWS-52b1af55ea94ac0398ff06a2228158f8",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 1,
+        "semantic_proposer": 0,
+        "time_mention": 2,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 49,
+        "participant": 29,
+        "semantic_proposer": 52,
+        "time_mention": 30,
+        "trigger": 23
+      }
+    },
+    {
+      "article_id": "GNEWS-3bc5d20e0da2722ae155911a7654f20e",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 3,
+        "participant": 3,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 49,
+        "participant": 34,
+        "semantic_proposer": 32,
+        "time_mention": 12,
+        "trigger": 20
+      }
+    },
+    {
+      "article_id": "GNEWS-bd030392c118ba48b9523a2cf375eceb",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 1,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 24,
+        "participant": 20,
+        "semantic_proposer": 16,
+        "time_mention": 8,
+        "trigger": 12
+      }
+    },
+    {
+      "article_id": "GNEWS-67368fd4f3c93f1673776596b913cb29",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 4,
+        "participant": 5,
+        "semantic_proposer": 3,
+        "time_mention": 0,
+        "trigger": 2
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 67,
+        "participant": 52,
+        "semantic_proposer": 42,
+        "time_mention": 16,
+        "trigger": 30
+      }
+    },
+    {
+      "article_id": "GNEWS-68b13340323be6878b7008a68d91e34d",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 45,
+        "participant": 46,
+        "semantic_proposer": 26,
+        "time_mention": 12,
+        "trigger": 21
+      }
+    },
+    {
+      "article_id": "GNEWS-6e984d41466593e158a654bf0e172301",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": false,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 5,
+        "participant": 1,
+        "semantic_proposer": 3,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 127,
+        "participant": 37,
+        "semantic_proposer": 93,
+        "time_mention": 28,
+        "trigger": 29
+      }
+    },
+    {
+      "article_id": "GNEWS-18bb79d26eafbd551685e67ba67b6040",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 1,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 56,
+        "participant": 36,
+        "semantic_proposer": 30,
+        "time_mention": 14,
+        "trigger": 19
+      }
+    },
+    {
+      "article_id": "GNEWS-81cf4d274099ec6acdbf11083e0be6df",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 0,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 17,
+        "participant": 7,
+        "semantic_proposer": 13,
+        "time_mention": 8,
+        "trigger": 3
+      }
+    },
+    {
+      "article_id": "GNEWS-f7fb3a5b269fded6dc57ea446fe667a4",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 1,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 30,
+        "participant": 35,
+        "semantic_proposer": 58,
+        "time_mention": 22,
+        "trigger": 26
+      }
+    },
+    {
+      "article_id": "GNEWS-3384d1e810cbdad2ce0ce35d944aa73b",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 1,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 50,
+        "participant": 27,
+        "semantic_proposer": 26,
+        "time_mention": 9,
+        "trigger": 16
+      }
+    },
+    {
+      "article_id": "GNEWS-6f5e81cd76581ca26e3e63dd00bafd7b",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 4,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 24,
+        "participant": 10,
+        "semantic_proposer": 27,
+        "time_mention": 5,
+        "trigger": 7
+      }
+    },
+    {
+      "article_id": "GNEWS-33aa29c0b3577fa030cb5a9701ce49e0",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 5,
+        "participant": 5,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 66,
+        "participant": 42,
+        "semantic_proposer": 40,
+        "time_mention": 11,
+        "trigger": 24
+      }
+    },
+    {
+      "article_id": "GNEWS-b95cd19841597017656c5590167f645f",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 3,
+        "participant": 4,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 32,
+        "participant": 33,
+        "semantic_proposer": 25,
+        "time_mention": 6,
+        "trigger": 21
+      }
+    },
+    {
+      "article_id": "GNEWS-81b789043a08105ff6dc58d7debc4951",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 3,
+        "participant": 2,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 19,
+        "participant": 10,
+        "semantic_proposer": 14,
+        "time_mention": 4,
+        "trigger": 7
+      }
+    },
+    {
+      "article_id": "GNEWS-9c3ae29820f0b8c16958f74e02e05ab5",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 33,
+        "participant": 23,
+        "semantic_proposer": 36,
+        "time_mention": 10,
+        "trigger": 17
+      }
+    },
+    {
+      "article_id": "GNEWS-ac1ab54a2281977768d45c5cb6ff4081",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 25,
+        "participant": 19,
+        "semantic_proposer": 23,
+        "time_mention": 1,
+        "trigger": 11
+      }
+    },
+    {
+      "article_id": "GNEWS-b27ef158a9f73939179fa1e7d17a32fb",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": false,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 4,
+        "participant": 3,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 107,
+        "participant": 48,
+        "semantic_proposer": 70,
+        "time_mention": 23,
+        "trigger": 29
+      }
+    },
+    {
+      "article_id": "GNEWS-6a3319899453f9be1a75efbc93eef02e",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 53,
+        "participant": 27,
+        "semantic_proposer": 48,
+        "time_mention": 21,
+        "trigger": 18
+      }
+    },
+    {
+      "article_id": "GNEWS-730b7df3f75eb65c691a312773a5caaf",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 6,
+        "participant": 5,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 92,
+        "participant": 31,
+        "semantic_proposer": 48,
+        "time_mention": 16,
+        "trigger": 26
+      }
+    },
+    {
+      "article_id": "GNEWS-e073697edd0b061fcbafbff8ba203e5d",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 2,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 1
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 73,
+        "participant": 43,
+        "semantic_proposer": 38,
+        "time_mention": 11,
+        "trigger": 21
+      }
+    },
+    {
+      "article_id": "GNEWS-ea6ea53b018a1795d7d2313b60e8990c",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": false,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 62,
+        "participant": 64,
+        "semantic_proposer": 93,
+        "time_mention": 32,
+        "trigger": 41
+      }
+    },
+    {
+      "article_id": "GNEWS-63543c51f3d13108f1efb2882f8201d2",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 27,
+        "participant": 21,
+        "semantic_proposer": 30,
+        "time_mention": 16,
+        "trigger": 15
+      }
+    },
+    {
+      "article_id": "GNEWS-947b599e2021a6a440682ecaef245227",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 25,
+        "participant": 14,
+        "semantic_proposer": 26,
+        "time_mention": 5,
+        "trigger": 10
+      }
+    },
+    {
+      "article_id": "GNEWS-e0dfb22667ff1e3c2c541cf6f64efc00",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 3,
+        "participant": 2,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 45,
+        "participant": 33,
+        "semantic_proposer": 40,
+        "time_mention": 16,
+        "trigger": 19
+      }
+    },
+    {
+      "article_id": "GNEWS-e227958cf43d4b574669c93e83b56aa4",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": false,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 2,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 127,
+        "participant": 29,
+        "semantic_proposer": 103,
+        "time_mention": 23,
+        "trigger": 24
+      }
+    },
+    {
+      "article_id": "GNEWS-c0fb8c34994386c3dafc9b882edf548f",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 3,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 48,
+        "participant": 26,
+        "semantic_proposer": 30,
+        "time_mention": 9,
+        "trigger": 14
+      }
+    },
+    {
+      "article_id": "GNEWS-ec468e974fafbc73c13307abf275d3cb",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 3,
+        "participant": 3,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 44,
+        "participant": 14,
+        "semantic_proposer": 33,
+        "time_mention": 3,
+        "trigger": 6
+      }
+    },
+    {
+      "article_id": "GNEWS-c15b1f5c8928eef654f42609372c2e75",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 28,
+        "participant": 21,
+        "semantic_proposer": 20,
+        "time_mention": 6,
+        "trigger": 10
+      }
+    },
+    {
+      "article_id": "GNEWS-17aa6423079c6532776b019c3f0ab912",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 3,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 35,
+        "participant": 44,
+        "semantic_proposer": 26,
+        "time_mention": 17,
+        "trigger": 26
+      }
+    },
+    {
+      "article_id": "GNEWS-bafc15e1e28497c44f4b6112df807f04",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 1,
+        "semantic_proposer": 0,
+        "time_mention": 1,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 30,
+        "participant": 29,
+        "semantic_proposer": 62,
+        "time_mention": 17,
+        "trigger": 30
+      }
+    },
+    {
+      "article_id": "GNEWS-b9911901b13539d5e5c5a65c8a8ea06a",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 32,
+        "participant": 23,
+        "semantic_proposer": 24,
+        "time_mention": 3,
+        "trigger": 15
+      }
+    },
+    {
+      "article_id": "GNEWS-f8f08c376dab6be2aa547a84e1e543dd",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 23,
+        "participant": 22,
+        "semantic_proposer": 13,
+        "time_mention": 4,
+        "trigger": 11
+      }
+    },
+    {
+      "article_id": "GNEWS-0deeecf9b35321c17bad4c11e105836e",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 2,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 32,
+        "participant": 15,
+        "semantic_proposer": 59,
+        "time_mention": 22,
+        "trigger": 9
+      }
+    },
+    {
+      "article_id": "GNEWS-4a09b59398cb3a30ed90768daf564333",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 1,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 44,
+        "participant": 15,
+        "semantic_proposer": 27,
+        "time_mention": 13,
+        "trigger": 13
+      }
+    },
+    {
+      "article_id": "GNEWS-4341a6752bdda136491068b332069437",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 1,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 1
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 65,
+        "participant": 32,
+        "semantic_proposer": 35,
+        "time_mention": 10,
+        "trigger": 21
+      }
+    },
+    {
+      "article_id": "GNEWS-6074bb5b702e91c0bc67d3315b2cc50c",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 9,
+        "participant": 5,
+        "semantic_proposer": 34,
+        "time_mention": 4,
+        "trigger": 4
+      }
+    },
+    {
+      "article_id": "GNEWS-6b3aed551d071f1aced7828fca620ad4",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 18,
+        "participant": 11,
+        "semantic_proposer": 17,
+        "time_mention": 6,
+        "trigger": 7
+      }
+    },
+    {
+      "article_id": "GNEWS-e305a9b92a7e03677862c9a53e9d3df6",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 22,
+        "participant": 8,
+        "semantic_proposer": 37,
+        "time_mention": 5,
+        "trigger": 4
+      }
+    },
+    {
+      "article_id": "GNEWS-f3f72dc1ce59a42f5beef4ab0d55671e",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_fit40",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 0,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 24,
+        "participant": 16,
+        "semantic_proposer": 23,
+        "time_mention": 10,
+        "trigger": 11
+      }
+    },
+    {
+      "article_id": "GNEWS-f0587f4f3d962753112cd1decfdbebc2",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 2,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 56,
+        "participant": 29,
+        "semantic_proposer": 28,
+        "time_mention": 8,
+        "trigger": 15
+      }
+    },
+    {
+      "article_id": "GNEWS-d4cb5c5088455b3600ac26e91a79a4a5",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 3,
+        "time_mention": 0,
+        "trigger": 1
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 39,
+        "participant": 28,
+        "semantic_proposer": 50,
+        "time_mention": 25,
+        "trigger": 17
+      }
+    },
+    {
+      "article_id": "GNEWS-3edb9035805e0e9fddac8944a5e2e764",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 1,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 21,
+        "participant": 12,
+        "semantic_proposer": 20,
+        "time_mention": 9,
+        "trigger": 9
+      }
+    },
+    {
+      "article_id": "GNEWS-77fd32e491ea552ad85aa93114260c73",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 3,
+        "participant": 1,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 31,
+        "participant": 13,
+        "semantic_proposer": 25,
+        "time_mention": 6,
+        "trigger": 11
+      }
+    },
+    {
+      "article_id": "GNEWS-90b6cff7ce3c21cd9489dd6d76a0ee5e",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 2,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 28,
+        "participant": 16,
+        "semantic_proposer": 23,
+        "time_mention": 5,
+        "trigger": 10
+      }
+    },
+    {
+      "article_id": "GNEWS-4441e9555b361ccec206c33b9adc94f4",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 2,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 50,
+        "participant": 25,
+        "semantic_proposer": 38,
+        "time_mention": 13,
+        "trigger": 16
+      }
+    },
+    {
+      "article_id": "GNEWS-c2fd40ebab4f87f76128a614c3c2256c",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 4,
+        "participant": 3,
+        "semantic_proposer": 4,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 46,
+        "participant": 16,
+        "semantic_proposer": 35,
+        "time_mention": 26,
+        "trigger": 19
+      }
+    },
+    {
+      "article_id": "GNEWS-7aef60434a4df7e8753e062acfa5eacb",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 3,
+        "participant": 3,
+        "semantic_proposer": 21,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 119,
+        "participant": 55,
+        "semantic_proposer": 54,
+        "time_mention": 19,
+        "trigger": 27
+      }
+    },
+    {
+      "article_id": "GNEWS-31dc7de5371a0a7ec49eec692c2c940a",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": true,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 1,
+        "participant": 0,
+        "semantic_proposer": 1,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 10,
+        "participant": 7,
+        "semantic_proposer": 9,
+        "time_mention": 3,
+        "trigger": 4
+      }
+    },
+    {
+      "article_id": "GNEWS-b78b1e1c73d8315ac06db1001e644bcd",
+      "cross_window": {
+        "entity_mention": 0,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 0,
+        "trigger": 0
+      },
+      "engineering_subset": "engineering_canary10",
+      "oracle_endpoint_budget_feasible": {
+        "entity_mention": false,
+        "participant": true,
+        "semantic_proposer": true,
+        "time_mention": true,
+        "trigger": true
+      },
+      "signed_residual": {
+        "entity_mention": 2,
+        "participant": 0,
+        "semantic_proposer": 0,
+        "time_mention": 1,
+        "trigger": 0
+      },
+      "split": "train",
+      "target_count": {
+        "entity_mention": 88,
+        "participant": 31,
+        "semantic_proposer": 46,
+        "time_mention": 13,
+        "trigger": 16
+      }
+    }
+  ],
+  "split": "existing_train_only",
+  "status": "STATIC_TRAIN_ONLY_UPSTREAM_GOLD_BLOCKED",
+  "training_target_dropped": 0
+}

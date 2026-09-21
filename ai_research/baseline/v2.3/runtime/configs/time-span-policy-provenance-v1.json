@@ -1,0 +1,11 @@
+{
+  "schema_version": "articlelocal-bcr-time-span-policy-provenance-v1",
+  "source_step6_policy_id": "STRUCTURAL_T16_C8",
+  "source_step6_policy_sha256": "7bead30f711217fca4b42b893c64e50f5a3c1edc0aabcf643816c71cf21cbe5a",
+  "choices": {
+    "TIME": {
+      "priority_policy_id": "STRUCTURAL_T16_C8"
+    }
+  },
+  "gold_or_training_runtime_dependency": false
+}
