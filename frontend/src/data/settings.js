@@ -93,7 +93,7 @@ export const interestPane = {
   failed: '설정을 불러오지 못했어요. 잠시 뒤 다시 열어주세요.',
   saving: '저장 중…',
   saved: '저장됨',
-  saveFailed: '저장하지 못해 이전 상태로 되돌렸어요.',
+  saveFailed: '저장 중 문제가 생겨 현재 설정을 다시 불러왔어요.',
 
   /** 분야 아래 한 줄 — 어디까지가 이 분야인지. 코드 순서는 TOPICS 와 같다. */
   scope: {

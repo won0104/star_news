@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { fetchRecommendationBoard, fetchRecommendationDetail } from '../../api/recommendations'
 import {
+  BOARD_ASSETS,
   BANNER_FRAME,
   BOARD_FRAME,
   BOARD_SIZE,
@@ -12,15 +13,15 @@ import {
 } from '../../data/recommendBoard'
 import { topicName } from '../../data/topics'
 import { useDraggableCard } from '../../hooks/useDraggableCard'
+import { useSession } from '../../store/session'
 import styles from './RecommendPane.module.css'
 
 /**
- * 나를 위한 추천 — 코르크 보드가 걸린 벽 사진 위에 글자를 쓴다.
+ * 나를 위한 추천 — 빈 코르크 보드 위에 종이와 핀을 건다.
  *
- * 사진은 이 컴포넌트가 그리지 않는다. <PhotoBackdrop> 이 화면 전체에 깔아 둔 것이
- * 이 방이고(data/recommend.js 의 arrivalScene), 보드·종이·핀·테이프·낙서가 전부 그 안에
- * 있다. 여기서 하는 일은 그 사진의 종이 자리(data/recommendBoard.js 의 SLOTS)에 추천
- * 하나씩을 글자로 얹는 것뿐이다.
+ * <PhotoBackdrop> 은 방과 빈 보드만 그린다(data/recommend.js 의 arrivalScene). 제목 종이,
+ * 추천 종이, 핀은 이 컴포넌트가 data/recommendBoard.js 의 좌표에 별도 에셋으로 올린다.
+ * 추천 카드의 button이 종이 전체를 감싸므로 글자가 아닌 종이를 눌러도 상세가 열린다.
  *
  * 그러려면 이 층이 사진과 정확히 같은 사각형 위에 서야 한다. <PhotoBackdrop> 은 사진을
  * `object-fit: cover; object-position: center bottom` 으로 깔므로, 여기 `.photoBox` 도 같은
@@ -31,13 +32,16 @@ import styles from './RecommendPane.module.css'
  * 보드 위로 올라온다 — 다른 화면으로 가지 않는다. 열 장을 훑는 게 이 화면의 일이라,
  * 하나를 보고 돌아올 때마다 판이 다시 그려지면 안 된다.
  *
- * 로그인이 필요하다. 비로그인(401)·회차 없음·실패는 오류가 아니라 상태다 — 종이를
- * 비워두면 사진만 남아 화면이 뭘 하는 곳인지 알 수 없으니, 표본 카드를 걸고 표본임을
- * 밝힌다. SAMPLE_WHEN_EMPTY 를 끄면 그 자리에 상태 문구만 선다.
+ * 로그인이 필요하다. 비로그인(401)일 때만 표본 카드를 걸고 표본임을 밝힌다.
+ * 로그인 후 추천 목록이 비어 있으면 정해진 업데이트 시각만 안내한다.
  */
 const SAMPLE_WHEN_EMPTY = true
+const RECOMMENDATION_COLUMN_COUNT = 5
+const SHEET_ANCHOR_GAP = 14
+const SHEET_EDGE_GAP = 16
 
 export function RecommendPane({ settled = true }) {
+  const account = useSession()
   const [board, setBoard] = useState(null)
   const [state, setState] = useState('loading')
   const [openId, setOpenId] = useState(null)
@@ -56,23 +60,33 @@ export function RecommendPane({ settled = true }) {
     return () => controller.abort()
   }, [])
 
-  const live = board?.items ?? []
-  const sample = SAMPLE_WHEN_EMPTY && state !== 'loading' && live.length === 0
+  const sample = SAMPLE_WHEN_EMPTY && !account && state === 'signedOut'
   const source = sample ? sampleBoard : board
   const items = source?.items ?? []
-  const open = items.find((item) => item.userRecommendationId === openId) ?? null
+  const openIndex = items.findIndex((item) => item.userRecommendationId === openId)
+  const open = openIndex >= 0 ? items[openIndex] : null
+  // 다섯 열 중 오른쪽 두 열만 상세 종이를 왼쪽에 띄운다. 가운데 열은 사용자가
+  // 요청한 대로 왼쪽 카드와 함께 오른쪽에 띄워 중심 Event를 가리지 않는다.
+  const detailSide = openIndex >= 0 && openIndex % RECOMMENDATION_COLUMN_COUNT > 2
+    ? 'left'
+    : 'right'
 
-  // 상태 문구는 표본을 걸지 않을 때만 종이 자리를 대신한다.
+  const handleCardToggle = (item) => {
+    const isOpen = openId === item.userRecommendationId
+    setOpenId(isOpen ? null : item.userRecommendationId)
+  }
+
+  const handleSheetClose = () => {
+    setOpenId(null)
+  }
+
+  // 인증된 사용자의 요청 실패를 표본으로 가리지 않는다.
   const notice = !sample && state !== 'ready'
-    ? { loading: boardCopy.loading, signedOut: boardCopy.signedOut, failed: boardCopy.failed }[state]
-    : !sample && items.length === 0
-      ? boardCopy.empty
-      : null
+    ? { loading: boardCopy.loading, signedOut: account ? boardCopy.failed : boardCopy.signedOut, failed: boardCopy.failed }[state]
+    : null
   const noticeHint = notice === boardCopy.signedOut
     ? boardCopy.signedOutHint
-    : notice === boardCopy.empty
-      ? boardCopy.emptyHint
-      : null
+    : null
 
   return (
     <section
@@ -90,11 +104,14 @@ export function RecommendPane({ settled = true }) {
           '--photo-zoom': BOARD_FRAME.zoom ?? 1,
         }}
       >
-        {/* 분홍 테이프 위 제목. 테이프는 사진에 있으니 글자만 놓는다. */}
+        {/* 제목 종이도 배경에 굽지 않고 독립 에셋으로 건다. */}
         <header className={styles.banner} style={placement(BANNER_FRAME)}>
-          <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
-          <h1 id="recommend-board-title">{boardCopy.title}</h1>
-          <p className={styles.cycle}>{cycleLine(source, sample)}</p>
+          <img className={styles.bannerPaper} src={BOARD_ASSETS.title} alt="" aria-hidden />
+          <span className={styles.bannerCopy}>
+            <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
+            <h1 id="recommend-board-title">{boardCopy.title}</h1>
+            <span className={styles.cycle}>{boardCopy.updateSchedule}</span>
+          </span>
         </header>
 
         <ol className={styles.slots} aria-label="추천 Event 열 장">
@@ -111,18 +128,23 @@ export function RecommendPane({ settled = true }) {
                   <button
                     type="button"
                     className={styles.card}
+                    data-recommendation-index={index}
                     aria-pressed={openId === item.userRecommendationId}
                     aria-label={`${index + 1}위. ${boardCopy.open(item.label)}`}
-                    onClick={() =>
-                      setOpenId(openId === item.userRecommendationId ? null : item.userRecommendationId)
-                    }
+                    onClick={() => handleCardToggle(item)}
                   >
-                    <span className={styles.cardHead}>
-                      <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
-                      <span className={styles.topic}>{topicName(item.topicCode)}</span>
+                    <span className={styles.cardFace}>
+                      <img className={styles.cardPaper} src={BOARD_ASSETS.paper} alt="" aria-hidden />
+                      <span className={styles.cardCopy}>
+                        <span className={styles.cardHead}>
+                          <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
+                          <span className={styles.topic}>{topicName(item.topicCode)}</span>
+                        </span>
+                        <strong className={styles.label}>{item.label}</strong>
+                        {item.reason && <span className={styles.reason}>{item.reason}</span>}
+                      </span>
                     </span>
-                    <strong className={styles.label}>{item.label}</strong>
-                    {item.reason && <span className={styles.reason}>{item.reason}</span>}
+                    <img className={styles.cardPin} src={BOARD_ASSETS.pin} alt="" aria-hidden />
                   </button>
                 ) : (
                   <span className={styles.blank} aria-hidden="true" />
@@ -149,7 +171,9 @@ export function RecommendPane({ settled = true }) {
           key={open.userRecommendationId}
           item={open}
           sample={sample}
-          onClose={() => setOpenId(null)}
+          side={detailSide}
+          anchorIndex={openIndex}
+          onClose={handleSheetClose}
         />
       )}
     </section>
@@ -165,10 +189,11 @@ export function RecommendPane({ settled = true }) {
  * `contextSummary` 가 null 인 것은 정상이다. 공개 시각까지 요약이 안 만들어지는 회차가
  * 있어서, 그때는 "준비 중"이라고 말하고 기사만 보여준다.
  */
-function DetailSheet({ item, sample, onClose }) {
+function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
   const [detail, setDetail] = useState(sample ? sampleDetail(item) : null)
   const [state, setState] = useState(sample ? 'ready' : 'loading')
   const { cardRef, cardStyle, dragging, handleProps } = useDraggableCard()
+  const anchorStyle = useDetailSheetAnchor(cardRef, anchorIndex, side)
 
   useEffect(() => {
     if (sample) return undefined
@@ -199,8 +224,9 @@ function DetailSheet({ item, sample, onClose }) {
     <aside
       ref={cardRef}
       className={styles.sheet}
-      style={cardStyle}
+      style={{ ...anchorStyle, ...cardStyle }}
       data-dragging={dragging}
+      data-side={side}
       aria-labelledby="recommend-sheet-title"
     >
       <button type="button" className={styles.sheetClose} aria-label={boardCopy.close} onClick={onClose}>
@@ -261,19 +287,84 @@ function DetailSheet({ item, sample, onClose }) {
   )
 }
 
-/** "아침 추천 · 06:00 공개". 표본이면 시각을 말하지 않는다 — 없는 회차의 시각은 거짓이다. */
-function cycleLine(source, sample) {
-  if (!source?.cycle) return ''
-  const cycle = boardCopy.cycle[source.cycle] ?? source.cycle
-  if (sample) return cycle
-  const time = formatTime(source.availableAt)
-  return time ? `${cycle} · ${boardCopy.availableAt(time)}` : cycle
+/**
+ * 상세 종이를 화면 모서리가 아니라 선택한 추천 종이에 붙인다.
+ *
+ * 오른쪽으로 열 때는 선택 종이의 오른쪽 변, 왼쪽으로 열 때는 왼쪽 변에서 시작한다.
+ * 상세 내용이 늦게 도착해 높이가 바뀌어도 화면 밖으로 밀리지 않도록 두 요소의 크기를
+ * 다시 관찰한다. 모바일은 별도 하단 sheet 레이아웃이 있으므로 위치를 덮어쓰지 않는다.
+ */
+function useDetailSheetAnchor(cardRef, anchorIndex, side) {
+  const [anchorStyle, setAnchorStyle] = useState(null)
+
+  useLayoutEffect(() => {
+    const sheet = cardRef.current
+    const anchorElement = document.querySelector(`[data-recommendation-index="${anchorIndex}"]`)
+    if (!sheet || !anchorElement) return undefined
+
+    const placeBesideCard = () => {
+      if (window.innerWidth <= 900) {
+        setAnchorStyle(null)
+        return
+      }
+
+      const anchorRect = anchorElement.getBoundingClientRect()
+      const sheetRect = sheet.getBoundingClientRect()
+      const boundaryElement = sheet.offsetParent
+      const boundaryRect = boundaryElement?.getBoundingClientRect() ?? {
+        left: 0,
+        top: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight,
+      }
+      // 데스크톱 rail 너비의 token 식과 같다. 카드 옆에 붙이더라도 내비게이션 위로
+      // 침범하지 않게 실제 viewport 너비로 계산한다.
+      const navigationInset = window.innerWidth >= 1024
+        ? Math.min(208, Math.max(176, window.innerWidth * 0.135))
+        : 0
+      const minLeft = Math.max(boundaryRect.left, navigationInset) + SHEET_EDGE_GAP
+      const maxRight = Math.min(boundaryRect.right, window.innerWidth) - SHEET_EDGE_GAP
+      const minTop = Math.max(boundaryRect.top, 0) + SHEET_EDGE_GAP
+      const maxBottom = Math.min(boundaryRect.bottom, window.innerHeight) - SHEET_EDGE_GAP
+      const desiredLeft = side === 'left'
+        ? anchorRect.left - sheetRect.width - SHEET_ANCHOR_GAP
+        : anchorRect.right + SHEET_ANCHOR_GAP
+      const maxLeft = Math.max(minLeft, maxRight - sheetRect.width)
+      const maxTop = Math.max(minTop, maxBottom - sheetRect.height)
+      // 브라우저가 키보드 포커스나 자동 scroll-into-view 때문에 overflow 컨테이너를
+      // 내부 스크롤한 경우에도 viewport에서 보이는 카드 옆에 그대로 붙인다.
+      const left = clamp(desiredLeft, minLeft, maxLeft)
+        - boundaryRect.left + (boundaryElement?.scrollLeft ?? 0)
+      const top = clamp(anchorRect.top - SHEET_EDGE_GAP, minTop, maxTop)
+        - boundaryRect.top + (boundaryElement?.scrollTop ?? 0)
+      const nextStyle = { top, right: 'auto', bottom: 'auto', left }
+
+      setAnchorStyle((current) => (
+        current?.top === nextStyle.top && current?.left === nextStyle.left
+          ? current
+          : nextStyle
+      ))
+    }
+
+    placeBesideCard()
+    window.addEventListener('resize', placeBesideCard)
+    const resizeObserver = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(placeBesideCard)
+    resizeObserver?.observe(anchorElement)
+    resizeObserver?.observe(sheet)
+
+    return () => {
+      window.removeEventListener('resize', placeBesideCard)
+      resizeObserver?.disconnect()
+    }
+  }, [anchorIndex, cardRef, side])
+
+  return anchorStyle
 }
 
-/** `2026-09-17T06:00:00+09:00` → `06:00`. 서버 오프셋을 그대로 읽는다. */
-function formatTime(value) {
-  const match = /T(\d{2}):(\d{2})/.exec(value ?? '')
-  return match ? `${match[1]}:${match[2]}` : ''
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value))
 }
 
 /** ISO 든 `2026.09.10 08:55` 든, 월·일만 뽑는다. */

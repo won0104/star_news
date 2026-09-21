@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
+import { signOut } from '../../api/auth';
 import { accountMenu } from '../../data/home';
 import { endSession } from '../../store/session';
 import { openSettings } from '../../store/settings';
@@ -38,7 +40,11 @@ const subscribeRail = (onChange) => {
 const useIsRail = () => useSyncExternalStore(subscribeRail, () => rail().matches);
 
 export function UserMenu({ account }) {
+  const navigate = useNavigate();
+  const displayName = account.user?.nickname || account.user?.loginId || accountMenu.unknownUser;
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState(null);
   const rootRef = useRef(null);
   const markRef = useRef(null);
   const panelRef = useRef(null);
@@ -49,12 +55,13 @@ export function UserMenu({ account }) {
 
     // The panel may be portalled out of root, so it has to be checked on its own.
     const closeOnOutsidePress = (event) => {
+      if (signingOut) return;
       const inside =
         rootRef.current?.contains(event.target) || panelRef.current?.contains(event.target);
       if (!inside) setOpen(false);
     };
     const closeOnEscape = (event) => {
-      if (event.key !== 'Escape') return;
+      if (event.key !== 'Escape' || signingOut) return;
       setOpen(false);
       markRef.current?.focus();
     };
@@ -65,17 +72,34 @@ export function UserMenu({ account }) {
       document.removeEventListener('pointerdown', closeOnOutsidePress);
       document.removeEventListener('keydown', closeOnEscape);
     };
-  }, [open]);
+  }, [open, signingOut]);
+
+  const handleSignOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    setSignOutError(null);
+    try {
+      await signOut();
+    } catch {
+      setSignOutError(accountMenu.signOutFailed);
+      setSigningOut(false);
+      return;
+    }
+    setOpen(false);
+    endSession();
+    navigate('/', { replace: true });
+  };
 
   const panel = (
     <div className={`${styles.panel} ${isRail ? styles.panelCentred : ''}`} ref={panelRef}>
-      <p className={styles.who}>{account.user?.nickname ?? account.user?.loginId}</p>
+      <p className={styles.who}>{displayName}</p>
 
       {accountMenu.items.map((item) => (
         <button
           key={item.id}
           type="button"
           className={styles.item}
+          disabled={signingOut}
           onClick={() => {
             setOpen(false);
             markRef.current?.focus();
@@ -91,13 +115,12 @@ export function UserMenu({ account }) {
       <button
         type="button"
         className={styles.item}
-        onClick={() => {
-          setOpen(false);
-          endSession();
-        }}
+        disabled={signingOut}
+        onClick={handleSignOut}
       >
-        {accountMenu.signOut}
+        {signingOut ? accountMenu.signingOut : accountMenu.signOut}
       </button>
+      {signOutError && <p className={styles.error} role="alert">{signOutError}</p>}
     </div>
   );
 
@@ -107,12 +130,13 @@ export function UserMenu({ account }) {
         type="button"
         ref={markRef}
         className={styles.mark}
+        disabled={signingOut}
         aria-haspopup="true"
         aria-expanded={open}
-        aria-label={`${account.user?.nickname ?? account.user?.loginId ?? ''} · ${accountMenu.label}`}
+        aria-label={`${displayName} · ${accountMenu.label}`}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
       >
-        {(account.user?.nickname ?? account.user?.loginId ?? '').trim().charAt(0).toUpperCase()}
+        {displayName.trim().charAt(0).toUpperCase()}
       </button>
 
       {open && (isRail ? createPortal(panel, document.body) : panel)}

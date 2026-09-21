@@ -16,7 +16,7 @@ import { ApiError, request } from './client';
  * treated as an answer; anything else is thrown for the caller to surface.
  */
 export async function checkIdAvailability(id) {
-  const data = await request(`/auth/login-id/availability?loginId=${encodeURIComponent(id.trim())}`);
+  const data = await request(`/auth/login-id/availability?loginId=${encodeURIComponent(id.trim())}`, { skipAuth: true });
   return data.available;
 }
 
@@ -28,6 +28,7 @@ export async function signIn({ id, password }) {
   return request('/auth/login', {
     method: 'POST',
     body: { loginId: id.trim(), password },
+    skipAuth: true,
   });
 }
 
@@ -43,6 +44,7 @@ export async function signUp({ id, nickname, password }) {
   await request('/auth/signup', {
     method: 'POST',
     body: { loginId: id.trim(), nickname: nickname.trim(), password },
+    skipAuth: true,
   });
 
   try {
