@@ -1,0 +1,31 @@
+{
+  "schema_version": "articlelocal-v3-public-package-mapping-v1",
+  "public_schema_version": "articlelocal-kg-public-v3",
+  "projection_version": "v3-public-projection-r1",
+  "scope": "PURE_LOCAL_DRY_RUN",
+  "entries": {
+    "schema": {
+      "path": "docs/v3-pretraining/public-graph-v3.schema.json",
+      "sha256": "58bcf4456c5cc9a870a212b951312e77bfdb5a211450be0e16ed6b4d7dba0c07"
+    },
+    "projection": {
+      "path": "runtime/v3_pretraining/public_graph.py",
+      "sha256": "0212c2d53d3e9ae6ae4d1ab714e0ddb57be816faba23890d198f71d05b1a5621"
+    },
+    "neo4j_dry_run": {
+      "path": "runtime/v3_pretraining/neo4j_projection.py",
+      "sha256": "a9fc7a0435569f29ecc621d96c387a4e0ed53ba2bf55e9e74ed6cc59075074d7"
+    },
+    "viewer_adapter": {
+      "path": "viewer/adapters/json_result.py",
+      "sha256": "fca3dbcc9857d35304480ebbd57073899ef4ebc901024b1ea3454e31efbcdcba"
+    },
+    "canonical_text": {
+      "path": "runtime/v3_pretraining/canonical_text.py",
+      "sha256": "45786af6d5c760ecf0b42ab0d1db09a6704c8b8880adf4c5b6bde05a3b919ad6"
+    }
+  },
+  "backend_uuid_mapping": "UNMAPPED",
+  "backend_entity_type_mapping": "UNMAPPED",
+  "db_writes": 0
+}

@@ -172,6 +172,8 @@ def find_events_with_consumer_counts(session: Session, topic_codes: list[str]) -
         // 소비한 유저 없는 Event도 인기도 0으로 포함시켜야 하니 OPTIONAL MATCH
         OPTIONAL MATCH (e)<-[:CONSUMED]-(consumer:User)
         RETURN e.nodeId AS eventId, count(DISTINCT consumer) AS uniqueConsumers, e.occurredAt AS occurredAt
+        // 소비자 수가 전부 0으로 묶여도(서비스 초기) 점수 동점자끼리는 최신순이 유지되도록
+        ORDER BY e.occurredAt DESC
         """,
         # 빈 리스트를 그대로 넘기면 Cypher의 `IN []`가 항상 거짓이라 아무것도 안 나옴 -> None으로 바꿔서 "필터 없음"으로 취급
         topicCodes=topic_codes or None,

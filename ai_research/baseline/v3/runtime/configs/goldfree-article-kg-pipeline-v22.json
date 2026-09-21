@@ -1,0 +1,31 @@
+{
+  "schema_version": "articlelocal-goldfree-kg-pipeline-config-v1",
+  "pipeline_config_id": "articlelocal_kg_pipeline_v22_compact_default",
+  "release_version": "2.2",
+  "status": "V22_COMPACT_DEFAULT_FINAL_RUNTIME_EXECUTED_REVIEW_PENDING",
+  "runtime_config_id": "eventframe_runtime_v22_compact",
+  "assembly_config_id": "articlelocal_compact_assembly_v22_v1",
+  "runtime_config": {
+    "path": "runtime/configs/article-local-runtime-v22.json",
+    "sha256": "0cb78a0400f4eddfc33c0a9d68c4281b525bdfed02b18dba72a322d4c114729d"
+  },
+  "assembly_config": {
+    "path": "runtime/configs/compact-graph-assembly-v22.json",
+    "sha256": "e71ca78146c1f8a4cfee9306be847b5453d897a844acee1f79ae2cc5a4788ff6"
+  },
+  "checkpoint_manifest": {
+    "path": "release/kf-deberta-base-kg-extractor-v2/checkpoint_manifest.json",
+    "sha256": "567ef8da0f3aa087b9b45a9077dc2f2efcb864888c21f33767f2577f51b9c1f4"
+  },
+  "gold_runtime_dependency_allowed": false,
+  "public_output_schema_version": "articlelocal-kg-public-v2.2",
+  "output_profile_contract": "ASSEMBLY_OUTPUT_PROFILE_V3",
+  "default_output_profile": "PUBLIC",
+  "compact_public_enabled": true,
+  "neo4j_projection": {
+    "enabled": false,
+    "mode": "OFFLINE_PREPARATION_ONLY",
+    "credentials_in_config": false
+  },
+  "runtime_validation_status": "FINAL_RUNTIME_EXECUTED_REVIEW_PENDING"
+}

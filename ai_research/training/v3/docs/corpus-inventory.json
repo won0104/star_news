@@ -1,0 +1,29 @@
+{
+  "current_gold_annotation_counts_not_final_1k_distribution": {
+    "entity_clusters": 8990,
+    "entity_mentions": 17434,
+    "event_clusters": 4898,
+    "events": 5560,
+    "relations": 2913,
+    "statements": 7682,
+    "time_mentions": 4011
+  },
+  "current_gold_by_existing_split": {
+    "dev": 51,
+    "test": 49,
+    "train": 400
+  },
+  "gold_article_row_count": 500,
+  "gold_completion": "PARTIAL_500_OF_1000; not final distribution",
+  "gold_json_file_count": 500,
+  "gold_unique_article_id_count": 500,
+  "source_article_count": 1000,
+  "source_structure": {
+    "article_id": "articles[].article_id",
+    "body": "articles[].article",
+    "published_at": "articles[].published"
+  },
+  "split_decision": "DEFERRED; existing seed-41 boundaries used for membership only",
+  "status": "BLOCKED",
+  "valid_gold_article_count": 499
+}
