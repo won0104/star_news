@@ -35,6 +35,9 @@ const SCENE_BY_VIEW = {
   trend: TREND_BACKDROP,
   foryou: arrivalScene,
   log: HISTORY_BACKDROP,
+  // 나의 리포트는 나의 기록과 같은 책이다 — 방이 다르면 같은 책이 두 곳에 있는 것으로 읽힌다.
+  // id 가 같아 두 화면을 오갈 때 <PhotoBackdrop> 이 remount 되지 않고 책상이 그대로 남는다.
+  report: HISTORY_BACKDROP,
 }
 
 /**
