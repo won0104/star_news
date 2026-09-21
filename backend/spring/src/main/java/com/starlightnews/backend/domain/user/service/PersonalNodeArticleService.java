@@ -19,6 +19,7 @@ import com.starlightnews.backend.domain.user.repository.PersonalNodeArticleRepos
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository;
 import com.starlightnews.backend.domain.user.repository.UserKnowledgeNodeRepository;
 import com.starlightnews.backend.domain.user.support.ArticleReadCursor;
+import com.starlightnews.backend.domain.user.support.GraphReadPeriod;
 import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.error.CommonErrorCode;
@@ -50,6 +51,12 @@ public class PersonalNodeArticleService {
 	@Transactional(readOnly = true)
 	public PersonalNodeArticlesResponse getReadArticles(Long userId, NodeType nodeType, String nodeKey,
 			int size, String rawCursor) {
+		return getReadArticles(userId, nodeType, nodeKey, size, rawCursor, null);
+	}
+
+	@Transactional(readOnly = true)
+	public PersonalNodeArticlesResponse getReadArticles(Long userId, NodeType nodeType, String nodeKey,
+			int size, String rawCursor, GraphReadPeriod period) {
 
 		ArticleReadCursor cursor = (rawCursor == null || rawCursor.isBlank())
 				? null : ArticleReadCursor.decode(rawCursor);
@@ -69,10 +76,20 @@ public class PersonalNodeArticleService {
 			return new PersonalNodeArticlesResponse(nodeSummary, List.of(), false, null);
 		}
 
-		List<ReadArticleRow> rows = (cursor == null)
-				? articleReadRepository.findFirstReadPage(userId, candidateIds, PageRequest.of(0, size + 1))
-				: articleReadRepository.findNextReadPage(userId, candidateIds,
-						cursor.lastReadAt().toLocalDateTime(), cursor.articleId(), PageRequest.of(0, size + 1));
+		List<ReadArticleRow> rows;
+		if (period == null) {
+			rows = (cursor == null)
+					? articleReadRepository.findFirstReadPage(userId, candidateIds, PageRequest.of(0, size + 1))
+					: articleReadRepository.findNextReadPage(userId, candidateIds,
+							cursor.lastReadAt().toLocalDateTime(), cursor.articleId(), PageRequest.of(0, size + 1));
+		} else {
+			rows = (cursor == null)
+					? articleReadRepository.findFirstReadPageInPeriod(userId, candidateIds,
+							period.fromInclusive(), period.toExclusive(), PageRequest.of(0, size + 1))
+					: articleReadRepository.findNextReadPageInPeriod(userId, candidateIds,
+							period.fromInclusive(), period.toExclusive(),
+							cursor.lastReadAt().toLocalDateTime(), cursor.articleId(), PageRequest.of(0, size + 1));
+		}
 
 		boolean hasNext = rows.size() > size;
 		List<ReadArticleRow> page = hasNext ? rows.subList(0, size) : rows;

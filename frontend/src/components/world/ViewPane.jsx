@@ -20,10 +20,12 @@ import styles from './ViewPane.module.css'
  * 나를 위한 추천's board waits for `settled` — the arrival clip reaching its end — and then
  * comes in, so it does not appear over a room that is still moving.
  */
-export function ViewPane({ view, settled = true, playTrendTransition = false }) {
+export function ViewPane({ view, settled = true, playTrendTransition = false, selectedNode }) {
   return (
     <div className={`${styles.page} ${view === 'trend' ? styles.trendPage : ''}`}>
-      {view === 'trend' && <TrendStage playTransition={playTrendTransition} />}
+      {view === 'trend' && (
+        <TrendStage playTransition={playTrendTransition} selectedNode={selectedNode} />
+      )}
       {view === 'foryou' && <RecommendPane settled={settled} />}
       {view === 'foryou2' && <EditorialRecommendPane />}
       {view === 'log' && <DiaryHistoryPane />}

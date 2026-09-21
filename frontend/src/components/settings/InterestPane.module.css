@@ -32,6 +32,12 @@
   background: rgba(186, 133, 56, 0.1);
 }
 
+.cardDisabled,
+.cardDisabled:hover {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .cardTitle {
   font-family: var(--font-sans);
   font-weight: 600;
@@ -45,6 +51,10 @@
   margin: 0;
   accent-color: var(--brass-b);
   cursor: pointer;
+}
+
+.box:disabled {
+  cursor: wait;
 }
 
 .cardScope {

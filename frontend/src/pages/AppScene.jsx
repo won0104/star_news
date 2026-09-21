@@ -4,8 +4,10 @@ import { backdrop, extraViews, navItems } from '../data/home'
 import { arrivalScene } from '../data/recommend'
 import { nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
+import { NodeSearch } from '../components/common/NodeSearch'
 import { TopBar } from '../components/common/TopBar'
 import { ViewPane } from '../components/world/ViewPane'
+import { useSession } from '../store/session'
 import { useSettingsValues } from '../store/settings'
 import { SCREEN_TRANSITIONS } from '../utils/motion'
 
@@ -77,11 +79,13 @@ const SCENE_BY_VIEW = {
  * which is every case but an arrival.
  */
 export function AppScene() {
+  const account = useSession()
   const navigate = useNavigate()
   const location = useLocation()
   const { reduceMotion } = useSettingsValues()
   const [params, setParams] = useSearchParams()
   const [walked, setWalked] = useState(false)
+  const [selectedNode, setSelectedNode] = useState(null)
   const [enteredFromHome] = useState(() => location.state?.from === 'home')
 
   const asked = params.get('view')
@@ -108,6 +112,15 @@ export function AppScene() {
     setParams(id === DEFAULT_VIEW ? {} : { view: id }, { replace: true })
   }
 
+  const openSearchedNode = (node) => {
+    setWalked(true)
+    setSelectedNode((current) => ({
+      ...node,
+      selectionId: (current?.selectionId ?? 0) + 1,
+    }))
+    if (view !== 'trend') setParams({}, { replace: true })
+  }
+
   const arriving = !walked && enteredFromHome
   const scene = (arriving && ARRIVAL[view]) || SCENE_BY_VIEW[view] || backdrop
   const motion = SCREEN_TRANSITIONS && !reduceMotion && scene !== backdrop
@@ -129,7 +142,14 @@ export function AppScene() {
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
       />
-      <ViewPane view={view} settled={settled} playTrendTransition={arriving && view === 'trend'} />
+      <NodeSearch night={view === 'trend'} onSelect={openSearchedNode} />
+      <ViewPane
+        key={account?.user?.userId ?? (account ? 'signed-in' : 'guest')}
+        view={view}
+        settled={settled}
+        playTrendTransition={arriving && view === 'trend'}
+        selectedNode={selectedNode}
+      />
     </PhotoBackdrop>
   )
 }

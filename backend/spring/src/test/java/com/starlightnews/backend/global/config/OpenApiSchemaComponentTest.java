@@ -70,7 +70,8 @@ class OpenApiSchemaComponentTest {
 		assertThat(schemas.has("NodeSummary")).isFalse();
 
 		assertEnumValues(schemas, "ArticleSummaryResponse", "summaryStatus");
-		assertEnumValues(schemas, "ArticleDetailResponse", "summaryStatus");
+		assertThat(schemas.path("ArticleDetailResponse").path("properties").has("summary")).isFalse();
+		assertThat(schemas.path("ArticleDetailResponse").path("properties").has("summaryStatus")).isFalse();
 		assertThat(schemas.path("ArticleHistoryItem")
 				.path("properties")
 				.path("clickCount")
