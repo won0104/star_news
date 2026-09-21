@@ -10,6 +10,7 @@ import com.starlightnews.backend.domain.user.exception.UserErrorCode;
 import com.starlightnews.backend.domain.user.repository.UserRepository;
 import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.error.BusinessException;
+import com.starlightnews.backend.global.error.CommonErrorCode;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
 import com.starlightnews.backend.global.security.TokenBlacklist;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,27 @@ public class UserService {
 				user.getTopicCodes(InterestType.DISLIKE));
 	}
 
+	@Transactional
+	public void changePassword(
+			long userId,
+			String accessTokenJti,
+			Instant accessTokenExpiresAt,
+			String currentPassword,
+			String newPassword
+	) {
+		User user = findActiveUser(userId);
+		if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+			throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
+		}
+		if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+			throw new BusinessException(CommonErrorCode.INVALID_INPUT_VALUE);
+		}
+
+		user.changePasswordHash(passwordEncoder.encode(newPassword));
+		refreshSessionStore.deleteAllByUserId(userId);
+		blacklistAccessToken(accessTokenJti, accessTokenExpiresAt);
+	}
+
 	/**
 	 * 회원 탈퇴. 계정을 soft delete(deleted_at)로 비활성화하고, 해당 사용자의 모든 Refresh 세션을 삭제하며,
 	 * 현재 Access Token 의 jti 를 남은 만료 시간 동안 블랙리스트에 등록한다.
@@ -71,7 +93,10 @@ public class UserService {
 
 		user.markDeleted();
 		refreshSessionStore.deleteAllByUserId(userId);
+		blacklistAccessToken(accessTokenJti, accessTokenExpiresAt);
+	}
 
+	private void blacklistAccessToken(String accessTokenJti, Instant accessTokenExpiresAt) {
 		Duration remaining = Duration.between(Instant.now(), accessTokenExpiresAt);
 		if (remaining.isNegative()) {
 			remaining = Duration.ZERO;
