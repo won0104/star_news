@@ -46,6 +46,13 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 		long getCount();
 	}
 
+	/** 기간 내 마지막으로 읽은 기사의 Neo4j 참조와 Topic. 분석 전이면 둘 다 null일 수 있다. */
+	interface GraphReadRow {
+		String getArticleNodeKey();
+
+		String getTopicCode();
+	}
+
 	/** 개인 그래프 Node 별 읽은 기사 목록 한 행. */
 	interface ReadArticleRow {
 		Long getArticleId();
@@ -139,6 +146,15 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 			+ "GROUP BY a.topicCode")
 	List<TopicReadCount> countReadArticlesByTopic(@Param("userId") Long userId);
 
+	/** 마지막 열람 시각이 기간에 속하는 기사만 그래프 재집계 대상으로 조회한다. */
+	@Query("SELECT a.nodeId AS articleNodeKey, a.topicCode AS topicCode "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId AND r.id.userId = :userId "
+			+ "AND r.lastReadAt >= :fromInclusive AND r.lastReadAt < :toExclusive")
+	List<GraphReadRow> findGraphReadsInPeriod(@Param("userId") Long userId,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive);
+
 	/**
 	 * candidateArticleIds(Neo4j 에서 조회한 Node 관련 기사) 중 이 사용자가 실제로 읽은 것만,
 	 * lastReadAt DESC, articleId DESC 로 첫 페이지를 가져온다.
@@ -152,6 +168,19 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
 	List<ReadArticleRow> findFirstReadPage(@Param("userId") Long userId,
 			@Param("candidateArticleIds") Collection<Long> candidateArticleIds, Pageable pageable);
+
+	/** Node 관련 기사 중 마지막 열람 시각이 선택 기간에 속하는 첫 페이지. */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
+			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, a.summary AS summary "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId AND r.id.userId = :userId "
+			+ "AND r.id.articleId IN :candidateArticleIds "
+			+ "AND r.lastReadAt >= :fromInclusive AND r.lastReadAt < :toExclusive "
+			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
+	List<ReadArticleRow> findFirstReadPageInPeriod(@Param("userId") Long userId,
+			@Param("candidateArticleIds") Collection<Long> candidateArticleIds,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive, Pageable pageable);
 
 	/** 위와 같지만 cursor 위치(lastReadAt, articleId) 다음부터 가져온다. */
 	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
@@ -168,6 +197,23 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 			@Param("cursorLastReadAt") LocalDateTime cursorLastReadAt,
 			@Param("cursorArticleId") Long cursorArticleId,
 			Pageable pageable);
+
+	/** 선택 기간의 cursor 다음 페이지. 기간을 바꾸면 cursor를 새로 시작해야 한다. */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
+			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, a.summary AS summary "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId AND r.id.userId = :userId "
+			+ "AND r.id.articleId IN :candidateArticleIds "
+			+ "AND r.lastReadAt >= :fromInclusive AND r.lastReadAt < :toExclusive "
+			+ "AND (r.lastReadAt < :cursorLastReadAt "
+			+ "     OR (r.lastReadAt = :cursorLastReadAt AND r.id.articleId < :cursorArticleId)) "
+			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
+	List<ReadArticleRow> findNextReadPageInPeriod(@Param("userId") Long userId,
+			@Param("candidateArticleIds") Collection<Long> candidateArticleIds,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive,
+			@Param("cursorLastReadAt") LocalDateTime cursorLastReadAt,
+			@Param("cursorArticleId") Long cursorArticleId, Pageable pageable);
 
 	/**
 	 * 사용자의 전체 열람 기록을 lastReadAt DESC, articleId DESC 로 첫 페이지 가져온다.
