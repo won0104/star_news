@@ -192,10 +192,13 @@ export function DiaryHistoryPane() {
     >
       <DiaryShell stageClassName={styles.diaryStage} frameClassName={styles.diaryFrame}>
 
-        <Link className={styles.reportBookmark} to="/app?view=report">
-          <img src={`${BOOKMARK_ASSET}/report-v2.webp`} alt="" aria-hidden="true" />
-          <span>나의 리포트</span>
-        </Link>
+        {/* 자리와 자르는 선은 틈(.reportSlot)이 갖고, 책갈피는 그 안에서 뽑힌다. */}
+        <div className={styles.reportSlot}>
+          <Link className={styles.reportBookmark} to="/app?view=report">
+            <img src={`${BOOKMARK_ASSET}/report-v2.webp`} alt="" aria-hidden="true" />
+            <span>나의 리포트</span>
+          </Link>
+        </div>
 
         <nav className={styles.categoryBookmarks} aria-label="뉴스 카테고리">
           {TOPICS.map((item) => {
