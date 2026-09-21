@@ -229,6 +229,19 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 	List<HistoryRow> findFirstHistoryPage(@Param("userId") Long userId,
 			@Param("topicCode") String topicCode, Pageable pageable);
 
+	/** 전체 열람 기록 중 마지막 열람 시각이 선택 기간에 속하는 첫 페이지. */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
+			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, r.clickCount AS clickCount, a.summary AS summary "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId AND r.id.userId = :userId "
+			+ "AND (:topicCode IS NULL OR a.topicCode = :topicCode) "
+			+ "AND r.lastReadAt >= :fromInclusive AND r.lastReadAt < :toExclusive "
+			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
+	List<HistoryRow> findFirstHistoryPageInPeriod(@Param("userId") Long userId,
+			@Param("topicCode") String topicCode,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive, Pageable pageable);
+
 	/** 위와 같지만 cursor 위치(lastReadAt, articleId) 다음부터 가져온다. */
 	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
 			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, r.clickCount AS clickCount, a.summary AS summary "
@@ -244,4 +257,21 @@ public interface ArticleReadRepository extends Repository<ArticleRead, ArticleRe
 			@Param("cursorLastReadAt") LocalDateTime cursorLastReadAt,
 			@Param("cursorArticleId") Long cursorArticleId,
 			Pageable pageable);
+
+	/** 위와 같지만 선택 기간과 cursor 다음 조건을 함께 적용한다. */
+	@Query("SELECT a.articleId AS articleId, a.title AS title, a.organization.name AS organizationName, "
+			+ "a.topicCode AS topicCode, r.lastReadAt AS lastReadAt, r.clickCount AS clickCount, a.summary AS summary "
+			+ "FROM ArticleRead r, Article a "
+			+ "WHERE a.articleId = r.id.articleId AND r.id.userId = :userId "
+			+ "AND (:topicCode IS NULL OR a.topicCode = :topicCode) "
+			+ "AND r.lastReadAt >= :fromInclusive AND r.lastReadAt < :toExclusive "
+			+ "AND (r.lastReadAt < :cursorLastReadAt "
+			+ "     OR (r.lastReadAt = :cursorLastReadAt AND r.id.articleId < :cursorArticleId)) "
+			+ "ORDER BY r.lastReadAt DESC, r.id.articleId DESC")
+	List<HistoryRow> findNextHistoryPageInPeriod(@Param("userId") Long userId,
+			@Param("topicCode") String topicCode,
+			@Param("fromInclusive") LocalDateTime fromInclusive,
+			@Param("toExclusive") LocalDateTime toExclusive,
+			@Param("cursorLastReadAt") LocalDateTime cursorLastReadAt,
+			@Param("cursorArticleId") Long cursorArticleId, Pageable pageable);
 }

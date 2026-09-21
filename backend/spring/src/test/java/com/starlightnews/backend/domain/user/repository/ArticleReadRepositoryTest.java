@@ -201,6 +201,14 @@ class ArticleReadRepositoryTest {
 				firstAt, endExclusive, lastAt, last.getArticleId(), PageRequest.of(0, 10)))
 				.extracting(ArticleReadRepository.ReadArticleRow::getArticleId)
 				.containsExactly(first.getArticleId());
+		assertThat(articleReadRepository.findFirstHistoryPageInPeriod(1L, null,
+				firstAt, endExclusive, PageRequest.of(0, 10)))
+				.extracting(ArticleReadRepository.HistoryRow::getArticleId)
+				.containsExactly(last.getArticleId(), first.getArticleId());
+		assertThat(articleReadRepository.findNextHistoryPageInPeriod(1L, null,
+				firstAt, endExclusive, lastAt, last.getArticleId(), PageRequest.of(0, 10)))
+				.extracting(ArticleReadRepository.HistoryRow::getArticleId)
+				.containsExactly(first.getArticleId());
 	}
 
 	@Test
