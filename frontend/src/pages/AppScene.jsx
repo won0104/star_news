@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { backdrop, extraViews, navItems } from '../data/home'
 import { arrivalScene } from '../data/recommend'
+import { BOARDS } from '../data/recommendBoard'
+import { useNearestWindow } from '../hooks/useNearestWindow'
 import { nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
 import { TopBar } from '../components/common/TopBar'
@@ -111,7 +113,11 @@ export function AppScene() {
   }
 
   const arriving = !walked && enteredFromHome
-  const scene = (arriving && ARRIVAL[view]) || SCENE_BY_VIEW[view] || backdrop
+  // 코르크 방은 비율마다 따로 그려져 있다. 고르는 기준이 뷰포트이므로 <RecommendPane> 이
+  // 같은 훅으로 같은 보드를 고르고, 종이는 그 보드의 코르크 위에 앉는다.
+  const board = useNearestWindow(BOARDS)
+  const chosen = (arriving && ARRIVAL[view]) || SCENE_BY_VIEW[view] || backdrop
+  const scene = chosen === arrivalScene ? { ...arrivalScene, src: board.src } : chosen
   const motion = SCREEN_TRANSITIONS && !reduceMotion && scene !== backdrop
   const [settled, setSettled] = useState(false)
   const onSettled = useCallback(() => setSettled(true), [])

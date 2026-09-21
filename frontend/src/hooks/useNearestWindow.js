@@ -32,10 +32,15 @@ const nearestIndex = (frames, ratio) => {
 }
 
 /**
- * The entry of `frames` nearest the measured ratio of `ref`'s element.
+ * The entry of `frames` nearest the measured ratio of `ref`'s element, or of the
+ * viewport when no ref is given.
  *
- * Seeded from the viewport so the first paint is already close — the box is narrower
- * than the viewport, never wider, so the seed is at worst one frame out and is
+ * Two layers that must agree on the same entry — a photograph and the things pinned to
+ * it — should both omit the ref. Measuring the same viewport makes them agree by
+ * construction rather than by staying in sync.
+ *
+ * Seeded from the viewport so the first paint is already close: a measured box is
+ * narrower than the viewport, never wider, so the seed is at worst one entry out and is
  * corrected before the browser paints.
  */
 export function useNearestWindow(frames, ref) {
@@ -46,11 +51,12 @@ export function useNearestWindow(frames, ref) {
   )
 
   useLayoutEffect(() => {
-    const node = ref.current
-    if (!node) return undefined
+    const node = ref?.current ?? document.documentElement
 
     const measure = () => {
-      const { width, height } = node.getBoundingClientRect()
+      const { width, height } = ref?.current
+        ? node.getBoundingClientRect()
+        : { width: window.innerWidth, height: window.innerHeight }
       if (!width || !height) return
       setIndex(nearestIndex(frames, width / height))
     }
