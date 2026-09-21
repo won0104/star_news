@@ -209,14 +209,16 @@ def fetch_event_display_info(session: Session, event_ids: list[str]) -> dict[str
 
 
 # 6. 가중치 재튜닝 평가용
-# CONSUMED 이력이 있는 유저별 event_id 목록 (최근순 정렬)
-def find_users_eligible_for_evaluation(session: Session) -> dict[int, list[str]]:
+# CONSUMED 이력이 있는 유저별 (event_id, 최근성 자격) 목록 (최근순 정렬)
+def find_users_eligible_for_evaluation(session: Session, recency_threshold: datetime) -> dict[int, list[dict]]:
     rows = session.run(
         """
         MATCH (u:User)-[r:CONSUMED]->(e:Event)
-        WITH u.userId AS userId, e.nodeId AS eventId, r.lastViewedAt AS lastViewedAt
+        WITH u.userId AS userId, e.nodeId AS eventId, r.lastViewedAt AS lastViewedAt,
+             (e.occurredAt IS NOT NULL AND e.occurredAt >= $recencyThreshold) AS isRecencyEligible
         ORDER BY userId, lastViewedAt DESC
-        RETURN userId, collect(eventId) AS history
-        """
+        RETURN userId, collect({eventId: eventId, isRecencyEligible: isRecencyEligible}) AS history
+        """,
+        recencyThreshold=recency_threshold,
     ).data()
     return {row["userId"]: row["history"] for row in rows}

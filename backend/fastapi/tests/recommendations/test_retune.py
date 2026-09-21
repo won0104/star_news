@@ -40,14 +40,14 @@ def _seed_fixture(session):
     )
 
 
-# recommend_with_holdout이 평가용으로 지운 CONSUMED 관계를 무조건 롤백하는지 확인
-# - 이게 깨지면 평가 한 번 돌릴 때마다 실 데이터(유저의 읽음 이력)가 진짜로 삭제됨
-def test_recommend_with_holdout_does_not_persist_deletion():
+# evaluate_user_across_weight_grid이 평가용으로 지운 CONSUMED 관계를 무조건 롤백하는지 확인
+def test_evaluate_user_across_weight_grid_does_not_persist_deletion():
     with _driver.session() as session:
         _reset_fixture(session)
         _seed_fixture(session)
 
-    service.recommend_with_holdout(EVAL_USER_ID, ["test-retune-event-1"], cbf_weight=0.7, cf_weight=0.3)
+    recommended_by_weight = service.evaluate_user_across_weight_grid(EVAL_USER_ID, ["test-retune-event-1"])
+    assert set(recommended_by_weight.keys()) == set(service.WEIGHT_GRID)
 
     with _driver.session() as session:
         result = session.run(
@@ -61,7 +61,6 @@ def test_recommend_with_holdout_does_not_persist_deletion():
 
 
 # select_best_weights가 그리드 중 하나를 골라서 지표와 함께 반환하는지 확인
-# (실제로 어떤 조합이 "이길지"는 데이터에 따라 달라지므로 단언하지 않고, 반환 형태만 검증)
 def test_select_best_weights_returns_a_grid_combination_with_valid_metrics():
     with _driver.session() as session:
         _reset_fixture(session)
