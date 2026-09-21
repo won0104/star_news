@@ -11,6 +11,7 @@ import com.starlightnews.backend.domain.user.repository.ArticleReadRepository;
 import com.starlightnews.backend.domain.user.repository.ArticleReadRepository.HistoryRow;
 import com.starlightnews.backend.domain.user.repository.UserArticleFavoriteRepository;
 import com.starlightnews.backend.domain.user.support.ArticleReadCursor;
+import com.starlightnews.backend.domain.user.support.GraphReadPeriod;
 import com.starlightnews.backend.domain.user.support.SummaryPreview;
 import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
@@ -34,16 +35,32 @@ public class ArticleHistoryService {
 
 	@Transactional(readOnly = true)
 	public ArticleHistoryResponse getHistory(Long userId, String rawTopicCode, int size, String rawCursor) {
+		return getHistory(userId, rawTopicCode, size, rawCursor, null);
+	}
+
+	@Transactional(readOnly = true)
+	public ArticleHistoryResponse getHistory(Long userId, String rawTopicCode, int size, String rawCursor,
+			GraphReadPeriod period) {
 
 		String topicCode = resolveTopicCode(rawTopicCode);
 
 		ArticleReadCursor cursor = (rawCursor == null || rawCursor.isBlank())
 				? null : ArticleReadCursor.decode(rawCursor);
 
-		List<HistoryRow> rows = (cursor == null)
-				? articleReadRepository.findFirstHistoryPage(userId, topicCode, PageRequest.of(0, size + 1))
-				: articleReadRepository.findNextHistoryPage(userId, topicCode,
-						cursor.lastReadAt().toLocalDateTime(), cursor.articleId(), PageRequest.of(0, size + 1));
+		List<HistoryRow> rows;
+		if (period == null) {
+			rows = (cursor == null)
+					? articleReadRepository.findFirstHistoryPage(userId, topicCode, PageRequest.of(0, size + 1))
+					: articleReadRepository.findNextHistoryPage(userId, topicCode,
+							cursor.lastReadAt().toLocalDateTime(), cursor.articleId(), PageRequest.of(0, size + 1));
+		} else {
+			rows = (cursor == null)
+					? articleReadRepository.findFirstHistoryPageInPeriod(userId, topicCode,
+							period.fromInclusive(), period.toExclusive(), PageRequest.of(0, size + 1))
+					: articleReadRepository.findNextHistoryPageInPeriod(userId, topicCode,
+							period.fromInclusive(), period.toExclusive(),
+							cursor.lastReadAt().toLocalDateTime(), cursor.articleId(), PageRequest.of(0, size + 1));
+		}
 
 		boolean hasNext = rows.size() > size;
 		List<HistoryRow> page = hasNext ? rows.subList(0, size) : rows;
