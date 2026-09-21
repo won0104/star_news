@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.starlightnews.backend.domain.recommendation.domain.RecommendationCycleWindow;
 import com.starlightnews.backend.domain.recommendation.domain.RecommendationRunStatus;
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationWeights;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateRequest;
 import com.starlightnews.backend.domain.recommendation.repository.RecommendationTargetRepository;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationCalculateOutcome.Calculated;
@@ -42,6 +43,7 @@ public class RecommendationBatchService {
 	private final EventSummaryService summaryService;
 	private final RecommendationRetentionService retentionService;
 	private final RecommendationRunRecorder runRecorder;
+	private final RecommendationWeightProvider weightProvider;
 	private final RecommendationProperties properties;
 
 	/**
@@ -55,6 +57,9 @@ public class RecommendationBatchService {
 	 */
 	public RecommendationBatchResult generate(LocalDateTime now) {
 		RecommendationCycleWindow window = RecommendationCycleWindow.from(now);
+		// 회차가 시작할 때 한 번만 읽는다. 묶음마다 읽으면 재튜닝이 회차 중간에 끼어들 때
+		// 같은 회차 사용자들이 서로 다른 가중치로 계산된다.
+		RecommendationWeights weights = weightProvider.current();
 		Long runId = runRecorder.start(window, now);
 		List<Chunk> chunks = new ArrayList<>();
 
@@ -66,12 +71,12 @@ public class RecommendationBatchService {
 					break;
 				}
 
-				Chunk chunk = new Chunk(page, userIds, attempt(userIds, window));
+				Chunk chunk = new Chunk(page, userIds, attempt(userIds, window, weights));
 				record(runId, chunk);
 				chunks.add(chunk);
 			}
 
-			retryFailed(runId, chunks, window);
+			retryFailed(runId, chunks, window, weights);
 		} catch (RuntimeException failure) {
 			// 사용자 조회 같은 묶음 바깥의 실패다. RUNNING 으로 남기면 끝난 회차인지 알 수 없다.
 			runRecorder.abort(runId, LocalDateTime.now(SEOUL));
@@ -96,11 +101,13 @@ public class RecommendationBatchService {
 
 		retentionService.purgeExpired(now);
 
-		log.info("추천 생성 회차 종료: 회차 {}, 공개 {}, 상태 {}, 묶음 {}개 중 실패 {}개(재시도로 복구 {}개), "
-						+ "사용자 {}명, 추천 {}건, 건너뜀 {}건, 실패 {}명, 요약 {}건",
+		log.info("추천 생성 회차 종료: 회차 {}, 공개 {}, 상태 {}, 가중치 cbf {} / cf {}, "
+						+ "묶음 {}개 중 실패 {}개(재시도로 복구 {}개), 사용자 {}명, 추천 {}건, 건너뜀 {}건, "
+						+ "실패 {}명, 요약 {}건",
 				window.cycle(), window.availableAt(), RecommendationRunStatus.of(chunks.size(), failedChunks),
-				chunks.size(), failedChunks, recoveredChunks, total.storedUsers(), total.storedItems(),
-				total.skippedItems(), total.failedUsers(), summaries);
+				weights.cbf(), weights.cf(), chunks.size(), failedChunks, recoveredChunks,
+				total.storedUsers(), total.storedItems(), total.skippedItems(), total.failedUsers(),
+				summaries);
 		return total;
 	}
 
@@ -110,7 +117,8 @@ public class RecommendationBatchService {
 	 * <p>한 바퀴를 다 돈 뒤에 모아서 보낸다. 실패 직후 바로 다시 부르면 막힌 FastAPI 에 또 부딪치고,
 	 * 기다리는 동안 뒤 묶음들이 밀린다. 사용자는 기록해 둔 목록 그대로 보낸다.
 	 */
-	private void retryFailed(Long runId, List<Chunk> chunks, RecommendationCycleWindow window) {
+	private void retryFailed(Long runId, List<Chunk> chunks, RecommendationCycleWindow window,
+			RecommendationWeights weights) {
 		for (int attemptNo = 2; attemptNo <= properties.maxAttempts(); attemptNo++) {
 			List<Chunk> pending = chunks.stream()
 					.filter(chunk -> !chunk.last.succeeded() && chunk.last.retryable())
@@ -126,7 +134,7 @@ public class RecommendationBatchService {
 			}
 
 			for (Chunk chunk : pending) {
-				chunk.retry(attempt(chunk.userIds, window));
+				chunk.retry(attempt(chunk.userIds, window, weights));
 				runRecorder.retried(runId, chunk.no, chunk.last.failureCode());
 			}
 		}
@@ -156,9 +164,10 @@ public class RecommendationBatchService {
 	}
 
 	/** 묶음 하나를 계산하고 저장한다. 계산이나 저장에 실패하면 그 사용자들만 실패로 센다. */
-	private ChunkAttempt attempt(List<Long> userIds, RecommendationCycleWindow window) {
-		RecommendationCalculateRequest request =
-				RecommendationCalculateRequest.of(userIds, window.cycle(), properties.limitPerUser());
+	private ChunkAttempt attempt(List<Long> userIds, RecommendationCycleWindow window,
+			RecommendationWeights weights) {
+		RecommendationCalculateRequest request = RecommendationCalculateRequest.of(userIds,
+				window.cycle(), properties.limitPerUser(), weights);
 
 		return switch (calculateClient.calculate(request)) {
 			case Calculated calculated -> store(userIds, calculated, window);
