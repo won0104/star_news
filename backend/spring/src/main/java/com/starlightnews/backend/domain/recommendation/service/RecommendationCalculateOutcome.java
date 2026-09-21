@@ -24,6 +24,7 @@ public sealed interface RecommendationCalculateOutcome {
 		 */
 		public boolean retryable() {
 			return errorCode == InternalApiErrorCode.INTERNAL_API_UNAVAILABLE
+					|| errorCode == InternalApiErrorCode.INTERNAL_API_TIMEOUT
 					|| errorCode == InternalApiErrorCode.INTERNAL_API_FAILED;
 		}
 	}

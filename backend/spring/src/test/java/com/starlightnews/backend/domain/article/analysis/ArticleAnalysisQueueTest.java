@@ -79,6 +79,31 @@ class ArticleAnalysisQueueTest {
 	}
 
 	@Test
+	void 시도_횟수가_적은_기사를_먼저_고른다() {
+		// 타임아웃 난 기사가 매 회차 맨 앞에 서서 시간 예산을 먼저 먹지 않게 한다.
+		long retried = insert("retried", "PROCESSING", null, 2);
+		long fresh = insert("fresh", "PROCESSING", null, 0);
+
+		assertThat(queue(10)).containsExactly(fresh, retried);
+	}
+
+	@Test
+	void 시도_횟수가_같으면_오래된_기사부터_고른다() {
+		long first = insert("retried-first", "PROCESSING", null, 1);
+		long second = insert("retried-second", "PROCESSING", null, 1);
+
+		assertThat(queue(10)).containsExactly(first, second);
+	}
+
+	@Test
+	void 회차_상한에_걸리면_재시도는_다음_회차로_밀린다() {
+		insert("retried", "PROCESSING", null, 1);
+		long fresh = insert("fresh", "PROCESSING", null, 0);
+
+		assertThat(queue(1)).containsExactly(fresh);
+	}
+
+	@Test
 	void 정해진_개수만큼만_고른다() {
 		insert("a", "PROCESSING", null, 0);
 		insert("b", "PROCESSING", null, 0);
