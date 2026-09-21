@@ -130,8 +130,8 @@ class ArticleControllerTest {
 				.andExpect(jsonPath("$.data.title").value("국방부, 한미 연합훈련 일정 발표"))
 				.andExpect(jsonPath("$.data.organizationName").value("연합뉴스"))
 				.andExpect(jsonPath("$.data.publishedAt").value("2026-08-31T10:00:00+09:00"))
-				.andExpect(jsonPath("$.data.summary").value("저장된 요약"))
-				.andExpect(jsonPath("$.data.summaryStatus").value("COMPLETED"))
+				.andExpect(jsonPath("$.data.summary").doesNotExist())
+				.andExpect(jsonPath("$.data.summaryStatus").doesNotExist())
 				.andExpect(jsonPath("$.data.originalUrl").value("https://news.example.com/articles/101"))
 				.andExpect(jsonPath("$.data.bookmarked").value(false));
 
@@ -161,24 +161,6 @@ class ArticleControllerTest {
 				.andExpect(jsonPath("$.data.bookmarked").value(false));
 
 		verify(articleDetailService).getDetail(101L, null);
-	}
-
-	@Test
-	void 다른_요청이_요약_생성중이면_null과_PROCESSING을_응답한다() throws Exception {
-		given(articleDetailService.getDetail(101L, null)).willReturn(new ArticleDetailResponse(
-				101L,
-				"국방부, 한미 연합훈련 일정 발표",
-				"연합뉴스",
-				OffsetDateTime.parse("2026-08-31T10:00:00+09:00"),
-				null,
-				ArticleSummaryStatus.PROCESSING,
-				"https://news.example.com/articles/101",
-				false));
-
-		mockMvc.perform(get(DETAIL_PATH, 101L))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.summary").isEmpty())
-				.andExpect(jsonPath("$.data.summaryStatus").value("PROCESSING"));
 	}
 
 	@Test
@@ -217,8 +199,6 @@ class ArticleControllerTest {
 				"국방부, 한미 연합훈련 일정 발표",
 				"연합뉴스",
 				OffsetDateTime.parse("2026-08-31T10:00:00+09:00"),
-				"저장된 요약",
-				ArticleSummaryStatus.COMPLETED,
 				"https://news.example.com/articles/101",
 				bookmarked);
 	}

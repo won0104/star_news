@@ -7,6 +7,7 @@ import { desks } from '../data/history'
 import { useNearestWindow } from '../hooks/useNearestWindow'
 import { nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
+import { NodeSearch } from '../components/common/NodeSearch'
 import { TopBar } from '../components/common/TopBar'
 import { ViewPane } from '../components/world/ViewPane'
 import { useSession } from '../store/session'
@@ -87,6 +88,7 @@ export function AppScene() {
   const { reduceMotion } = useSettingsValues()
   const [params, setParams] = useSearchParams()
   const [walked, setWalked] = useState(false)
+  const [selectedNode, setSelectedNode] = useState(null)
   const [enteredFromHome] = useState(() => location.state?.from === 'home')
 
   const asked = params.get('view')
@@ -111,6 +113,15 @@ export function AppScene() {
   const open = (id) => {
     setWalked(true)
     setParams(id === DEFAULT_VIEW ? {} : { view: id }, { replace: true })
+  }
+
+  const openSearchedNode = (node) => {
+    setWalked(true)
+    setSelectedNode((current) => ({
+      ...node,
+      selectionId: (current?.selectionId ?? 0) + 1,
+    }))
+    if (view !== 'trend') setParams({}, { replace: true })
   }
 
   const arriving = !walked && enteredFromHome
@@ -145,11 +156,13 @@ export function AppScene() {
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
       />
+      <NodeSearch night={view === 'trend'} onSelect={openSearchedNode} />
       <ViewPane
         key={account?.user?.userId ?? (account ? 'signed-in' : 'guest')}
         view={view}
         settled={settled}
         playTrendTransition={arriving && view === 'trend'}
+        selectedNode={selectedNode}
       />
     </PhotoBackdrop>
   )

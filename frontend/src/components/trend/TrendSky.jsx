@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { recordNodeClick } from '../../api/personalGraph'
 import { fetchHomeTrends, fetchNeighbors } from '../../api/trend'
 import { stars } from '../../data/trend'
 import {
   trendNeighbors,
   trendNodeArticles,
-  trendNodeDetails,
   trendSkyExpandCopy,
 } from '../../data/trendNeighbors'
 import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlots } from '../../data/trendTop'
+import { useSession } from '../../store/session'
 import { TrendConstellation } from './TrendConstellation'
 import styles from './TrendSky.module.css'
 
@@ -38,7 +39,18 @@ import styles from './TrendSky.module.css'
  * rounds are landing.
  */
 const SAMPLE_WHEN_EMPTY = true
-export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }) {
+const TRACKED_NODE_TYPES = new Set(['EVENT', 'ENTITY', 'STATEMENT'])
+
+function trailNode(node) {
+  return {
+    nodeType: node.nodeType ?? 'EVENT',
+    nodeKey: node.nodeKey ?? node.id,
+    label: node.label ?? node.title ?? '이름 없는 노드',
+  }
+}
+
+export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, selectedNode }) {
+  const account = useSession()
   const [home, setHome] = useState(given ?? null)
   const [homeState, setHomeState] = useState(given ? 'ready' : 'loading')
   const [openKey, setOpenKey] = useState(null)
@@ -46,10 +58,12 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
   const [graphState, setGraphState] = useState('idle')
   const [previewGraphs, setPreviewGraphs] = useState({})
   const [articlePanelOpen, setArticlePanelOpen] = useState(false)
+  const [trail, setTrail] = useState([])
   // Neighbours do not change while the screen is open, so a key already opened is served
   // from here rather than fetched again.
   const cache = useRef(new Map())
   const activeKeyRef = useRef(null)
+  const handledSelectionRef = useRef(null)
 
   useEffect(() => {
     if (given) return
@@ -74,6 +88,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
     setGraph(null)
     setGraphState('idle')
     setArticlePanelOpen(false)
+    setTrail([])
   }, [])
 
   useEffect(() => {
@@ -93,11 +108,29 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
   const ranked = [...trends].sort((a, b) => a.rank - b.rank).slice(0, trendSlots.length)
   const topCount = Math.max(1, ...ranked.map((trend) => trend.articleCount))
 
-  // Not memoised: it only ever lands on an onClick, and it has to read `sample`, which is
-  // derived from this render.
-  const open = (trend, { preserveGraph = false } = {}) => {
+  const open = useCallback((
+    trend,
+    { preserveGraph = false, trailMode = 'append', trailIndex = -1 } = {},
+  ) => {
+    const nodeType = trend.nodeType ?? 'EVENT'
+    const nextTrailNode = trailNode(trend)
     activeKeyRef.current = trend.nodeKey
     setOpenKey(trend.nodeKey)
+    setTrail((current) => {
+      if (trailMode === 'reset') return [nextTrailNode]
+      if (trailMode === 'truncate') return current.slice(0, trailIndex + 1)
+      const repeatedAt = current.findIndex(
+        (node) => node.nodeType === nextTrailNode.nodeType && node.nodeKey === nextTrailNode.nodeKey,
+      )
+      if (repeatedAt >= 0) return current.slice(0, repeatedAt + 1)
+      return [...current, nextTrailNode]
+    })
+
+    // 사용자가 실제 Node를 선택한 순간만 개인 그래프 탐색 기록으로 남긴다.
+    // 샘플 별은 Neo4j에 없는 키이고, 비로그인 사용자는 개인 기록의 주체가 없으므로 제외한다.
+    if (!sample && account && TRACKED_NODE_TYPES.has(nodeType)) {
+      recordNodeClick(nodeType, trend.nodeKey).catch(() => {})
+    }
 
     // A sampled sky's keys are not in Neo4j, so asking for them would only 404.
     const ready = sample
@@ -112,7 +145,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
 
     if (!preserveGraph) setGraph(null)
     setGraphState('loading')
-    fetchNeighbors(trend.nodeType, trend.nodeKey)
+    fetchNeighbors(nodeType, trend.nodeKey)
       .then((payload) => {
         cache.current.set(trend.nodeKey, payload)
         // A different star may have been pressed while this was in flight.
@@ -125,7 +158,14 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
         if (activeKeyRef.current !== trend.nodeKey) return
         setGraphState('failed')
       })
-  }
+  }, [account, givenNeighbors, sample])
+
+  useEffect(() => {
+    if (!selectedNode?.nodeKey || selectedNode.selectionId == null) return
+    if (handledSelectionRef.current === selectedNode.selectionId) return
+    handledSelectionRef.current = selectedNode.selectionId
+    open(selectedNode, { trailMode: 'reset' })
+  }, [open, selectedNode])
 
   /**
    * 화면에 보이는 관련 Event가 다음 중심이 되었을 때의 1-Hop 구성을 미리 가져온다.
@@ -201,9 +241,19 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
         onArticlePanelOpenChange={setArticlePanelOpen}
         onBack={close}
         onWalk={(node) =>
-          open({ nodeType: node.nodeType ?? 'EVENT', nodeKey: node.id }, { preserveGraph: true })
+          open(
+            {
+              nodeType: node.nodeType ?? 'EVENT',
+              nodeKey: node.id,
+              label: node.label,
+            },
+            { preserveGraph: true },
+          )
         }
-        details={sample ? trendNodeDetails : undefined}
+        trail={trail}
+        onTrailSelect={(node, index) =>
+          open(node, { trailMode: 'truncate', trailIndex: index })
+        }
         articleSamples={sample ? trendNodeArticles : undefined}
         overlayRoot={overlayRoot}
       />
@@ -251,7 +301,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot }
               <button
                 type="button"
                 className={styles.star}
-                onClick={() => open(trend)}
+                onClick={() => open(trend, { trailMode: 'reset' })}
                 aria-label={`${trendSkyCopy.rank(trend.rank)} ${trend.label} — ${trendSkyCopy.articles(trend.articleCount)}`}
               >
                 <img src={stars.event} alt="" aria-hidden />

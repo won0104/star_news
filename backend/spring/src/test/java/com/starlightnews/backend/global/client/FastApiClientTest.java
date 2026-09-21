@@ -194,6 +194,17 @@ class FastApiClientTest {
 	}
 
 	@Test
+	void 제한_시간을_넘기면_TIMEOUT이다() {
+		// 시간 초과와 연결 실패는 대응이 다르다. 기사별 실패 원인으로도 남는다.
+		server.expect(requestTo(BASE_URL + PATH))
+				.andRespond(withException(new java.net.SocketTimeoutException("Read timed out")));
+
+		Throwable thrown = catchThrowable(() -> client("test-key").post(PATH, Map.of(), Map.class));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(InternalApiErrorCode.INTERNAL_API_TIMEOUT);
+	}
+
+	@Test
 	void isReachable은_헬스체크가_성공하면_true다() {
 		// /health 는 /internal/v1 아래가 아니라 루트에 있고 인증이 없다.
 		server.expect(requestTo(BASE_URL + "/health"))

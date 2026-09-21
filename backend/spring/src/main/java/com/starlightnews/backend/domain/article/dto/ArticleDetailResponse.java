@@ -14,11 +14,6 @@ public record ArticleDetailResponse(
 		String organizationName,
 		@Schema(description = "언론사가 기사를 발행한 시각", example = "2026-08-31T10:00:00+09:00")
 		OffsetDateTime publishedAt,
-		@Schema(description = "저장되었거나 상세 조회 중 생성된 AI 요약. 다른 요청이 생성 중이면 null",
-				nullable = true, example = "국방부는 한미 연합훈련 일정과 세부 계획을 발표했다.")
-		String summary,
-		@Schema(description = "상세 조회 응답의 요약 상태", example = "COMPLETED")
-		ArticleSummaryStatus summaryStatus,
 		@Schema(description = "언론사 원문 URL", example = "https://news.example.com/articles/101")
 		String originalUrl,
 		@Schema(description = "현재 사용자의 기사 북마크 여부. 비회원은 false", example = "false")

@@ -4,10 +4,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.starlightnews.backend.domain.article.dto.CollectedArticle;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.article.service.ArticleStoreService;
 import com.starlightnews.backend.domain.article.service.ArticleWriter;
 import com.starlightnews.backend.domain.article.service.NewsOrganizationResolver;
+import com.starlightnews.backend.domain.article.support.ArticleContents;
 import com.starlightnews.backend.domain.article.support.ArticleUrls;
 import com.starlightnews.backend.global.enums.ContentType;
 import org.junit.jupiter.api.Test;
@@ -57,5 +59,34 @@ class ArticleCollectionIntegrationTest {
         assertThat(store.store(new CollectedArticlePreprocessor().process(collector.collectAll()))).isZero();
         assertThat(repository.findIdByUrlHash(ArticleUrls.hash("https://crawl-test.example/1"))).contains(firstId);
         server.verify();
+    }
+
+    /**
+     * 사이트의 추천 기사 목록이 본문 자리에 들어오면, 회차마다 제목만 다른 기사가 쌓인다.
+     * 전처리의 본문 중복 검사는 한 회차 안에서만 비교해서 이걸 막지 못한다.
+     */
+    @Test void 회차가_달라도_같은_본문에_제목이_다르면_저장하지_않는다() {
+        String sharedBody = "[뉴스핌 베스트 기사] 사진 위고비에 도전한 새 비만약 '에페' 가격은?";
+
+        assertThat(store.store(List.of(collected("아시안게임 남자 계영 800m", "list-1", sharedBody)))).isEqualTo(1);
+        assertThat(store.store(List.of(collected("김여정 담화 발표", "list-2", sharedBody)))).isZero();
+
+        assertThat(repository.findIdByUrlHash(ArticleUrls.hash("https://collision.example/list-2"))).isEmpty();
+        assertThat(repository.findTitlesByContentHash(ArticleContents.hash(sharedBody)))
+            .containsExactly("아시안게임 남자 계영 800m");
+    }
+
+    @Test void 제목까지_같으면_다른_매체가_받아쓴_기사로_보고_저장한다() {
+        String wireBody = "정부가 추석 연휴 교통 대책을 발표했다.";
+
+        assertThat(store.store(List.of(collected("추석 연휴 교통 대책 발표", "wire-1", wireBody)))).isEqualTo(1);
+        assertThat(store.store(List.of(collected("추석 연휴 교통 대책 발표", "wire-2", wireBody)))).isEqualTo(1);
+    }
+
+    private static CollectedArticle collected(String title, String path, String content) {
+        String url = "https://collision.example/" + path;
+        return new CollectedArticle(title, url, ArticleUrls.hash(url),
+            LocalDateTime.of(2026, 9, 15, 10, 0), content, ContentType.FULL_TEXT,
+            "general", "뉴스핌", "newspim.com");
     }
 }

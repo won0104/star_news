@@ -20,7 +20,6 @@ import styles from './TrendStage.module.css'
  * configured; otherwise the screen settles immediately instead of cross-fading between
  * unrelated rooms.
  */
-
 /**
  * How far the sky runs under the wood, in per cent of the scene. The frame is drawn
  * over it, so the overlap is invisible; without it a rounding difference between the
@@ -31,7 +30,7 @@ const GLASS_OVERLAP = 1
 const glassInset = ({ top, right, bottom, left }) =>
   [top, right, bottom, left].map((edge) => `${Math.max(0, edge - GLASS_OVERLAP)}%`).join(' ')
 
-export function TrendStage({ playTransition = false }) {
+export function TrendStage({ playTransition = false, selectedNode }) {
   const [ready, setReady] = useState(false)
   const [ended, setEnded] = useState(false)
   const [overlayRoot, setOverlayRoot] = useState(null)
@@ -77,7 +76,7 @@ export function TrendStage({ playTransition = false }) {
         <div className={styles.windowLayer}>
           {settled && (
             <div className={styles.windowGlass} style={{ inset: glassInset(sceneWindow.opening) }}>
-              <TrendSky overlayRoot={overlayRoot} />
+              <TrendSky overlayRoot={overlayRoot} selectedNode={selectedNode} />
             </div>
           )}
 
