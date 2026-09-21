@@ -38,10 +38,12 @@ export function DiaryReportPane() {
         frameClassName={styles.diaryFrame}
       >
         {/* Each screen's outer bookmark points at the other one, so the two read as one book. */}
-        <Link className={styles.historyBookmark} to="/app?view=log">
-          <img src={`${BOOKMARK_ASSET}/report-v2.webp`} alt="" aria-hidden="true" />
-          <span>나의 기록</span>
-        </Link>
+        <div className={styles.historySlot}>
+          <Link className={styles.historyBookmark} to="/app?view=log">
+            <img src={`${BOOKMARK_ASSET}/report-v2.webp`} alt="" aria-hidden="true" />
+            <span>나의 기록</span>
+          </Link>
+        </div>
 
         {/* 오른쪽 가장자리 — 이 책 안의 페이지들. 나의 기록이 카테고리로 쓰는 것과 같은 에셋. */}
         <nav className={styles.pageBookmarks} aria-label="리포트 페이지">

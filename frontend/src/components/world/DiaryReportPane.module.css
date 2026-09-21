@@ -23,18 +23,30 @@
 
 /* ---- 책갈피 ---------------------------------------------------------------- */
 
-/* Mirrors 나의 기록's own outer bookmark: same asset, same edge, other destination. */
-.historyBookmark {
+/*
+ * Mirrors 나의 기록's own outer bookmark: same asset, same edge, other destination.
+ * 값도 그쪽과 같아야 한다 — 같은 책, 같은 에셋이므로 한쪽만 고치면 두 화면이 어긋난다.
+ * 빈 SVG 시절의 치수(92/260, left 5.6%, width 6.35%)가 남아 있어 report-v2(437×1909)를
+ * 55% 넓게 늘이고 있었다. DiaryHistoryPane 의 .reportBookmark 와 짝을 맞춘다.
+ */
+.historySlot {
   position: absolute;
   z-index: 4;
-  top: 10%;
-  left: 5.6%;
-  width: 6.35%;
-  aspect-ratio: 92 / 260;
-  clip-path: inset(0 28% 0 0);
+  top: 9%;
+  left: 6.99%;
+  width: 4.57%;
+  aspect-ratio: 437 / 1909;
+  clip-path: inset(-2% 16% -2% -25%);
+}
+
+.historyBookmark {
+  position: absolute;
+  inset: 0;
   color: #faf7ef;
   text-decoration: none;
-  transition: filter 160ms ease;
+  transition:
+    transform 220ms cubic-bezier(0.16, 0.84, 0.3, 1),
+    filter 180ms ease;
 }
 
 .historyBookmark img {
@@ -48,7 +60,7 @@
 
 .historyBookmark span {
   position: absolute;
-  inset: 25% 27% 24% 19%;
+  inset: 15% 10% 15% 10%;
   display: grid;
   font: 700 clamp(10px, 1.05vw, 17px)/1.05 var(--font-sans);
   letter-spacing: 0.08em;
@@ -59,7 +71,8 @@
 }
 
 .historyBookmark:hover {
-  filter: brightness(1.08);
+  transform: translateX(-10%);
+  filter: brightness(1.06) drop-shadow(-2px 2px 3px rgb(52 32 16 / 0.3));
 }
 
 .historyBookmark:focus-visible {
@@ -69,16 +82,18 @@
 
 /* 오른쪽 가장자리 책갈피 — 이 책 안의 세 페이지.
    나의 기록의 카테고리 책갈피와 같은 에셋·같은 치수라, 두 화면이 한 권으로 읽힌다.
-   `clip-path` 는 책 밖으로 나가는 왼쪽 절반을 잘라 책등에 꽂힌 것처럼 보이게 한다. */
+   `clip-path` 는 탭의 안쪽 끝을 잘라 없앤다 — 닫힌 도형의 왼쪽 변이 보이면 종이 위에 얹힌
+   별개의 물체로 읽힌다. 선은 컨테이너에 걸려 제자리에 남으므로 틈 역할을 하고, 탭만 그 안에서
+   빠져나온다. 세 값 모두 DiaryHistoryPane 의 .categoryBookmarks 와 같아야 한다. */
 .pageBookmarks {
   position: absolute;
   z-index: 6;
-  top: 11%;
-  right: 6.8%;
+  top: 9.5%;
+  right: 7.06%;
   display: flex;
-  width: 6.6%;
+  width: 5.6%;
   flex-direction: column;
-  clip-path: inset(0 0 0 40%);
+  clip-path: inset(-2% -25% -2% 35%);
 }
 
 .pageBookmarks button {
@@ -86,27 +101,31 @@
   display: block;
   width: 100%;
   flex: 0 0 auto;
-  aspect-ratio: 96 / 112;
+  aspect-ratio: 681 / 892;
   padding: 0;
   border: 0;
   background: transparent;
   color: #44392f;
   cursor: pointer;
-  transition: transform 160ms ease;
+  transition:
+    transform 220ms cubic-bezier(0.16, 0.84, 0.3, 1),
+    filter 180ms ease;
 }
 
 .pageBookmarks button + button {
-  margin-top: -8%;
+  margin-top: -6%;
 }
 
 .pageBookmarks button:hover {
-  transform: translateX(3px);
+  transform: translateX(11%);
 }
 
+/* 뽑히는 거리는 숨은 깊이(1.96%p)보다 작아야 한다. 그림자는 종이 이음선 쪽을 피한다. */
 .pageBookmarks button[aria-current='true'] {
   z-index: 1;
   color: #faf7ef;
-  transform: translateX(5px);
+  transform: translateX(17%);
+  filter: drop-shadow(1px 2px 3px rgb(52 32 16 / 0.34));
 }
 
 .pageBookmarks button:focus-visible {
@@ -125,7 +144,7 @@
 
 .pageBookmarks span {
   position: absolute;
-  inset: 15% 30%;
+  inset: 8% 38% 8% 38%;
   display: grid;
   font: 700 clamp(7px, 0.78vw, 13px)/1 var(--font-sans);
   letter-spacing: 0.04em;
@@ -490,8 +509,13 @@
   }
 
   .diaryFrame,
-  .historyBookmark {
+  .historySlot {
     display: none;
+  }
+
+  /* 세로에서는 책 가장자리가 없으므로 틈도 없다 — 가로 기준으로 자르면 가로 띠가 잘려 나간다. */
+  .pageBookmarks {
+    clip-path: none;
   }
 
   .leftPage,
