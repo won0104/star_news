@@ -83,7 +83,7 @@ def find_consumed_events_with_embeddings(session: Session, user_id: int) -> list
         """
         // 유저가 소비한 Event 중 임베딩 있는 것만
         MATCH (u:User {userId: $userId})-[r:CONSUMED]->(e:Event)
-        WHERE e.embedding IS NOT NULL
+        WHERE e.embedding IS NOT NULL AND r.lastViewedAt IS NOT NULL
         RETURN e.embedding AS embedding, r.eventClickCount AS eventClickCount, r.lastViewedAt AS lastViewedAt,
                coalesce(r.eventFavorited, false) AS isFavorited
         """,
@@ -206,3 +206,17 @@ def fetch_event_display_info(session: Session, event_ids: list[str]) -> dict[str
         eventIds=event_ids,
     )
     return {record["eventId"]: {"label": record["label"], "topicCode": record["topicCode"]} for record in result}
+
+
+# 6. 가중치 재튜닝 평가용
+# CONSUMED 이력이 있는 유저별 event_id 목록 (최근순 정렬)
+def find_users_eligible_for_evaluation(session: Session) -> dict[int, list[str]]:
+    rows = session.run(
+        """
+        MATCH (u:User)-[r:CONSUMED]->(e:Event)
+        WITH u.userId AS userId, e.nodeId AS eventId, r.lastViewedAt AS lastViewedAt
+        ORDER BY userId, lastViewedAt DESC
+        RETURN userId, collect(eventId) AS history
+        """
+    ).data()
+    return {row["userId"]: row["history"] for row in rows}

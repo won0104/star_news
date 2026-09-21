@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 
 from neo4j import Session
 
+from app.database import _driver
 from app.recommendations import repository
 from app.recommendations.schemas import (
     CBFCandidate,
@@ -40,8 +41,14 @@ def calculate_recommendations(
         is_cold_start = not repository.has_consumption_history(session, user.user_id)
         recommendation_type = "COLD_START" if is_cold_start else "NORMAL"
 
-        # 3) 실제 추천 계산 
-        scored = calculate_interest_based_recommendations(user.user_id, session, is_cold_start=is_cold_start)
+        # 3) 실제 추천 계산 - 요청에 재튜닝된 가중치가 실려있으면 그걸 쓰고, 없으면 기본값 사용
+        scored = calculate_interest_based_recommendations(
+            user.user_id,
+            session,
+            cbf_weight=request.cbf_weight if request.cbf_weight is not None else DEFAULT_CBF_WEIGHT,
+            cf_weight=request.cf_weight if request.cf_weight is not None else DEFAULT_CF_WEIGHT,
+            is_cold_start=is_cold_start,
+        )
 
         # 후보가 하나도 없으면 (신규 Topic이라 인기 Event도 없는 등) 빈 목록으로 응답
         if not scored:
@@ -67,9 +74,10 @@ def calculate_recommendations(
 
     return RecommendationCalculateResponse(cycle=request.cycle, results=results)
 
-# CF/CBF 결합 가중치 기본값. 나중에 -84에서 튜닝.
-DEFAULT_CBF_WEIGHT = 0.5
-DEFAULT_CF_WEIGHT = 0.5
+# CF/CBF 결합 가중치 기본값
+# 초기 서비스라 유저 수가 적어 CF(유사 유저 기반)가 구조적으로 불리하므로 CBF 쪽으로 기울여 시작한다
+DEFAULT_CBF_WEIGHT = 0.7
+DEFAULT_CF_WEIGHT = 0.3
 
 # 1. 협업 필터링(CF) 공용 모듈
 def calculate_cf_scores(
@@ -243,3 +251,104 @@ def calculate_interest_based_recommendations(
     scored.sort(key=lambda s: s.score, reverse=True)
     # 상위 FINAL_RECOMMENDATION_LIMIT개만 반환
     return scored[: repository.FINAL_RECOMMENDATION_LIMIT]
+
+
+# 5. 가중치 재튜닝 (적응형 holdout 평가)
+# CF/CBF 가중치 그리드서치용 오프라인 평가
+# 유저별 CONSUMED 이력 중 최근 일부를 "정답"으로 숨기고, 나머지 이력만으로 추천을 계산해서 정답을 맞히는지로 채점
+
+# holdout 비율 - 이력의 최근 20%를 정답으로 뗀다
+HOLD_OUT_RATIO = 0.2
+# 이력이 이보다 적으면 평가 자체가 불가능 (정답 1개 + 학습용 1개, 최소 2개)
+MIN_HISTORY_FOR_EVAL = 2
+# 추천 Top-K - 지표(NDCG/HitRate/Recall) 계산 시 몇 등까지 볼지
+EVAL_TOP_K = 10
+# 그리드서치 대상 (cbf_weight, cf_weight) 조합 - cbf_weight + cf_weight = 1 고정, 0.1 단위로 11개
+# [(1.0,0.0), (0.9,0.1), (0.8,0.2), ..., (0.1,0.9), (0.0,1.0)]
+WEIGHT_GRID = [(round(1 - i * 0.1, 1), round(i * 0.1, 1)) for i in range(11)]
+
+
+# 유저별 CONSUMED 이력(최근순 정렬된 event_id 리스트)을 받아서, 평가 가능한 유저만 남기고 각자 (정답 목록, 학습용으로 남길 목록)으로 나눈다
+def build_holdout_splits(all_histories: dict[int, list[str]]) -> dict[int, tuple[list[str], list[str]]]:
+    splits = {}
+    for user_id, history in all_histories.items():
+        # 이력이 너무 적으면(정답+학습용 최소 1개씩도 안 나옴) 이 유저는 평가 대상에서 제외
+        if len(history) < MIN_HISTORY_FOR_EVAL:
+            continue
+        # 이력 개수의 20%를 정답 개수로 - 소수점은 반올림하되 최소 1개는 보장
+        hold_out_count = max(1, round(len(history) * HOLD_OUT_RATIO))
+        # 앞쪽(최신) hold_out_count개 = 정답, 나머지(더 오래된 것들) = 추천 계산에 쓸 학습용 이력
+        splits[user_id] = (history[:hold_out_count], history[hold_out_count:])
+    return splits
+
+
+# 추천 Top-K와 정답(held_out) 집합을 비교해서 채점하는 지표 3개
+# 1) NDCG@10 (순위까지 반영) - 앞쪽에서 맞힐수록 점수가 높음, 자기 정답 개수 기준 이상적인 순위(IDCG)로 나눠 정규화
+def calculate_ndcg_at_k(recommended_ids: list[str], held_out: set[str], k: int = EVAL_TOP_K) -> float:
+    dcg = sum(1 / math.log2(i + 2) for i, eid in enumerate(recommended_ids[:k]) if eid in held_out)
+    idcg = sum(1 / math.log2(i + 2) for i in range(min(len(held_out), k)))
+    return dcg / idcg if idcg else 0.0
+
+
+# 2) Hit Rate@10 - Top-K 안에 정답이 하나라도 있으면 1, 없으면 0 (이진값)
+def calculate_hit_rate_at_k(recommended_ids: list[str], held_out: set[str], k: int = EVAL_TOP_K) -> float:
+    return 1.0 if set(recommended_ids[:k]) & held_out else 0.0
+
+
+# 3) Recall@10 - Top-K 중 정답을 몇 % 맞혔는지 (숨긴 정답 개수 대비)
+def calculate_recall_at_k(recommended_ids: list[str], held_out: set[str], k: int = EVAL_TOP_K) -> float:
+    return len(set(recommended_ids[:k]) & held_out) / len(held_out) if held_out else 0.0
+
+
+# 정답(held_out) 이벤트의 CONSUMED 관계를 트랜잭션 안에서만 지우고 추천을 계산한 뒤,롤백
+def recommend_with_holdout(
+    user_id: int, held_out_ids: list[str], cbf_weight: float, cf_weight: float
+) -> list[str]:
+    with _driver.session() as session:
+        tx = session.begin_transaction()
+        try:
+            tx.run(
+                """
+                MATCH (:User {userId: $userId})-[r:CONSUMED]->(e:Event)
+                WHERE e.nodeId IN $heldOutIds
+                DELETE r
+                """,
+                userId=user_id,
+                heldOutIds=held_out_ids,
+            )
+            scored = calculate_interest_based_recommendations(user_id, tx, cbf_weight=cbf_weight, cf_weight=cf_weight)
+            return [s.event_id for s in scored]
+        finally:
+            tx.rollback()
+
+
+# 재튜닝 메인 함수 - 그리드서치 전체를 돌려서 NDCG@10이 가장 높은 (cbf_weight, cf_weight) 조합을 고른다
+def select_best_weights() -> tuple[float, float, float, float, float]:
+    # 평가 가능한 유저(이력 2개 이상)만 뽑아서 (정답, 학습용) 스플릿 미리 계산 - 그리드 11개 조합 전부에 재사용
+    with _driver.session() as session:
+        all_histories = repository.find_users_eligible_for_evaluation(session)
+    splits = build_holdout_splits(all_histories)
+
+    best = None  # (cbf_weight, cf_weight, ndcg, hit_rate, recall) - NDCG 기준 최고 조합
+    for cbf_weight, cf_weight in WEIGHT_GRID:
+        ndcgs, hits, recalls = [], [], []
+        # 이 가중치 조합으로 평가 대상 유저 전원에 대해 "정답 숨기고 추천 → 채점"을 반복
+        for user_id, (held_out, _visible) in splits.items():
+            recommended = recommend_with_holdout(user_id, held_out, cbf_weight, cf_weight)
+            held_out_set = set(held_out)
+            ndcgs.append(calculate_ndcg_at_k(recommended, held_out_set))
+            hits.append(calculate_hit_rate_at_k(recommended, held_out_set))
+            recalls.append(calculate_recall_at_k(recommended, held_out_set))
+
+        # 유저별 지표를 평균 내서 이 가중치 조합 하나의 점수로 요약
+        avg_ndcg = sum(ndcgs) / len(ndcgs) if ndcgs else 0.0
+        avg_hit = sum(hits) / len(hits) if hits else 0.0
+        avg_recall = sum(recalls) / len(recalls) if recalls else 0.0
+
+        # 의사결정 기준은 NDCG - hit_rate/recall는 참고
+        if best is None or avg_ndcg > best[2]:
+            # NDCG가 더 높으면 갱신
+            best = (cbf_weight, cf_weight, avg_ndcg, avg_hit, avg_recall)
+
+    cbf_weight, cf_weight, ndcg, hit_rate, recall = best
+    return cbf_weight, cf_weight, ndcg, hit_rate, recall
