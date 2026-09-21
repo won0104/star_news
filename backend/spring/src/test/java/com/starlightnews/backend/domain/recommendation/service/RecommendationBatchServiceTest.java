@@ -1,11 +1,13 @@
 package com.starlightnews.backend.domain.recommendation.service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 import com.starlightnews.backend.domain.recommendation.domain.RecommendationCycleWindow;
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationWeights;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateRequest;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalculateResponse;
 import com.starlightnews.backend.domain.recommendation.repository.RecommendationTargetRepository;
@@ -57,13 +59,18 @@ class RecommendationBatchServiceTest {
 	@Mock
 	private RecommendationRunRecorder runRecorder;
 
+	@Mock
+	private RecommendationWeightProvider weightProvider;
+
 	private RecommendationBatchService service;
 
 	@BeforeEach
 	void setUp() {
+		// 회차마다 읽는 값이다. 가중치를 보는 테스트만 다른 값으로 다시 스텁한다.
+		given(weightProvider.current()).willReturn(RecommendationWeights.DEFAULT);
 		// 보관 7일, 묶음 2명, 사용자별 10건, 최대 3번 시도, 재시도 대기 없음
 		service = new RecommendationBatchService(targetRepository, calculateClient, storeService,
-				summaryService, retentionService, runRecorder,
+				summaryService, retentionService, runRecorder, weightProvider,
 				new RecommendationProperties(7, 2, 10, 3, Duration.ZERO));
 	}
 
@@ -93,6 +100,11 @@ class RecommendationBatchServiceTest {
 			stubbing = stubbing.willReturn(page);
 		}
 		stubbing.willReturn(List.of());
+	}
+
+	private void givenWeights(String cbf, String cf) {
+		given(weightProvider.current()).willReturn(
+				new RecommendationWeights(new BigDecimal(cbf), new BigDecimal(cf)));
 	}
 
 	private void givenCalculateSucceeds() {
@@ -371,7 +383,7 @@ class RecommendationBatchServiceTest {
 	@Test
 	void 시도_횟수가_1이면_재시도하지_않는다() {
 		RecommendationBatchService noRetry = new RecommendationBatchService(targetRepository, calculateClient,
-				storeService, summaryService, retentionService, runRecorder,
+				storeService, summaryService, retentionService, runRecorder, weightProvider,
 				new RecommendationProperties(7, 2, 10, 1, Duration.ZERO));
 		givenUserPages(List.of(1L, 2L));
 		given(calculateClient.calculate(any())).willReturn(unavailable());
@@ -414,5 +426,55 @@ class RecommendationBatchServiceTest {
 
 		// 대상이 없으면 서비스가 스스로 빈 목록을 보고 끝낸다. 회차 시각은 그대로 넘긴다.
 		verify(summaryService).generateForCycle(AVAILABLE_AT);
+	}
+
+	// --- 가중치 ---
+
+	@Test
+	void 재튜닝으로_정해진_가중치를_요청에_싣는다() {
+		givenWeights("0.8000", "0.2000");
+		givenUserPages(List.of(1L, 2L));
+		givenCalculateSucceeds();
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(RecommendationStoreResult.empty());
+
+		service.generate(MORNING_RUN);
+
+		ArgumentCaptor<RecommendationCalculateRequest> captor =
+				ArgumentCaptor.forClass(RecommendationCalculateRequest.class);
+		verify(calculateClient).calculate(captor.capture());
+		assertThat(captor.getValue().cbfWeight()).isEqualByComparingTo("0.8000");
+		assertThat(captor.getValue().cfWeight()).isEqualByComparingTo("0.2000");
+	}
+
+	@Test
+	void 가중치는_회차가_시작할_때_한_번만_읽는다() {
+		// 묶음마다 읽으면 재튜닝이 회차 중간에 끼어들 때 사용자마다 다른 가중치로 계산된다.
+		givenWeights("0.7000", "0.3000");
+		givenUserPages(List.of(1L, 2L), List.of(3L, 4L), List.of(5L));
+		givenCalculateSucceeds();
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(RecommendationStoreResult.empty());
+
+		service.generate(MORNING_RUN);
+
+		verify(weightProvider, times(1)).current();
+	}
+
+	@Test
+	void 재시도_묶음도_같은_가중치로_보낸다() {
+		givenWeights("0.6000", "0.4000");
+		givenUserPages(List.of(1L, 2L));
+		given(calculateClient.calculate(any())).willReturn(unavailable(), calculated());
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(RecommendationStoreResult.empty());
+
+		service.generate(MORNING_RUN);
+
+		ArgumentCaptor<RecommendationCalculateRequest> captor =
+				ArgumentCaptor.forClass(RecommendationCalculateRequest.class);
+		verify(calculateClient, times(2)).calculate(captor.capture());
+		assertThat(captor.getAllValues()).allSatisfy(request ->
+				assertThat(request.cbfWeight()).isEqualByComparingTo("0.6000"));
 	}
 }
