@@ -62,6 +62,11 @@ services:
       GNEWS_MAX: ${GNEWS_MAX:-12}
       GNEWS_COLLECT_CRON: "${GNEWS_COLLECT_CRON:-0 10 * * * *}"
       GNEWS_RETRY_DELAY: ${GNEWS_RETRY_DELAY:-1s}
+      # GMS(SSAFY OpenAI 중계). 기사/이벤트 요약에 사용. 키는 루트 .env 로 주입한다.
+      GMS_API_KEY: ${GMS_API_KEY:-}
+      GMS_BASE_URL: ${GMS_BASE_URL:-https://gms.ssafy.io/gmsapi/api.openai.com/v1}
+      GMS_MODEL: ${GMS_MODEL:-gpt-5.4-nano}
+      GMS_TIMEOUT: ${GMS_TIMEOUT:-60s}
       # FastAPI 내부 호출. 키는 backend-fastapi 와 같은 값이어야 하고,
       # 주소는 compose 네트워크의 서비스명으로 접근한다(컨테이너 안에서 localhost 는 자기 자신이다).
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}

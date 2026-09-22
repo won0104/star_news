@@ -44,8 +44,8 @@
     },
     {
       "scope": "app-node-search",
-      "decision": "Place graph Node search as persistent top-right app chrome, using the existing paper glass by day and night glass on the trend view.",
-      "rationale": "Keeps search available across current /app destinations without displacing the fixed navigation rail or covering the trend constellation."
+      "decision": "Show graph Node search only on the trend view as top-right night-glass chrome.",
+      "rationale": "Node search changes the trend constellation's center, so hiding it from recommendation, history, and report views keeps the control within the screen where its result is presented."
     },
     {
       "scope": "graph-exploration-trail",
