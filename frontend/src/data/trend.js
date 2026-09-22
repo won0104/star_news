@@ -232,7 +232,7 @@ export const ambientStars = [
  * 1/1.8 of the image, which is what the sizes in TrendConstellation.module.css assume.
  */
 export const stars = {
-  event: '/assets/trend/star-event.webp',
+  event: '/assets/trend/star-event.png',
   statement: '/assets/trend/star-statement.webp',
   entity: '/assets/trend/star-entity.webp',
 }

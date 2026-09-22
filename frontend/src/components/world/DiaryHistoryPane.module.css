@@ -996,30 +996,78 @@
 .statementList,
 .eventArticleList {
   display: grid;
-  gap: 7px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* 발언은 인용이다 — 따옴표가 데이터에 들어 있으니 표시는 기울임과 들여쓰기로만 준다. */
+/* 한 사건 안의 두 섹션은 성격이 다르다 — 발언은 사건에서 옮겨 적은 말이고, 기사는 내가
+   읽은 기록이다. 그래서 같은 목록으로 보이지 않게 밀도부터 갈라 둔다: 발언은 인용답게
+   넓게, 기사는 장부답게 촘촘하게. */
+.statementList {
+  gap: clamp(7px, 0.7vw, 11px);
+}
+
+.eventArticleList {
+  gap: clamp(4px, 0.4vw, 6px);
+}
+
+/* 발언은 인용이다. 라벨은 Neo4j 의 Statement.text 원문이라 따옴표가 없으므로(구버전
+   HistoryPane 의 표본에는 있었다) 여기서 여는 부호를 붙인다. 들여쓰기를 넓히고 줄간을
+   띄워 인용 블록으로 읽히게 한다 — 아래 기사 목록의 촘촘한 장부와 대비가 되도록. */
 .statementList li {
-  padding-left: 9px;
-  border-left: 1px solid rgba(69, 57, 45, 0.22);
-  font: italic clamp(9px, 0.8vw, 13px)/1.5 var(--font-serif-kr);
-  color: #4b3d30;
+  position: relative;
+  padding: 1px 0 1px clamp(16px, 1.5vw, 22px);
+  font: italic clamp(10px, 0.86vw, 14px)/1.62 var(--font-serif-kr);
+  color: #45392d;
   word-break: keep-all;
 }
 
-.eventArticleList small {
+/* 여는 따옴표만 세운다. 닫는 쪽은 문장 길이에 따라 어디에 놓든 어색해진다.
+   분야 색은 바로 왼쪽 .statementBox 테두리가 이미 쓰고 있어 중성 잉크로 둔다. */
+.statementList li::before {
+  content: 'C';
+  position: absolute;
+  left: 0;
+  top: clamp(-2px, -0.2vw, 0px);
+  font: normal clamp(14px, 1.3vw, 21px)/1 var(--font-serif-kr);
+  color: rgba(69, 57, 45, 0.38);
+}
+
+/* 기사는 날짜·출처·제목 세 조각이다. 날짜만 왼쪽 열로 빼 세로로 맞춘다. */
+.eventArticleList li {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: clamp(7px, 0.7vw, 11px);
+  padding: 2px 0;
+  border-top: 1px solid rgba(69, 57, 45, 0.09);
+}
+
+.eventArticleList li:first-child {
+  border-top: 0;
+}
+
+.articleWhen {
+  font: 500 clamp(7px, 0.6vw, 10px)/1.5 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: #8a7862;
+}
+
+.articleBody {
+  min-width: 0;
+}
+
+.articleSource {
   display: block;
-  font: clamp(7px, 0.6vw, 10px) var(--font-sans);
+  font: clamp(7px, 0.58vw, 9.5px) var(--font-sans);
+  letter-spacing: 0.02em;
   color: #9b8567;
 }
 
 .eventArticleList p {
-  margin: 2px 0 0;
-  font: clamp(9px, 0.76vw, 12px)/1.45 var(--font-serif-kr);
+  margin: 1px 0 0;
+  font: clamp(9px, 0.76vw, 12px)/1.42 var(--font-serif-kr);
   color: #4b3d30;
   word-break: keep-all;
 }

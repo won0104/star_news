@@ -16,9 +16,6 @@ function isPublicLocation({ pathname, search }) {
     pathname === '/' ||
     pathname === '/login' ||
     pathname === '/signup' ||
-    pathname === '/trend' ||
-    pathname === '/explore' ||
-    pathname.startsWith('/event/') ||
     pathname.startsWith('/history/')
   );
 }

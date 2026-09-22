@@ -342,12 +342,23 @@ export function DiaryHistoryPane() {
                             </h4>
                             {articles?.state === 'ready' && articles.items.length > 0 && (
                               <ul className={styles.eventArticleList}>
+                                {/*
+                                  읽은 날짜를 왼쪽 열로 빼 세로로 맞춘다. 발언은 사건의
+                                  내용이고 이쪽은 내 행위의 기록이라, 날짜가 열을 이루면
+                                  훑기만 해도 "언제 읽었나"가 보이고 위의 인용 덩어리와
+                                  모양 자체가 갈린다.
+                                */}
                                 {articles.items.map((article) => (
                                   <li key={article.articleId}>
-                                    <small>
-                                      {article.organizationName} · {formatDate(article.lastReadAt)}
+                                    <small className={styles.articleWhen}>
+                                      {formatDate(article.lastReadAt)}
                                     </small>
-                                    <p>{article.title}</p>
+                                    <span className={styles.articleBody}>
+                                      <small className={styles.articleSource}>
+                                        {article.organizationName}
+                                      </small>
+                                      <p>{article.title}</p>
+                                    </span>
                                   </li>
                                 ))}
                               </ul>

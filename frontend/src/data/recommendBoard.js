@@ -137,7 +137,7 @@ const EVENT_TOPIC = {
 /**
  * RecommendationBoardResponse 모양의 표본. 비로그인일 때 판을 비워두지
  * 않기 위한 것이고, 화면은 표본임을 밝힌다. 제목·요약은 data/events.js 의 것을 그대로 써서
- * 카드와 /event/:id 가 다른 말을 하지 않게 한다.
+ * 카드 문구가 추천 상세와 다른 말을 하지 않게 한다.
  */
 export const sampleBoard = {
   cycle: 'AM',
