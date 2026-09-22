@@ -627,7 +627,17 @@ export const eventPanels = {
 /** Copy for the panel's own furniture, which does not change with the event. */
 export const panelCopy = {
   countLabel: (n) => `관련 기사 ${n}개`,
-  detail: '상세 보기',
+  /* 요약은 펼쳐야 가져온다 — 버튼 문구가 "읽겠다"는 뜻이 되도록 적는다. */
+  summaryOpen: 'AI 요약 보기',
+  summaryClose: '요약 접기',
+  summaryLoading: '요약을 불러오는 중…',
+  summaryPending: '다른 곳에서 요약을 만드는 중이에요.',
+  summaryNone: '이 기사에는 아직 요약이 없어요.',
+  /* 422 — 다시 눌러도 달라지지 않는 쪽이라 실패와 나눠 적는다. */
+  summaryUnavailable: '원문 본문이 없어 요약을 만들 수 없어요.',
+  summaryFailed: '요약을 만들지 못했어요.',
+  summaryRetry: '다시 시도',
+  origin: '원문 보러가기',
   close: '닫기',
   open: (n) => `관련 기사 ${n}개 보기`,
   recentre: '이 사건을 가운데로',
