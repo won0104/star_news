@@ -240,7 +240,7 @@ class UserKnowledgeNodeRepositoryTest {
 		LocalDateTime now = LocalDateTime.of(2024, 5, 25, 5, 20);
 		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
 
-		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 1, now);
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 1, 0, now);
 		entityManager.clear();
 
 		UserKnowledgeNode found = userKnowledgeNodeRepository.findById(id).orElseThrow();
@@ -257,7 +257,7 @@ class UserKnowledgeNodeRepositoryTest {
 		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
 
 		// readIncrement=0(재열람)이어도 INSERT 되는 Row 는 이 기사가 첫 고유 기사이므로 1 이다
-		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 0, now);
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 0, 0, now);
 		entityManager.clear();
 
 		assertThat(userKnowledgeNodeRepository.findById(id).orElseThrow().getReadArticleCount()).isEqualTo(1);
@@ -271,7 +271,7 @@ class UserKnowledgeNodeRepositoryTest {
 		entityManager.persist(UserKnowledgeNode.forFirstRead(id, "기준금리 동결", "ECONOMY", first));
 		entityManager.flush();
 
-		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "다른 제목", "SOCIETY", 1, later);
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "다른 제목", "SOCIETY", 1, 0, later);
 		entityManager.clear();
 
 		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
@@ -290,7 +290,7 @@ class UserKnowledgeNodeRepositoryTest {
 		entityManager.persist(UserKnowledgeNode.forFirstRead(id, "기준금리 동결", "ECONOMY", first));
 		entityManager.flush();
 
-		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 0, later);
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 0, 0, later);
 		entityManager.clear();
 
 		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
@@ -306,7 +306,7 @@ class UserKnowledgeNodeRepositoryTest {
 		entityManager.persist(UserKnowledgeNode.forFirstClick(id, "기준금리 동결", "ECONOMY", first));
 		entityManager.flush();
 
-		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 1, later);
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY", 1, 0, later);
 		entityManager.clear();
 
 		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
