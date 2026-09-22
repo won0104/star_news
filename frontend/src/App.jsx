@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { refreshAccessToken } from './api/client';
+import { fetchMyProfile } from './api/user';
 import { SettingsOverlay } from './components/settings/SettingsOverlay';
 import { AppRoutes } from './routes/AppRoutes';
-import { getSessionRevision, startSession, useSession } from './store/session';
+import { attachUser, getSessionRevision, startSession, useSession } from './store/session';
 import styles from './App.module.css';
 
 function isPublicLocation({ pathname, search }) {
@@ -40,8 +41,26 @@ export default function App() {
     refreshAccessToken()
       .then((session) => {
         if (!isActive()) return;
-        if (getSessionRevision() === revision) startSession(session);
+        if (getSessionRevision() !== revision) {
+          setSessionState('ready');
+          return;
+        }
+        startSession(session);
         setSessionState('ready');
+
+        // refresh 응답은 토큰만 준다. 누구인지는 여기서 따로 받아 채운다 — 이게 없으면
+        // 새로고침한 사용자는 로그인 상태이면서 이름이 '내 계정' 으로만 보인다.
+        // 화면을 붙잡아 두지 않는다: 이름은 늦게 와도 되는 정보다.
+        //
+        // 기준 revision 은 startSession **뒤에** 읽는다. 그 호출이 revision 을 올리므로
+        // 앞에서 읽은 값과 비교하면 언제나 달라져 결과를 통째로 버리게 된다.
+        const signedIn = getSessionRevision();
+        fetchMyProfile()
+          .then((user) => {
+            if (!isActive() || getSessionRevision() !== signedIn) return;
+            attachUser(session.accessToken, user);
+          })
+          .catch(() => {});
       })
       .catch((error) => {
         if (!isActive()) return;
