@@ -64,7 +64,9 @@ public class ArticleReadService {
 		int readIncrement = firstRead ? 1 : 0;
 		byId.forEach((id, snapshot) -> userKnowledgeNodeRepository.upsertRead(
 				userId, id.getNodeType().name(), id.getNodeId(),
-				snapshot.label(), snapshot.topicCode(), readIncrement, now));
+				snapshot.label(), snapshot.topicCode(), readIncrement,
+				// 대표로 다룬 Node 만 따로 센다. 추천에 "본 것"으로 보낼지를 이 값으로 가른다.
+				firstRead && snapshot.primary() ? 1 : 0, now));
 	}
 
 	private List<ArticleNodeSnapshot> findConnectedNodes(String articleNodeKey) {

@@ -63,22 +63,30 @@ class UserGraphAggregationRepositoryTest {
 
 	private void insertKnowledgeNode(long userId, String nodeType, String nodeId,
 			int clickCount, LocalDateTime lastSeenAt) {
-		insertKnowledgeNode(userId, nodeType, nodeId, clickCount, 1, lastSeenAt);
+		insertKnowledgeNode(userId, nodeType, nodeId, clickCount, 1, 1, lastSeenAt);
 	}
 
 	private void insertKnowledgeNode(long userId, String nodeType, String nodeId,
 			int clickCount, int readArticleCount, LocalDateTime lastSeenAt) {
+		insertKnowledgeNode(userId, nodeType, nodeId, clickCount, readArticleCount,
+				readArticleCount, lastSeenAt);
+	}
+
+	/** primaryReadCount 는 그 Node 를 대표로 다룬 기사를 읽은 수다. */
+	private void insertKnowledgeNode(long userId, String nodeType, String nodeId,
+			int clickCount, int readArticleCount, int primaryReadCount, LocalDateTime lastSeenAt) {
 		entityManager.getEntityManager()
 				.createNativeQuery("INSERT INTO user_knowledge_nodes "
 						+ "(user_id, node_label, node_type, node_id, read_article_count, "
-						+ " node_click_count, first_seen_at, last_seen_at) "
-						+ "VALUES (?1, '노드', ?2, ?3, ?4, ?5, ?6, ?6)")
+						+ " primary_read_count, node_click_count, first_seen_at, last_seen_at) "
+						+ "VALUES (?1, '노드', ?2, ?3, ?4, ?7, ?5, ?6, ?6)")
 				.setParameter(1, userId)
 				.setParameter(2, nodeType)
 				.setParameter(3, nodeId)
 				.setParameter(4, readArticleCount)
 				.setParameter(5, clickCount)
 				.setParameter(6, lastSeenAt)
+				.setParameter(7, primaryReadCount)
 				.executeUpdate();
 		entityManager.flush();
 	}
@@ -177,10 +185,10 @@ class UserGraphAggregationRepositoryTest {
 	}
 
 	@Test
-	void 기사를_읽기만_해도_소비로_본다() {
+	void 대표로_다룬_기사를_읽기만_해도_소비로_본다() {
 		// FastAPI 는 이 관계로 "이미 본 Event" 를 추천에서 뺀다. 클릭만 보면 읽은 내용을 다시 추천한다.
 		// 기사를 목록에서 눌러 읽는 쪽이 그래프에서 노드를 클릭하는 것보다 훨씬 흔하다.
-		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, 3, LocalDateTime.of(2026, 9, 15, 5, 30));
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, 3, 3, LocalDateTime.of(2026, 9, 15, 5, 30));
 
 		assertThat(repository.findConsumedEvents(List.of(1L)))
 				.singleElement()
@@ -189,6 +197,25 @@ class UserGraphAggregationRepositoryTest {
 					// 보내는 값은 그대로 클릭 수다. 0 이면 취향 벡터 가중치가 0 이라 영향이 없다.
 					assertThat(row.getClickCount()).isZero();
 				});
+	}
+
+	@Test
+	void 스치듯_언급된_사건만_읽었으면_소비로_보지_않는다() {
+		// 기사 한 건이 COVERS 로 사건 열 개 넘게 이어진다. 전부 보내면 기사 한 건을 읽을 때마다
+		// 사건 열댓 개가 추천 후보에서 빠지는데, 클릭이 0 이라 취향 벡터에는 기여하지 않는다.
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 0, 5, 0, LocalDateTime.of(2026, 9, 15, 5, 30));
+
+		assertThat(repository.findConsumedEvents(List.of(1L))).isEmpty();
+	}
+
+	@Test
+	void 부차_사건이어도_눌러_봤으면_소비로_본다() {
+		// 대표가 아니어도 직접 누른 것은 분명한 신호다.
+		insertKnowledgeNode(1L, "EVENT", EVENT_ID, 2, 5, 0, LocalDateTime.of(2026, 9, 15, 5, 30));
+
+		assertThat(repository.findConsumedEvents(List.of(1L)))
+				.singleElement()
+				.satisfies(row -> assertThat(row.getClickCount()).isEqualTo(2));
 	}
 
 	@Test
