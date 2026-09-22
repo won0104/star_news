@@ -34,35 +34,23 @@
  * H.264 with an audio track the element mutes. scripts/encode-clip.ps1 has the recipe.
  */
 /**
- * 나를 위한 추천의 방 — 비어 있는 코르크 보드가 걸린 벽 사진 한 장.
+ * 나를 위한 추천의 방 — 비어 있는 코르크 보드가 걸린 벽.
  *
- * <PhotoBackdrop> 은 방과 빈 보드만 바닥으로 깔고, <RecommendPane> 이 제목 종이·추천 종이·핀을
+ * <PhotoBackdrop> 은 방과 빈 보드만 바닥으로 깔고, <RecommendPane> 이 제목 띠·추천 종이·압정을
  * 별도 에셋으로 올린다. 카드 자체가 버튼이므로 종이 전체를 눌러 상세를 열 수 있다. 도착
  * 영상(arrival.mp4)과 그 마지막 프레임(desk-still.webp)은 옛 방을 찍은 것이라 여기 맞지 않아
  * 뗐다 — `loop: null` 이면 <PhotoBackdrop> 이 첫 프레임부터 정착(settled)으로 친다.
  *
- * 1672×941. 종이 열 장의 자리는 data/recommendBoard.js 가 이 사진의 비율 좌표로 갖는다.
+ * 어느 그림을 걸지는 화면 비율을 보고 data/recommendBoard.js 의 BOARDS 에서 고른다. 여기
+ * `src` 는 그 선택이 오기 전 첫 칠에 쓰는 값이고, `frame` 은 사진을 뷰포트에 그대로 채우라는
+ * 표시다 — 방이 벽과 화분, 책까지 한 장면이라 어느 한 부분만 잘라 보이면 장면이 아니게 된다.
  */
 export const arrivalScene = {
   id: 'foryou',
-  src: '/assets/board/recommend-board-empty.png',
+  src: '/assets/board/recommend-board-empty-16x9-v2.webp',
   loop: null,
-  /**
-   * 사진을 어디에 맞춰 걸지.
-   *
-   * 보드의 가운데는 사진의 (가로 52.4%, 세로 46.8%) 지점이다. 그 지점을 **왼쪽 내비를 뺀
-   * 내용 영역**의 가운데에 건다 — 화면 가운데에 걸면 보드 왼쪽이 내비 밑으로 들어간다.
-   *
-   * 16:9 화면에서 cover 는 여유가 0 이라, 사진을 옮기면 가장자리가 빈다. 그래서 딱 그만큼만
-   * 키운다: 1.06 이 1440×900 과 1920×1080 둘 다에서 위·왼쪽이 비지 않는 최솟값이다(그 아래로
-   * 내리면 위가 몇 px 드러난다). focusY 는 0.468 이 아니라 0.472 — 세로도 그 한계 안에서
-   * 최대한 내린 값.
-   *
-   * <PhotoBackdrop> 과 <RecommendPane> 이 같은 값으로 같은 사각형을 계산해야 글자가 종이 위에
-   * 남는다 — 그래서 둘이 여기서 함께 읽는다.
-   */
-  frame: { width: 1672, height: 941, focusX: 0.524, focusY: 0.472, zoom: 1.06 },
-};
+  frame: { width: 1672, height: 941 },
+}
 
 export const recommend = {
   reasonLabel: '추천 이유',
@@ -85,4 +73,4 @@ export const recommend = {
     { eventId: 'ai-rule', reason: "'AI'가 들어간 기사를 지난주에 4회 읽었어요" },
     { eventId: 'shipbuilding', reason: '읽은 기록에서 제조업 비중이 늘고 있어요' },
   ],
-};
+}

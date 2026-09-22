@@ -23,18 +23,30 @@
 
 /* ---- 책갈피 ---------------------------------------------------------------- */
 
-/* Mirrors 나의 기록's own outer bookmark: same asset, same edge, other destination. */
-.historyBookmark {
+/*
+ * Mirrors 나의 기록's own outer bookmark: same asset, same edge, other destination.
+ * 값도 그쪽과 같아야 한다 — 같은 책, 같은 에셋이므로 한쪽만 고치면 두 화면이 어긋난다.
+ * 빈 SVG 시절의 치수(92/260, left 5.6%, width 6.35%)가 남아 있어 report-v2(437×1909)를
+ * 55% 넓게 늘이고 있었다. DiaryHistoryPane 의 .reportBookmark 와 짝을 맞춘다.
+ */
+.historySlot {
   position: absolute;
   z-index: 4;
-  top: 10%;
-  left: 5.6%;
-  width: 6.35%;
-  aspect-ratio: 92 / 260;
-  clip-path: inset(0 28% 0 0);
+  top: 9%;
+  left: 6.99%;
+  width: 4.57%;
+  aspect-ratio: 437 / 1909;
+  clip-path: inset(-2% 16% -2% -25%);
+}
+
+.historyBookmark {
+  position: absolute;
+  inset: 0;
   color: #faf7ef;
   text-decoration: none;
-  transition: filter 160ms ease;
+  transition:
+    transform 220ms cubic-bezier(0.16, 0.84, 0.3, 1),
+    filter 180ms ease;
 }
 
 .historyBookmark img {
@@ -48,7 +60,7 @@
 
 .historyBookmark span {
   position: absolute;
-  inset: 25% 27% 24% 19%;
+  inset: 15% 10% 15% 10%;
   display: grid;
   font: 700 clamp(10px, 1.05vw, 17px)/1.05 var(--font-sans);
   letter-spacing: 0.08em;
@@ -59,7 +71,8 @@
 }
 
 .historyBookmark:hover {
-  filter: brightness(1.08);
+  transform: translateX(-10%);
+  filter: brightness(1.06) drop-shadow(-2px 2px 3px rgb(52 32 16 / 0.3));
 }
 
 .historyBookmark:focus-visible {
@@ -69,16 +82,18 @@
 
 /* 오른쪽 가장자리 책갈피 — 이 책 안의 세 페이지.
    나의 기록의 카테고리 책갈피와 같은 에셋·같은 치수라, 두 화면이 한 권으로 읽힌다.
-   `clip-path` 는 책 밖으로 나가는 왼쪽 절반을 잘라 책등에 꽂힌 것처럼 보이게 한다. */
+   `clip-path` 는 탭의 안쪽 끝을 잘라 없앤다 — 닫힌 도형의 왼쪽 변이 보이면 종이 위에 얹힌
+   별개의 물체로 읽힌다. 선은 컨테이너에 걸려 제자리에 남으므로 틈 역할을 하고, 탭만 그 안에서
+   빠져나온다. 세 값 모두 DiaryHistoryPane 의 .categoryBookmarks 와 같아야 한다. */
 .pageBookmarks {
   position: absolute;
   z-index: 6;
-  top: 11%;
-  right: 6.8%;
+  top: 9.5%;
+  right: 7.06%;
   display: flex;
-  width: 6.6%;
+  width: 5.6%;
   flex-direction: column;
-  clip-path: inset(0 0 0 40%);
+  clip-path: inset(-2% -25% -2% 35%);
 }
 
 .pageBookmarks button {
@@ -86,27 +101,31 @@
   display: block;
   width: 100%;
   flex: 0 0 auto;
-  aspect-ratio: 96 / 112;
+  aspect-ratio: 681 / 892;
   padding: 0;
   border: 0;
   background: transparent;
   color: #44392f;
   cursor: pointer;
-  transition: transform 160ms ease;
+  transition:
+    transform 220ms cubic-bezier(0.16, 0.84, 0.3, 1),
+    filter 180ms ease;
 }
 
 .pageBookmarks button + button {
-  margin-top: -8%;
+  margin-top: -6%;
 }
 
 .pageBookmarks button:hover {
-  transform: translateX(3px);
+  transform: translateX(11%);
 }
 
+/* 뽑히는 거리는 숨은 깊이(1.96%p)보다 작아야 한다. 그림자는 종이 이음선 쪽을 피한다. */
 .pageBookmarks button[aria-current='true'] {
   z-index: 1;
   color: #faf7ef;
-  transform: translateX(5px);
+  transform: translateX(17%);
+  filter: drop-shadow(1px 2px 3px rgb(52 32 16 / 0.34));
 }
 
 .pageBookmarks button:focus-visible {
@@ -125,7 +144,7 @@
 
 .pageBookmarks span {
   position: absolute;
-  inset: 15% 30%;
+  inset: 8% 38% 8% 38%;
   display: grid;
   font: 700 clamp(7px, 0.78vw, 13px)/1 var(--font-sans);
   letter-spacing: 0.04em;
@@ -136,12 +155,23 @@
   pointer-events: none;
 }
 
+/*
+ * 책의 종이. 가로에서는 아무것도 하지 않는 투명한 층이다 — 안의 페이지들은 예전처럼 자기
+ * 좌표로 절대 배치되고, 이 층이 절대 배치라 담는 블록(.stage 의 패딩 상자)도 그대로다.
+ * 세로에서는 이것이 스크롤되는 종이가 된다. 책갈피는 이 밖에 있어 책 가장자리에 남는다.
+ */
+.pageScroll {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pageScroll > * {
+  pointer-events: auto;
+}
+
 /* ---- 페이지 ---------------------------------------------------------------- */
 
-/* Measured off the photograph: cream runs 9.8%–49.6% on the left leaf and 50.1%–90.1%
-   on the right, with the stitched seam between them and paper from 3% to 94.4% down.
-   The content sits well inside both the leather edge and the stitched gutter, so charts
-   read as marks on the page instead of touching the book's frame. */
 /* 차트를 못 그릴 때 그 자리에 들어가는 한 줄. 펼친 양면에 걸쳐 가운데 놓는다 —
    한쪽 페이지에만 적으면 반대쪽이 비어 아직 로딩 중인 것처럼 보인다. */
 .notice {
@@ -181,6 +211,10 @@
   text-decoration-color: #8b7355;
 }
 
+/* Measured off the photograph: cream runs 9.8%–49.6% on the left leaf and 50.1%–90.1%
+   on the right, with the stitched seam between them and paper from 3% to 94.4% down.
+   The content sits well inside both the leather edge and the stitched gutter, so charts
+   read as marks on the page instead of touching the book's frame. */
 .leftPage,
 .rightPage {
   position: absolute;
@@ -530,23 +564,141 @@
 /* No book at this width: the spread becomes two stacked sheets, the same way 나의 기록
    drops its frame and lets the planet and the record page flow. */
 @media (max-width: 850px) {
+  /*
+   * 세로에서는 펼친 책 대신 한 페이지 책이다 — 나의 기록과 같은 에셋·같은 기하를 쓴다.
+   * 예전에는 책을 버리고 종이색 패널(#ead8b9)로 갈아치웠는데, 그러면 같은 책이 두 화면에서
+   * 다른 물건이 된다. 책은 화면에 고정하고 두 페이지를 이어 붙여 종이 안에서 스크롤시킨다.
+   */
   .diaryStage {
-    display: grid;
-    width: 100%;
+    position: relative;
+    display: block;
+    width: min(100%, calc((100svh - 132px) * 876 / 1274));
     height: auto;
-    min-height: calc(100vh - 116px);
-    grid-template-rows: auto;
-    gap: 18px;
-    padding: 24px 18px 30px;
-    aspect-ratio: auto;
+    min-height: 0;
+    gap: 0;
+    padding: 0;
+    aspect-ratio: 876 / 1274;
+    margin-inline: auto;
     overflow: visible;
-    background: #ead8b9;
+    background: url('/assets/history/diary-single-v2.webp') center / 100% 100% no-repeat;
     filter: drop-shadow(0 18px 32px rgba(42, 25, 12, 0.24));
   }
 
-  .diaryFrame,
-  .historyBookmark {
+  /*
+   * 종이 영역 = 평평한 종이 그 자체. diary-single-v2.webp 에서 잰 값이다 —
+   * 왼쪽 11.8% · 위 2.7% · 오른쪽 94.8% · 아래 94.4% 부터 바깥은 책배·가죽이다.
+   * 나의 기록의 .pageScroll 과 같은 값이어야 한다 — 같은 책이다.
+   *
+   * padding 은 책의 판면 여백이다. inset 이 "종이가 어디까지인가"를, padding 이 "글을 종이
+   * 어디까지 앉히는가"를 말한다 — 둘을 섞으면 에셋이 바뀔 때 어느 쪽을 고쳐야 할지 알 수
+   * 없다. 백분율 padding 은 위아래도 폭을 기준으로 한다.
+   */
+  .pageScroll {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    inset: 2.7% 5.2% 5.6% 11.8%;
+    padding: 4.5% 5.5% 6%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+    scrollbar-width: none;
+  }
+
+  /* 책장에 브라우저 스크롤바가 서 있으면 책이 아니라 창이 된다. 스크롤은 그대로 둔다. */
+  .pageScroll::-webkit-scrollbar {
     display: none;
+  }
+
+  /*
+   * grid 가 아니라 flex 다. grid 일 때는 행성(.planetPortal)의 aspect-ratio 로 정해지는 높이가
+   * 행 크기 계산에 들어가지 않아, 행은 145px 인데 상자는 285px 이 되어 아래 내용 위로 넘쳤다.
+   * flex 컬럼에서는 주축이 세로라 aspect-ratio 가 그대로 높이가 된다.
+   *
+   * flex: 0 0 auto 는 내용이 길어질 때 항목이 눌리지 않게 한다 — 눌리면 종이 안 스크롤이
+   * 생기지 않고 글이 찌그러진다.
+   */
+  .pageScroll > * {
+    flex: 0 0 auto;
+  }
+
+  .diaryFrame {
+    display: none;
+  }
+
+  /*
+   * 세로에서는 책배가 왼쪽이고 오른쪽은 제본이다 — 가로와 좌우가 반대다. 값은 나의 기록의
+   * .reportSlot / .categoryBookmarks 와 같아야 한다.
+   *
+   * 리본은 책 위로 올린다 — 길쭉해서 책배에 세우면 탭 기둥과 자리를 다툰다. transform-origin:
+   * 0 0 + rotate(90deg) 이면 지역 +x 가 화면 아래로, 지역 +y 가 화면 왼쪽으로 가므로
+   * left/top 꼭지점이 회전 뒤 보이는 영역의 오른쪽 위가 된다 — 화면 x 39.6~86%, y −2.5~4.81%.
+   * clip 도 함께 돌아가 지역 오른쪽 22% 가 화면 아래 22% 를 자르고, 잘리는 선 3.20%H 는
+   * 위쪽 가죽(0.1~2.2%)·책배(2.2~2.7%)를 지나 종이로 0.5%p 들어간 자리다.
+   */
+  .historySlot {
+    top: -2.5%;
+    left: 86%;
+    width: 10.63%;
+    transform-origin: 0 0;
+    transform: rotate(90deg);
+    clip-path: inset(-2% 22% -2% -25%);
+  }
+
+  /*
+   * 글자는 상자와 함께 돌아가므로 자기 중심 기준 −90도 되돌린다 — 합이 0 이라 똑바로 서고
+   * 왼쪽→오른쪽으로 읽힌다. 지역 오른쪽 26% 를 비워 글자 중심이 잘리는 78% 안쪽에 온다.
+   */
+  .historyBookmark span {
+    inset: 0 26% 0 0;
+    font-size: clamp(9px, 2.6vw, 13px);
+    letter-spacing: 0.06em;
+    text-orientation: mixed;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    writing-mode: horizontal-tb;
+  }
+
+  /*
+   * 리본이 위로 갔으므로 책배 전체가 탭 기둥이다 — 폭 10%→13% 로 키워 글자가 편해진다.
+   * 35% → 1.5% + 13%×0.65 = 9.95%, 책배(5.2~11.8%) 안이다. 탭 높이 11.71%H, 이 화면은
+   * 페이지 탭이 둘이라 8% → 30.9% 로 끝난다.
+   */
+  .pageBookmarks {
+    top: 8%;
+    right: auto;
+    left: 1.5%;
+    width: 13%;
+    flex-direction: column;
+    clip-path: inset(-2% 35% -2% -25%);
+  }
+
+  /* 탭 그림은 오른쪽 가장자리용으로 그려져 있다 — 좌우를 뒤집어 둥근 끝이 바깥(왼쪽)을
+     보게 한다. 글자는 뒤집지 않으므로 span 은 그대로 둔다. */
+  .pageBookmarks img {
+    transform: scaleX(-1);
+  }
+
+  /* 뽑히는 방향도 반대다 — 바깥이 왼쪽이다. */
+  .pageBookmarks button:hover {
+    transform: translateX(-4%);
+  }
+
+  .pageBookmarks button[aria-current='true'] {
+    transform: translateX(-7%);
+    filter: drop-shadow(-1px 2px 3px rgb(52 32 16 / 0.34));
+  }
+
+  /*
+   * 이 화면의 가장 긴 라벨은 "저장한 기사" — 공백까지 세로 6칸이다. 탭 높이는 폰에서 57px,
+   * 상하 여백 4% 를 뺀 글자 상자가 52.6px 이므로 한 칸이 8.7px 를 넘으면 넘친다. 나의 기록의
+   * 가장 긴 라벨("IT·과학")은 5칸이라 거기서는 더 큰 값을 쓴다.
+   */
+  .pageBookmarks span {
+    inset: 4% 34% 4% 34%;
+    font-size: clamp(7px, 2vw, 10px);
+    letter-spacing: 0;
   }
 
   .leftPage,

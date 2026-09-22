@@ -20,18 +20,59 @@
  */
 
 /**
- * The room seen behind 오늘의 트렌드. Both crops come from the same source composition;
- * each keeps the wooden window around the interactive sky instead of asking cover to
- * invent a mobile crop. A transition stays disabled until a clip is authored to end on
- * this exact room — handing off from the former attic image would read as a flash cut.
+ * The window 오늘의 트렌드 is seen through, as layers: `backdrops` is the night outside
+ * and nothing else, and one of `frames` is the wooden window over it.
+ *
+ * Splitting them is what makes the set small. A backdrop may be cropped to any shape,
+ * so landscape and portrait cover every viewport between them. A frame may not — the
+ * plant at its right and the bush at its left each run the full lower half of the
+ * composition, and neither survives losing an edge — so it is stretched to fill
+ * instead, and stretching only holds near the ratio it was drawn at.
+ *
+ * Hence five frames, a constant 0.75 apart in ratio. Whatever the viewport, the nearest
+ * of them is within about 15% — see `useNearestWindow`, which is also all that has to
+ * be true for a sixth to work: add it here, in ratio order, and nothing else changes.
+ *
+ * `opening` is the glass, in per cent of the frame's own box, measured off the asset's
+ * alpha rather than authored. <TrendStage> insets the sky by it and then lets it run a
+ * little under the wood; the margin is its business, so these stay the measurement.
+ *
+ * A transition stays disabled until a clip is authored to end on this exact room —
+ * handing off from the former attic image would read as a flash cut.
  */
 export const nightfall = {
-  still: '/assets/trend/trend-window-night-desktop-v1.jpg',
-  sidebarStill: '/assets/trend/trend-window-night-sidebar-extension-v2.png',
-  ultrawideStill: '/assets/trend/trend-window-night-ultrawide-v1.jpg',
-  compactStill: '/assets/trend/trend-window-night-compact-v1.jpg',
-  tabletStill: '/assets/trend/trend-window-night-tablet-v1.jpg',
-  mobileStill: '/assets/trend/trend-window-night-mobile-tall-v1.jpg',
+  backdrops: {
+    landscape: '/assets/trend/trend-window-backdrop-landscape-v2.webp',
+    portrait: '/assets/trend/trend-window-backdrop-portrait-v2.webp',
+  },
+  frames: [
+    {
+      ratio: 16 / 9,
+      src: '/assets/trend/trend-window-frame-16x9-v2.webp',
+      opening: { top: 9.7, right: 6.6, bottom: 12.6, left: 11.5 },
+    },
+    {
+      ratio: 4 / 3,
+      src: '/assets/trend/trend-window-frame-4x3-v2.webp',
+      opening: { top: 12.2, right: 11.2, bottom: 17, left: 12.5 },
+    },
+    {
+      ratio: 1,
+      src: '/assets/trend/trend-window-frame-1x1-v2.webp',
+      opening: { top: 13.4, right: 12, bottom: 14.4, left: 16.3 },
+    },
+    {
+      ratio: 3 / 4,
+      src: '/assets/trend/trend-window-frame-3x4-v2.webp',
+      opening: { top: 9, right: 12.1, bottom: 13.4, left: 13.5 },
+    },
+    {
+      ratio: 9 / 16,
+      src: '/assets/trend/trend-window-frame-9x16-v2.webp',
+      opening: { top: 9.7, right: 11.9, bottom: 13.9, left: 15.3 },
+    },
+  ],
+  sidebarStill: '/assets/trend/trend-window-night-sidebar-v3.webp',
   clip: null,
 }
 
