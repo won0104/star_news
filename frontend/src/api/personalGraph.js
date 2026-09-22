@@ -39,17 +39,37 @@
 import { request } from './client'
 
 /**
+ * 기간(`from`·`to`)을 쿼리에 붙인다. `yyyy-MM-dd`, KST, 양끝 포함이다.
+ *
+ * 서버는 둘을 함께 받거나 둘 다 없거나만 허용한다 — 한쪽만 오면 400 INVALID_INPUT_VALUE 다.
+ * 그래서 여기서 짝이 맞을 때만 붙이고, 아니면 아무것도 붙이지 않아 전체 기간으로 둔다.
+ *
+ * 기간을 주면 서버가 다른 경로로 답한다. 누적 Node 카운트를 쓰지 않고 그 기간에 읽은 기사에서
+ * 그래프를 다시 만들기 때문에, 클릭만 하고 기사를 열지 않은 Node 는 빠진다. 부르는 쪽이
+ * 그걸 알고 고르는 값이다.
+ */
+function withPeriod(query, from, to) {
+  if (!from || !to) return query
+  query.set('from', from)
+  query.set('to', to)
+  return query
+}
+
+/**
  * `GET /users/me/graph` — 최초 진입용 요약.
  *
  * 읽은 것이 하나도 없으면 `nodes`·`edges` 가 빈 배열로 온다(200). 실패가 아니라 상태다.
  */
-export async function fetchPersonalGraph({ signal } = {}) {
-  return request('/users/me/graph', { signal })
+export async function fetchPersonalGraph({ from, to, signal } = {}) {
+  const query = withPeriod(new URLSearchParams(), from, to)
+  const suffix = query.size > 0 ? `?${query}` : ''
+  return request(`/users/me/graph${suffix}`, { signal })
 }
 
 /** `GET /users/me/graph/map?topicCode=` — 분야 하나의 EVENT·ENTITY·STATEMENT 전부와 그 사이 Edge. */
-export async function fetchPersonalTopicMap(topicCode, { signal } = {}) {
-  return request(`/users/me/graph/map?topicCode=${encodeURIComponent(topicCode)}`, { signal })
+export async function fetchPersonalTopicMap(topicCode, { from, to, signal } = {}) {
+  const query = withPeriod(new URLSearchParams({ topicCode }), from, to)
+  return request(`/users/me/graph/map?${query}`, { signal })
 }
 
 /**
@@ -60,10 +80,15 @@ export async function fetchPersonalTopicMap(topicCode, { signal } = {}) {
  *
  * 개인 그래프에 없는 Node 면 404 NODE_NOT_ACQUIRED.
  */
-export async function fetchPersonalNodeArticles(nodeType, nodeKey, { size, cursor, signal } = {}) {
+export async function fetchPersonalNodeArticles(
+  nodeType,
+  nodeKey,
+  { size, cursor, from, to, signal } = {},
+) {
   const query = new URLSearchParams()
   if (size != null) query.set('size', String(size))
   if (cursor) query.set('cursor', cursor)
+  withPeriod(query, from, to)
 
   const suffix = query.size > 0 ? `?${query}` : ''
   return request(
