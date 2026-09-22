@@ -20,13 +20,15 @@ import org.springframework.stereotype.Repository;
 public class Neo4jArticleNodeSnapshotRepository implements ArticleNodeSnapshotRepository {
 
 	private static final String FIND_CONNECTED_NODES_CYPHER = """
-			MATCH (a:Article {nodeId: $articleNodeKey})-[:%s]->(n)
+			MATCH (a:Article {nodeId: $articleNodeKey})-[link:%s]->(n)
 			WHERE $label IN labels(n)
+			WITH n, coalesce(link.isPrimary, false) AS primary
 			OPTIONAL MATCH (n)-[classified:CLASSIFIED_AS]->(topic:Topic)
-			WITH n, topic.topicCode AS topicCode, coalesce(classified.isPrimary, false) AS isPrimary
-			ORDER BY isPrimary DESC
-			WITH n, head(collect(topicCode)) AS topicCode
-			RETURN n.nodeId AS nodeKey, coalesce(n[$titleProp], n.nodeId) AS label, topicCode
+			WITH n, primary, topic.topicCode AS topicCode,
+			     coalesce(classified.isPrimary, false) AS isPrimaryTopic
+			ORDER BY isPrimaryTopic DESC
+			WITH n, primary, head(collect(topicCode)) AS topicCode
+			RETURN n.nodeId AS nodeKey, coalesce(n[$titleProp], n.nodeId) AS label, topicCode, primary
 			""";
 
 	private final Neo4jClient neo4jClient;
@@ -55,7 +57,8 @@ public class Neo4jArticleNodeSnapshotRepository implements ArticleNodeSnapshotRe
 						relation.nodeType(),
 						record.get("nodeKey").asString(),
 						record.get("label").asString(),
-						record.get("topicCode").isNull() ? null : record.get("topicCode").asString()))
+						record.get("topicCode").isNull() ? null : record.get("topicCode").asString(),
+						record.get("primary").asBoolean(false)))
 				.all()
 				.stream()
 				.toList();

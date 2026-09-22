@@ -58,10 +58,21 @@ services:
       REDIS_PORT: "6379"
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       APP_AUTH_STORE: redis
+      # 개인 그래프 참여도 집계 캐시: none(기본) | redis
+      # 사용자별 노드가 많아져 /users/me/graph 가 느려질 때 .env 에 APP_CACHE_STORE=redis 만 넣으면 켜진다.
+      APP_CACHE_STORE: ${APP_CACHE_STORE:-none}
       GNEWS_API_KEY: ${GNEWS_API_KEY:-}
       GNEWS_MAX: ${GNEWS_MAX:-12}
       GNEWS_COLLECT_CRON: "${GNEWS_COLLECT_CRON:-0 10 * * * *}"
       GNEWS_RETRY_DELAY: ${GNEWS_RETRY_DELAY:-1s}
+      # 배치 주기와 한도. 기본값은 application.properties 와 같다.
+      # 서버에서 잠깐 당겨 돌려 보거나 처리량을 조절할 때 .env 로 덮어쓴다(재배포 없이 재시작만 하면 된다).
+      ARTICLE_ANALYSIS_CRON: "${ARTICLE_ANALYSIS_CRON:-0 20 * * * *}"
+      ARTICLE_ANALYSIS_TIME_BUDGET: ${ARTICLE_ANALYSIS_TIME_BUDGET:-45m}
+      TREND_AGGREGATE_CRON: "${TREND_AGGREGATE_CRON:-0 0 5,17 * * *}"
+      USER_GRAPH_SYNC_CRON: "${USER_GRAPH_SYNC_CRON:-0 0 1-23/2 * * *}"
+      RECOMMENDATION_GENERATE_CRON: "${RECOMMENDATION_GENERATE_CRON:-0 30 5,17 * * *}"
+      RECOMMENDATION_RETUNE_CRON: "${RECOMMENDATION_RETUNE_CRON:-0 0 3 * * SUN}"
       # GMS(SSAFY OpenAI 중계). 기사/이벤트 요약에 사용. 키는 루트 .env 로 주입한다.
       GMS_API_KEY: ${GMS_API_KEY:-}
       GMS_BASE_URL: ${GMS_BASE_URL:-https://gms.ssafy.io/gmsapi/api.openai.com/v1}

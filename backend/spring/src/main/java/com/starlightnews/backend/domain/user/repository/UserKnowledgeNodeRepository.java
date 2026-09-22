@@ -67,20 +67,25 @@ public interface UserKnowledgeNodeRepository
 	 * <p>readIncrement 는 이 기사를 처음 읽을 때만 1, 재열람이면 0 이다.
 	 * read_article_count 가 그 Node 를 건드린 고유 기사 수라 같은 기사 재열람으로는 늘면 안 된다.
 	 *
+	 * <p>primaryIncrement 는 그중 이 기사가 대표로 다룬 Node 일 때만 1 이다. 추천에 "본 것"으로
+	 * 보낼지는 이 값으로 가른다.
+	 *
 	 * <p>UPDATE 를 먼저 치고 0 행이면 INSERT 하는 방식은 동시 요청에서 InnoDB 갭 락 데드락을 일으켜 쓰지 않는다.
 	 */
 	@Modifying
 	@Query(value = "INSERT INTO user_knowledge_nodes "
 			+ "(user_id, node_type, node_id, node_label, topic_code, "
-			+ " read_article_count, node_click_count, first_seen_at, last_seen_at) "
-			+ "VALUES (:userId, :nodeType, :nodeId, :nodeLabel, :topicCode, 1, 0, :now, :now) "
+			+ " read_article_count, primary_read_count, node_click_count, first_seen_at, last_seen_at) "
+			+ "VALUES (:userId, :nodeType, :nodeId, :nodeLabel, :topicCode, 1, :primaryIncrement, 0, "
+			+ " :now, :now) "
 			+ "ON DUPLICATE KEY UPDATE "
-			+ " read_article_count = read_article_count + :readIncrement, last_seen_at = :now",
+			+ " read_article_count = read_article_count + :readIncrement, "
+			+ " primary_read_count = primary_read_count + :primaryIncrement, last_seen_at = :now",
 			nativeQuery = true)
 	int upsertRead(@Param("userId") Long userId, @Param("nodeType") String nodeType,
 			@Param("nodeId") String nodeId, @Param("nodeLabel") String nodeLabel,
 			@Param("topicCode") String topicCode, @Param("readIncrement") int readIncrement,
-			@Param("now") LocalDateTime now);
+			@Param("primaryIncrement") int primaryIncrement, @Param("now") LocalDateTime now);
 
 	/** 해당 사용자의 특정 Topic 개인 Node 전체. (개인 그래프 Topic 스냅샷용) */
 	@Query("SELECT u FROM UserKnowledgeNode u "
