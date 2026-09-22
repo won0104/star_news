@@ -56,6 +56,22 @@ export const reportTabs = [
   { id: 'articles', label: '저장한 기사' },
 ]
 
+/**
+ * 리포트가 차트 대신 보여줄 한 줄들.
+ *
+ * 리포트는 내가 읽은 기록을 집계한 것이라 로그인 없이는 만들 수 없다. 그래서 비로그인과
+ * 세션 만료를 한 문구로 묶지 않는다 — 전자는 아직 시작하지 않은 것이고, 후자는 하던 것이
+ * 끊긴 것이라 사용자가 할 일이 다르다.
+ */
+export const reportCopy = {
+  title: '나의 리포트',
+  loading: '리포트를 집계하는 중…',
+  signedOut: '로그인하면 최근 3개월의 읽기 기록을 정리해 드려요.',
+  expired: '로그인이 만료됐어요. 다시 로그인하면 이어서 볼 수 있어요.',
+  failed: '리포트를 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.',
+  signIn: '로그인하러 가기',
+}
+
 const SAVED_PRESS = ['연합뉴스', '한국경제', '전자신문', '한겨레', '머니투데이']
 
 /**
@@ -123,6 +139,8 @@ export const savedCopy = {
   summaryNone: '이 기사에는 아직 요약이 없어요.',
   summaryPending: '요약을 만드는 중이에요.',
   summaryFailed: '요약을 만들지 못했어요.',
+  // 422 ARTICLE_CONTENT_UNAVAILABLE — 다시 눌러도 달라지지 않는 쪽이라 실패와 나눠 적는다.
+  summaryUnavailable: '원문 본문이 없어 요약을 만들 수 없어요.',
 }
 
 export const report = {

@@ -14,6 +14,18 @@
 
 import { request } from './client';
 
+/**
+ * `GET /users/me` — 로그인한 사용자의 기본 정보와 관심·비관심 Topic.
+ *
+ * 새로고침 뒤에 누구인지 되찾는 용도다. 부팅 때 부르는 `POST /auth/refresh` 는 토큰만
+ * 돌려주고 `user` 를 담지 않아서, 그것만으로는 화면이 이름을 모른 채 로그인 상태가 된다.
+ *
+ * `{ userId, loginId, nickname, interestedTopicCodes[], dislikedTopicCodes[] }`
+ */
+export async function fetchMyProfile({ signal } = {}) {
+  return request('/users/me', { signal });
+}
+
 export async function withdrawAccount(password) {
   return request('/users/me', { method: 'DELETE', body: { password } });
 }

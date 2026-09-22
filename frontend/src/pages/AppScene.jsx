@@ -156,7 +156,7 @@ export function AppScene() {
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
       />
-      <NodeSearch night={view === 'trend'} onSelect={openSearchedNode} />
+      {view === 'trend' && <NodeSearch night onSelect={openSearchedNode} />}
       <ViewPane
         key={account?.user?.userId ?? (account ? 'signed-in' : 'guest')}
         view={view}
