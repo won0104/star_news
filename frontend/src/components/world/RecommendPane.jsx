@@ -38,6 +38,14 @@ import styles from './RecommendPane.module.css'
 const SAMPLE_WHEN_EMPTY = true
 const RECOMMENDATION_COLUMN_COUNT = 5
 const SHEET_ANCHOR_GAP = 14
+/*
+ * 카드 옆에 딱 붙이지 않고 누른 카드 쪽으로 이만큼 더 당긴다. 좌우 어느 쪽으로 열든 같은
+ * 값이라 배치는 대칭으로 남는다 — 1열을 누른 자리와 4열을 누른 자리가 서로 맞바뀐다.
+ *
+ * 상자 기준으로는 카드를 51px 덮지만, 액자 종이는 가장자리에서 폭의 5.6% 가 투명이라
+ * 눈에 보이는 종이가 카드를 타는 것은 그보다 적다.
+ */
+const SHEET_ANCHOR_PULL = 65
 const SHEET_EDGE_GAP = 16
 /* 이 폭 아래로는 종이를 카드 옆에 세우지 않는다 — RecommendPane.module.css 의 하단 sheet
    질의와 같은 값이어야 한다. */
@@ -378,8 +386,8 @@ function useDetailSheetAnchor(cardRef, anchorIndex, side) {
       const maxBottom = Math.min(boundaryRect.bottom, window.innerHeight) - SHEET_EDGE_GAP
       const desiredLeft =
         side === 'left'
-          ? anchorRect.left - sheetRect.width - SHEET_ANCHOR_GAP
-          : anchorRect.right + SHEET_ANCHOR_GAP
+          ? anchorRect.left - sheetRect.width - SHEET_ANCHOR_GAP + SHEET_ANCHOR_PULL
+          : anchorRect.right + SHEET_ANCHOR_GAP - SHEET_ANCHOR_PULL
       const maxLeft = Math.max(minLeft, maxRight - sheetRect.width)
       // 세로는 누른 카드가 아니라 보드가 정한다 — 같은 행, 같은 높이.
       const height = Math.min(corkRect?.height ?? sheetRect.height, maxBottom - minTop)
