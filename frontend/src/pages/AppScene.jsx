@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { backdrop, extraViews, navItems } from '../data/home'
 import { arrivalScene } from '../data/recommend'
+import { BOARDS } from '../data/recommendBoard'
+import { desks } from '../data/history'
+import { useNearestWindow } from '../hooks/useNearestWindow'
 import { nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
 import { NodeSearch } from '../components/common/NodeSearch'
@@ -20,12 +23,9 @@ const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
  * simply arrived on without one — which is every destination but 나를 위한 추천 today.
  */
 const ARRIVAL = { foryou: arrivalScene }
-const TREND_BACKDROP = { id: 'trend', src: nightfall.still, loop: null }
-const HISTORY_BACKDROP = {
-  id: 'history',
-  src: '/assets/history/history-desk-background.png',
-  loop: null,
-}
+const TREND_BACKDROP = { id: 'trend', src: nightfall.backdrops.landscape, loop: null }
+/** 사진은 비율에 맞춰 아래에서 고른다 — 여기서는 어느 방인지만 정한다. */
+const HISTORY_BACKDROP = { id: 'history', loop: null }
 
 /**
  * 공용 햇살 방 대신 자기 사진을 바닥으로 쓰는 목적지. 오늘의 트렌드는 밤 창가, 나를 위한
@@ -36,6 +36,9 @@ const SCENE_BY_VIEW = {
   trend: TREND_BACKDROP,
   foryou: arrivalScene,
   log: HISTORY_BACKDROP,
+  // 나의 리포트는 나의 기록과 같은 책이다 — 방이 다르면 같은 책이 두 곳에 있는 것으로 읽힌다.
+  // id 가 같아 두 화면을 오갈 때 <PhotoBackdrop> 이 remount 되지 않고 책상이 그대로 남는다.
+  report: HISTORY_BACKDROP,
 }
 
 /**
@@ -122,7 +125,18 @@ export function AppScene() {
   }
 
   const arriving = !walked && enteredFromHome
-  const scene = (arriving && ARRIVAL[view]) || SCENE_BY_VIEW[view] || backdrop
+  // 코르크 방은 비율마다 따로 그려져 있다. 고르는 기준이 뷰포트이므로 <RecommendPane> 이
+  // 같은 훅으로 같은 보드를 고르고, 종이는 그 보드의 코르크 위에 앉는다.
+  const board = useNearestWindow(BOARDS)
+  // 책상도 비율마다 그려져 있다. 책은 자기 상자를 가지므로 사진만 갈아끼우면 된다.
+  const desk = useNearestWindow(desks)
+  const chosen = (arriving && ARRIVAL[view]) || SCENE_BY_VIEW[view] || backdrop
+  const scene =
+    chosen === arrivalScene
+      ? { ...arrivalScene, src: board.src }
+      : chosen === HISTORY_BACKDROP
+        ? { ...HISTORY_BACKDROP, src: desk.src }
+        : chosen
   const motion = SCREEN_TRANSITIONS && !reduceMotion && scene !== backdrop
   const [settled, setSettled] = useState(false)
   const onSettled = useCallback(() => setSettled(true), [])

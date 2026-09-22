@@ -1,13 +1,12 @@
 /*
- * 주요 트렌드's scrollable stage: the clip, then the still it ends on. On desktop a
- * separately authored sliver continues the same window behind the fixed navigation.
+ * 주요 트렌드's stage: the night outside, the live sky, and the wooden window over both.
  *
  * The stars are drawn inside it, positioned against this box - so it is the field the
  * constellation's percentages are percentages of.
  *
- * The picture and live sky still share one frame, but the frame now participates in
- * normal page flow. When a short or portrait viewport cannot hold it plus navigation,
- * <PhotoBackdrop>'s vertical scroller can reveal the rest without horizontal panning.
+ * Geometry that belongs to a frame asset — which ratios it serves and where its glass
+ * opening is — is not here. It is measured off each asset's alpha and kept beside it in
+ * data/trend, because adding a frame should be one entry there and no CSS at all.
  */
 .stage {
   position: relative;
@@ -16,83 +15,25 @@
   container-type: inline-size;
 }
 
+/*
+ * The scene fills the viewport. The frame is drawn into it at whatever shape that is,
+ * which stretches the wood a little: a frame cannot be cropped instead, because the
+ * plant and the bush anchor its lower corners and neither survives losing an edge.
+ * Picking the nearest of five ratios is what keeps the stretch small — see
+ * useNearestWindow.
+ */
 .sceneFrame {
   position: relative;
   width: 100%;
-  min-height: 100svh;
-  aspect-ratio: 8 / 5;
+  height: 100svh;
 }
 
-/* The rail sits outside the 8:5 composition the user approved. This narrow continuation
- * therefore extends left instead of making the main window wider or hiding its frame.
- * It contains only glass and scenery: the pane's far edge remains off-canvas, avoiding
- * a second, visibly smaller window cell. */
+/* The rail sits outside the composition. This narrow continuation therefore extends
+ * left instead of making the main window wider or hiding its frame. It contains only
+ * glass and scenery: the pane's far edge remains off-canvas, avoiding a second,
+ * visibly smaller window cell. */
 .sidebarExtension {
   display: none;
-}
-
-/* Wide screens intentionally keep the 8:5 composition until it would create more than
- * a short page. The 115svh ceiling gives roughly the same small scroll as 나의 기록;
- * beyond it, bottom alignment preserves the plant and trims the quiet upper sky first. */
-@media (min-aspect-ratio: 19/10) {
-  .sceneFrame {
-    height: min(62.5cqw, 115svh);
-    aspect-ratio: auto;
-  }
-}
-
-/* Near-square screens get the original 4:3 composition. Compared with forcing the 8:5
- * desktop crop, this scales the photograph and its live sky down together and reveals
- * more of the physical window. */
-@media (max-aspect-ratio: 4/3) {
-  .sceneFrame {
-    aspect-ratio: 4 / 3;
-  }
-}
-
-/* Portrait tablets and near-square side panels use a 3:4 composition. Without this
- * middle step the 4:3 scene loses half its horizontal coordinate space on an iPad. */
-@media (max-aspect-ratio: 1/1) {
-  .sceneFrame {
-    aspect-ratio: 3 / 4;
-  }
-}
-
-/* A genuinely tall phone still uses the separately authored portrait composition. */
-@media (max-width: 900px) and (max-aspect-ratio: 2/3) {
-  .sceneFrame {
-    aspect-ratio: 9 / 16;
-  }
-}
-
-/*
- * The still carries the physical window. Desktop and mobile sources match the frame
- * ratios, so the frame itself — not the image independently — decides the cover crop.
- */
-.still,
-.clip {
-  object-position: center;
-}
-
-.still {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 400ms ease;
-}
-
-.stillReady {
-  opacity: 1;
-}
-
-@media (min-aspect-ratio: 19/10) {
-  .still,
-  .clip {
-    object-position: center bottom;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -111,14 +52,46 @@
 }
 
 /*
- * The generated picture is deliberately flat. Clipping the live sky to the measured
- * inner edge of its glass gives it the correct depth without maintaining a second
- * transparent cut-out of the frame and plant.
+ * The night outside, and nothing else. It is the one layer allowed to crop, so it
+ * covers whatever shape the scene is and only two of them — landscape and portrait —
+ * serve every viewport.
+ */
+.still,
+.clip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.still {
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.stillReady {
+  opacity: 1;
+}
+
+/*
+ * The window itself — the glass opening and the wood over it. They share one box, so
+ * whatever stretch the wood takes the sky takes with it and the two cannot drift apart.
+ */
+.windowLayer {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+}
+
+/*
+ * Where the live sky is allowed to draw. The inset is set per frame from the opening
+ * measured off its alpha; the rule here only carries what every frame shares.
  */
 .windowGlass {
   position: absolute;
   z-index: 2;
-  inset: 11.5% 9.25% 16.5% 8.75%;
   overflow: hidden;
   box-shadow: inset 0 0 38px rgba(4, 10, 24, 0.2);
 }
@@ -142,12 +115,24 @@
   z-index: 2;
 }
 
+/* Over the sky, under the room UI: the plant and the bush read as being inside the
+ * room, in front of the night. */
+.frame {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Cards and drawers belong to the room UI, not to the night outside. They are portalled
    here so they can sit over the wall and wooden frame while the stars remain clipped to
    the glass opening. The layer itself is inert; only rendered controls receive input. */
 .sceneOverlay {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -155,22 +140,4 @@
 
 .sceneOverlay > * {
   pointer-events: auto;
-}
-
-@media (max-aspect-ratio: 4/3) {
-  .windowGlass {
-    inset: 15% 12% 15% 8.6%;
-  }
-}
-
-@media (max-aspect-ratio: 1/1) {
-  .windowGlass {
-    inset: 8.5% 6.5% 11.5%;
-  }
-}
-
-@media (max-width: 900px) and (max-aspect-ratio: 2/3) {
-  .windowGlass {
-    inset: 9% 9% 12.5%;
-  }
 }

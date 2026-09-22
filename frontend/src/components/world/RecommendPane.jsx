@@ -2,17 +2,17 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 import { fetchRecommendationBoard, fetchRecommendationDetail } from '../../api/recommendations'
 import {
   BOARD_ASSETS,
-  BANNER_FRAME,
-  BOARD_FRAME,
-  BOARD_SIZE,
+  PIN_BY_TONE,
+  BOARDS,
   SLOTS,
   boardCopy,
-  placement,
+  corkPlacement,
   sampleBoard,
   sampleDetail,
 } from '../../data/recommendBoard'
 import { topicName } from '../../data/topics'
 import { useDraggableCard } from '../../hooks/useDraggableCard'
+import { useNearestWindow } from '../../hooks/useNearestWindow'
 import { useSession } from '../../store/session'
 import styles from './RecommendPane.module.css'
 
@@ -42,6 +42,8 @@ const SHEET_EDGE_GAP = 16
 
 export function RecommendPane({ settled = true }) {
   const account = useSession()
+  // <AppScene> 이 같은 훅으로 같은 그림을 건다. 종이는 그 그림의 코르크 위에 앉는다.
+  const boardArt = useNearestWindow(BOARDS)
   const [board, setBoard] = useState(null)
   const [state, setState] = useState('loading')
   const [openId, setOpenId] = useState(null)
@@ -67,9 +69,8 @@ export function RecommendPane({ settled = true }) {
   const open = openIndex >= 0 ? items[openIndex] : null
   // 다섯 열 중 오른쪽 두 열만 상세 종이를 왼쪽에 띄운다. 가운데 열은 사용자가
   // 요청한 대로 왼쪽 카드와 함께 오른쪽에 띄워 중심 Event를 가리지 않는다.
-  const detailSide = openIndex >= 0 && openIndex % RECOMMENDATION_COLUMN_COUNT > 2
-    ? 'left'
-    : 'right'
+  const detailSide =
+    openIndex >= 0 && openIndex % RECOMMENDATION_COLUMN_COUNT > 2 ? 'left' : 'right'
 
   const handleCardToggle = (item) => {
     const isOpen = openId === item.userRecommendationId
@@ -81,78 +82,80 @@ export function RecommendPane({ settled = true }) {
   }
 
   // 인증된 사용자의 요청 실패를 표본으로 가리지 않는다.
-  const notice = !sample && state !== 'ready'
-    ? { loading: boardCopy.loading, signedOut: account ? boardCopy.failed : boardCopy.signedOut, failed: boardCopy.failed }[state]
-    : null
-  const noticeHint = notice === boardCopy.signedOut
-    ? boardCopy.signedOutHint
-    : null
+  const notice =
+    !sample && state !== 'ready'
+      ? {
+          loading: boardCopy.loading,
+          signedOut: account ? boardCopy.failed : boardCopy.signedOut,
+          failed: boardCopy.failed,
+        }[state]
+      : null
+  const noticeHint = notice === boardCopy.signedOut ? boardCopy.signedOutHint : null
 
   return (
     <section
       className={`${styles.stage} ${settled ? styles.stageIn : styles.stageWaiting}`}
       aria-labelledby="recommend-board-title"
     >
-      {/* <PhotoBackdrop> 의 .photoFramed 와 같은 변수 넷으로 같은 사각형을 만든다. */}
-      <div
-        className={styles.photoBox}
-        style={{
-          '--photo-w': BOARD_SIZE.width,
-          '--photo-h': BOARD_SIZE.height,
-          '--photo-focus-x': BOARD_FRAME.focusX ?? 0.5,
-          '--photo-focus-y': BOARD_FRAME.focusY ?? 0.5,
-          '--photo-zoom': BOARD_FRAME.zoom ?? 1,
-        }}
-      >
-        {/* 제목 종이도 배경에 굽지 않고 독립 에셋으로 건다. */}
-        <header className={styles.banner} style={placement(BANNER_FRAME)}>
-          <img className={styles.bannerPaper} src={BOARD_ASSETS.title} alt="" aria-hidden />
-          <span className={styles.bannerCopy}>
-            <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
-            <h1 id="recommend-board-title">{boardCopy.title}</h1>
-            <span className={styles.cycle}>{boardCopy.updateSchedule}</span>
-          </span>
-        </header>
+      {/* 사진과 같은 사각형 — 사진이 뷰포트를 채우므로 이 층도 뷰포트다. */}
+      <div className={styles.photoBox}>
+        {/* 종이가 사는 곳은 코르크 면뿐이다. 넘치면 나무틀을 넘지 않고 여기서 스크롤된다. */}
+        <div className={styles.corkArea} style={corkPlacement(boardArt)}>
+          {/* 제목 종이도 배경에 굽지 않고 독립 에셋으로 건다. */}
+          <header className={styles.banner}>
+            <img className={styles.bannerPaper} src={BOARD_ASSETS.title} alt="" aria-hidden />
+            <span className={styles.bannerCopy}>
+              <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
+              <h1 id="recommend-board-title">{boardCopy.title}</h1>
+              <span className={styles.cycle}>{boardCopy.updateSchedule}</span>
+            </span>
+          </header>
 
-        <ol className={styles.slots} aria-label="추천 Event 열 장">
-          {SLOTS.map((slot, index) => {
-            const item = items[index]
-            return (
-              <li
-                key={slot.doodle}
-                className={styles.slot}
-                data-tone={slot.tone}
-                style={placement(slot.frame)}
-              >
-                {item ? (
-                  <button
-                    type="button"
-                    className={styles.card}
-                    data-recommendation-index={index}
-                    aria-pressed={openId === item.userRecommendationId}
-                    aria-label={`${index + 1}위. ${boardCopy.open(item.label)}`}
-                    onClick={() => handleCardToggle(item)}
-                  >
-                    <span className={styles.cardFace}>
-                      <img className={styles.cardPaper} src={BOARD_ASSETS.paper} alt="" aria-hidden />
-                      <span className={styles.cardCopy}>
-                        <span className={styles.cardHead}>
-                          <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
-                          <span className={styles.topic}>{topicName(item.topicCode)}</span>
+          <ol className={styles.slots} aria-label="추천 Event 열 장">
+            {SLOTS.map((slot, index) => {
+              const item = items[index]
+              return (
+                <li key={slot.doodle} className={styles.slot} data-tone={slot.tone}>
+                  {item ? (
+                    <button
+                      type="button"
+                      className={styles.card}
+                      data-recommendation-index={index}
+                      aria-pressed={openId === item.userRecommendationId}
+                      aria-label={`${index + 1}위. ${boardCopy.open(item.label)}`}
+                      onClick={() => handleCardToggle(item)}
+                    >
+                      <span className={styles.cardFace}>
+                        <img
+                          className={styles.cardPaper}
+                          src={BOARD_ASSETS.paper}
+                          alt=""
+                          aria-hidden
+                        />
+                        <span className={styles.cardCopy}>
+                          <span className={styles.cardHead}>
+                            <b className={styles.rank}>{String(item.rank).padStart(2, '0')}</b>
+                            <span className={styles.topic}>{topicName(item.topicCode)}</span>
+                          </span>
+                          <strong className={styles.label}>{item.label}</strong>
+                          {item.reason && <span className={styles.reason}>{item.reason}</span>}
                         </span>
-                        <strong className={styles.label}>{item.label}</strong>
-                        {item.reason && <span className={styles.reason}>{item.reason}</span>}
                       </span>
-                    </span>
-                    <img className={styles.cardPin} src={BOARD_ASSETS.pin} alt="" aria-hidden />
-                  </button>
-                ) : (
-                  <span className={styles.blank} aria-hidden="true" />
-                )}
-              </li>
-            )
-          })}
-        </ol>
+                      <img
+                        className={styles.cardPin}
+                        src={PIN_BY_TONE[slot.tone]}
+                        alt=""
+                        aria-hidden
+                      />
+                    </button>
+                  ) : (
+                    <span className={styles.blank} aria-hidden="true" />
+                  )}
+                </li>
+              )
+            })}
+          </ol>
+        </div>
       </div>
 
       {/* 종이 밖의 것들은 사진 상자가 아니라 뷰포트에 붙인다 — 사진이 뷰포트보다 넓어져
@@ -229,7 +232,12 @@ function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
       data-side={side}
       aria-labelledby="recommend-sheet-title"
     >
-      <button type="button" className={styles.sheetClose} aria-label={boardCopy.close} onClick={onClose}>
+      <button
+        type="button"
+        className={styles.sheetClose}
+        aria-label={boardCopy.close}
+        onClick={onClose}
+      >
         ×
       </button>
 
@@ -319,38 +327,39 @@ function useDetailSheetAnchor(cardRef, anchorIndex, side) {
       }
       // 데스크톱 rail 너비의 token 식과 같다. 카드 옆에 붙이더라도 내비게이션 위로
       // 침범하지 않게 실제 viewport 너비로 계산한다.
-      const navigationInset = window.innerWidth >= 1024
-        ? Math.min(208, Math.max(176, window.innerWidth * 0.135))
-        : 0
+      const navigationInset =
+        window.innerWidth >= 1024 ? Math.min(208, Math.max(176, window.innerWidth * 0.135)) : 0
       const minLeft = Math.max(boundaryRect.left, navigationInset) + SHEET_EDGE_GAP
       const maxRight = Math.min(boundaryRect.right, window.innerWidth) - SHEET_EDGE_GAP
       const minTop = Math.max(boundaryRect.top, 0) + SHEET_EDGE_GAP
       const maxBottom = Math.min(boundaryRect.bottom, window.innerHeight) - SHEET_EDGE_GAP
-      const desiredLeft = side === 'left'
-        ? anchorRect.left - sheetRect.width - SHEET_ANCHOR_GAP
-        : anchorRect.right + SHEET_ANCHOR_GAP
+      const desiredLeft =
+        side === 'left'
+          ? anchorRect.left - sheetRect.width - SHEET_ANCHOR_GAP
+          : anchorRect.right + SHEET_ANCHOR_GAP
       const maxLeft = Math.max(minLeft, maxRight - sheetRect.width)
       const maxTop = Math.max(minTop, maxBottom - sheetRect.height)
       // 브라우저가 키보드 포커스나 자동 scroll-into-view 때문에 overflow 컨테이너를
       // 내부 스크롤한 경우에도 viewport에서 보이는 카드 옆에 그대로 붙인다.
-      const left = clamp(desiredLeft, minLeft, maxLeft)
-        - boundaryRect.left + (boundaryElement?.scrollLeft ?? 0)
-      const top = clamp(anchorRect.top - SHEET_EDGE_GAP, minTop, maxTop)
-        - boundaryRect.top + (boundaryElement?.scrollTop ?? 0)
+      const left =
+        clamp(desiredLeft, minLeft, maxLeft) -
+        boundaryRect.left +
+        (boundaryElement?.scrollLeft ?? 0)
+      const top =
+        clamp(anchorRect.top - SHEET_EDGE_GAP, minTop, maxTop) -
+        boundaryRect.top +
+        (boundaryElement?.scrollTop ?? 0)
       const nextStyle = { top, right: 'auto', bottom: 'auto', left }
 
-      setAnchorStyle((current) => (
-        current?.top === nextStyle.top && current?.left === nextStyle.left
-          ? current
-          : nextStyle
-      ))
+      setAnchorStyle((current) =>
+        current?.top === nextStyle.top && current?.left === nextStyle.left ? current : nextStyle,
+      )
     }
 
     placeBesideCard()
     window.addEventListener('resize', placeBesideCard)
-    const resizeObserver = typeof ResizeObserver === 'undefined'
-      ? null
-      : new ResizeObserver(placeBesideCard)
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(placeBesideCard)
     resizeObserver?.observe(anchorElement)
     resizeObserver?.observe(sheet)
 

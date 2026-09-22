@@ -41,8 +41,12 @@
 }
 
 @keyframes stageArrive {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /*
@@ -52,32 +56,16 @@
  * 사진이 뷰포트보다 커지면 가장자리가 잘리는데, 그것도 사진과 똑같이 잘린다.
  * 한쪽만 바꾸면 글자가 종이에서 벗어난다 — 두 식은 늘 같아야 한다.
  */
+/*
+ * 사진과 같은 사각형 — 이제 그냥 뷰포트다. 그림이 벽과 화분, 책까지 한 장면으로 그려져
+ * 있어 어느 한 부분만 잘라 보이면 장면이 아니게 되므로, 잘라내는 대신 늘려 채운다.
+ * 사진도 같은 규칙으로 채우므로(.photoFramed) 종이는 어떤 비율에서도 보드 위에 남는다.
+ */
 .photoBox {
-  --anchor-x: 50%;
   position: absolute;
-  top: 50%;
-  left: var(--anchor-x);
-  width: calc(max(100%, 100vh * var(--photo-w) / var(--photo-h)) * var(--photo-zoom));
-  aspect-ratio: var(--photo-w) / var(--photo-h);
+  inset: 0;
   container-type: inline-size;
-  transform: translate(calc(-100% * var(--photo-focus-x)), calc(-100% * var(--photo-focus-y)));
   pointer-events: none;
-}
-
-/* 데스크톱에서는 왼쪽 내비를 뺀 영역의 가운데에 초점을 건다 — .photoFramed 와 동일. */
-@media (min-width: 1024px) {
-  .photoBox {
-    --anchor-x: calc(var(--desktop-nav-width) + (100% - var(--desktop-nav-width)) / 2);
-  }
-}
-
-/* 4:3에 가까운 데스크톱에서 배경 cover 크기를 그대로 따르면 열 장 중 양끝이 잘린다.
-   빈 보드에는 카드 자국이 없으므로 이 오버레이만 내용 열에 맞춰 한 단계 축소해, 왼쪽
-   내비게이션은 유지하면서도 첫째·열째 카드까지 모두 보이게 한다. */
-@media (min-width: 1024px) and (max-aspect-ratio: 3/2) {
-  .photoBox {
-    width: calc((100% - var(--desktop-nav-width)) * 1.42);
-  }
 }
 
 .photoBox > * {
@@ -86,25 +74,29 @@
 
 /* ---- 제목 (분홍 테이프 위) ---------------------------------------------------- */
 
+/* 띠도 스스로 컨테이너다 — 안쪽 글자가 코르크가 아니라 띠에 비례해야 종이 위에서 같은
+   그림으로 남는다. 코르크 기준으로 두었더니 보드가 커져도 글자만 제자리였다. */
 .banner {
-  position: absolute;
+  position: relative;
+  container-type: inline-size;
+  width: min(100%, 48cqw);
+  aspect-ratio: 1923 / 444;
+  margin: 0 auto 2.4cqw;
   z-index: 3;
   isolation: isolate;
   overflow: visible;
   pointer-events: none !important;
 }
 
-/* 원본 PNG는 제목 종이 주변에 넓은 투명 여백이 있다. 세로로 크게 놓아 실제 종이 부분만
-   BANNER_FRAME 안에 들어오게 하되, 원본은 자르지 않아 가장자리 질감을 그대로 보존한다. */
+/* 에셋은 투명 여백을 잘라낸 상태라 프레임이 곧 그림이다 — BANNER_FRAME 이 에셋과 같은
+   비율이므로 그대로 채우면 늘어나지 않는다. */
 .bannerPaper {
   position: absolute;
   z-index: -1;
-  top: 50%;
-  left: 50%;
-  width: 105%;
-  height: 322%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: fill;
-  transform: translate(-50%, -50%);
   filter: drop-shadow(0 6px 8px rgb(76 43 20 / 0.2));
 }
 
@@ -114,56 +106,101 @@
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 0.15cqw;
-  padding: 0 4%;
+  gap: 0.6cqw;
+  padding: 0 6%;
   text-align: center;
 }
 
 .eyebrow {
-  font: 700 0.55cqw var(--font-sans);
+  font: 700 clamp(9px, 2.1cqw, 13px) var(--font-sans);
   letter-spacing: 0.18em;
   color: #9b7a63;
 }
 
 .banner h1 {
   margin: 0;
-  font: 700 1.55cqw/1.15 var(--font-serif-kr);
+  font: 700 clamp(18px, 6cqw, 30px)/1.15 var(--font-serif-kr);
   color: #3b3128;
   letter-spacing: -0.01em;
 }
 
 .cycle {
   min-height: 1em;
-  font: 500 0.62cqw var(--font-sans);
+  font: 500 clamp(10px, 2.4cqw, 15px) var(--font-sans);
   color: #8a6f5c;
 }
 
 /* ---- 종이 열 장 --------------------------------------------------------------- */
 
-.slots {
+/*
+ * 종이가 사는 곳. 코르크 면 그대로이며, 안쪽 여백은 나무틀에 종이가 닿지 않을 만큼만 준다.
+ * 열 장이 다 들어가지 않으면 여기서 스크롤된다 — 자리를 좌표로 박아두던 때에는 목록이
+ * 보드보다 길어지면 종이가 나무틀을 넘어 책상 위로 흘러내렸다.
+ *
+ * `container-type` 을 여기 두어 종이 안 글자가 화면이 아니라 코르크에 비례하게 한다.
+ */
+.corkArea {
   position: absolute;
-  inset: 0;
   z-index: 2;
+  overflow-y: auto;
+  container-type: inline-size;
+  padding: 2.4cqw;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(120 84 52 / 0.45) transparent;
+}
+
+/*
+ * 다섯 장씩 두 줄. 15cqw 가 코르크 폭에서 정확히 다섯 열을 주는 값이라, 보드가 커지든
+ * 작아지든 같은 배치가 유지되고 종이만 함께 자란다. 125px 하한은 보드가 아주 작아졌을 때
+ * — 글자가 읽히지 않을 만큼 종이가 좁아지면 그때만 열을 하나 줄인다.
+ *
+ * 열 장이 한 화면에 안 들어가면 코르크 안에서 스크롤된다.
+ */
+.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(125px, 15cqw)), 1fr));
+  gap: 2.2cqw;
   margin: 0;
   padding: 0;
   list-style: none;
-  pointer-events: none !important;
 }
 
+/*
+ * 종이 에셋(779×858)의 비율을 지켜 카드가 늘어나지 않게 한다.
+ *
+ * 카드가 스스로 컨테이너다. 안쪽 글자는 화면도 보드도 아닌 종이에 비례해야 한다 — 열 수가
+ * 바뀌어 카드가 넓어지거나 좁아지면 글자도 같이 가야 종이 안에서 같은 그림으로 남는다.
+ *
+ * 다만 비례만 두면 양 끝에서 무너진다: 작은 보드에서는 읽을 수 없고, 큰 화면에서는 제목이
+ * 32px 까지 자라 문장이 종이를 넘겼다. 그래서 글자마다 clamp 로 아래위를 막아둔다.
+ */
 .slot {
-  position: absolute;
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 779 / 858;
   --tone-rgb: 214 133 150;
-  --pin-hue: 0deg;
-  --pin-saturation: 1;
-  --pin-brightness: 1;
 }
 
-.slot[data-tone='rose'] { --tone-rgb: 222 128 150; --pin-hue: 0deg; }
-.slot[data-tone='sky'] { --tone-rgb: 120 168 224; --pin-hue: 212deg; --pin-saturation: 0.9; }
-.slot[data-tone='mint'] { --tone-rgb: 108 178 140; --pin-hue: 126deg; --pin-saturation: 0.76; }
-.slot[data-tone='sand'] { --tone-rgb: 218 168 84; --pin-hue: 52deg; --pin-saturation: 0.9; --pin-brightness: 1.12; }
-.slot[data-tone='lilac'] { --tone-rgb: 160 130 214; --pin-hue: 276deg; --pin-saturation: 0.72; }
-.slot[data-tone='coral'] { --tone-rgb: 232 130 90; --pin-hue: 20deg; --pin-saturation: 0.9; --pin-brightness: 1.06; }
+/* --tone-rgb 는 순위 글자 색에만 쓴다. 압정은 그 색으로 그려진 에셋을 직접 건다. */
+.slot[data-tone='rose'] {
+  --tone-rgb: 222 128 150;
+}
+.slot[data-tone='sky'] {
+  --tone-rgb: 120 168 224;
+}
+.slot[data-tone='mint'] {
+  --tone-rgb: 108 178 140;
+}
+.slot[data-tone='sand'] {
+  --tone-rgb: 218 168 84;
+}
+.slot[data-tone='lilac'] {
+  --tone-rgb: 160 130 214;
+}
+.slot[data-tone='coral'] {
+  --tone-rgb: 232 130 90;
+}
 
 /* button이 종이 전체를 감싼다. 종이·핀은 장식이고 .cardCopy만 실제 텍스트 흐름이다. */
 .card {
@@ -196,10 +233,9 @@
 .cardPaper {
   position: absolute;
   z-index: 0;
-  top: -5%;
-  left: -7%;
-  width: 114%;
-  height: 110%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: fill;
   pointer-events: none;
   filter: drop-shadow(0 7px 7px rgb(72 43 24 / 0.2));
@@ -208,21 +244,22 @@
 
 /* 원본 핀은 정사각 투명 캔버스 중앙 1/3에 구가 있다. 56px 캔버스를 쓰면 실제 핀은
    약 19px가 되어 기존 사진 속 핀 크기와 같다. */
+/*
+ * 슬롯 기준 백분율 — 압정만 px 로 두면 보드가 커져도 따라 자라지 않아, 같은 화면에서도
+ * 넓은 창에서는 작고 좁은 창에서는 종이를 덮을 만큼 커졌다. 18% 는 에셋 기준이고, 그중
+ * 공은 약 77% 라 종이 폭의 14% 안쪽으로 찍힌다.
+ */
 .cardPin {
   position: absolute;
   z-index: 2;
-  top: -19px;
+  top: -7%;
   left: 50%;
-  width: 56px;
-  aspect-ratio: 1;
+  width: 18%;
+  aspect-ratio: 150 / 156;
   object-fit: contain;
   pointer-events: none;
   transform: translateX(-50%);
-  filter:
-    hue-rotate(var(--pin-hue))
-    saturate(var(--pin-saturation))
-    brightness(var(--pin-brightness))
-    drop-shadow(0 3px 2px rgb(66 34 15 / 0.34));
+  filter: drop-shadow(0 3px 2px rgb(66 34 15 / 0.34));
 }
 
 .cardCopy {
@@ -231,8 +268,8 @@
   inset: 14% 11% 11%;
   display: flex;
   flex-direction: column;
-  gap: 0.4cqw;
-  padding: 0.35cqw 0.45cqw;
+  gap: 2.5cqw;
+  padding: 0;
   pointer-events: none;
 }
 
@@ -253,9 +290,7 @@
 }
 
 .card[aria-pressed='true'] .cardPaper {
-  filter:
-    brightness(1.03)
-    drop-shadow(0 0 0.45cqw rgb(var(--tone-rgb) / 0.72))
+  filter: brightness(1.03) drop-shadow(0 0 4cqw rgb(var(--tone-rgb) / 0.72))
     drop-shadow(0 9px 9px rgb(72 43 24 / 0.26));
 }
 
@@ -267,17 +302,17 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.4cqw;
+  gap: 3.5cqw;
 }
 
 .rank {
-  font: 700 0.74cqw var(--font-sans);
+  font: 700 clamp(10px, 6.6cqw, 14px) var(--font-sans);
   font-variant-numeric: tabular-nums;
   color: rgb(var(--tone-rgb));
 }
 
 .topic {
-  font: 600 0.6cqw var(--font-sans);
+  font: 600 clamp(9px, 5.4cqw, 12px) var(--font-sans);
   letter-spacing: 0.08em;
   color: #9b7a63;
 }
@@ -285,7 +320,7 @@
 .label {
   display: -webkit-box;
   overflow: hidden;
-  font: 700 1.12cqw/1.32 var(--font-serif-kr);
+  font: 700 clamp(13px, 10.2cqw, 19px)/1.3 var(--font-serif-kr);
   color: #3b3128;
   word-break: keep-all;
   -webkit-box-orient: vertical;
@@ -296,11 +331,11 @@
   display: -webkit-box;
   overflow: hidden;
   margin-top: auto;
-  font: 0.8cqw/1.42 var(--font-serif-kr);
+  font: clamp(10px, 7cqw, 13px)/1.45 var(--font-serif-kr);
   color: #7a6a5a;
   word-break: keep-all;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
 }
 
 .blank {
@@ -370,7 +405,9 @@
   overflow-y: auto;
   border-radius: 3px;
   background: #fbf6ea;
-  box-shadow: 0 16px 34px rgb(50 30 14 / 0.36), 0 2px 6px rgb(50 30 14 / 0.18);
+  box-shadow:
+    0 16px 34px rgb(50 30 14 / 0.36),
+    0 2px 6px rgb(50 30 14 / 0.18);
   color: #3b3128;
   scrollbar-width: thin;
 }
@@ -416,8 +453,13 @@
   cursor: pointer;
 }
 
-.sheetClose:hover { background: rgb(59 49 40 / 0.08); }
-.sheetClose:focus-visible { outline: 2px solid #3b3128; outline-offset: 2px; }
+.sheetClose:hover {
+  background: rgb(59 49 40 / 0.08);
+}
+.sheetClose:focus-visible {
+  outline: 2px solid #3b3128;
+  outline-offset: 2px;
+}
 
 .sheetKind {
   font: 700 0.65cqw var(--font-sans);
@@ -506,77 +548,16 @@
   text-underline-offset: 3px;
 }
 
-/* ---- 좁은 화면: 고정 층을 풀고 목록으로 --------------------------------------- */
+/* ---- 좁은 화면 -------------------------------------------------------------- */
 
-@media (max-width: 900px) {
-  .stage {
-    position: relative;
-    inset: auto;
-    overflow: visible;
-    padding: 18px 16px 28px;
-    container-type: normal;
-    pointer-events: auto;
-  }
-
-  .photoBox {
-    position: static;
-    width: auto;
-    aspect-ratio: auto;
-    transform: none;
-    container-type: normal;
-  }
-
-  .banner {
-    position: relative;
-    top: auto !important;
-    left: auto !important;
-    width: min(86vw, 520px) !important;
-    height: 88px !important;
-    margin: 0 auto 14px;
-    padding: 0;
-  }
-
-  .eyebrow { font-size: 10px; }
-  .banner h1 { font-size: 24px; color: #3b3128; text-shadow: none; }
-  .cycle { font-size: 12px; color: #8a6f5c; }
-
-  .slots {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 14px;
-    pointer-events: auto !important;
-  }
-
-  .slot {
-    position: relative;
-    inset: auto !important;
-    width: auto !important;
-    height: auto !important;
-    min-height: 150px;
-  }
-
-  .card {
-    position: absolute;
-    inset: 0;
-  }
-
-  .cardCopy {
-    inset: 15% 11% 11%;
-    gap: 6px;
-    padding: 8px 10px;
-  }
-
-  .cardPin {
-    top: -22px;
-    width: 64px;
-  }
-
-  .rank { font-size: 12px; }
-  .topic { font-size: 10px; }
-  .label { font-size: 16px; }
-  .reason { font-size: 12px; }
-
+/*
+ * 배치는 여기서 바꾸지 않는다. 비율마다 보드가 있고 종이는 코르크 안에서 흐르므로, 좁은
+ * 화면도 같은 방 같은 규칙을 쓴다 — 예전에는 이 폭에서 보드를 버리고 페이지 목록으로
+ * 갈아탔고, 그래서 종이가 나무틀을 넘어 흘러내렸다.
+ *
+ * 남은 것은 방 밖 살림뿐이다: 안내 문구와 상세 시트는 작은 화면에서 자리를 달리 잡는다.
+ */
+@media (max-width: 700px) {
   .notice {
     position: static;
     width: auto;
@@ -603,20 +584,57 @@
     gap: 10px;
   }
 
-  .sheetClose { top: 10px; right: 12px; width: 28px; height: 28px; font-size: 20px; }
-  .sheetHead { gap: 6px; padding-right: 30px; }
-  .sheetKind { font-size: 11px; }
-  .sheet h2 { font-size: 19px; }
-  .sheetReason { font-size: 12px; padding: 8px 10px; }
-  .sheetReason b { font-size: 10px; }
-  .summary { font-size: 14px; }
-  .sheetNote { font-size: 13px; }
-  .articles h3 { font-size: 14px; margin-top: 6px; padding-top: 10px; }
-  .articles h3 b { font-size: 12px; }
-  .articles ul { gap: 10px; margin-top: 8px; }
-  .articles small { font-size: 11px; }
-  .articles p { font-size: 13px; }
-  .articles a { font-size: 12px; }
+  .sheetClose {
+    top: 10px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+  }
+  .sheetHead {
+    gap: 6px;
+    padding-right: 30px;
+  }
+  .sheetKind {
+    font-size: 11px;
+  }
+  .sheet h2 {
+    font-size: 19px;
+  }
+  .sheetReason {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  .sheetReason b {
+    font-size: 10px;
+  }
+  .summary {
+    font-size: 14px;
+  }
+  .sheetNote {
+    font-size: 13px;
+  }
+  .articles h3 {
+    font-size: 14px;
+    margin-top: 6px;
+    padding-top: 10px;
+  }
+  .articles h3 b {
+    font-size: 12px;
+  }
+  .articles ul {
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .articles small {
+    font-size: 11px;
+  }
+  .articles p {
+    font-size: 13px;
+  }
+  .articles a {
+    font-size: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -625,5 +643,26 @@
     opacity: 1;
   }
 
-  .cardFace { transition: none; }
+  .cardFace {
+    transition: none;
+  }
+}
+
+/*
+ * 코르크가 좁아지면 띠는 폭을 다 쓴다. 폭의 48%로 두면 폰에서 118px까지 줄어 제목이
+ * 읽히지 않았다 — 보드가 작아진 것이지 제목이 덜 중요해진 것이 아니다.
+ *
+ * 컨테이너 질의의 기준은 .corkArea 다. 뷰포트가 아니라 코르크를 보고 정해야, 같은 폭이라도
+ * 보드가 큰 화면과 작은 화면에서 다르게 굴지 않는다.
+ */
+@container (max-width: 420px) {
+  .banner {
+    width: 100%;
+  }
+
+  /* 한 줄에 한 장이면 종이가 세로로 길어져, 이유를 바닥에 붙여 두면 제목과의 사이가 크게
+     빈다. 이 폭에서는 글을 위로 모아 읽는 순서대로 붙인다. */
+  .reason {
+    margin-top: 0;
+  }
 }

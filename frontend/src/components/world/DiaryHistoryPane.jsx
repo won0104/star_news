@@ -192,10 +192,13 @@ export function DiaryHistoryPane() {
     >
       <DiaryShell stageClassName={styles.diaryStage} frameClassName={styles.diaryFrame}>
 
-        <Link className={styles.reportBookmark} to="/app?view=report">
-          <img src={`${BOOKMARK_ASSET}/bookmark-report-blank.svg`} alt="" aria-hidden="true" />
-          <span>나의 리포트</span>
-        </Link>
+        {/* 자리와 자르는 선은 틈(.reportSlot)이 갖고, 책갈피는 그 안에서 뽑힌다. */}
+        <div className={styles.reportSlot}>
+          <Link className={styles.reportBookmark} to="/app?view=report">
+            <img src={`${BOOKMARK_ASSET}/report-v2.webp`} alt="" aria-hidden="true" />
+            <span>나의 리포트</span>
+          </Link>
+        </div>
 
         <nav className={styles.categoryBookmarks} aria-label="뉴스 카테고리">
           {TOPICS.map((item) => {
@@ -209,7 +212,7 @@ export function DiaryHistoryPane() {
                 onClick={() => selectTopic(item)}
               >
                 <img
-                  src={`${BOOKMARK_ASSET}/tab-${selected ? 'selected' : 'default'}-blank.svg`}
+                  src={`${BOOKMARK_ASSET}/right-${selected ? 'active' : 'idle'}-v2.webp`}
                   alt=""
                   aria-hidden="true"
                 />
@@ -218,6 +221,10 @@ export function DiaryHistoryPane() {
             )
           })}
         </nav>
+
+        {/* 책의 종이 — 세로 화면에서 여기만 스크롤된다. 탭은 이 밖에 있어 책 가장자리에
+            그대로 남는다. 가로에서는 자리를 차지하지 않는 투명한 층이다. */}
+        <div className={styles.pageScroll}>
 
         <header className={styles.diaryTitle}>
           <span>MY CONSTELLATION ARCHIVE</span>
@@ -418,6 +425,8 @@ export function DiaryHistoryPane() {
             </div>
           )}
         </article>
+
+        </div>
       </DiaryShell>
 
     </section>
