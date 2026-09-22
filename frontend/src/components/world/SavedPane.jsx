@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { fetchArticleDetail, generateArticleSummary } from '../../api/articles'
-import { fetchArticleBookmarks, fetchNodeBookmarks } from '../../api/bookmarks'
+import { fetchArticleBookmarks, fetchNodeBookmarks, setArticleBookmark } from '../../api/bookmarks'
 import { fetchNodeArticles, fetchNodeDetail } from '../../api/trend'
 import { nodeTypeLabels, subtypeLabels } from '../../data/trendNeighbors'
-import { savedArticlesSample, savedCopy } from '../../data/world'
+import { savedCopy } from '../../data/world'
 import styles from './SavedPane.module.css'
 
 /**
@@ -21,13 +21,10 @@ import styles from './SavedPane.module.css'
  * Bookmarks need a token. A signed-out reader gets 401, which is not an error to report
  * but a state to explain — the screen says so.
  *
- * Nothing can be bookmarked yet: the write endpoints are not wired here, and there is no
- * public way to reach an article id to bookmark in the first place. So rather than leave
- * the page empty while it is being designed, an empty or refused load falls back to the
- * sample in data/world.js and says so on the page. Set SAMPLE_WHEN_EMPTY to false, or
- * delete it and the `sample` branches, once real bookmarks are landing.
+ * 비어 있을 때 표본을 깔던 것은 걷어냈다. 북마크를 넣고 뺄 길이 없던 동안의 임시였고, 지금은
+ * 트렌드·나의 기록·이 화면 모두에서 담고 뺄 수 있다. 오히려 마지막 하나를 해제하면 표본
+ * 세 건이 나타나 지운 것이 되살아난 것처럼 보였다. 빈 목록은 빈 목록이라고 말한다.
  */
-const SAMPLE_WHEN_EMPTY = true
 export function SavedPane({ kind }) {
   const copy = savedCopy[kind]
   const [list, setList] = useState(null)
@@ -69,12 +66,23 @@ export function SavedPane({ kind }) {
       .catch(() => setState('failed'))
   }
 
-  const live = list?.items ?? []
-  // 로그인 전이거나, 로그인했지만 저장한 것이 없거나, 불러오지 못했을 때.
-  const sample =
-    SAMPLE_WHEN_EMPTY && kind === 'articles' && state !== 'loading' && live.length === 0
-  const source = sample ? savedArticlesSample : list
-  const items = source?.items ?? []
+  /**
+   * 해제한 기사를 목록에서 뺀다.
+   *
+   * 다른 화면의 책갈피와 달리 여기서는 자리에 남겨 둘 수 없다. 이 목록의 뜻 자체가 "저장한
+   * 것"이라, 해제한 기사가 그대로 있으면 목록이 제 이름과 어긋난다.
+   *
+   * 왼쪽에 펼쳐 둔 것이 그 기사였다면 함께 닫는다 — 목록에 없는 것을 읽고 있는 상태가 된다.
+   * `totalCount` 같은 집계는 서버가 주는 값이라 손대지 않는다. 다시 불러오면 맞춰진다.
+   */
+  const removeArticle = (articleId) => {
+    setList((was) =>
+      was ? { ...was, items: was.items.filter((item) => item.articleId !== articleId) } : was,
+    )
+    setChosen((was) => (was?.articleId === articleId ? null : was))
+  }
+
+  const items = list?.items ?? []
   const keyOf = (item) => (kind === 'events' ? item.nodeId : item.articleId)
 
   return (
@@ -91,7 +99,7 @@ export function SavedPane({ kind }) {
           kind === 'events' ? (
             <EventDetail key={chosen.nodeId} node={chosen} />
           ) : (
-            <ArticleDetail key={chosen.articleId} article={chosen} sample={sample} />
+            <ArticleDetail key={chosen.articleId} article={chosen} />
           )
         ) : (
           <p className={styles.placeholder}>{savedCopy.pickOne}</p>
@@ -102,30 +110,32 @@ export function SavedPane({ kind }) {
       <div className={styles.rightPage}>
         {state === 'loading' && <p className={styles.notice}>{savedCopy.loading}</p>}
 
-        {!sample && state === 'signedOut' && (
+        {state === 'signedOut' && (
           <div className={styles.notice}>
             <p>{savedCopy.signedOut}</p>
             <p className={styles.noticeHint}>{savedCopy.signedOutHint}</p>
           </div>
         )}
 
-        {!sample && state === 'failed' && <p className={styles.notice}>{savedCopy.failed}</p>}
+        {state === 'failed' && <p className={styles.notice}>{savedCopy.failed}</p>}
 
-        {!sample && state === 'ready' && items.length === 0 && (
+        {state === 'ready' && items.length === 0 && (
           <div className={styles.notice}>
             <p>{copy.empty}</p>
             <p className={styles.noticeHint}>{copy.emptyHint}</p>
           </div>
         )}
 
-        {(sample || state === 'ready') && items.length > 0 && (
+        {state === 'ready' && items.length > 0 && (
           <>
             <ul className={styles.list}>
               {items.map((item) => (
-                <li key={keyOf(item)}>
+                <li key={keyOf(item)} className={styles.row}>
                   <button
                     type="button"
-                    className={chosen && keyOf(chosen) === keyOf(item) ? styles.rowOn : ''}
+                    className={`${styles.rowPick} ${
+                      chosen && keyOf(chosen) === keyOf(item) ? styles.rowOn : ''
+                    }`}
                     aria-current={chosen && keyOf(chosen) === keyOf(item) ? 'true' : undefined}
                     onClick={() => setChosen(item)}
                   >
@@ -135,20 +145,89 @@ export function SavedPane({ kind }) {
                     </small>
                     <strong>{kind === 'events' ? item.name : item.title}</strong>
                   </button>
+
+                  {kind === 'articles' && (
+                    <UnsaveButton
+                      article={item}
+                      onRemoved={() => removeArticle(item.articleId)}
+                    />
+                  )}
                 </li>
               ))}
             </ul>
 
-            {source?.hasNext && (
+            {list?.hasNext && (
               <button type="button" className={styles.more} onClick={more}>
                 {savedCopy.more}
               </button>
             )}
-
-            {sample && <p className={styles.sampleNote}>{savedCopy.sampleNote}</p>}
           </>
         )}
       </div>
+    </>
+  )
+}
+
+/**
+ * 행 오른쪽의 북마크 해제.
+ *
+ * 되돌리기(undo)를 두지 않는 대신 응답을 기다렸다가 지운다. 다른 화면의 책갈피는 낙관적으로
+ * 먼저 칠하지만(useBookmark), 여기서 낙관적으로 하면 실패했을 때 지운 행을 원래 자리에 되살려
+ * 놓아야 한다 — 그 사이 `더 보기`로 목록이 늘어났을 수도 있어 자리를 장담할 수 없다.
+ * 요청 하나 기다리는 값이 그 복잡함보다 싸다.
+ *
+ * 실패는 행 안에 한 줄로 남긴다. 행이 사라지지 않았다는 것 자체가 이미 절반의 안내다.
+ */
+function UnsaveButton({ article, onRemoved }) {
+  const [pending, setPending] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  const unsave = () => {
+    if (pending) return
+    setPending(true)
+    setFailed(false)
+    setArticleBookmark(article.articleId, false)
+      .then((confirmed) => {
+        // API 가 확정 상태를 돌려준다. 여전히 담긴 것으로 온다면 해제되지 않은 것이므로
+        // 행을 지우면 안 된다 — 다시 불러오면 되살아나 사라졌다 나타나는 꼴이 된다.
+        if (confirmed) {
+          setFailed(true)
+          setPending(false)
+          return
+        }
+        onRemoved()
+      })
+      .catch(() => {
+        setFailed(true)
+        setPending(false)
+      })
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        className={styles.unsave}
+        aria-label={`${article.title} ${savedCopy.unsave}`}
+        title={savedCopy.unsave}
+        disabled={pending}
+        onClick={unsave}
+      >
+        <svg viewBox="0 0 13 17" aria-hidden>
+          <path
+            d="M1 1.6A.6.6 0 0 1 1.6 1h9.8a.6.6 0 0 1 .6.6v14.2l-5.5-3.6L1 15.8z"
+            fill="currentColor"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {failed && (
+        <small className={styles.unsaveFailed} role="status">
+          {savedCopy.unsaveFailed}
+        </small>
+      )}
     </>
   )
 }
@@ -240,25 +319,22 @@ const SUMMARY_MAX_TRIES = 3
  * 요약이 없는 이유는 한 가지가 아니다. 본문이 없어 만들 수 없는 것(422)과 만들다 실패한
  * 것(502)과 남이 만드는 중인 것(PROCESSING)은 읽는 사람이 할 일이 다르므로 따로 말한다.
  */
-function ArticleDetail({ article, sample }) {
-  const [detail, setDetail] = useState(sample ? article : null)
+function ArticleDetail({ article }) {
+  const [detail, setDetail] = useState(null)
   // 북마크 행이 이미 들고 있는 요약이 출발점이다. 있으면 생성을 부르지 않는다.
   const [summary, setSummary] = useState(article.summary ?? null)
-  const [summaryState, setSummaryState] = useState(
-    sample || article.summary ? 'ready' : 'loading',
-  )
+  const [summaryState, setSummaryState] = useState(article.summary ? 'ready' : 'loading')
 
   useEffect(() => {
-    if (sample) return
     const controller = new AbortController()
     fetchArticleDetail(article.articleId, { signal: controller.signal })
       .then(setDetail)
       .catch(() => {})
     return () => controller.abort()
-  }, [article, sample])
+  }, [article])
 
   useEffect(() => {
-    if (sample || article.summary) return
+    if (article.summary) return
     const controller = new AbortController()
     let timer = null
     let tries = 0
@@ -292,7 +368,7 @@ function ArticleDetail({ article, sample }) {
       controller.abort()
       if (timer) clearTimeout(timer)
     }
-  }, [article, sample])
+  }, [article])
 
   const url = detail?.originalUrl
 

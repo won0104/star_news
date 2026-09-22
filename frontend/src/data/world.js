@@ -71,59 +71,21 @@ export const reportCopy = {
   failed: '리포트를 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.',
   signIn: '로그인하러 가기',
 }
-
-const SAVED_PRESS = ['연합뉴스', '한국경제', '전자신문', '한겨레', '머니투데이']
-
-/**
- * 저장한 기사 표본 — `GET /users/me/bookmarks/articles` 응답 형태.
- *
- * CursorResponse<ArticleBookmarkItem>: `{ items, hasNext, nextCursor }`, 각 항목은
- * `{ articleId, title, publisher, publishedAt, summary, bookmarkedAt }`.
- *
- * 화면을 비워두지 않기 위한 것이고, 실제 북마크가 있으면 쓰이지 않는다. 목록이 스크롤되는지
- * 보려면 한 화면보다 길어야 해서 아홉 건을 둔다. `hasNext` 는 false — 다음 쪽을 가져올
- * 수 없는데 있다고 하면 눌러도 실패하는 버튼이 생긴다.
- */
-export const savedArticlesSample = {
-  items: [
-    ['SK하이닉스, HBM3E 수율 80% 근접', '수율 발언 이후 주가가 20만 원을 돌파했고, 기술 자신감과 무리수라는 평가가 엇갈리고 있다.'],
-    ['한국은행, 기준금리 3.50% 8차례 연속 동결', '물가가 5개월 연속 3%대에 머무르는 가운데 인하 압력과 물가 불확실성이 맞섰다.'],
-    ['엔비디아, 차세대 가속기에 HBM4 채택', '공급망 재편이 예상되며 국내 메모리 업계의 수주 경쟁이 본격화되고 있다.'],
-    ['유니테스트, SK하이닉스와 검사장비 공급 계약', '테스트 공정 수요가 늘며 후공정 장비업체에 대한 관심이 커졌다.'],
-    ['원·달러 환율 1,330원대 진입', '수출 채산성과 물가에 동시에 영향을 주는 구간으로 들어섰다.'],
-    ['미국, 대중 반도체 수출통제 확대', '허가 요건이 추가로 넓어지며 장비·소재 기업의 대응이 갈리고 있다.'],
-    ['여야, 내년도 예산안 협상 착수', '법정 기한 내 처리를 목표로 상임위별 심사 일정이 조율되고 있다.'],
-    ['EU, AI법 단계적 시행', '고위험 영역부터 적용되며 국내 기업의 준비 상황이 점검되고 있다.'],
-    ['한미반도체, 본더 수주 사상 최대', 'HBM 생산 확대에 따라 연간 수주가 최고치를 기록했다.'],
-  ].map(([title, rawSummary], i) => ({
-    articleId: 940001 + i,
-    title,
-    publisher: SAVED_PRESS[i % SAVED_PRESS.length],
-    publishedAt: `2026-09-${String(16 - i).padStart(2, '0')}T09:${String(10 + i * 5).padStart(2, '0')}:00+09:00`,
-    summary: i === 4 || i === 7 ? null : rawSummary,
-    bookmarkedAt: `2026-09-${String(16 - Math.floor(i / 2)).padStart(2, '0')}T21:00:00+09:00`,
-    // 상세 응답이 붙기 전까지 왼쪽 페이지가 쓸 값. example.com 은 IANA 예약 도메인이라
-    // 진짜 기사로 오해될 수 없다 — 표본이라는 사실이 주소에도 남는다.
-    originalUrl: `https://example.com/articles/${940001 + i}`,
-    summaryStatus: i === 4 ? 'NOT_REQUESTED' : i === 7 ? 'PROCESSING' : 'COMPLETED',
-  })),
-  hasNext: false,
-  nextCursor: null,
-}
-
 /** 저장한 것들 화면의 문구. */
 export const savedCopy = {
   events: {
     title: '저장한 사건',
     blurb: '즐겨찾기한 사건입니다. 왼쪽에서 자세히 볼 수 있어요.',
-    empty: '아직 저장한 사건이 없어요.',
-    emptyHint: '별자리에서 사건을 즐겨찾기하면 여기에 모입니다.',
+    empty: '여기는 아직 비어 있어요.',
+    emptyHint:
+      '별자리에서 사건에 ★ 을 달아 두면 여기 모입니다. 며칠 뒤에 다시 와도 그 사건이 어떻게 이어졌는지 따라갈 수 있어요.',
   },
   articles: {
     title: '저장한 기사',
     blurb: '북마크한 기사입니다. 왼쪽에서 요약을 볼 수 있어요.',
-    empty: '아직 저장한 기사가 없어요.',
-    emptyHint: '기사 목록에서 북마크하면 여기에 모입니다.',
+    empty: '여기는 아직 비어 있어요.',
+    emptyHint:
+      '읽다가 남겨 두고 싶은 기사에 책갈피를 꽂아 두면 여기 모입니다. 언제든 다시 꾼내 읽을 수 있어요.',
   },
   signedOut: '로그인하면 저장한 항목을 볼 수 있어요.',
   signedOutHint: '북마크는 계정에 저장됩니다.',
@@ -132,9 +94,10 @@ export const savedCopy = {
   more: '더 보기',
   savedAt: (at) => `${at} 저장`,
   pickOne: '오른쪽에서 하나를 선택해 보세요.',
+  unsave: '북마크 해제',
+  unsaveFailed: '북마크를 해제하지 못했어요.',
   relatedArticles: '관련 기사',
   openTrend: '오늘의 트렌드에서 보기 →',
-  sampleNote: '표본 데이터 · 저장한 기사 없음',
   origin: '원문 보러가기',
   summaryNone: '이 기사에는 아직 요약이 없어요.',
   summaryPending: '요약을 만드는 중이에요.',

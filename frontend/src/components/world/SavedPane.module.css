@@ -183,9 +183,20 @@
   scrollbar-width: thin;
 }
 
-.list button {
-  display: block;
-  width: 100%;
+/* 행은 고르는 칸과 해제 버튼 둘이다. 예전에는 행 전체가 버튼 하나였는데, 버튼 안에 버튼을
+   넣을 수 없어 형제로 갈랐다. 해제가 실패하면 안내가 아래 줄 전체를 차지한다.
+   격자가 아니라 flex 인 이유는 해제 버튼이 없는 행(저장한 사건·표본) 때문이다 — 격자에서는
+   두 번째 칸이 비어도 그 사이 간격이 그대로 남아 오른쪽이 4px 밀린다. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.rowPick {
+  flex: 1;
+  min-width: 0;
   padding: 3.5% 4%;
   border: 1px solid rgba(94, 74, 51, 0.18);
   border-radius: 4px;
@@ -195,7 +206,7 @@
   transition: border-color 140ms ease, background 140ms ease;
 }
 
-.list button:hover {
+.rowPick:hover {
   border-color: rgba(94, 74, 51, 0.4);
   background: rgba(255, 253, 248, 0.7);
 }
@@ -203,6 +214,43 @@
 .list button:focus-visible {
   outline: 2px solid #182b43;
   outline-offset: 2px;
+}
+
+/* 채워진 책갈피다 — 이 목록의 모든 기사는 이미 담긴 것이라 빈 상태가 없다. 누르면 빠진다는
+   뜻이 드러나도록 평소에는 옅게 두고 올리면 붉은 쪽으로 간다. */
+.unsave {
+  display: grid;
+  place-items: center;
+  width: clamp(22px, 2vw, 30px);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: rgba(120, 102, 80, 0.55);
+  cursor: pointer;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.unsave svg {
+  width: clamp(9px, 0.76vw, 12px);
+  height: auto;
+}
+
+.unsave:hover:not(:disabled) {
+  border-color: rgba(150, 74, 60, 0.32);
+  background: rgba(168, 112, 92, 0.1);
+  color: #a8705c;
+}
+
+.unsave:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.unsaveFailed {
+  flex-basis: 100%;
+  font: clamp(7px, 0.58vw, 10px) var(--font-sans);
+  color: #a8705c;
 }
 
 .rowOn {
@@ -280,16 +328,6 @@
   .list {
     max-height: 320px;
   }
-}
-
-/* 지금 보고 있는 것이 실제 북마크가 아님을 알린다. 표본을 진짜처럼 두면 나중에
-   "저장했는데 왜 목록이 그대로냐"로 돌아온다. */
-.sampleNote {
-  flex: none;
-  margin: 0;
-  font: clamp(7px, 0.6vw, 10px) var(--font-sans);
-  color: #a08b6d;
-  text-align: right;
 }
 
 /* 요약이 없을 때. 본문과 같은 자리지만 흐린 기울임으로, 기사 내용이 아니라 상태임을 알린다. */
