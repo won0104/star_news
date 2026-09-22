@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchArticleDetail } from '../../api/articles'
+import { fetchArticleDetail, generateArticleSummary } from '../../api/articles'
 import { fetchArticleBookmarks, fetchNodeBookmarks } from '../../api/bookmarks'
 import { fetchNodeArticles, fetchNodeDetail } from '../../api/trend'
 import { nodeTypeLabels, subtypeLabels } from '../../data/trendNeighbors'
@@ -221,20 +221,32 @@ function EventDetail({ node }) {
   )
 }
 
+/** 요약이 만들어지길 기다릴 때 다시 물어보는 간격과 횟수. */
+const SUMMARY_RETRY_MS = 2500
+const SUMMARY_MAX_TRIES = 3
+
 /**
  * 저장한 기사 하나.
  *
  * The bookmark row already carries a summary, so the title and the text appear at once;
- * `GET /articles/{id}` is what adds the original link and the summary's status, and it
- * fills in when it arrives. Keyed by the caller on `articleId`, so choosing another row
- * remounts this rather than letting a slow response land on the wrong article.
+ * `GET /articles/{id}` is what adds the original link, and it fills in when it arrives.
+ * Keyed by the caller on `articleId`, so choosing another row remounts this rather than
+ * letting a slow response land on the wrong article.
  *
- * `summaryStatus` decides what to say when there is no text: not asked for, still being
- * made, or failed are three different things to a reader, and `summary === null` alone
- * cannot tell them apart.
+ * 상세와 요약은 두 요청이고, 서로를 기다리지 않는다. 상세가 실패해도 요약은 뜨고, 요약이
+ * 502 로 죽어도 제목·발행일·원문 링크는 그대로 있다 — 둘을 한 체인으로 묶으면 한쪽 실패가
+ * 아무 상관 없는 다른 쪽까지 지운다.
+ *
+ * 요약이 없는 이유는 한 가지가 아니다. 본문이 없어 만들 수 없는 것(422)과 만들다 실패한
+ * 것(502)과 남이 만드는 중인 것(PROCESSING)은 읽는 사람이 할 일이 다르므로 따로 말한다.
  */
 function ArticleDetail({ article, sample }) {
   const [detail, setDetail] = useState(sample ? article : null)
+  // 북마크 행이 이미 들고 있는 요약이 출발점이다. 있으면 생성을 부르지 않는다.
+  const [summary, setSummary] = useState(article.summary ?? null)
+  const [summaryState, setSummaryState] = useState(
+    sample || article.summary ? 'ready' : 'loading',
+  )
 
   useEffect(() => {
     if (sample) return
@@ -245,8 +257,43 @@ function ArticleDetail({ article, sample }) {
     return () => controller.abort()
   }, [article, sample])
 
-  const summary = detail?.summary ?? article.summary
-  const status = detail?.summaryStatus
+  useEffect(() => {
+    if (sample || article.summary) return
+    const controller = new AbortController()
+    let timer = null
+    let tries = 0
+    // abort 만으로는 부족하다. 응답이 abort 보다 먼저 도착하면 then 이 그대로 돌아
+    // 언마운트된 뒤에도 다음 재시도를 걸어버린다 — 그 체인을 끊는 플래그다.
+    let dropped = false
+
+    const ask = () => {
+      tries += 1
+      generateArticleSummary(article.articleId, { signal: controller.signal })
+        .then((result) => {
+          if (dropped) return
+          if (result?.summaryStatus === 'PROCESSING') {
+            setSummaryState('pending')
+            // 서버가 중복 생성을 막으므로 다시 물어도 GMS 를 두 번 부르지 않는다.
+            if (tries < SUMMARY_MAX_TRIES) timer = setTimeout(ask, SUMMARY_RETRY_MS)
+            return
+          }
+          setSummary(result?.summary ?? null)
+          setSummaryState(result?.summary ? 'ready' : 'none')
+        })
+        .catch((error) => {
+          if (dropped || error?.name === 'AbortError') return
+          setSummaryState(error?.status === 422 ? 'unavailable' : 'failed')
+        })
+    }
+    ask()
+
+    return () => {
+      dropped = true
+      controller.abort()
+      if (timer) clearTimeout(timer)
+    }
+  }, [article, sample])
+
   const url = detail?.originalUrl
 
   return (
@@ -268,7 +315,9 @@ function ArticleDetail({ article, sample }) {
       {summary ? (
         <p className={styles.summary}>{summary}</p>
       ) : (
-        status && <p className={styles.summaryNone}>{summaryNote(status)}</p>
+        summaryState !== 'loading' && (
+          <p className={styles.summaryNone}>{summaryNote(summaryState)}</p>
+        )
       )}
 
       {url && (
@@ -281,9 +330,10 @@ function ArticleDetail({ article, sample }) {
 }
 
 /** 요약이 비어 있는 이유를 화면 말로 옮긴다. */
-function summaryNote(status) {
-  if (status === 'PROCESSING') return savedCopy.summaryPending
-  if (status === 'FAILED') return savedCopy.summaryFailed
+function summaryNote(state) {
+  if (state === 'pending') return savedCopy.summaryPending
+  if (state === 'unavailable') return savedCopy.summaryUnavailable
+  if (state === 'failed') return savedCopy.summaryFailed
   return savedCopy.summaryNone
 }
 
