@@ -232,10 +232,28 @@ export const ambientStars = [
  * 1/1.8 of the image, which is what the sizes in TrendConstellation.module.css assume.
  */
 export const stars = {
-  event: '/assets/trend/star-event.png',
+  event: '/assets/trend/star-event.webp',
   statement: '/assets/trend/star-statement.webp',
   entity: '/assets/trend/star-entity.webp',
 }
+
+/**
+ * 이미 지나온 별. 종류를 가리지 않고 한 장을 쓴다.
+ *
+ * A → B → C 로 걸어 들어가면 B 는 C 의 주변에도 다시 나타난다. 그때 처음 보는 별과 같은
+ * 그림이면 "여기 왔었다"는 사실이 화면에서 사라진다 — 탐색 경로는 상단 빵가루에만 남고,
+ * 별자리 자체는 아무것도 기억하지 못하는 것처럼 보인다.
+ *
+ * 사건·인물·발언을 따로 그리지 않는 이유는, 이 별이 답하는 질문이 "무엇인가"가 아니라
+ * "가봤는가"이기 때문이다. 종류는 평소 별 세 장이 이미 말하고 있고, 지나왔다는 사실에는
+ * 종류가 없다.
+ *
+ * 규격은 `stars` 와 같아야 한다 — 240px 프레임, 몸통이 프레임의 0.72.
+ * 어긋나면 같은 자리에서 별 크기가 달라 보인다(scripts/crop-stars.py).
+ *
+ * 지금 중심인 별은 제외한다. 중심은 "지나온 곳"이 아니라 "지금 보는 곳"이다.
+ */
+export const visitedStar = '/assets/trend/star-visited.webp'
 
 /**
  * 주요 트렌드's constellation: one event at a time, taken apart into what it is made of,

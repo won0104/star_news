@@ -39,29 +39,20 @@ const EVENT_SIZE_STEPS = [
 ];
 
 /**
- * 행성 위의 노드는 세 종류다 — 사건(EVENT), 인물·기관(ENTITY), 발언(STATEMENT).
+ * 행성 위의 노드는 두 종류다 — 분야(TOPIC_CLUSTER)와 사건(EVENT).
  *
- * 색은 이미 분야(topicCode)가, 크기는 읽은 기사 수가 쓰고 있다. 그래서 유형에 남은
- * 채널은 모양이다: 사건은 별, 인물·기관은 구, 발언은 팔면체. 모양은 색과 달리
- * 색맹·저채도 화면에서도 남고, 라벨 없이 멀리서도 구분된다.
+ * 인물·기관과 발언은 올리지 않는다. 한 사건에 딸린 인물이 열 개를 넘는 일이 흔해서,
+ * 구 표면이 이름표로 덮이고 정작 축이 되는 사건이 그 사이에 묻힌다. 둘은 사건을 고른 뒤
+ * 오른쪽 페이지에서 본다 — 거기서는 목록이라 수가 늘어도 읽을 수 있다.
  *
- * `sizeMultiplier` 는 기사 수로 정한 크기 위에 곱해진다. 사건이 이야기의 축이고
- * 인물과 발언은 거기에 붙는 것이므로, 같은 기사 수라도 사건이 가장 크게 선다.
+ * 그래서 행성이 답하는 질문은 "어떤 분야에서 어떤 사건을 읽었나" 하나로 좁혀진다.
+ * 색은 분야(topicCode), 크기는 읽은 기사 수가 쓴다.
+ *
+ * `sizeMultiplier` 는 기사 수로 정한 크기 위에 곱해진다.
  */
 const NODE_STYLE = {
-  TOPIC_CLUSTER: { label: '토픽', sizeMultiplier: 1 },
-  EVENT: { label: '이벤트', sizeMultiplier: 1 },
-  ENTITY: { label: '인물·기관', sizeMultiplier: 0.8 },
-  STATEMENT: { label: '발언', sizeMultiplier: 0.7 },
-};
-
-/**
- * 별 모델(glb)을 쓰지 않는 유형의 기하. 네트워크를 기다리지 않고 바로 만들어지므로,
- * glb 로드가 늦거나 실패해도 인물·발언은 항상 보인다.
- */
-const PRIMITIVE_GEOMETRY = {
-  ENTITY: (size) => new THREE.SphereGeometry(size * 0.3, 20, 14),
-  STATEMENT: (size) => new THREE.OctahedronGeometry(size * 0.34, 0),
+  TOPIC_CLUSTER: { label: '분야', sizeMultiplier: 1 },
+  EVENT: { label: '사건', sizeMultiplier: 1 },
 };
 
 const RELATION_LABEL = {
@@ -89,7 +80,11 @@ function fallbackTopicPoint(index, count) {
 }
 
 function buildLayout(graph) {
-  const nodes = graph.nodes ?? [];
+  // 분야와 사건만 행성에 세운다(위 NODE_STYLE 주석 참조). 인물·발언은 통과시키지 않으므로
+  // 그들에게 걸린 Edge 도 함께 떨군다 — 남겨 두면 없는 노드로 향하는 선이 생긴다.
+  const nodes = (graph.nodes ?? []).filter(
+    (node) => node.kind === 'TOPIC_CLUSTER' || node.nodeType === 'EVENT',
+  );
   const topics = nodes.filter((node) => node.kind === 'TOPIC_CLUSTER');
   const topicAnchors = new Map();
 
@@ -122,7 +117,10 @@ function buildLayout(graph) {
     return { ...node, position: surfacePoint.multiplyScalar(PLANET_RADIUS + elevation) };
   });
 
-  const edges = graph.edges ?? [];
+  const kept = new Set(layoutNodes.map((node) => node.id));
+  const edges = (graph.edges ?? []).filter(
+    (edge) => kept.has(edge.sourceId) && kept.has(edge.targetId),
+  );
   const adjacency = new Map(layoutNodes.map((node) => [node.id, new Set()]));
   edges.forEach((edge) => {
     if (!adjacency.has(edge.sourceId) || !adjacency.has(edge.targetId)) return;
@@ -312,7 +310,6 @@ export default function HistoryPlanet({
       const style = NODE_STYLE[kind] ?? NODE_STYLE.EVENT;
       const sizeStep = eventSizeForArticleCount(node.sourceArticleCount);
       const modelSize = (isTopic ? 0.94 : sizeStep.size * 0.76) * style.sizeMultiplier;
-      const color = colorForNode(node);
       const holder = new THREE.Group();
       holder.position.copy(node.position);
       holder.userData.nodeId = node.id;
@@ -334,23 +331,9 @@ export default function HistoryPlanet({
 
       globe.add(holder);
 
-      // 인물·발언은 별 모델을 쓰지 않으므로 여기서 끝난다. glb 로더는 model 이 이미
-      // 채워진 항목을 건너뛴다.
-      const primitive = PRIMITIVE_GEOMETRY[kind];
+      // 분야와 사건 둘 다 별 모델(glb)을 쓴다 — 아래 GLTFLoader 가 채운다.
       let model = null;
       let modelMaterial = null;
-      if (primitive) {
-        modelMaterial = new THREE.MeshStandardMaterial({
-          color,
-          emissive: color,
-          emissiveIntensity: kind === 'STATEMENT' ? 0.34 : 0.28,
-          roughness: 0.38,
-          metalness: 0.12,
-          transparent: true,
-        });
-        model = new THREE.Mesh(primitive(modelSize), modelMaterial);
-        modelHolder.add(model);
-      }
 
       nodeEntries.set(node.id, {
         node,
@@ -901,7 +884,7 @@ export default function HistoryPlanet({
                 onClick={() => onSelectNode(node)}
               >
                 <strong>{node.title}</strong>
-                {/* 기사 수는 토픽과 사건에만 있다. 인물·발언은 대신 자기 유형을 밝힌다. */}
+                {/* 기사 수가 없으면(분야 칸 등) 대신 자기 유형을 밝힌다. */}
                 <small>
                   {node.sourceArticleCount == null
                     ? (NODE_STYLE[nodeKind(node)] ?? NODE_STYLE.EVENT).label
