@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { fetchRecommendationBoard, fetchRecommendationDetail } from '../../api/recommendations'
 import {
   BOARD_ASSETS,
@@ -11,7 +11,7 @@ import {
   sampleDetail,
 } from '../../data/recommendBoard'
 import { topicName } from '../../data/topics'
-import { useDraggableCard } from '../../hooks/useDraggableCard'
+import { useResizableCard } from '../../hooks/useResizableCard'
 import { useNearestWindow } from '../../hooks/useNearestWindow'
 import { useSession } from '../../store/session'
 import styles from './RecommendPane.module.css'
@@ -39,6 +39,18 @@ const SAMPLE_WHEN_EMPTY = true
 const RECOMMENDATION_COLUMN_COUNT = 5
 const SHEET_ANCHOR_GAP = 14
 const SHEET_EDGE_GAP = 16
+/* 이 폭 아래로는 종이를 카드 옆에 세우지 않는다 — RecommendPane.module.css 의 하단 sheet
+   질의와 같은 값이어야 한다. */
+const SHEET_BESIDE_MIN_WIDTH = 900
+/* 하단 sheet 을 끝까지 밀어 넣었을 때 남는 높이 — 제목 한 줄은 보이게 한다. */
+const SHEET_PEEK_MIN_HEIGHT = 132
+const SHEET_PEEK_MAX_RATIO = 0.92
+const RESIZE_CORNERS = [
+  { direction: 'nw', label: '왼쪽 위 모서리에서 종이 크기 조절' },
+  { direction: 'ne', label: '오른쪽 위 모서리에서 종이 크기 조절' },
+  { direction: 'sw', label: '왼쪽 아래 모서리에서 종이 크기 조절' },
+  { direction: 'se', label: '오른쪽 아래 모서리에서 종이 크기 조절' },
+]
 
 export function RecommendPane({ settled = true }) {
   const account = useSession()
@@ -100,7 +112,8 @@ export function RecommendPane({ settled = true }) {
       {/* 사진과 같은 사각형 — 사진이 뷰포트를 채우므로 이 층도 뷰포트다. */}
       <div className={styles.photoBox}>
         {/* 종이가 사는 곳은 코르크 면뿐이다. 넘치면 나무틀을 넘지 않고 여기서 스크롤된다. */}
-        <div className={styles.corkArea} style={corkPlacement(boardArt)}>
+        {/* data-cork-area: 상세 종이가 이 면의 세로를 그대로 쓴다(useDetailSheetAnchor). */}
+        <div className={styles.corkArea} data-cork-area style={corkPlacement(boardArt)}>
           {/* 제목 종이도 배경에 굽지 않고 독립 에셋으로 건다. */}
           <header className={styles.banner}>
             <img className={styles.bannerPaper} src={BOARD_ASSETS.title} alt="" aria-hidden />
@@ -195,7 +208,9 @@ export function RecommendPane({ settled = true }) {
 function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
   const [detail, setDetail] = useState(sample ? sampleDetail(item) : null)
   const [state, setState] = useState(sample ? 'ready' : 'loading')
-  const { cardRef, cardStyle, dragging, handleProps } = useDraggableCard()
+  const { cardRef, cardStyle, dragging, resizing, positioned, handleProps, resizeHandleProps } =
+    useResizableCard({ minWidth: 260, minHeight: 240 })
+  const { peekStyle, peeking, peekHandleProps } = useBottomSheetPeek(cardRef)
   const anchorStyle = useDetailSheetAnchor(cardRef, anchorIndex, side)
 
   useEffect(() => {
@@ -227,11 +242,23 @@ function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
     <aside
       ref={cardRef}
       className={styles.sheet}
-      style={{ ...anchorStyle, ...cardStyle }}
+      style={{ ...anchorStyle, ...cardStyle, ...peekStyle }}
       data-dragging={dragging}
+      data-resizing={resizing}
+      data-peeking={peeking}
+      data-positioned={positioned}
       data-side={side}
       aria-labelledby="recommend-sheet-title"
     >
+      {/* 하단 sheet 에서만 보인다. 가로모드에서는 아래 네 모서리가 그 일을 한다. */}
+      <button
+        type="button"
+        className={styles.peek}
+        aria-label={boardCopy.peek}
+        title={`${boardCopy.peek} — 방향키로도 조절할 수 있습니다`}
+        {...peekHandleProps}
+      />
+
       <button
         type="button"
         className={styles.sheetClose}
@@ -291,6 +318,17 @@ function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
           </section>
         </>
       )}
+
+      {RESIZE_CORNERS.map(({ direction, label }) => (
+        <button
+          key={direction}
+          type="button"
+          className={`${styles.resizeHandle} ${styles[`resize${direction.toUpperCase()}`]}`}
+          aria-label={label}
+          title={`${label} — 방향키로도 조절할 수 있습니다`}
+          {...resizeHandleProps(direction)}
+        />
+      ))}
     </aside>
   )
 }
@@ -298,9 +336,12 @@ function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
 /**
  * 상세 종이를 화면 모서리가 아니라 선택한 추천 종이에 붙인다.
  *
- * 오른쪽으로 열 때는 선택 종이의 오른쪽 변, 왼쪽으로 열 때는 왼쪽 변에서 시작한다.
- * 상세 내용이 늦게 도착해 높이가 바뀌어도 화면 밖으로 밀리지 않도록 두 요소의 크기를
- * 다시 관찰한다. 모바일은 별도 하단 sheet 레이아웃이 있으므로 위치를 덮어쓰지 않는다.
+ * 오른쪽으로 열 때는 선택 종이의 오른쪽 변, 왼쪽으로 열 때는 왼쪽 변에서 시작한다. 가로만
+ * 그렇다 — 세로 자리와 높이는 코르크 면에서 가져와 어느 카드를 눌러도 같다. 카드마다 높이가
+ * 달라지면 열 장을 훑는 동안 종이가 위아래로 튀고, 내용 길이가 종이 크기를 정하게 된다.
+ *
+ * 보드가 줄거나 늘면 함께 따라가야 하므로 카드·종이와 함께 코르크도 다시 관찰한다.
+ * 모바일은 별도 하단 sheet 레이아웃이 있으므로 위치를 덮어쓰지 않는다.
  */
 function useDetailSheetAnchor(cardRef, anchorIndex, side) {
   const [anchorStyle, setAnchorStyle] = useState(null)
@@ -308,15 +349,17 @@ function useDetailSheetAnchor(cardRef, anchorIndex, side) {
   useLayoutEffect(() => {
     const sheet = cardRef.current
     const anchorElement = document.querySelector(`[data-recommendation-index="${anchorIndex}"]`)
+    const corkElement = document.querySelector('[data-cork-area]')
     if (!sheet || !anchorElement) return undefined
 
     const placeBesideCard = () => {
-      if (window.innerWidth <= 900) {
+      if (window.innerWidth <= SHEET_BESIDE_MIN_WIDTH) {
         setAnchorStyle(null)
         return
       }
 
       const anchorRect = anchorElement.getBoundingClientRect()
+      const corkRect = corkElement?.getBoundingClientRect()
       const sheetRect = sheet.getBoundingClientRect()
       const boundaryElement = sheet.offsetParent
       const boundaryRect = boundaryElement?.getBoundingClientRect() ?? {
@@ -338,7 +381,10 @@ function useDetailSheetAnchor(cardRef, anchorIndex, side) {
           ? anchorRect.left - sheetRect.width - SHEET_ANCHOR_GAP
           : anchorRect.right + SHEET_ANCHOR_GAP
       const maxLeft = Math.max(minLeft, maxRight - sheetRect.width)
-      const maxTop = Math.max(minTop, maxBottom - sheetRect.height)
+      // 세로는 누른 카드가 아니라 보드가 정한다 — 같은 행, 같은 높이.
+      const height = Math.min(corkRect?.height ?? sheetRect.height, maxBottom - minTop)
+      const desiredTop = corkRect ? corkRect.top : anchorRect.top - SHEET_EDGE_GAP
+      const maxTop = Math.max(minTop, maxBottom - height)
       // 브라우저가 키보드 포커스나 자동 scroll-into-view 때문에 overflow 컨테이너를
       // 내부 스크롤한 경우에도 viewport에서 보이는 카드 옆에 그대로 붙인다.
       const left =
@@ -346,13 +392,16 @@ function useDetailSheetAnchor(cardRef, anchorIndex, side) {
         boundaryRect.left +
         (boundaryElement?.scrollLeft ?? 0)
       const top =
-        clamp(anchorRect.top - SHEET_EDGE_GAP, minTop, maxTop) -
-        boundaryRect.top +
-        (boundaryElement?.scrollTop ?? 0)
-      const nextStyle = { top, right: 'auto', bottom: 'auto', left }
+        clamp(desiredTop, minTop, maxTop) - boundaryRect.top + (boundaryElement?.scrollTop ?? 0)
+      // 높이만 넘기면 폭(aspect-ratio)과 안쪽 여백이 CSS 에서 따라온다.
+      const nextStyle = { top, '--sheet-h': `${height}px`, right: 'auto', bottom: 'auto', left }
 
       setAnchorStyle((current) =>
-        current?.top === nextStyle.top && current?.left === nextStyle.left ? current : nextStyle,
+        current?.top === nextStyle.top &&
+        current?.left === nextStyle.left &&
+        current?.['--sheet-h'] === nextStyle['--sheet-h']
+          ? current
+          : nextStyle,
       )
     }
 
@@ -362,6 +411,7 @@ function useDetailSheetAnchor(cardRef, anchorIndex, side) {
       typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(placeBesideCard)
     resizeObserver?.observe(anchorElement)
     resizeObserver?.observe(sheet)
+    if (corkElement) resizeObserver?.observe(corkElement)
 
     return () => {
       window.removeEventListener('resize', placeBesideCard)
@@ -370,6 +420,89 @@ function useDetailSheetAnchor(cardRef, anchorIndex, side) {
   }, [anchorIndex, cardRef, side])
 
   return anchorStyle
+}
+
+/**
+ * 하단 sheet 을 위아래로 여닫는다 — 높이만 바꾸고 좌우와 아래 변은 화면에 붙여 둔다.
+ *
+ * 가로모드의 모서리 조절(useResizableCard)은 이 sheet 에 걸리지 않는다. 그 훅은 offsetParent
+ * 를 기준점으로 삼는데 `position: fixed` 인 요소에는 그것이 없어 조작이 시작되지 않는다.
+ * 여기서 필요한 것도 네 방향이 아니라 높이 하나뿐이라 따로 둔다.
+ *
+ * 폭이 바뀌면 손으로 잡은 높이를 버리고 CSS 배치로 돌아간다 — 가로모드로 넘어갔을 때
+ * 하단 sheet 시절의 높이가 종이에 남지 않도록.
+ */
+function useBottomSheetPeek(cardRef) {
+  const [height, setHeight] = useState(null)
+  const [peeking, setPeeking] = useState(false)
+  const dragRef = useRef(null)
+
+  useEffect(() => {
+    const reset = () => {
+      dragRef.current = null
+      setPeeking(false)
+      setHeight(null)
+    }
+
+    window.addEventListener('resize', reset)
+    return () => window.removeEventListener('resize', reset)
+  }, [])
+
+  const limit = (value) =>
+    clamp(value, SHEET_PEEK_MIN_HEIGHT, Math.round(window.innerHeight * SHEET_PEEK_MAX_RATIO))
+
+  const begin = (event) => {
+    const sheet = cardRef.current
+    if (event.button !== 0 || !sheet) return
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startHeight: sheet.getBoundingClientRect().height,
+    }
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    event.preventDefault()
+    setPeeking(true)
+  }
+
+  const move = (event) => {
+    const drag = dragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    // 위로 끌수록(음수 delta) 종이가 나온다.
+    setHeight(limit(drag.startHeight - (event.clientY - drag.startY)))
+  }
+
+  const end = (event) => {
+    const drag = dragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    dragRef.current = null
+    setPeeking(false)
+  }
+
+  const nudge = (event) => {
+    const sheet = cardRef.current
+    if (!sheet || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return
+
+    const step = event.shiftKey ? 48 : 16
+    const current = sheet.getBoundingClientRect().height
+    setHeight(limit(current + (event.key === 'ArrowUp' ? step : -step)))
+    event.preventDefault()
+  }
+
+  return {
+    peeking,
+    // max-height 를 풀지 않으면 72vh 에서 더 끌어올려지지 않는다.
+    peekStyle: height === null ? undefined : { height: `${height}px`, maxHeight: 'none' },
+    peekHandleProps: {
+      onPointerDown: begin,
+      onPointerMove: move,
+      onPointerUp: end,
+      onPointerCancel: end,
+      onKeyDown: nudge,
+    },
+  }
 }
 
 function clamp(value, min, max) {
