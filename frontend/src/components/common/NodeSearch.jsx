@@ -8,10 +8,15 @@ const TYPE_LABEL = {
   STATEMENT: '발언',
 }
 
-export function NodeSearch({ night = false, onSelect }) {
+/**
+ * `docked` 는 검색창이 세로 레일 안에 자리를 받았다는 뜻이다. 스스로 떠 있기를 그만두고,
+ * 레일 폭(176~208px)에 안내 문구가 잘리지 않도록 짧은 쪽을 쓴다.
+ */
+export function NodeSearch({ night = false, docked = false, takeFocus = false, onSelect }) {
   const inputId = useId()
   const listId = useId()
   const rootRef = useRef(null)
+  const inputRef = useRef(null)
   const [query, setQuery] = useState('')
   const [items, setItems] = useState([])
   const [state, setState] = useState('idle')
@@ -52,10 +57,15 @@ export function NodeSearch({ night = false, onSelect }) {
     return () => document.removeEventListener('pointerdown', close)
   }, [])
 
+  // 아이콘을 눌러 막 열린 검색창이면 바로 쓸 수 있어야 한다 — 한 번 더 눌러 커서를 옮기게 두지 않는다.
+  useEffect(() => {
+    if (takeFocus) inputRef.current?.focus()
+  }, [takeFocus])
+
   return (
     <search
       ref={rootRef}
-      className={`${styles.search} ${night ? styles.night : ''}`}
+      className={`${styles.search} ${night ? styles.night : ''} ${docked ? styles.docked : ''}`}
       aria-label="뉴스 그래프 검색"
     >
       <label className={styles.label} htmlFor={inputId}>
@@ -65,11 +75,12 @@ export function NodeSearch({ night = false, onSelect }) {
       <div className={styles.control}>
         <span className={styles.icon} aria-hidden>⌕</span>
         <input
+          ref={inputRef}
           id={inputId}
           className={styles.input}
           type="search"
           value={query}
-          placeholder="사건, 인물, 기관, 발언 검색"
+          placeholder={docked ? '사건·인물 검색' : '사건, 인물, 기관, 발언 검색'}
           autoComplete="off"
           aria-controls={open ? listId : undefined}
           aria-expanded={open}

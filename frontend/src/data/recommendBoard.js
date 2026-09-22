@@ -112,6 +112,7 @@ export const boardCopy = {
   reasonLabel: '추천 이유',
   open: (label) => `${label} — 요약과 기사 보기`,
   close: '닫기',
+  peek: '종이를 위아래로 끌어 높이 조절',
   summaryPending: '요약을 준비하고 있어요. 조금 뒤에 다시 열어보세요.',
   articles: '이 사건을 다룬 기사',
   articlesEmpty: '아직 연결된 기사가 없어요.',
