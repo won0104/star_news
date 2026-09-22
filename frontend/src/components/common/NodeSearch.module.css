@@ -109,6 +109,26 @@
   padding: 6px;
   overflow-y: auto;
   list-style: none;
+  /* 기본 회색 막대는 종이든 밤하늘이든 혼자 튄다. 결과창의 결을 따른다. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 102, 82, 0.38) transparent;
+}
+
+.list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(120, 102, 82, 0.38);
+}
+
+.list::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 102, 82, 0.6);
 }
 
 .item {
@@ -223,6 +243,55 @@
 
 .night .status {
   color: rgba(246, 236, 215, 0.72);
+}
+
+.night .list {
+  scrollbar-color: rgba(232, 199, 128, 0.3) transparent;
+}
+
+.night .list::-webkit-scrollbar-thumb {
+  background: rgba(232, 199, 128, 0.3);
+}
+
+.night .list::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 199, 128, 0.52);
+}
+
+/*
+ * 세로 레일 안에 놓일 때. 자리는 레일이 정하므로 스스로 떠 있기를 그만둔다.
+ *
+ * 결과 목록만 레일 밖으로 넓게 펼친다. 레일은 176~208px 라 분류 딱지(64px)와 이름이 한 줄에
+ * 들어가지 않고, 흐름에 그대로 두면 목록이 열릴 때마다 아래 목적지들이 밀려 내려간다.
+ */
+@media (min-width: 1024px) {
+  .docked {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+  }
+
+  .docked .control {
+    height: 38px;
+  }
+
+  .docked .icon {
+    margin: 0 5px 0 11px;
+    font-size: 17px;
+  }
+
+  /*
+   * 레일 위가 아니라 레일 오른쪽 옆. 아래로 펼치면 320px 짜리 목록이 레일을 덮어 목적지
+   * 단추들이 가려진다. 18px 은 레일의 안쪽 여백이라 100% + 18px 이 곧 레일의 바깥 변이고,
+   * 거기서 10px 더 띄운다 — 레일 폭이 176~208px 사이에서 변해도 같은 간격으로 남는다.
+   */
+  .docked .results {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 28px);
+    width: 320px;
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 1023px) {
