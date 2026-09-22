@@ -142,6 +142,45 @@
    on the right, with the stitched seam between them and paper from 3% to 94.4% down.
    The content sits well inside both the leather edge and the stitched gutter, so charts
    read as marks on the page instead of touching the book's frame. */
+/* 차트를 못 그릴 때 그 자리에 들어가는 한 줄. 펼친 양면에 걸쳐 가운데 놓는다 —
+   한쪽 페이지에만 적으면 반대쪽이 비어 아직 로딩 중인 것처럼 보인다. */
+.notice {
+  position: absolute;
+  z-index: 3;
+  top: 9%;
+  bottom: 9%;
+  left: 14.4%;
+  right: 14.4%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 6%;
+  text-align: center;
+  color: #7b6650;
+}
+
+.notice p {
+  margin: 0;
+  max-width: 34ch;
+  font: clamp(10px, 0.92vw, 14px)/1.7 var(--font-serif-kr);
+  word-break: keep-all;
+}
+
+.noticeAction {
+  font: 700 clamp(9px, 0.78vw, 12px) var(--font-sans);
+  letter-spacing: 0.04em;
+  color: #44392f;
+  text-decoration: underline;
+  text-decoration-color: rgba(139, 115, 85, 0.5);
+  text-underline-offset: 4px;
+}
+
+.noticeAction:hover {
+  text-decoration-color: #8b7355;
+}
+
 .leftPage,
 .rightPage {
   position: absolute;
@@ -338,6 +377,22 @@
   min-height: 0;
   margin-top: 7%;
   padding-left: 7%;
+}
+
+/* 12주 판이 비었을 때 그 안에 놓이는 한 줄. 출처 블록의 각주와 같은 서체·색이라
+   두 블록이 같은 방식으로 비어 있다고 말한다. */
+.plotEmpty {
+  position: absolute;
+  z-index: 1;
+  left: 7%;
+  right: 0;
+  top: 50%;
+  margin: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  font: clamp(7px, 0.58vw, 10px)/1.5 var(--font-serif-kr);
+  color: #8b7355;
+  word-break: keep-all;
 }
 
 .tick {
