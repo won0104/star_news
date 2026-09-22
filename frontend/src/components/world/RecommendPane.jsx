@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
+import { recordNodeClick } from '../../api/personalGraph'
 import { fetchRecommendationBoard, fetchRecommendationDetail } from '../../api/recommendations'
 import {
   BOARD_ASSETS,
@@ -72,9 +73,22 @@ export function RecommendPane({ settled = true }) {
   const detailSide =
     openIndex >= 0 && openIndex % RECOMMENDATION_COLUMN_COUNT > 2 ? 'left' : 'right'
 
+  /**
+   * 카드를 펼치는 것이 이 화면의 "추천을 확인했다"이다. 그 순간만 개인 그래프에 클릭으로
+   * 남긴다 — `POST /users/me/graph/nodes/EVENT/{eventId}/clicks`. 접는 것은 새 클릭이
+   * 아니므로 보내지 않고, 이미 눌러 본 Event 를 다시 눌렀을 때는 서버가 클릭 수를 올린다.
+   *
+   * 키는 `item.eventId` 다 — 스펙이 말하는 Neo4j Event 의 nodeId 이고, 상세 조회에 쓰는
+   * userRecommendationId 가 아니다. 표본 카드의 키는 Neo4j 에 없어 404 로만 돌아오고,
+   * 비로그인은 401 이므로 둘 다 부르지 않는다. 실패해도 화면이 할 일은 없어 조용히 삼킨다.
+   */
   const handleCardToggle = (item) => {
     const isOpen = openId === item.userRecommendationId
     setOpenId(isOpen ? null : item.userRecommendationId)
+    if (isOpen) return
+    if (!sample && account && item.eventId) {
+      recordNodeClick('EVENT', item.eventId).catch(() => {})
+    }
   }
 
   const handleSheetClose = () => {
