@@ -149,7 +149,7 @@ export function AppScene() {
       onSettled={onSettled}
     >
       <TopBar
-        activeId={view === 'foryou2' ? 'foryou' : view}
+        activeId={view}
         nightGlass={view === 'trend'}
         onSelect={open}
         onBrand={() => navigate('/')}
