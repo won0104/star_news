@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import { report, reportTabs } from '../../data/world'
+import { useEffect, useState } from 'react'
+import { fetchNewsReport } from '../../api/report'
+import { reportFromApi } from '../../adapters/newsReport'
+import { reportCopy, reportTabs } from '../../data/world'
+import { useSession } from '../../store/session'
 import { SavedPane } from './SavedPane'
 import { DiaryShell } from './DiaryShell'
 import styles from './DiaryReportPane.module.css'
@@ -25,24 +28,55 @@ const BOOKMARK_ASSET = '/assets/history/bookmarks'
  *
  * The split by field is gone: it was the twelve-week chart's own totals drawn again, so
  * the page spent a block saying what the block beside it already said.
+ *
+ * 차트는 전부 `GET /users/me/statistics/news-report` 의 집계다. 표본으로 대체하지 않는다 —
+ * 리포트는 "내가 무엇을 읽었나"에 답하는 화면이라, 남의 숫자를 채워 넣으면 화면이 하는 말이
+ * 거짓이 된다. 불러오지 못했으면 차트 자리에 그 사실을 적는다.
  */
 export function DiaryReportPane() {
-  const { totals, sources, weeks, terrain } = report
+  const account = useSession()
+  const [report, setReport] = useState(null)
+  const [state, setState] = useState('loading')
   // 오른쪽 가장자리 책갈피가 고르는 페이지. 나의 기록의 카테고리 책갈피와 같은 조작이다.
   const [tab, setTab] = useState('report')
 
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchNewsReport({ signal: controller.signal })
+      .then((payload) => {
+        setReport(reportFromApi(payload))
+        setState('ready')
+      })
+      .catch((error) => {
+        if (error?.name === 'AbortError') return
+        setState(error?.status === 401 ? 'signedOut' : 'failed')
+      })
+    return () => controller.abort()
+  }, [])
+
+  // 401 이어도 세션에 계정이 남아 있으면 처음부터 비로그인인 게 아니라 끊긴 것이다.
+  const notice = {
+    loading: reportCopy.loading,
+    signedOut: account ? reportCopy.expired : reportCopy.signedOut,
+    failed: reportCopy.failed,
+  }[state]
+  const offerSignIn = state === 'signedOut'
+  // 차트는 ready 일 때만 그리므로 이 넷은 그 안에서 항상 채워져 있다.
+  const { totals, sources, weeks, terrain } = report ?? {}
+
   return (
-    <section className={styles.page} aria-label={report.title}>
+    <section className={styles.page} aria-label={reportCopy.title}>
       <DiaryShell
-        frameSrc="/assets/history/diary-report-frame.png"
         stageClassName={styles.diaryStage}
         frameClassName={styles.diaryFrame}
       >
         {/* Each screen's outer bookmark points at the other one, so the two read as one book. */}
-        <Link className={styles.historyBookmark} to="/app?view=log">
-          <img src={`${BOOKMARK_ASSET}/bookmark-report-blank.svg`} alt="" aria-hidden="true" />
-          <span>나의 기록</span>
-        </Link>
+        <div className={styles.historySlot}>
+          <Link className={styles.historyBookmark} to="/app?view=log">
+            <img src={`${BOOKMARK_ASSET}/report-v2.webp`} alt="" aria-hidden="true" />
+            <span>나의 기록</span>
+          </Link>
+        </div>
 
         {/* 오른쪽 가장자리 — 이 책 안의 페이지들. 나의 기록이 카테고리로 쓰는 것과 같은 에셋. */}
         <nav className={styles.pageBookmarks} aria-label="리포트 페이지">
@@ -57,7 +91,7 @@ export function DiaryReportPane() {
                 onClick={() => setTab(item.id)}
               >
                 <img
-                  src={`${BOOKMARK_ASSET}/tab-${selected ? 'selected' : 'default'}-blank.svg`}
+                  src={`${BOOKMARK_ASSET}/right-${selected ? 'active' : 'idle'}-v2.webp`}
                   alt=""
                   aria-hidden="true"
                 />
@@ -67,148 +101,166 @@ export function DiaryReportPane() {
           })}
         </nav>
 
-        {tab !== 'report' && <SavedPane kind={tab} />}
+        {/* 책의 종이 — 세로 화면에서 여기만 스크롤된다. 책갈피는 이 밖에 있어 책
+            가장자리에 그대로 남는다. 가로에서는 자리를 차지하지 않는 투명한 층이다. */}
+        <div className={styles.pageScroll}>
+          {tab !== 'report' && <SavedPane kind={tab} />}
 
-        {tab === 'report' && (
-          <>
-            {/* ─────────────── 왼쪽 페이지 ─────────────── */}
-            <div className={styles.leftPage}>
-              <header className={styles.pageHead}>
-                <span>MY READING CHART</span>
-                <h1>{report.title}</h1>
-                <p>{report.summary}</p>
-              </header>
+          {/* 집계를 못 얻었으면 차트 자리에 그 사실만 적는다. 표본으로 채우지 않는다. */}
+          {tab === 'report' && state !== 'ready' && (
+            <div className={styles.notice} role="status">
+              <p>{notice}</p>
+              {offerSignIn && (
+                <Link className={styles.noticeAction} to="/login">
+                  {reportCopy.signIn}
+                </Link>
+              )}
+            </div>
+          )}
 
-              <dl className={styles.totals}>
-                {totals.map((total) => (
-                  <div key={total.id}>
-                    <dd>{total.value}</dd>
-                    <dt>{total.label}</dt>
+          {tab === 'report' && state === 'ready' && (
+            <>
+              {/* ─────────────── 왼쪽 페이지 ─────────────── */}
+              <div className={styles.leftPage}>
+                <header className={styles.pageHead}>
+                  <span>{report.eyebrow}</span>
+                  <h1>{report.title}</h1>
+                  <p>{report.summary}</p>
+                </header>
+
+                <dl className={styles.totals}>
+                  {totals.map((total) => (
+                    <div key={total.id}>
+                      <dd>{total.value}</dd>
+                      <dt>{total.label}</dt>
+                    </div>
+                  ))}
+                </dl>
+
+                <section className={styles.block}>
+                  <div className={styles.blockHead}>
+                    <div>
+                      <h2>{weeks.label}</h2>
+                      <p className={styles.hint}>{weeks.hint}</p>
+                    </div>
+                    <ul className={styles.seriesLegend}>
+                      {weeks.series.map((entry, index) => (
+                        <li key={entry.id}>
+                          <span
+                            className={`${styles.swatch} ${styles[`tone${index}`]}`}
+                            aria-hidden
+                          />
+                          {entry.label}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                ))}
-              </dl>
 
-              <section className={styles.block}>
-                <div className={styles.blockHead}>
-                  <div>
-                    <h2>{weeks.label}</h2>
-                    <p className={styles.hint}>{weeks.hint}</p>
+                  <div className={styles.plot}>
+                    {weeks.empty && <p className={styles.plotEmpty}>{weeks.empty}</p>}
+
+                    {weeks.ticks.map((tick) => (
+                      <div
+                        className={styles.tick}
+                        key={tick}
+                        style={{ bottom: `${(tick / weeks.axisMax) * 100}%` }}
+                      >
+                        <span className={styles.tickLabel}>{tick}</span>
+                      </div>
+                    ))}
+
+                    <div className={styles.columns}>
+                      {weeks.columns.map((column, weekIndex) => (
+                        <div className={styles.column} key={weekIndex}>
+                          <div className={styles.stack}>
+                            {/* Reversed so the first series ends up at the base of the column. */}
+                            {[...column.values].reverse().map((value, reversedIndex) => {
+                              const seriesIndex = column.values.length - 1 - reversedIndex
+                              return (
+                                <span
+                                  key={weeks.series[seriesIndex].id}
+                                  className={`${styles.segment} ${styles[`tone${seriesIndex}`]}`}
+                                  style={{ height: `${(value / weeks.axisMax) * 100}%` }}
+                                />
+                              )
+                            })}
+                          </div>
+                          <span className={styles.monthLabel}>{column.month ?? ''}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <ul className={styles.seriesLegend}>
-                    {weeks.series.map((entry, index) => (
-                      <li key={entry.id}>
-                        <span
-                          className={`${styles.swatch} ${styles[`tone${index}`]}`}
-                          aria-hidden
-                        />
-                        {entry.label}
+                </section>
+              </div>
+
+              {/* ─────────────── 오른쪽 페이지 ─────────────── */}
+              <div className={styles.rightPage}>
+                <section className={`${styles.block} ${styles.blockTight}`}>
+                  <h2>{sources.label}</h2>
+
+                  <div className={styles.shareBar}>
+                    {sources.rows.map((row, index) => (
+                      <span
+                        key={row.id}
+                        className={`${styles.shareSegment} ${styles[`tone${index}`]}`}
+                        style={{ width: `${row.share}%` }}
+                      />
+                    ))}
+                  </div>
+
+                  <ul className={styles.shareLegend}>
+                    {sources.rows.map((row, index) => (
+                      <li key={row.id}>
+                        <span className={`${styles.swatch} ${styles[`tone${index}`]}`} aria-hidden />
+                        {row.label}
+                        <b>{row.share}%</b>
                       </li>
                     ))}
                   </ul>
-                </div>
 
-                <div className={styles.plot}>
-                  {weeks.ticks.map((tick) => (
-                    <div
-                      className={styles.tick}
-                      key={tick}
-                      style={{ bottom: `${(tick / weeks.axisMax) * 100}%` }}
-                    >
-                      <span className={styles.tickLabel}>{tick}</span>
-                    </div>
-                  ))}
+                  <p className={styles.footnote}>{sources.footnote}</p>
+                </section>
+                <section className={styles.block}>
+                  <h2>{terrain.label}</h2>
+                  <p className={styles.hint}>{terrain.hint}</p>
 
-                  <div className={styles.columns}>
-                    {weeks.columns.map((column, weekIndex) => (
-                      <div className={styles.column} key={weekIndex}>
-                        <div className={styles.stack}>
-                          {/* Reversed so the first series ends up at the base of the column. */}
-                          {[...column.values].reverse().map((value, reversedIndex) => {
-                            const seriesIndex = column.values.length - 1 - reversedIndex
-                            return (
-                              <span
-                                key={weeks.series[seriesIndex].id}
-                                className={`${styles.segment} ${styles[`tone${seriesIndex}`]}`}
-                                style={{ height: `${(value / weeks.axisMax) * 100}%` }}
-                              />
-                            )
-                          })}
-                        </div>
-                        <span className={styles.monthLabel}>{column.month ?? ''}</span>
-                      </div>
+                  <div className={styles.terrain}>
+                    <span className={styles.quadrantFill} aria-hidden />
+                    <span className={`${styles.quadrantLabel} ${styles.qTopLeft}`}>
+                      {terrain.quadrants.topLeft}
+                    </span>
+                    <span className={`${styles.quadrantLabel} ${styles.qTopRight}`}>
+                      {terrain.quadrants.topRight}
+                    </span>
+                    <span className={`${styles.quadrantLabel} ${styles.qBottomLeft}`}>
+                      {terrain.quadrants.bottomLeft}
+                    </span>
+                    <span className={`${styles.quadrantLabel} ${styles.qBottomRight}`}>
+                      {terrain.quadrants.bottomRight}
+                    </span>
+
+                    {terrain.topics.map((topic) => (
+                      <span
+                        key={topic.id}
+                        className={`${styles.topic} ${topic.strong ? styles.topicStrong : ''}`}
+                        style={{ left: `${topic.x}%`, top: `${topic.y}%` }}
+                      >
+                        <span className={styles.topicDot} aria-hidden />
+                        {topic.label}
+                      </span>
                     ))}
                   </div>
-                </div>
-              </section>
-            </div>
 
-            {/* ─────────────── 오른쪽 페이지 ─────────────── */}
-            <div className={styles.rightPage}>
-              <section className={`${styles.block} ${styles.blockTight}`}>
-                <h2>{sources.label}</h2>
-
-                <div className={styles.shareBar}>
-                  {sources.rows.map((row, index) => (
-                    <span
-                      key={row.id}
-                      className={`${styles.shareSegment} ${styles[`tone${index}`]}`}
-                      style={{ width: `${row.share}%` }}
-                    />
-                  ))}
-                </div>
-
-                <ul className={styles.shareLegend}>
-                  {sources.rows.map((row, index) => (
-                    <li key={row.id}>
-                      <span className={`${styles.swatch} ${styles[`tone${index}`]}`} aria-hidden />
-                      {row.label}
-                      <b>{row.share}%</b>
-                    </li>
-                  ))}
-                </ul>
-
-                <p className={styles.footnote}>{sources.footnote}</p>
-              </section>
-              <section className={styles.block}>
-                <h2>{terrain.label}</h2>
-                <p className={styles.hint}>{terrain.hint}</p>
-
-                <div className={styles.terrain}>
-                  <span className={styles.quadrantFill} aria-hidden />
-                  <span className={`${styles.quadrantLabel} ${styles.qTopLeft}`}>
-                    {terrain.quadrants.topLeft}
-                  </span>
-                  <span className={`${styles.quadrantLabel} ${styles.qTopRight}`}>
-                    {terrain.quadrants.topRight}
-                  </span>
-                  <span className={`${styles.quadrantLabel} ${styles.qBottomLeft}`}>
-                    {terrain.quadrants.bottomLeft}
-                  </span>
-                  <span className={`${styles.quadrantLabel} ${styles.qBottomRight}`}>
-                    {terrain.quadrants.bottomRight}
-                  </span>
-
-                  {terrain.topics.map((topic) => (
-                    <span
-                      key={topic.id}
-                      className={`${styles.topic} ${topic.strong ? styles.topicStrong : ''}`}
-                      style={{ left: `${topic.x}%`, top: `${topic.y}%` }}
-                    >
-                      <span className={styles.topicDot} aria-hidden />
-                      {topic.label}
-                    </span>
-                  ))}
-                </div>
-
-                <p className={styles.axisNote}>
-                  {terrain.axisX}
-                  <br />
-                  {terrain.axisY}
-                </p>
-              </section>
-            </div>
-          </>
-        )}
+                  <p className={styles.axisNote}>
+                    {terrain.axisX}
+                    <br />
+                    {terrain.axisY}
+                  </p>
+                </section>
+              </div>
+            </>
+          )}
+        </div>
       </DiaryShell>
     </section>
   )
