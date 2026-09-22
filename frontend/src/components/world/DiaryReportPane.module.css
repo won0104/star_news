@@ -333,8 +333,8 @@
 
 .swatch {
   display: inline-block;
-  width: 7px;
-  height: 7px;
+  width: 9px;
+  height: 9px;
   border-radius: 2px;
   flex: none;
 }
@@ -390,18 +390,20 @@
 .seriesLegend {
   display: grid;
   grid-template-columns: repeat(2, auto);
-  gap: 2px 8px;
+  gap: 3px 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* 분야 이름이라 본문과 같은 크기까지 올린다. 이 줄이 색과 이름을 잇는 유일한 자리인데
+   9px 로는 색만 보이고 이름이 안 읽혔다. */
 .seriesLegend li {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font: clamp(6px, 0.55vw, 9px) var(--font-sans);
-  color: #6f5c47;
+  gap: 5px;
+  font: clamp(8px, 0.75vw, 12px) var(--font-sans);
+  color: #5d4b38;
   white-space: nowrap;
 }
 
