@@ -553,6 +553,61 @@
   background: #182b43;
 }
 
+/* ---- 같은 자리에 겹친 점 ------------------------------------------------------ */
+/* 겹침은 흔들림이 아니라 같은 값이다(adapters/newsReport.js terrainClusters). 흩뜨리는
+   대신 하나로 세우고 몇 개인지 적는다. */
+.clusterToggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.clusterToggle:hover .clusterCount {
+  border-color: rgba(47, 38, 32, 0.5);
+  color: #2f2620;
+}
+
+.clusterToggle:focus-visible {
+  outline: 2px solid #182b43;
+  outline-offset: 2px;
+}
+
+.clusterCount {
+  margin-left: 3px;
+  padding: 0 3px;
+  border: 1px solid rgba(111, 92, 71, 0.38);
+  border-radius: 999px;
+  font-size: 0.86em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #8a745a;
+}
+
+/* 펼친 이름들. 점 바로 아래에 두어 어느 자리의 것인지 잃지 않는다. 지형 안에서 자리를
+   차지하면 다른 점을 밀어내므로 흐름에서 빼낸다. */
+.clusterList {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 3px);
+  left: 9px;
+  display: grid;
+  gap: 1px;
+  max-width: 128px;
+  padding: 4px 6px;
+  border: 1px solid rgba(111, 92, 71, 0.3);
+  border-radius: 3px;
+  background: rgba(248, 243, 233, 0.97);
+  box-shadow: 0 2px 6px rgba(68, 57, 47, 0.14);
+  font-weight: 400;
+  color: #6f5c47;
+  white-space: normal;
+  word-break: keep-all;
+}
+
 .axisNote {
   margin: 5% 0 0;
   font: clamp(6px, 0.52vw, 9px)/1.5 var(--font-sans);

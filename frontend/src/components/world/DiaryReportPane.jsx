@@ -239,15 +239,8 @@ export function DiaryReportPane() {
                       {terrain.quadrants.bottomRight}
                     </span>
 
-                    {terrain.topics.map((topic) => (
-                      <span
-                        key={topic.id}
-                        className={`${styles.topic} ${topic.strong ? styles.topicStrong : ''}`}
-                        style={{ left: `${topic.x}%`, top: `${topic.y}%` }}
-                      >
-                        <span className={styles.topicDot} aria-hidden />
-                        {topic.label}
-                      </span>
+                    {terrain.clusters.map((cluster) => (
+                      <TerrainPoint key={cluster.id} cluster={cluster} />
                     ))}
                   </div>
 
@@ -263,5 +256,56 @@ export function DiaryReportPane() {
         </div>
       </DiaryShell>
     </section>
+  )
+}
+
+/**
+ * 지형 위의 점 하나. 같은 자리에 선 것이 여럿이면 하나로 묶고 `+N` 을 단다.
+ *
+ * 흩뜨리지 않는 이유는 어댑터의 terrainClusters 주석에 적어 뒀다 — 겹침이 오차가 아니라
+ * 같은 값이어서다. 옮기면 없는 차이를 만든다.
+ *
+ * 묶인 점만 버튼이다. 혼자 선 점은 이름이 이미 옆에 있어 누를 일이 없고, 지형 열두 자리가
+ * 전부 누를 수 있는 것처럼 보이면 눌러 볼 것이 없는 점까지 눌러 보게 된다.
+ */
+function TerrainPoint({ cluster }) {
+  const [open, setOpen] = useState(false)
+  const [first, ...rest] = cluster.members
+
+  const position = { left: `${cluster.x}%`, top: `${cluster.y}%` }
+  const className = `${styles.topic} ${cluster.strong ? styles.topicStrong : ''}`
+
+  if (rest.length === 0) {
+    return (
+      <span className={className} style={position}>
+        <span className={styles.topicDot} aria-hidden />
+        {first.label}
+      </span>
+    )
+  }
+
+  return (
+    <span className={className} style={position}>
+      <span className={styles.topicDot} aria-hidden />
+      <button
+        type="button"
+        className={styles.clusterToggle}
+        aria-expanded={open}
+        onClick={() => setOpen((was) => !was)}
+      >
+        {first.label}
+        <b className={styles.clusterCount}>+{rest.length}</b>
+      </button>
+
+      {/* 목록은 라벨 아래로 펼친다. 같은 자리의 이름들이라 점에서 멀어지면 어느 점의
+          것인지 알 수 없다. */}
+      {open && (
+        <span className={styles.clusterList}>
+          {rest.map((member) => (
+            <span key={member.id}>{member.label}</span>
+          ))}
+        </span>
+      )}
+    </span>
   )
 }

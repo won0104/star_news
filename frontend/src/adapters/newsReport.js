@@ -30,18 +30,44 @@ export function reportFromApi(payload) {
         bottomLeft: '가볍게 접한 흐름',
         bottomRight: '나에게 익숙한 흐름',
       },
-      topics: terrainNodes.map((node) => ({
-        id: node.nodeKey,
-        label: node.label,
-        x: node.x,
-        y: node.y,
-        strong: node.strong,
-        familiarity: node.familiarity,
-      })),
+      clusters: terrainClusters(terrainNodes),
       axisX: '가로축 · 내가 읽은 정도',
       axisY: '세로축 · 전체 독자가 읽은 정도',
     },
   }
+}
+
+/**
+ * 같은 자리에 선 노드를 하나로 묶는다.
+ *
+ * 겹침은 흔들림이 아니라 정확한 동점이다. 서버가 x 를 읽은 기사 수의 min-max 정규화로
+ * 잡는데(NewsReportService.normalizeLogCount), 그 수가 작은 정수라 서로 다른 값이 몇 개
+ * 안 나온다. 기사를 하나씩만 읽은 사용자는 `maxLog == minLog` 에 걸려 열두 노드가 전부
+ * 한가운데 0.5 로 떨어진다.
+ *
+ * 그래서 흩뜨리지 않고 묶는다. 옮겨 놓으면 같은 수를 읽은 것을 다르게 읽은 것처럼 말하게
+ * 되는데, 축 이름이 그대로 "내가 읽은 정도"다.
+ *
+ * 좌표는 서버가 이미 소수 첫째 자리로 반올림해 보내므로 문자열로 묶어도 안전하다.
+ */
+function terrainClusters(nodes) {
+  const byPosition = new Map()
+
+  nodes.forEach((node) => {
+    const at = `${node.x}:${node.y}`
+    const found = byPosition.get(at)
+    const member = { id: node.nodeKey, label: node.label, familiarity: node.familiarity }
+    if (found) {
+      found.members.push(member)
+      // 한 자리에 약한 것과 강한 것이 섞이면 강한 쪽으로 그린다. 묶은 점 하나가 그중
+      // 가장 짙은 것을 대표한다.
+      found.strong = found.strong || node.strong
+      return
+    }
+    byPosition.set(at, { id: at, x: node.x, y: node.y, strong: node.strong, members: [member] })
+  })
+
+  return [...byPosition.values()]
 }
 
 function sourceReads(reads) {
