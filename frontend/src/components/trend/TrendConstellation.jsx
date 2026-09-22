@@ -6,6 +6,7 @@ import {
   constellationStart,
   panelCopy,
   stars,
+  visitedStar,
   trendFigmaAssets,
 } from '../../data/trend'
 import { fetchNodeArticles } from '../../api/trend'
@@ -35,6 +36,7 @@ const NODE_STAR = {
   ENTITY: stars.entity,
   STATEMENT: stars.statement,
 }
+
 
 const PREVIEW_STAR = {
   EVENT: trendFigmaAssets.relatedLeftSticker,
@@ -181,10 +183,13 @@ function scrollTrailHorizontally(event) {
   list.scrollLeft += rawDelta * unit
 }
 
-function StarArt({ role, nodeType }) {
+/** `visited` 면 색 계열이 다른 같은 모양을 쓴다 — 자리와 크기는 그대로다. */
+function StarArt({ role, nodeType, visited = false }) {
+  const src = visited ? visitedStar : (NODE_STAR[nodeType] ?? ROLE_STAR[role])
+
   return (
     <span className={`${styles.art} ${styles.portableArt}`} aria-hidden>
-      <img className={styles.mobileStar} src={NODE_STAR[nodeType] ?? ROLE_STAR[role]} alt="" />
+      <img className={styles.mobileStar} src={src} alt="" />
     </span>
   )
 }
@@ -231,6 +236,8 @@ export function TrendConstellation({
   const centre = nodes[0]
   const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
   const visibleNodeKeys = new Set(nodes.map((node) => node.id))
+  // trail 의 마지막은 지금 중심이다. 그 앞의 것들이 이미 지나온 별이다.
+  const visitedKeys = new Set((trail ?? []).slice(0, -1).map((item) => item.nodeKey))
   const at = (node) => (narrow ? node.slot.atNarrow : node.slot.at)
 
   /** 현재 Event의 다음 기사 페이지를 기존 카드에 이어 붙인다. */
@@ -442,7 +449,13 @@ export function TrendConstellation({
         {nodes.map((node, index) => {
           const { role, visual } = node.slot
           const isCentre = role === 'centre'
-          const art = <StarArt role={role} nodeType={isCentre ? centreType : node.nodeType} />
+          const art = (
+            <StarArt
+              role={role}
+              nodeType={isCentre ? centreType : node.nodeType}
+              visited={!isCentre && visitedKeys.has(node.id)}
+            />
+          )
           const previewNodes =
             role === 'related' ? previewNodesFor(previewGraphs?.[node.id], visibleNodeKeys) : []
           const previewText = previewSummary(previewNodes)
