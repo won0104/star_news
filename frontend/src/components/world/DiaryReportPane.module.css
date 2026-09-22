@@ -467,6 +467,7 @@
 }
 
 .stack {
+  position: relative;
   display: flex;
   height: 100%;
   flex-direction: column;
@@ -476,6 +477,60 @@
 .segment {
   display: block;
   width: 100%;
+}
+
+/* ---- 기타 조각의 판정 영역 ---------------------------------------------------- */
+/* 조각 위에 덮는 투명한 층. 기타는 접히고 남은 작은 값이라 어떤 주에는 1~2px 이고, 그
+   높이를 그대로 표적으로 쓰면 멈춰 있을 수가 없다. 최소 높이를 보장해 위쪽 빈 곳으로만
+   자라게 한다 — 바닥이 고정돼 있어 아래 조각을 가리지 않는다. */
+.otherHotspot {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  left: 0;
+  min-height: 12px;
+}
+
+/* 말풍선은 조각 위로 띄운다. 12주가 좁게 붙어 있어 기둥 안에 넣으면 폭이 한 칸으로
+   묶여 글자가 세로로 쪼개진다. */
+.otherTip {
+  position: absolute;
+  z-index: 3;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  display: grid;
+  gap: 1px;
+  min-width: 74px;
+  padding: 5px 7px 6px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(94, 74, 51, 0.34);
+  border-radius: 3px;
+  background: rgba(252, 249, 242, 0.98);
+  box-shadow: 0 2px 7px rgba(68, 57, 47, 0.16);
+  font: clamp(8px, 0.7vw, 11px)/1.45 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #6f5c47;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.otherTip b {
+  margin-bottom: 2px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(94, 74, 51, 0.2);
+  color: #3a2f26;
+}
+
+/* 첫 주와 마지막 주는 말풍선이 판 밖으로 나간다. 그 둘만 안쪽으로 붙인다. */
+.column:first-child .otherTip {
+  left: 0;
+  transform: none;
+}
+
+.column:last-child .otherTip {
+  right: 0;
+  left: auto;
+  transform: none;
 }
 
 .monthLabel {

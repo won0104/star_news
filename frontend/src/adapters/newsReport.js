@@ -129,14 +129,27 @@ function weeklyTrend(weeks) {
     const byCode = new Map(
       (week.topics ?? []).map((topic) => [topic.topicCode, topic.readArticleCount]),
     )
-    const other = [...byCode.entries()]
-      .filter(([code]) => !topSet.has(code))
-      .reduce((sum, [, count]) => sum + count, 0)
+    const folded = [...byCode.entries()].filter(([code]) => !topSet.has(code))
+    const other = folded.reduce((sum, [, count]) => sum + count, 0)
 
     return {
       month: monthLabel(week.weekStart, index === 0 ? null : weeks[index - 1]?.weekStart),
+      weekStart: week.weekStart,
       // series 와 언제나 같은 길이. 기타를 세우지 않았으면 그 칸도 없다.
       values: [...topCodes.map((code) => byCode.get(code) ?? 0), ...(hasOther ? [other] : [])],
+      /*
+       * 이 주의 기타에 무엇이 들었는지. 조각에 마우스를 올렸을 때 그 자리에서 답하려고
+       * 남긴다 — 묻는 것이 "이 주의 기타"이므로 12주 합계로 답하면 딴 말이 된다.
+       *
+       * 0인 분야는 뺀다. 기타에 접히는 것은 대부분 0이라 그대로 두면 목록이 0으로 채워져
+       * 정작 읽은 분야가 묻힌다. rankedCodes 순서를 따라 많이 읽은 것부터 세운다.
+       */
+      otherParts: hasOther
+        ? rankedCodes
+          .slice(TOP_TOPIC_LIMIT)
+          .map((code) => ({ id: code, label: labels.get(code) ?? code, count: byCode.get(code) ?? 0 }))
+          .filter((part) => part.count > 0)
+        : [],
     }
   })
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { fetchNewsReport } from '../../api/report'
 import { reportFromApi } from '../../adapters/newsReport'
 import { reportCopy, reportTabs } from '../../data/world'
@@ -9,6 +9,8 @@ import { DiaryShell } from './DiaryShell'
 import styles from './DiaryReportPane.module.css'
 
 const BOOKMARK_ASSET = '/assets/history/bookmarks'
+/* 기타 조각에 머물러야 하는 시간. 훑는 동안 말풍선이 연달아 뜨지 않을 만큼만 길다. */
+const HOVER_OPEN_MS = 400
 
 /**
  * 나의 리포트 — the same four charts as <ReportPane>, laid across one diary spread.
@@ -143,6 +145,7 @@ export function DiaryReportPane() {
                       <h2>{weeks.label}</h2>
                       <p className={styles.hint}>{weeks.hint}</p>
                     </div>
+                    {/* 기타에 무엇이 들었는지는 조각에 마우스를 올려 본다 — <OtherHotspot>. */}
                     <ul className={styles.seriesLegend}>
                       {weeks.series.map((entry, index) => (
                         <li key={entry.id}>
@@ -170,24 +173,40 @@ export function DiaryReportPane() {
                     ))}
 
                     <div className={styles.columns}>
-                      {weeks.columns.map((column, weekIndex) => (
-                        <div className={styles.column} key={weekIndex}>
-                          <div className={styles.stack}>
-                            {/* Reversed so the first series ends up at the base of the column. */}
-                            {[...column.values].reverse().map((value, reversedIndex) => {
-                              const seriesIndex = column.values.length - 1 - reversedIndex
-                              return (
-                                <span
-                                  key={weeks.series[seriesIndex].id}
-                                  className={`${styles.segment} ${styles[`tone${seriesIndex}`]}`}
-                                  style={{ height: `${(value / weeks.axisMax) * 100}%` }}
+                      {weeks.columns.map((column, weekIndex) => {
+                        const otherIndex = weeks.series.findIndex((entry) => entry.id === 'OTHER')
+                        const otherValue = otherIndex >= 0 ? column.values[otherIndex] : 0
+
+                        return (
+                          <div className={styles.column} key={weekIndex}>
+                            <div className={styles.stack}>
+                              {/* Reversed so the first series ends up at the base of the column. */}
+                              {[...column.values].reverse().map((value, reversedIndex) => {
+                                const seriesIndex = column.values.length - 1 - reversedIndex
+                                return (
+                                  <span
+                                    key={weeks.series[seriesIndex].id}
+                                    className={`${styles.segment} ${styles[`tone${seriesIndex}`]}`}
+                                    style={{ height: `${(value / weeks.axisMax) * 100}%` }}
+                                  />
+                                )
+                              })}
+
+                              {otherValue > 0 && column.otherParts.length > 0 && (
+                                <OtherHotspot
+                                  column={column}
+                                  value={otherValue}
+                                  below={
+                                    column.values.reduce((sum, one) => sum + one, 0) - otherValue
+                                  }
+                                  axisMax={weeks.axisMax}
                                 />
-                              )
-                            })}
+                              )}
+                            </div>
+                            <span className={styles.monthLabel}>{column.month ?? ''}</span>
                           </div>
-                          <span className={styles.monthLabel}>{column.month ?? ''}</span>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 </section>
@@ -256,6 +275,62 @@ export function DiaryReportPane() {
         </div>
       </DiaryShell>
     </section>
+  )
+}
+
+/**
+ * 12주 기둥에서 `기타` 조각을 가리키는 판정 영역.
+ *
+ * 조각 자체가 아니라 그 위에 투명한 층을 덮는다. 기타는 정의상 접히고 남은 작은 값들이라
+ * 어떤 주에는 높이가 1~2px 이고, 그 높이를 그대로 표적으로 쓰면 스쳐 지나갈 뿐 멈춰 있을
+ * 수가 없다. 그래서 조각을 덮되 최소 높이를 보장하고, 기둥 폭 전체를 쓴다.
+ *
+ * 머문 뒤에만 연다. 12주를 훑느라 가로지르는 동안 말풍선이 연달아 튀면 차트를 못 읽는다.
+ * 다만 `몇 초`는 길어서 대부분 포기하고 지나가므로, 우연과 의도가 갈리는 선인 0.4초로 둔다.
+ *
+ * 마우스만의 길이다 — 터치와 키보드는 범례의 `기타`를 눌러 12주 합계를 본다.
+ */
+function OtherHotspot({ column, value, below, axisMax }) {
+  const [open, setOpen] = useState(false)
+  const timer = useRef(null)
+
+  const clear = () => {
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = null
+  }
+
+  // 언마운트될 때 남은 타이머가 사라진 컴포넌트를 열려고 하지 않게 한다.
+  useEffect(() => clear, [])
+
+  return (
+    <span
+      className={styles.otherHotspot}
+      /* 기타는 기둥 맨 위에 쌓이므로, 아래 조각들의 합만큼 띄운 자리에서 시작한다.
+         바닥을 고정해 두면 최소 높이가 위쪽 빈 곳으로만 자라 다른 조각을 가리지 않는다. */
+      style={{
+        bottom: `${(below / axisMax) * 100}%`,
+        height: `${(value / axisMax) * 100}%`,
+      }}
+      onMouseEnter={() => {
+        clear()
+        timer.current = setTimeout(() => setOpen(true), HOVER_OPEN_MS)
+      }}
+      onMouseLeave={() => {
+        clear()
+        setOpen(false)
+      }}
+    >
+      {open && (
+        <span className={styles.otherTip} role="status">
+          <b>기타 {value}</b>
+          {column.otherParts.map((part) => (
+            <span key={part.id}>
+              {part.label} {part.count}
+            </span>
+          ))}
+        </span>
+      )}
+    </span>
   )
 }
 
