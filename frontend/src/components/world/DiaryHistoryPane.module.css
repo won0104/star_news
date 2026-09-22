@@ -1119,10 +1119,11 @@
   color: rgba(69, 57, 45, 0.38);
 }
 
-/* 기사는 날짜·출처·제목 세 조각이다. 날짜만 왼쪽 열로 빼 세로로 맞춘다. */
+/* 기사는 날짜·출처·제목 세 조각이다. 날짜만 왼쪽 열로 빼 세로로 맞춘다.
+   책갈피는 오른쪽 끝 열에 세워, 날짜와 마찬가지로 줄마다 같은 자리에 오게 한다. */
 .eventArticleList li {
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: max-content 1fr max-content;
   column-gap: clamp(7px, 0.7vw, 11px);
   padding: 2px 0;
   border-top: 1px solid rgba(69, 57, 45, 0.09);
@@ -1155,6 +1156,47 @@
   font: clamp(9px, 0.76vw, 12px)/1.42 var(--font-serif-kr);
   color: #4b3d30;
   word-break: keep-all;
+}
+
+/* 담기지 않은 기사에서는 윤곽선만 옅게 둔다. 줄마다 하나씩 서는 표시라 기본 상태가 진하면
+   기사 제목보다 책갈피가 먼저 눈에 든다. 채워진 것만 분야 색으로 또렷해진다. */
+.articleBookmark {
+  display: grid;
+  place-items: center;
+  align-self: start;
+  width: clamp(15px, 1.3vw, 20px);
+  height: clamp(15px, 1.3vw, 20px);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(120, 102, 80, 0.5);
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.articleBookmark svg {
+  width: clamp(8px, 0.68vw, 11px);
+  height: auto;
+}
+
+.articleBookmark:hover:not(:disabled) {
+  color: rgba(91, 67, 48, 0.85);
+}
+
+.articleBookmark:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.articleBookmarkOn {
+  color: rgb(var(--tone));
+}
+
+.articleHint {
+  display: block;
+  margin-top: 1px;
+  font: clamp(7px, 0.58vw, 9.5px) var(--font-sans);
+  color: #a8705c;
 }
 
 .statementEmpty {
