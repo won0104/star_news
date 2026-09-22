@@ -58,6 +58,7 @@ class ArticleReadServiceTest {
 	private static final long USER_ID = 1L;
 	private static final long ARTICLE_ID = 101L;
 	private static final String ARTICLE_NODE_KEY = "00000010-0920-4000-8000-000000000001";
+	private static final String OTHER_EVENT_KEY = "00000020-0920-4000-8000-000000009999";
 	private static final String EVENT_KEY = "00000020-0920-4000-8000-000000000001";
 	private static final String ENTITY_KEY = "00000020-0920-4000-8000-000000000002";
 
@@ -117,12 +118,12 @@ class ArticleReadServiceTest {
 		givenArticle(ARTICLE_NODE_KEY);
 		given(articleReadRepository.upsertRead(anyLong(), anyLong(), any())).willReturn(INSERTED);
 		given(articleNodeSnapshotRepository.findConnectedNodes(ARTICLE_NODE_KEY)).willReturn(List.of(
-				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY")));
+				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY", true)));
 
 		articleReadService.recordRead(USER_ID, ARTICLE_ID);
 
 		verify(userKnowledgeNodeRepository).upsertRead(eq(USER_ID), eq("EVENT"), eq(EVENT_KEY),
-				eq("기준금리 동결"), eq("ECONOMY"), eq(1), any(LocalDateTime.class));
+				eq("기준금리 동결"), eq("ECONOMY"), eq(1), anyInt(), any(LocalDateTime.class));
 	}
 
 	@Test
@@ -130,13 +131,13 @@ class ArticleReadServiceTest {
 		givenArticle(ARTICLE_NODE_KEY);
 		given(articleReadRepository.upsertRead(anyLong(), anyLong(), any())).willReturn(UPDATED);
 		given(articleNodeSnapshotRepository.findConnectedNodes(ARTICLE_NODE_KEY)).willReturn(List.of(
-				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY")));
+				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY", true)));
 
 		articleReadService.recordRead(USER_ID, ARTICLE_ID);
 
 		// 이미 있는 Node 면 +0, 없던 Node 면 INSERT 쪽에서 1 로 시작한다. 둘 다 이 한 문장이 처리한다.
 		verify(userKnowledgeNodeRepository).upsertRead(eq(USER_ID), eq("EVENT"), eq(EVENT_KEY),
-				eq("기준금리 동결"), eq("ECONOMY"), eq(0), any(LocalDateTime.class));
+				eq("기준금리 동결"), eq("ECONOMY"), eq(0), anyInt(), any(LocalDateTime.class));
 	}
 
 	@Test
@@ -144,13 +145,45 @@ class ArticleReadServiceTest {
 		givenArticle(ARTICLE_NODE_KEY);
 		given(articleReadRepository.upsertRead(anyLong(), anyLong(), any())).willReturn(INSERTED);
 		given(articleNodeSnapshotRepository.findConnectedNodes(ARTICLE_NODE_KEY)).willReturn(List.of(
-				new ArticleNodeSnapshot(NodeType.ENTITY, ENTITY_KEY, "한국은행", null)));
+				new ArticleNodeSnapshot(NodeType.ENTITY, ENTITY_KEY, "한국은행", null, true)));
 
 		articleReadService.recordRead(USER_ID, ARTICLE_ID);
 
 		// ENTITY 는 CLASSIFIED_AS 가 없어 topic 이 비어 있다
 		verify(userKnowledgeNodeRepository).upsertRead(eq(USER_ID), eq("ENTITY"), eq(ENTITY_KEY),
-				eq("한국은행"), isNull(), eq(1), any(LocalDateTime.class));
+				eq("한국은행"), isNull(), eq(1), anyInt(), any(LocalDateTime.class));
+	}
+
+	@Test
+	void 대표로_다룬_Node만_대표_열람으로_센다() {
+		// 기사 한 건이 사건 열 개 넘게 이어지는데 대부분은 스치듯 언급된 부차 사건이다.
+		// 전부 "본 것"으로 치면 기사 한 건에 사건 열댓 개가 추천 후보에서 빠진다.
+		givenArticle(ARTICLE_NODE_KEY);
+		given(articleReadRepository.upsertRead(anyLong(), anyLong(), any())).willReturn(INSERTED);
+		given(articleNodeSnapshotRepository.findConnectedNodes(ARTICLE_NODE_KEY)).willReturn(List.of(
+				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY", true),
+				new ArticleNodeSnapshot(NodeType.EVENT, OTHER_EVENT_KEY, "환율 상승", "ECONOMY", false)));
+
+		articleReadService.recordRead(USER_ID, ARTICLE_ID);
+
+		verify(userKnowledgeNodeRepository).upsertRead(eq(USER_ID), eq("EVENT"), eq(EVENT_KEY),
+				any(), any(), eq(1), eq(1), any(LocalDateTime.class));
+		verify(userKnowledgeNodeRepository).upsertRead(eq(USER_ID), eq("EVENT"), eq(OTHER_EVENT_KEY),
+				any(), any(), eq(1), eq(0), any(LocalDateTime.class));
+	}
+
+	@Test
+	void 재열람이면_대표_열람도_늘리지_않는다() {
+		// 고유 기사 수와 같은 기준이다. 같은 기사를 다시 열었다고 새로 본 것이 아니다.
+		givenArticle(ARTICLE_NODE_KEY);
+		given(articleReadRepository.upsertRead(anyLong(), anyLong(), any())).willReturn(UPDATED);
+		given(articleNodeSnapshotRepository.findConnectedNodes(ARTICLE_NODE_KEY)).willReturn(List.of(
+				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY", true)));
+
+		articleReadService.recordRead(USER_ID, ARTICLE_ID);
+
+		verify(userKnowledgeNodeRepository).upsertRead(eq(USER_ID), eq("EVENT"), eq(EVENT_KEY),
+				any(), any(), eq(0), eq(0), any(LocalDateTime.class));
 	}
 
 	@Test
@@ -158,13 +191,13 @@ class ArticleReadServiceTest {
 		givenArticle(ARTICLE_NODE_KEY);
 		given(articleReadRepository.upsertRead(anyLong(), anyLong(), any())).willReturn(INSERTED);
 		given(articleNodeSnapshotRepository.findConnectedNodes(ARTICLE_NODE_KEY)).willReturn(List.of(
-				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY"),
-				new ArticleNodeSnapshot(NodeType.ENTITY, ENTITY_KEY, "한국은행", null)));
+				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY", true),
+				new ArticleNodeSnapshot(NodeType.ENTITY, ENTITY_KEY, "한국은행", null, true)));
 
 		articleReadService.recordRead(USER_ID, ARTICLE_ID);
 
 		verify(userKnowledgeNodeRepository, times(2))
-				.upsertRead(anyLong(), anyString(), anyString(), anyString(), any(), anyInt(), any());
+				.upsertRead(anyLong(), anyString(), anyString(), anyString(), any(), anyInt(), anyInt(), any());
 	}
 
 	@Test
@@ -172,13 +205,13 @@ class ArticleReadServiceTest {
 		givenArticle(ARTICLE_NODE_KEY);
 		given(articleReadRepository.upsertRead(anyLong(), anyLong(), any())).willReturn(INSERTED);
 		given(articleNodeSnapshotRepository.findConnectedNodes(ARTICLE_NODE_KEY)).willReturn(List.of(
-				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY"),
-				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY")));
+				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY", true),
+				new ArticleNodeSnapshot(NodeType.EVENT, EVENT_KEY, "기준금리 동결", "ECONOMY", true)));
 
 		articleReadService.recordRead(USER_ID, ARTICLE_ID);
 
 		verify(userKnowledgeNodeRepository, times(1))
-				.upsertRead(anyLong(), anyString(), anyString(), anyString(), any(), anyInt(), any());
+				.upsertRead(anyLong(), anyString(), anyString(), anyString(), any(), anyInt(), anyInt(), any());
 	}
 
 	@Test
@@ -203,6 +236,6 @@ class ArticleReadServiceTest {
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(CommonErrorCode.INTERNAL_SERVER_ERROR);
 		verify(userKnowledgeNodeRepository, never())
-				.upsertRead(anyLong(), anyString(), anyString(), anyString(), any(), anyInt(), any());
+				.upsertRead(anyLong(), anyString(), anyString(), anyString(), any(), anyInt(), anyInt(), any());
 	}
 }
