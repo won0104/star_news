@@ -7,7 +7,6 @@ import { desks } from '../data/history'
 import { useNearestWindow } from '../hooks/useNearestWindow'
 import { nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
-import { NodeSearch } from '../components/common/NodeSearch'
 import { TopBar } from '../components/common/TopBar'
 import { ViewPane } from '../components/world/ViewPane'
 import { useSession } from '../store/session'
@@ -155,8 +154,9 @@ export function AppScene() {
         onSelect={open}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
+        search={view === 'trend'}
+        onSearchSelect={openSearchedNode}
       />
-      {view === 'trend' && <NodeSearch night onSelect={openSearchedNode} />}
       <ViewPane
         key={account?.user?.userId ?? (account ? 'signed-in' : 'guest')}
         view={view}

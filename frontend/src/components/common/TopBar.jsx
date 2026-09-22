@@ -1,6 +1,8 @@
-import { Fragment, useLayoutEffect, useRef } from 'react';
+import { Fragment, useLayoutEffect, useRef, useState } from 'react';
 import { authActions, brand, navItems } from '../../data/home';
+import { useHasNavRail } from '../../hooks/useHasNavRail';
 import { useSession } from '../../store/session';
+import { NodeSearch } from './NodeSearch';
 import { UserMenu } from './UserMenu';
 import styles from './TopBar.module.css';
 
@@ -29,10 +31,25 @@ import styles from './TopBar.module.css';
  * is not a fifth destination: from inside the app it leaves for the front of the site.
  * Without it the mark falls back to opening the first destination, which is what the
  * screens that are already at the front want.
+ *
+ * `search` 를 켜면 검색창도 이 chrome 의 일부가 된다. 세로 레일에서는 이름과 첫 목적지
+ * 사이에 늘 자리를 차지하고, 가로 상단바에서는 아이콘 하나로 줄어 눌렀을 때만 예전 그
+ * 자리에 떠오른다 — 상단바는 폭이 좁아 검색창까지 늘 펼쳐 둘 자리가 없다.
  */
-export function TopBar({ activeId, onSelect, onBrand, onAuth, nightGlass = false }) {
+export function TopBar({
+  activeId,
+  onSelect,
+  onBrand,
+  onAuth,
+  nightGlass = false,
+  search = false,
+  onSearchSelect,
+}) {
   const account = useSession();
   const navRef = useRef(null);
+  const rail = useHasNavRail();
+  // 레일에서는 늘 펼쳐져 있으므로 이 값은 상단바일 때만 읽는다.
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useLayoutEffect(() => {
     // A direct link or narrower window can hide the selected tab beyond the scroll edge.
@@ -58,6 +75,19 @@ export function TopBar({ activeId, onSelect, onBrand, onAuth, nightGlass = false
         <span className={styles.brandName}>{brand.name}</span>
       </button>
 
+      {/* 레일에서는 이름과 목적지 사이의 한 칸, 상단바에서는 자리를 차지하지 않는
+          껍데기다(display: contents) — 좁은 폭의 상단바는 grid 라 빈 칸이 늘면 배치가 어긋난다. */}
+      {search && (rail || searchOpen) && (
+        <div className={styles.searchSlot}>
+          <NodeSearch
+            night={nightGlass}
+            docked={rail}
+            takeFocus={!rail}
+            onSelect={onSearchSelect}
+          />
+        </div>
+      )}
+
       <nav ref={navRef} className={styles.nav}>
         {navItems.map((item, index) => (
           <Fragment key={item.id}>
@@ -75,6 +105,18 @@ export function TopBar({ activeId, onSelect, onBrand, onAuth, nightGlass = false
       </nav>
 
       <div className={styles.spacer} />
+
+      {search && !rail && (
+        <button
+          type="button"
+          className={styles.searchToggle}
+          aria-expanded={searchOpen}
+          aria-label={searchOpen ? '검색 닫기' : '검색 열기'}
+          onClick={() => setSearchOpen((open) => !open)}
+        >
+          <span aria-hidden>⌕</span>
+        </button>
+      )}
 
       <div className={styles.auth}>
         {account ? (
