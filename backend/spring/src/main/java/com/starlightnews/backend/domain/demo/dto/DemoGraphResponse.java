@@ -28,17 +28,17 @@ public record DemoGraphResponse(
 		String subtopicCode,
 
 		@Schema(description = "그래프 노드")
-		List<Node> nodes,
+		List<DemoGraphNode> nodes,
 
 		@Schema(description = "그래프 간선")
-		List<Edge> edges
+		List<DemoGraphEdge> edges
 ) {
 
 	/**
 	 * @param nodeType ARTICLE | EVENT | ENTITY | STATEMENT | TOPIC | TIME | STORY
 	 * @param subType  Entity 의 세부 유형(PERSON·ORGANIZATION·LOCATION·PRODUCT). 그 밖에는 null
 	 */
-	public record Node(
+	public record DemoGraphNode(
 			@Schema(description = "노드 키") String nodeKey,
 			@Schema(description = "노드 종류", example = "EVENT") String nodeType,
 			@Schema(description = "화면에 보일 이름") String label,
@@ -51,7 +51,7 @@ public record DemoGraphResponse(
 	 *                 | CLASSIFIED_AS | OCCURRED_ON | PART_OF | PUBLISHED_BY
 	 * @param primary  그 기사가 대표로 다루는 사건인지. COVERS·CLASSIFIED_AS 에만 의미가 있다
 	 */
-	public record Edge(
+	public record DemoGraphEdge(
 			@Schema(description = "출발 노드 키") String from,
 			@Schema(description = "도착 노드 키") String to,
 			@Schema(description = "관계 종류", example = "COVERS") String relation,

@@ -149,13 +149,13 @@ public class DemoArticleService {
 	 */
 	private DemoGraphResponse toResponse(long articleId,
 			ArticleRepository.DemoArticle article, List<DemoGraphRow> rows) {
-		Map<String, DemoGraphResponse.Node> nodes = new LinkedHashMap<>();
-		List<DemoGraphResponse.Edge> edges = new ArrayList<>(rows.size());
+		Map<String, DemoGraphResponse.DemoGraphNode> nodes = new LinkedHashMap<>();
+		List<DemoGraphResponse.DemoGraphEdge> edges = new ArrayList<>(rows.size());
 
 		for (DemoGraphRow row : rows) {
 			putNode(nodes, row.fromKey(), row.fromType(), row.fromLabel(), row.fromSubType());
 			putNode(nodes, row.toKey(), row.toType(), row.toLabel(), row.toSubType());
-			edges.add(new DemoGraphResponse.Edge(
+			edges.add(new DemoGraphResponse.DemoGraphEdge(
 					row.fromKey(), row.toKey(), row.relation(), row.primary()));
 		}
 
@@ -168,12 +168,12 @@ public class DemoArticleService {
 				List.copyOf(edges));
 	}
 
-	private void putNode(Map<String, DemoGraphResponse.Node> nodes, String key, String type,
+	private void putNode(Map<String, DemoGraphResponse.DemoGraphNode> nodes, String key, String type,
 			String label, String subType) {
 		if (key == null) {
 			return;
 		}
-		nodes.computeIfAbsent(key, nodeKey -> new DemoGraphResponse.Node(
+		nodes.computeIfAbsent(key, nodeKey -> new DemoGraphResponse.DemoGraphNode(
 				nodeKey,
 				type == null ? null : type.toUpperCase(java.util.Locale.ROOT),
 				label,
