@@ -48,7 +48,14 @@
     border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px;
     font-size: 13px; font-family: inherit;
   }
-  textarea { min-height: 220px; resize: vertical; line-height: 1.5; }
+  /* 오른쪽 아래 모서리를 끌어 가로·세로 모두 늘릴 수 있다. */
+  textarea { min-height: 220px; resize: both; line-height: 1.5; }
+  button.link {
+    display: inline; width: auto; margin: 0; padding: 0 2px;
+    background: none; border: 0; color: var(--accent);
+    font-size: inherit; font-weight: 600; font-family: inherit;
+    text-decoration: underline; cursor: pointer;
+  }
   .row { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
   .row label { margin: 0; color: var(--text); font-size: 13px; }
   button {
@@ -62,6 +69,46 @@
   .status.err { color: #ff8b8b; }
   .status b { color: var(--text); }
   main { flex: 1; position: relative; min-width: 0; }
+
+  aside.right {
+    width: 270px; flex: none; padding: 16px 14px; overflow-y: auto;
+    border-right: 0; border-left: 1px solid var(--border); background: var(--panel);
+  }
+  aside.right h2 {
+    margin: 0 0 8px; font-size: 12px; font-weight: 700; color: var(--muted);
+    letter-spacing: .02em;
+  }
+  aside.right h2:not(:first-child) { margin-top: 18px; }
+  .filter { display: flex; flex-direction: column; gap: 5px; }
+  .filter label {
+    display: flex; align-items: center; gap: 7px; margin: 0;
+    font-size: 12.5px; color: var(--text); cursor: pointer;
+  }
+  .filter i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .filter .count { margin-left: auto; color: var(--muted); font-size: 11.5px; }
+  .events { display: flex; flex-direction: column; gap: 6px; }
+  .events button {
+    width: 100%; margin: 0; padding: 8px 10px; text-align: left;
+    background: var(--box-bg, #101119); border: 1px solid var(--border);
+    color: var(--text); border-radius: 7px;
+    font-size: 12.5px; font-weight: 400; line-height: 1.45; cursor: pointer;
+  }
+  .events button.primary { border-color: var(--event); }
+  .events button .tag { display: block; font-size: 10.5px; color: var(--event); margin-bottom: 2px; }
+  .events .none { font-size: 12.5px; color: var(--muted); }
+  .events .group {
+    font-size: 11px; color: var(--muted); margin: 8px 0 1px; letter-spacing: .02em;
+  }
+  .events .group:first-child { margin-top: 0; }
+  aside.right .toggle {
+    display: flex; align-items: center; gap: 7px; margin: 0;
+    font-size: 12.5px; color: var(--text); cursor: pointer;
+  }
+  aside.right button.wide {
+    width: auto; flex: 1; margin: 0; padding: 6px 8px; font-size: 12px;
+    background: transparent; border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px;
+  }
   svg { width: 100%; height: 100%; display: block; cursor: grab; }
   svg:active { cursor: grabbing; }
   .legend {
@@ -94,7 +141,7 @@
   .zoom span { font-size: 12px; color: var(--muted); min-width: 38px; text-align: center; }
   .relLabel { font-size: 9px; fill: var(--muted); }
   .detail {
-    position: absolute; right: 14px; top: 48px; width: 320px; max-width: calc(100% - 28px);
+    position: absolute; left: 0; top: 0; width: 300px; max-width: calc(100% - 28px);
     background: rgba(15,16,20,.95); border: 1px solid var(--border); border-radius: 10px;
     padding: 12px 14px; font-size: 13px; line-height: 1.6;
   }
@@ -106,26 +153,58 @@
   .detail .rels div { margin: 2px 0; }
   .detail .close { position: absolute; right: 10px; top: 8px; width: auto; margin: 0;
                    padding: 0 4px; background: none; color: var(--muted); font-size: 15px; }
+  .busy {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    background: rgba(15,16,20,.72);
+  }
+  .busy[hidden] { display: none; }
+  .spinner {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .busy .what { font-size: 13.5px; color: var(--text); }
+  .busy .what b { font-variant-numeric: tabular-nums; }
+  .busy .bar {
+    width: 260px; max-width: 60%; height: 4px; border-radius: 2px;
+    background: var(--border); overflow: hidden;
+  }
+  .busy .bar i {
+    display: block; height: 100%; width: 0; border-radius: 2px;
+    background: var(--accent); transition: width .4s linear;
+  }
+  /* 얼마나 걸릴지 모를 때는 채우는 대신 좌우로 흐르게 둔다. */
+  .busy .bar.unknown i { width: 40%; animation: slide 1.1s ease-in-out infinite; }
+  @keyframes slide {
+    0% { margin-left: -40%; } 100% { margin-left: 100%; }
+  }
   .empty {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    color: var(--muted); font-size: 14px;
+    color: var(--muted); font-size: 14px; text-align: center; line-height: 2;
   }
   /* 클래스 선택자가 기본 [hidden] 규칙보다 우선하므로 여기서 다시 숨긴다. */
   .empty[hidden], .counts[hidden] { display: none; }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1100px) {
     body { flex-direction: column; height: auto; }
-    aside { width: 100%; border-right: 0; border-bottom: 1px solid var(--border); }
+    aside, aside.right {
+      width: 100%; border-right: 0; border-left: 0;
+      border-bottom: 1px solid var(--border);
+    }
     main { height: 70vh; }
   }
-  text { pointer-events: none; user-select: none; }
+  text { user-select: none; }
+  /* 이름을 눌러도 노드를 잡을 수 있게 한다. 관계 이름은 방해만 되므로 통과시킨다. */
+  #nodes text { cursor: pointer; }
+  .relLabel { pointer-events: none; }
 </style>
 </head>
 <body>
 
 <aside>
   <h1>기사 → 지식그래프</h1>
-  <p class="sub">기사를 넣으면 저장·분석하고 만들어진 그래프를 그린다. 분석에 30~60초 걸린다.</p>
 
   <label for="title">제목</label>
   <input id="title" type="text" placeholder="부산 북항 친수공원에 이틀째 상어 출몰">
@@ -172,17 +251,36 @@
     <div class="rels"></div>
   </div>
   <div id="counts" class="counts" hidden></div>
-  <div id="empty" class="empty">아직 그래프가 없습니다.</div>
-  <div class="legend">
-    <span><i style="background:var(--article)"></i>기사</span>
-    <span><i style="background:var(--event)"></i>사건</span>
-    <span><i style="background:var(--entity)"></i>개체</span>
-    <span><i style="background:var(--statement)"></i>발언</span>
-    <span><i style="background:var(--topic)"></i>분류</span>
-    <span><i style="background:var(--time)"></i>시점</span>
-    <span><i style="background:var(--story)"></i>스토리</span>
+  <div id="busy" class="busy" hidden>
+    <div class="spinner"></div>
+    <div class="what"></div>
+    <div class="bar"><i></i></div>
+  </div>
+  <div id="empty" class="empty">
+    <div>
+      아직 그래프가 없습니다.<br>
+      <button id="sample" class="link">기사 12205 불러오기</button>
+    </div>
   </div>
 </main>
+
+<aside class="right">
+  <h2>보기</h2>
+  <label class="toggle">
+    <input id="primaryOnlyRight" type="checkbox" checked>
+    대표 사건만 보기
+  </label>
+
+  <h2>종류별 표시</h2>
+  <div class="row" style="margin:0 0 8px">
+    <button id="selectAll" class="wide">모두 선택</button>
+    <button id="clearAll" class="wide">모두 해제</button>
+  </div>
+  <div id="filter" class="filter"></div>
+
+  <h2>노드 목록</h2>
+  <div id="events" class="events"><div class="none">아직 없습니다.</div></div>
+</aside>
 
 <script>
 const COLORS = {
@@ -212,6 +310,98 @@ function setStatus(html, isError) {
 
 /* ---------- 보기 전환 ---------- */
 
+const TYPE_NAMES = {
+  ARTICLE: '기사', EVENT: '사건', ENTITY: '개체', STATEMENT: '발언',
+  TOPIC: '분류', TIME: '시점', STORY: '스토리',
+};
+
+/** 체크를 끈 노드 종류. 그 종류의 노드와 거기 걸린 간선을 화면에서 뺀다. */
+const hiddenTypes = new Set();
+
+/** 종류별 표시 목록을 지금 보고 있는 그래프 기준으로 다시 만든다. */
+function rebuildFilter(view) {
+  const counts = new Map();
+  for (const node of view.nodes) {
+    counts.set(node.nodeType, (counts.get(node.nodeType) ?? 0) + 1);
+  }
+
+  $('filter').innerHTML = Object.keys(TYPE_NAMES)
+    .filter((type) => counts.has(type))
+    .map((type) => `
+      <label>
+        <input type="checkbox" data-type="${type}" ${hiddenTypes.has(type) ? '' : 'checked'}>
+        <i style="background:var(--${type.toLowerCase()})"></i>
+        ${TYPE_NAMES[type]}
+        <span class="count">${counts.get(type)}</span>
+      </label>`).join('');
+
+  for (const box of $('filter').querySelectorAll('input')) {
+    box.addEventListener('change', () => {
+      if (box.checked) hiddenTypes.delete(box.dataset.type);
+      else hiddenTypes.add(box.dataset.type);
+      applyView();
+    });
+  }
+}
+
+/**
+ * 노드 목록. 종류별 표시에서 켜 둔 종류만 보여 주고, 누르면 그 노드를 화면 가운데로 옮긴다.
+ */
+function rebuildList(view) {
+  const primaryKeys = new Set(view.edges
+    .filter((edge) => edge.relation === 'COVERS' && edge.primary)
+    .map((edge) => edge.to));
+
+  const sections = Object.keys(TYPE_NAMES)
+    .filter((type) => !hiddenTypes.has(type))
+    .map((type) => {
+      const nodes = view.nodes.filter((node) => node.nodeType === type);
+      if (nodes.length === 0) {
+        return '';
+      }
+      const items = nodes.map((node) => `
+        <button data-key="${node.nodeKey}" class="${primaryKeys.has(node.nodeKey) ? 'primary' : ''}">
+          ${primaryKeys.has(node.nodeKey) ? '<span class="tag">대표 사건</span>' : ''}
+          ${escapeHtml(node.label ?? '(이름 없음)')}
+        </button>`).join('');
+      return `<div class="group">${TYPE_NAMES[type]} ${nodes.length}</div>${items}`;
+    })
+    .join('');
+
+  $('events').innerHTML = sections || '<div class="none">표시할 노드가 없습니다.</div>';
+  for (const button of $('events').querySelectorAll('button')) {
+    button.addEventListener('click', () => focusNode(button.dataset.key));
+  }
+}
+
+/** 종류별 표시를 한 번에 켜거나 끈다. */
+function setAllTypes(enabled) {
+  hiddenTypes.clear();
+  if (!enabled) {
+    for (const type of Object.keys(TYPE_NAMES)) hiddenTypes.add(type);
+  }
+  applyView();
+}
+
+/** 노드 하나를 화면 가운데로 옮기고 상세를 연다. */
+function focusNode(nodeKey) {
+  const index = current.nodes.findIndex((node) => node.nodeKey === nodeKey);
+  if (index < 0) return;
+  const node = current.nodes[index];
+  viewport.x = svg.clientWidth / 2 - node.x * viewport.scale;
+  viewport.y = svg.clientHeight / 2 - node.y * viewport.scale;
+  applyViewport();
+  showDetail(index);
+}
+
+/** 체크를 끈 종류의 노드와 그 노드에 걸린 간선을 뺀다. */
+function applyTypeFilter(view) {
+  if (hiddenTypes.size === 0) return view;
+  const nodes = view.nodes.filter((node) => !hiddenTypes.has(node.nodeType));
+  const kept = new Set(nodes.map((node) => node.nodeKey));
+  return { ...view, nodes, edges: view.edges.filter((edge) => kept.has(edge.from) && kept.has(edge.to)) };
+}
+
 /** 기사가 대표로 다루는 사건만 남긴다. 서버 쪽 primaryOnly 와 같은 규칙이다. */
 function keepPrimaryOnly(data) {
   const article = data.articleNodeId;
@@ -236,7 +426,45 @@ function keepPrimaryOnly(data) {
 /** 받아 둔 응답을 지금 선택한 보기로 그린다. 네트워크를 타지 않는다. */
 function applyView() {
   if (!received) return;
-  draw($('primaryOnly').checked ? keepPrimaryOnly(received) : received);
+  // 같은 설정을 양쪽 패널에 두었으므로 어느 쪽을 눌러도 둘 다 맞춘다.
+  $('primaryOnlyRight').checked = $('primaryOnly').checked;
+  const view = $('primaryOnly').checked ? keepPrimaryOnly(received) : received;
+  // 목록과 개수는 종류 필터를 걸기 전 기준이다. 체크를 꺼도 목록에서 사라지지 않게.
+  rebuildFilter(view);
+  rebuildList(view);
+  draw(applyTypeFilter(view));
+}
+
+/* ---------- 진행 표시 ---------- */
+
+/** 분석이 대개 이 정도 걸린다. 막대를 이 값에 맞춰 채운다. */
+const EXPECTED_ANALYSIS_SECONDS = 60;
+
+/**
+ * 기다리는 동안 회전판과 막대를 띄운다.
+ *
+ * @param startedAt 분석처럼 오래 걸리는 일은 시작 시각을 넘겨 막대를 채우게 한다.
+ *                  넘기지 않으면 얼마나 걸릴지 모르는 일로 보고 막대가 흐르기만 한다.
+ */
+function showBusy(what, startedAt) {
+  const busy = $('busy');
+  busy.querySelector('.what').textContent = what;
+  busy.querySelector('.bar').classList.toggle('unknown', !startedAt);
+  busy.querySelector('.bar i').style.width = startedAt ? '0%' : '';
+  busy.hidden = false;
+  if (startedAt) updateBusy(startedAt);
+}
+
+function updateBusy(startedAt) {
+  const seconds = (Date.now() - startedAt) / 1000;
+  // 예상보다 오래 걸려도 다 찬 것처럼 보이지 않게 95% 에서 멈춘다.
+  const ratio = Math.min(0.95, seconds / EXPECTED_ANALYSIS_SECONDS);
+  $('busy').querySelector('.bar i').style.width = `${ratio * 100}%`;
+  $('busy').querySelector('.what').innerHTML = `분석 중 <b>${Math.round(seconds)}초</b>`;
+}
+
+function hideBusy() {
+  $('busy').hidden = true;
 }
 
 /* ---------- API ---------- */
@@ -261,9 +489,12 @@ async function submitArticle() {
   }
 
   const started = Date.now();
+  showBusy('분석 중', started);
   const timer = setInterval(() => {
-    setStatus(`분석 중… <b>${Math.round((Date.now() - started) / 1000)}초</b> 경과 (최대 150초)`);
-  }, 1000);
+    const seconds = Math.round((Date.now() - started) / 1000);
+    setStatus(`분석 중… <b>${seconds}초</b> 경과 (최대 150초)`);
+    updateBusy(started);
+  }, 250);
   $('submit').disabled = true;
 
   try {
@@ -285,6 +516,7 @@ async function submitArticle() {
     clearInterval(timer);
     setStatus(failure.message, true);
   } finally {
+    hideBusy();
     $('submit').disabled = false;
   }
 }
@@ -293,6 +525,7 @@ async function loadArticle() {
   const articleId = $('articleId').value.trim();
   if (!articleId) return;
   setStatus('불러오는 중…');
+  showBusy('불러오는 중');
   try {
     const data = await call(`/api/v1/demo/articles/${articleId}/graph?primaryOnly=false`);
     received = data;
@@ -301,6 +534,8 @@ async function loadArticle() {
     applyView();
   } catch (failure) {
     setStatus(failure.message, true);
+  } finally {
+    hideBusy();
   }
 }
 
@@ -310,6 +545,26 @@ async function loadArticle() {
 
 /** 노드를 누르면 여는 상세. 이름이 길어 줄임표로 잘린 것을 여기서 전부 보여 준다. */
 let current = { nodes: [], links: [] };
+
+/** 상세를 열어 둔 노드. 화면을 옮기거나 확대할 때 카드도 같이 따라가야 한다. */
+let detailIndex = null;
+
+/** 상세 카드를 그 노드 바로 아래에 둔다. 화면 밖으로 나가지 않게 가장자리에서 멈춘다. */
+function positionDetail() {
+  const detail = $('detail');
+  if (detailIndex === null || detail.hidden) return;
+  const node = current.nodes[detailIndex];
+  if (!node) return;
+
+  const gap = 16;
+  const left = node.x * viewport.scale + viewport.x - detail.offsetWidth / 2;
+  const top = node.y * viewport.scale + viewport.y + gap;
+  const maxLeft = svg.clientWidth - detail.offsetWidth - 8;
+  const maxTop = svg.clientHeight - detail.offsetHeight - 8;
+
+  detail.style.left = `${Math.max(8, Math.min(maxLeft, left))}px`;
+  detail.style.top = `${Math.max(8, Math.min(maxTop, top))}px`;
+}
 
 function showDetail(nodeIndex) {
   const node = current.nodes[nodeIndex];
@@ -335,6 +590,13 @@ function showDetail(nodeIndex) {
     : [...counts].map(([key, count]) => `<div>${escapeHtml(key)} · ${count}개</div>`).join('');
 
   detail.hidden = false;
+  detailIndex = nodeIndex;
+  positionDetail();
+}
+
+function hideDetail() {
+  $('detail').hidden = true;
+  detailIndex = null;
 }
 
 function draw(data) {
@@ -345,7 +607,7 @@ function draw(data) {
     .map((edge) => ({ ...edge, source: index.get(edge.from), target: index.get(edge.to) }));
 
   current = { nodes, links };
-  $('detail').hidden = true;
+  hideDetail();
   $('empty').hidden = nodes.length > 0;
   $('counts').hidden = nodes.length === 0;
   $('counts').textContent = `노드 ${nodes.length} · 간선 ${links.length}`;
@@ -463,6 +725,7 @@ function update(nodes, links) {
   nodes.forEach((node, i) => {
     groups[i].setAttribute('transform', `translate(${node.x},${node.y})`);
   });
+  positionDetail();
 }
 
 function escapeHtml(value) {
@@ -482,6 +745,7 @@ function applyViewport() {
       `translate(${viewport.x},${viewport.y}) scale(${viewport.scale})`);
   }
   $('zoomLevel').textContent = `${Math.round(viewport.scale * 100)}%`;
+  positionDetail();
 }
 
 /** 화면 가운데를 기준으로 확대·축소한다. 그래야 보고 있던 곳이 밖으로 밀려나지 않는다. */
@@ -572,10 +836,10 @@ svg.addEventListener('click', (event) => {
   if (group) {
     showDetail(Number(group.dataset.index));
   } else {
-    $('detail').hidden = true;
+    hideDetail();
   }
 });
-$('detailClose').addEventListener('click', () => { $('detail').hidden = true; });
+$('detailClose').addEventListener('click', hideDetail);
 // 휠 한 칸에 5%만 움직인다. 이전 12% 는 두세 칸만 굴려도 화면이 확 튀었다.
 // 트랙패드는 deltaY 가 잘게 여러 번 오므로 그 크기에 비례해 부드럽게 따라가도록 한다.
 svg.addEventListener('wheel', (event) => {
@@ -587,10 +851,20 @@ svg.addEventListener('wheel', (event) => {
 $('submit').addEventListener('click', submitArticle);
 $('load').addEventListener('click', loadArticle);
 $('primaryOnly').addEventListener('change', applyView);
+$('primaryOnlyRight').addEventListener('change', () => {
+  $('primaryOnly').checked = $('primaryOnlyRight').checked;
+  applyView();
+});
 $('showRelations').addEventListener('change', applyView);
 $('zoomIn').addEventListener('click', () => zoomBy(1.25));
 $('zoomOut').addEventListener('click', () => zoomBy(1 / 1.25));
 $('zoomFit').addEventListener('click', zoomToFit);
+$('selectAll').addEventListener('click', () => setAllTypes(true));
+$('clearAll').addEventListener('click', () => setAllTypes(false));
+$('sample').addEventListener('click', () => {
+  $('articleId').value = '12205';
+  loadArticle();
+});
 </script>
 </body>
 </html>
