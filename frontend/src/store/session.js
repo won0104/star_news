@@ -94,6 +94,22 @@ export function replaceAccessToken(expectedToken, next) {
   return true;
 }
 
+/**
+ * 새로고침 뒤 뒤늦게 알아낸 사용자 정보를 지금 세션에 붙인다.
+ *
+ * `POST /auth/refresh` 는 토큰만 주므로 부팅 직후의 세션에는 `user` 가 없다. 뒤이어 부른
+ * `GET /users/me` 의 결과가 여기로 온다. revision 을 올리지 않는 것이 중요하다 — 올리면
+ * 그 사이 날아간 요청들이 세션이 바뀐 것으로 보고 스스로를 취소한다.
+ *
+ * 기다리는 동안 로그아웃하거나 다시 로그인했으면 늦게 온 정보는 버린다.
+ */
+export function attachUser(expectedToken, user) {
+  if (!account || account.accessToken !== expectedToken) return false;
+  account = { ...account, user };
+  notify();
+  return true;
+}
+
 export function endSessionIfToken(expectedToken) {
   if (!account || account.accessToken !== expectedToken) return false;
   endSession({ broadcast: false });

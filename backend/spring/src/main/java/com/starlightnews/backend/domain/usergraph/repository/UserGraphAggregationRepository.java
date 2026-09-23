@@ -102,10 +102,15 @@ public interface UserGraphAggregationRepository extends Repository<User, Long> {
 	/**
 	 * Event 소비 집계를 조회한다.
 	 *
-	 * <p>클릭·열람·즐겨찾기 중 하나라도 있으면 보낸다. FastAPI 는 이 관계를 두 가지로 쓰는데,
+	 * <p>클릭·대표 열람·즐겨찾기 중 하나라도 있으면 보낸다. FastAPI 는 이 관계를 두 가지로 쓰는데,
 	 * 하나는 "이미 본 Event 를 추천에서 빼는" 미열람 필터이고 다른 하나는 취향 벡터 가중치다.
 	 * 앞쪽 기준으로는 기사를 읽은 것만으로도 본 것이므로, 클릭만 보면 읽은 내용을 다시 추천한다.
 	 * 기사를 목록에서 눌러 읽는 쪽이 그래프에서 노드를 클릭하는 것보다 훨씬 흔하다.
+	 *
+	 * <p><b>열람은 대표 사건만 본다.</b> 기사 한 건이 COVERS 로 사건 열 개 넘게 이어지는데 대부분은
+	 * 스치듯 언급된 부차 사건이다. 전부 보내면 기사 한 건을 읽을 때마다 사건 열댓 개가 추천 후보에서
+	 * 빠지는데, 클릭이 0 이라 취향 벡터에는 기여하지 않는다. 후보만 마른다.
+	 * 부차 사건도 화면(개인 그래프)에는 그대로 남는다. read_article_count 는 건드리지 않는다.
 	 *
 	 * <p>{@code eventClickCount} 로 보내는 값은 그대로 클릭 수다. 클릭이 0 이면 가중치가
 	 * {@code log(1+0)=0} 이라 취향 벡터에는 영향이 없고 미열람 필터에만 걸린다.
@@ -122,7 +127,7 @@ public interface UserGraphAggregationRepository extends Repository<User, Long> {
 			WHERE node.user_id IN (:userIds)
 			  AND node.node_type = 'EVENT'
 			  AND (node.node_click_count > 0
-			       OR node.read_article_count > 0
+			       OR node.primary_read_count > 0
 			       OR favorite.user_id IS NOT NULL)
 			ORDER BY node.user_id, node.node_id
 			""", nativeQuery = true)

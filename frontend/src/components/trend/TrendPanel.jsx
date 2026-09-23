@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { fetchArticleDetail, recordArticleRead } from '../../api/articles'
 import { fetchNodeDetail } from '../../api/trend'
 import { panelCopy } from '../../data/trend'
+import { useArticleSummary } from '../../hooks/useArticleSummary'
 import { useBookmark } from '../../hooks/useBookmark'
 import { useResizableCard } from '../../hooks/useResizableCard'
 import { useSession } from '../../store/session'
@@ -29,8 +31,12 @@ const NODE_COPY = ARTICLE_COPY
  *
  * 저장은 둘이다. 제목 옆 ★ 은 이 사건(Node) 자체의 즐겨찾기 — `PATCH /bookmarks/nodes`,
  * 기사 줄의 책갈피는 그 기사의 북마크 — `PATCH /bookmarks/articles`. 둘 다 로그인이 필요
- * 하고, 없이 누르면 요청 없이 한 줄 안내만 뜬다(useBookmark). `상세 보기` has nothing
- * behind it yet: there is no article route to send anyone to.
+ * 하고, 없이 누르면 요청 없이 한 줄 안내만 뜬다(useBookmark).
+ *
+ * 기사를 여는 일은 별도 화면이 아니라 줄 안에서 펼치는 것으로 끝낸다. 기사 상세 API 가
+ * 주는 것이 제목·언론사·발행일·원문 주소뿐이고 그 셋은 이 목록에 이미 있어서, 화면을 하나
+ * 더 띄워 봐야 원문 링크 하나가 늘 뿐이다. 펼치면 요약을 만들고(POST /summary) 열람으로
+ * 기록한다(POST /reads) — 자세한 조건은 <ArticleRow>.
  */
 export function TrendPanel({ data, state, title, node, open, onClose, onMore, id }) {
   const { cardRef, cardStyle, dragging, resizing, positioned, handleProps, resizeHandleProps } =
@@ -153,7 +159,15 @@ function NodeStar({ node, open }) {
   )
 }
 
-/** 기사 한 줄. 책갈피는 이 기사의 북마크 — 줄마다 자기 상태를 가진다. */
+/**
+ * 기사 한 줄. 책갈피는 이 기사의 북마크 — 줄마다 자기 상태를 가진다.
+ *
+ * 요약은 펼쳐야 가져온다. `POST /articles/{id}/summary` 는 저장된 요약이 없으면 그 자리에서
+ * 만들기 때문에, 목록에 뜨는 것만으로 부르면 아무도 읽지 않을 요약까지 만들게 된다. 펼치기를
+ * 누른 것만 만든다 — 사용자가 읽겠다고 한 것과 생성 비용이 같은 자리에 온다.
+ *
+ * 한 번 받아온 요약은 접었다 펴도 다시 부르지 않는다(훅이 들고 있다).
+ */
 function ArticleRow({ article }) {
   const { on, pending, hint, toggle } = useBookmark({
     kind: 'article',
@@ -161,6 +175,69 @@ function ArticleRow({ article }) {
     initial: article.bookmarked,
     copy: ARTICLE_COPY,
   })
+  const account = useSession()
+  const [open, setOpen] = useState(false)
+  // 원문 주소는 관련 기사 목록에 없고 상세에만 있다(RelatedArticleItem 에는 없는 유일한 칸).
+  // 한 번 받으면 들고 있다가 이후로는 그냥 링크로 건다.
+  const [origin, setOrigin] = useState(null)
+  const { summary, state, load, retry } = useArticleSummary(article.articleId)
+  // 이 기사를 이미 읽음으로 남겼는지. 접었다 펴도, 원문을 다시 눌러도 보내지 않기 위한 표시다.
+  const recorded = useRef(false)
+  const bodyId = `article-summary-${article.articleId}`
+
+  useEffect(() => {
+    if (!open || origin) return
+    const controller = new AbortController()
+    fetchArticleDetail(article.articleId, { signal: controller.signal })
+      .then((detail) => setOrigin(detail?.originalUrl ?? null))
+      .catch(() => {})
+    return () => controller.abort()
+  }, [open, origin, article.articleId])
+
+  /**
+   * 이 기사를 읽은 것으로 남긴다. 요약을 펼치는 것과 원문으로 나가는 것 둘 다 해당한다 —
+   * 어느 쪽이든 사용자가 이 기사를 읽겠다고 고른 것이다.
+   *
+   * effect 가 아니라 클릭에서 보낸다 — StrictMode 는 effect 를 두 번 실행하므로 열람 횟수를
+   * 올리는 요청을 거기 두면 개발 모드에서 두 배가 된다. 한 기사에 한 번만 보내려고 ref 로
+   * 막는다. 비로그인은 보내지 않는다 — 어차피 401 로 거절될 요청이다.
+   */
+  const markRead = () => {
+    if (!account || recorded.current) return
+    recorded.current = true
+    recordArticleRead(article.articleId).catch(() => {
+      // 읽음 기록은 화면이 하는 일의 곁가지다. 실패해도 읽는 일을 방해하지 않는다.
+      recorded.current = false
+    })
+  }
+
+  /** 요약 토글. 펼칠 때만 만들거나 가져온다 — 접기는 새로 읽는 것이 아니다. */
+  const expand = () => {
+    const next = !open
+    setOpen(next)
+    if (!next) return
+    load()
+    markRead()
+  }
+
+  /**
+   * 원문 주소를 아직 모를 때만 쓰는 길. 알고 나면 아래에서 그냥 <a> 로 건다.
+   *
+   * 빈 탭을 **클릭과 같은 흐름에서 먼저** 연 뒤 주소를 넣는다. 응답을 기다렸다가 window.open
+   * 을 부르면 사용자 제스처와 끊겨 팝업 차단에 걸린다. 주소를 못 받으면 열어 둔 탭을 닫는다.
+   */
+  const openOrigin = () => {
+    markRead()
+    const tab = window.open('', '_blank', 'noopener,noreferrer')
+    fetchArticleDetail(article.articleId)
+      .then((detail) => {
+        const url = detail?.originalUrl ?? null
+        setOrigin(url)
+        if (url && tab) tab.location.href = url
+        else tab?.close()
+      })
+      .catch(() => tab?.close())
+  }
 
   return (
     <li className={styles.item}>
@@ -191,11 +268,74 @@ function ArticleRow({ article }) {
       <p className={styles.headline}>{article.title}</p>
       {hint && <p className={styles.hint} role="status">{hint}</p>}
 
-      <button type="button" className={styles.detail}>
-        {panelCopy.detail} →
-      </button>
+      {/*
+        요약과 원문을 나란히 둔다. 요약만 두면 원문이 필요한 사람도 요약을 펼쳐야 해서,
+        아무도 읽지 않을 요약을 만들게 된다(POST /summary 는 없으면 그 자리에서 생성한다).
+        둘은 서로 다른 일이므로 버튼도 둘이다.
+      */}
+      <div className={styles.articleActions}>
+        <button
+          type="button"
+          className={styles.detail}
+          aria-expanded={open}
+          aria-controls={bodyId}
+          onClick={expand}
+        >
+          {open ? panelCopy.summaryClose : panelCopy.summaryOpen}
+          <span className={styles.detailCaret} aria-hidden>
+            {open ? '▴' : '▾'}
+          </span>
+        </button>
+
+        {origin ? (
+          <a
+            className={`${styles.detail} ${styles.detailAway}`}
+            href={origin}
+            target="_blank"
+            rel="noreferrer"
+            onClick={markRead}
+          >
+            {panelCopy.origin}
+            <span className={styles.detailCaret} aria-hidden>↗</span>
+          </a>
+        ) : (
+          <button
+            type="button"
+            className={`${styles.detail} ${styles.detailAway}`}
+            onClick={openOrigin}
+          >
+            {panelCopy.origin}
+            <span className={styles.detailCaret} aria-hidden>↗</span>
+          </button>
+        )}
+      </div>
+
+      <div className={styles.summaryBody} id={bodyId} hidden={!open}>
+        {summary ? (
+          <p className={styles.summaryText}>{summary}</p>
+        ) : (
+          <p className={styles.summaryNote} role="status">
+            {summaryNote(state)}
+          </p>
+        )}
+
+        {(state === 'failed' || state === 'pending') && (
+          <button type="button" className={styles.summaryRetry} onClick={retry}>
+            {panelCopy.summaryRetry}
+          </button>
+        )}
+      </div>
     </li>
   )
+}
+
+/** 요약이 비어 있는 이유를 화면 말로 옮긴다. */
+function summaryNote(state) {
+  if (state === 'loading') return panelCopy.summaryLoading
+  if (state === 'pending') return panelCopy.summaryPending
+  if (state === 'unavailable') return panelCopy.summaryUnavailable
+  if (state === 'failed') return panelCopy.summaryFailed
+  return panelCopy.summaryNone
 }
 
 /** `2024-01-11T09:52:15+09:00` → `1월 11일`. Read out of the string so the server's own

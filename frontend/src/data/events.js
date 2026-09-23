@@ -2,7 +2,7 @@
  * The event store: one entry per event, holding everything any screen needs about it.
  *
  * Two screens read it and neither owns it. 나를 위한 추천 shows a card per event, and
- * /event/:id shows one event in full — so the title, the summary and the articles live
+ * 사건 하나를 통째로 보여주던 /event/:id 가 없어졌다. 아래 값들은 추천 보드가 카드 문구로
  * here once, and data/recommend.js carries only which events are recommended and why.
  * Written the other way round, a card and its own detail page could drift apart.
  *

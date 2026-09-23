@@ -238,6 +238,24 @@ export const stars = {
 }
 
 /**
+ * 이미 지나온 별. 종류를 가리지 않고 한 장을 쓴다.
+ *
+ * A → B → C 로 걸어 들어가면 B 는 C 의 주변에도 다시 나타난다. 그때 처음 보는 별과 같은
+ * 그림이면 "여기 왔었다"는 사실이 화면에서 사라진다 — 탐색 경로는 상단 빵가루에만 남고,
+ * 별자리 자체는 아무것도 기억하지 못하는 것처럼 보인다.
+ *
+ * 사건·인물·발언을 따로 그리지 않는 이유는, 이 별이 답하는 질문이 "무엇인가"가 아니라
+ * "가봤는가"이기 때문이다. 종류는 평소 별 세 장이 이미 말하고 있고, 지나왔다는 사실에는
+ * 종류가 없다.
+ *
+ * 규격은 `stars` 와 같아야 한다 — 240px 프레임, 몸통이 프레임의 0.72.
+ * 어긋나면 같은 자리에서 별 크기가 달라 보인다(scripts/crop-stars.py).
+ *
+ * 지금 중심인 별은 제외한다. 중심은 "지나온 곳"이 아니라 "지금 보는 곳"이다.
+ */
+export const visitedStar = '/assets/trend/star-visited.webp'
+
+/**
  * 주요 트렌드's constellation: one event at a time, taken apart into what it is made of,
  * with the events it connects to around it. Drawn once the clip has handed the screen
  * over to the still.
@@ -627,7 +645,17 @@ export const eventPanels = {
 /** Copy for the panel's own furniture, which does not change with the event. */
 export const panelCopy = {
   countLabel: (n) => `관련 기사 ${n}개`,
-  detail: '상세 보기',
+  /* 요약은 펼쳐야 가져온다 — 버튼 문구가 "읽겠다"는 뜻이 되도록 적는다. */
+  summaryOpen: 'AI 요약 보기',
+  summaryClose: '요약 접기',
+  summaryLoading: '요약을 불러오는 중…',
+  summaryPending: '다른 곳에서 요약을 만드는 중이에요.',
+  summaryNone: '이 기사에는 아직 요약이 없어요.',
+  /* 422 — 다시 눌러도 달라지지 않는 쪽이라 실패와 나눠 적는다. */
+  summaryUnavailable: '원문 본문이 없어 요약을 만들 수 없어요.',
+  summaryFailed: '요약을 만들지 못했어요.',
+  summaryRetry: '다시 시도',
+  origin: '원문 보러가기',
   close: '닫기',
   open: (n) => `관련 기사 ${n}개 보기`,
   recentre: '이 사건을 가운데로',

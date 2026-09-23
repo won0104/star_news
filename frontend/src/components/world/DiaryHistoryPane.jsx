@@ -12,6 +12,7 @@ import {
   mergeTopicMap,
 } from '../../adapters/personalGraph'
 import { TOPICS } from '../../data/topics'
+import { useBookmark } from '../../hooks/useBookmark'
 import { useSettingsValues } from '../../store/settings'
 import { DiaryShell } from './DiaryShell'
 import styles from './DiaryHistoryPane.module.css'
@@ -32,6 +33,31 @@ const TONE_CLASS = {
 }
 
 const EMPTY_GRAPH = { generatedAt: null, nodes: [], edges: [] }
+
+/**
+ * 오늘을 `yyyy-MM-dd` 로, KST 기준으로 준다. 날짜 칸의 상한으로 쓴다.
+ *
+ * 서버가 기간을 KST 날짜로 읽으므로 브라우저의 시간대로 찍으면 안 된다 — 한국 밖에서 보면
+ * 하루가 밀린다. `en-CA` 로케일이 그 형식을 그대로 준다.
+ */
+const KST_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' })
+function kstToday() {
+  return KST_DATE.format(new Date())
+}
+
+/** 비어 있는 기간 — 이 상태로 두면 파라미터를 보내지 않아 전체 기록이 온다. */
+const NO_RANGE = { from: '', to: '' }
+
+/**
+ * 책갈피가 실패했을 때 줄 밑에 한 줄로 남긴다.
+ *
+ * 로그인 문구도 들고 있지만 이 화면에서는 거의 쓰이지 않는다 — 기록 자체가 로그인해야 보이는
+ * 것이라 여기까지 온 사람은 이미 로그인돼 있다. 세션이 중간에 끊긴 경우를 위해 남겨 둔다.
+ */
+const ARTICLE_BOOKMARK_COPY = {
+  signIn: '로그인하면 담을 수 있어요.',
+  failed: '북마크를 바꾸지 못했어요.',
+}
 
 /**
  * 나의 기록.
@@ -61,18 +87,39 @@ export function DiaryHistoryPane() {
    * setState 로 하면 렌더가 한 번 더 돌므로, 값 자체에 어느 분야의 것인지를 달아두고 읽는 쪽에서
    * 가른다 — 분야가 다르면 없는 것으로 친다. 늦게 도착한 이전 분야의 응답도 같은 규칙에 걸린다.
    */
-  const [map, setMap] = useState({ topicCode: null, state: 'loading', data: null })
-  const [articles, setArticles] = useState({ topicCode: null, byEvent: {} })
+  const [map, setMap] = useState({ scope: null, state: 'loading', data: null })
+  const [articles, setArticles] = useState({ scope: null, byEvent: {} })
+
+  /*
+   * 기간은 URL 이 아니라 여기에 둔다. 분야를 옮길 때 setParams 로 검색 문자열을 통째로 갈아
+   * 끼우고 있어서, URL 에 두면 분야를 누를 때마다 기간이 조용히 초기화된다.
+   *
+   * 칸에 적힌 값(draft)과 실제로 보내는 값(range)을 나눈다. 서버는 from·to 를 함께 받거나
+   * 둘 다 없거나만 허용하므로(한쪽만 오면 400), 시작일만 고르고 끝을 아직 안 고른 중간 상태를
+   * 그대로 보내면 안 된다. 그 사이는 오류가 아니라 고르는 중이다.
+   */
+  const [draft, setDraft] = useState(NO_RANGE)
+  const [range, setRange] = useState(NO_RANGE)
+  // `yyyy-MM-dd` 는 사전순과 날짜순이 같아 문자열 비교로 충분하다.
+  const reversed = Boolean(draft.from && draft.to) && draft.from > draft.to
+
+  /*
+   * 지도와 기사에 달아 두는 꼬리표. 분야뿐 아니라 기간까지 넣는다 — 기간만 바꾼 경우에도
+   * 손에 든 응답은 이미 남의 것이므로, 분야만으로 가르면 새 응답이 오기 전까지 이전 기간의
+   * 사건이 그대로 보인다. 보내지 않는 기간(빈 문자열)은 전체를 뜻하므로 그것도 한 꼬리표다.
+   */
+  const rangeKey = `${range.from}|${range.to}`
+  const scope = `${topic.topicCode}|${rangeKey}`
 
   const [selectedNode, setSelectedNode] = useState(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [eventPageIndex, setEventPageIndex] = useState(0)
   const [openEventId, setOpenEventId] = useState(null)
 
-  // 요약은 한 번만. 분야를 옮겨 다녀도 대표 별들은 그대로다.
+  // 분야를 옮겨 다녀도 대표 별들은 그대로다. 다시 부르는 것은 기간이 바뀔 때뿐이다.
   useEffect(() => {
     const controller = new AbortController()
-    fetchPersonalGraph({ signal: controller.signal })
+    fetchPersonalGraph({ ...range, signal: controller.signal })
       .then((payload) => {
         setSummaryGraph(graphFromSummary(payload))
         setSummaryState('ready')
@@ -82,20 +129,22 @@ export function DiaryHistoryPane() {
         setSummaryState(error?.status === 401 ? 'signedOut' : 'failed')
       })
     return () => controller.abort()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeKey])
 
-  // 지도는 분야를 옮길 때마다.
+  // 지도는 분야를 옮기거나 기간을 바꿀 때마다.
   useEffect(() => {
     const controller = new AbortController()
-    const topicCode = topic.topicCode
-    fetchPersonalTopicMap(topicCode, { signal: controller.signal })
-      .then((payload) => setMap({ topicCode, state: 'ready', data: payload }))
+    const forScope = scope
+    fetchPersonalTopicMap(topic.topicCode, { ...range, signal: controller.signal })
+      .then((payload) => setMap({ scope: forScope, state: 'ready', data: payload }))
       .catch((error) => {
         if (error?.name === 'AbortError') return
-        setMap({ topicCode, state: error?.status === 401 ? 'signedOut' : 'failed', data: null })
+        setMap({ scope: forScope, state: error?.status === 401 ? 'signedOut' : 'failed', data: null })
       })
     return () => controller.abort()
-  }, [topic.topicCode])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scope])
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -105,8 +154,8 @@ export function DiaryHistoryPane() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }, [])
 
-  const current = map.topicCode === topic.topicCode ? map : { state: 'loading', data: null }
-  const articlesByEvent = articles.topicCode === topic.topicCode ? articles.byEvent : {}
+  const current = map.scope === scope ? map : { state: 'loading', data: null }
+  const articlesByEvent = articles.scope === scope ? articles.byEvent : {}
   const graph = current.data ? mergeTopicMap(summaryGraph, current.data) : summaryGraph
   const events = current.data ? eventsFromTopicMap(current.data) : []
   const state =
@@ -119,6 +168,24 @@ export function DiaryHistoryPane() {
     (safeEventPageIndex + 1) * EVENTS_PER_PAGE,
   )
 
+  /**
+   * 기간을 바꾼다. 펼쳐 둔 사건과 페이지는 접는다 — 새 기간에 그 사건이 남아 있다는 보장이
+   * 없고, 사라진 사건을 펼친 채로 두면 빈 칸이 열려 있게 된다.
+   */
+  const changeRange = (next) => {
+    setDraft(next)
+
+    // 칸에 적힌 것이 곧 보낼 것은 아니다. 한쪽만 고른 중간과 거꾸로 고른 상태에서는 들고 있던
+    // 기간을 그대로 둔다 — 그래야 고치는 동안 화면이 제멋대로 전체로 돌아가지 않는다.
+    const settled = !next.from && !next.to
+    if (!settled && !(next.from && next.to && next.from <= next.to)) return
+
+    setSelectedNode(null)
+    setOpenEventId(null)
+    setEventPageIndex(0)
+    setRange(settled ? NO_RANGE : { from: next.from, to: next.to })
+  }
+
   const selectTopic = (nextTopic) => {
     setSelectedNode(null)
     setOpenEventId(null)
@@ -130,15 +197,15 @@ export function DiaryHistoryPane() {
    * 사건 하나를 펼친다. 기사는 그때 받아온다 — 한 번 받은 것은 남겨두고 다시 묻지 않는다.
    * 클릭 기록은 화면이 기다릴 일이 아니므로 결과를 보지 않는다.
    */
-  const loadArticles = useCallback((topicCode, event) => {
+  const loadArticles = useCallback((forScope, event, forRange) => {
     const put = (value) =>
       setArticles((was) => {
-        const byEvent = was.topicCode === topicCode ? was.byEvent : {}
-        return { topicCode, byEvent: { ...byEvent, [event.nodeKey]: value } }
+        const byEvent = was.scope === forScope ? was.byEvent : {}
+        return { scope: forScope, byEvent: { ...byEvent, [event.nodeKey]: value } }
       })
 
     put({ state: 'loading' })
-    fetchPersonalNodeArticles('EVENT', event.nodeKey, { size: ARTICLES_PER_EVENT })
+    fetchPersonalNodeArticles('EVENT', event.nodeKey, { ...forRange, size: ARTICLES_PER_EVENT })
       .then((payload) => put({ state: 'ready', items: payload?.items ?? [] }))
       .catch(() => put({ state: 'failed' }))
   }, [])
@@ -149,7 +216,7 @@ export function DiaryHistoryPane() {
     if (open) return
     // 목록과 행성이 따로 놀지 않도록, 펼치는 사건으로 행성을 돌린다.
     setSelectedNode({ id: event.id, nodeType: 'EVENT', nodeKey: event.nodeKey, topicCode: topic.topicCode })
-    if (!articlesByEvent[event.nodeKey]) loadArticles(topic.topicCode, event)
+    if (!articlesByEvent[event.nodeKey]) loadArticles(scope, event, range)
     recordNodeClick('EVENT', event.nodeKey).catch(() => {})
   }
 
@@ -172,7 +239,7 @@ export function DiaryHistoryPane() {
     if (!event) return
     setOpenEventId(event.id)
     setEventPageIndex(Math.floor(events.indexOf(event) / EVENTS_PER_PAGE))
-    if (!articlesByEvent[event.nodeKey]) loadArticles(topic.topicCode, event)
+    if (!articlesByEvent[event.nodeKey]) loadArticles(scope, event, range)
   }
 
   const toggleFullscreen = async () => {
@@ -263,7 +330,52 @@ export function DiaryHistoryPane() {
               <span>{formatSnapshot(graph.generatedAt)}</span>
               <h2>{topic.topicName} 기록</h2>
             </div>
+            <div className={styles.periodRow} role="group" aria-label="기간">
+              <label className={styles.periodField}>
+                <span>부터</span>
+                <input
+                  type="date"
+                  value={draft.from}
+                  max={draft.to || kstToday()}
+                  onChange={(event) => changeRange({ ...draft, from: event.target.value })}
+                />
+              </label>
+              <label className={styles.periodField}>
+                <span>까지</span>
+                <input
+                  type="date"
+                  value={draft.to}
+                  min={draft.from || undefined}
+                  max={kstToday()}
+                  onChange={(event) => changeRange({ ...draft, to: event.target.value })}
+                />
+              </label>
+              {(draft.from || draft.to) && (
+                <button type="button" className={styles.periodClear} onClick={() => changeRange(NO_RANGE)}>
+                  전체 보기
+                </button>
+              )}
+            </div>
           </header>
+
+          {/*
+            기간을 건 동안만 밝힌다. 기준이 클릭이 아니라 열람이라는 것을 모르면, 별만 눌러 본
+            사건이 빠진 것을 기록이 사라진 것으로 읽는다.
+
+            한쪽만 고른 상태는 안내하지 않는다 — 고르는 중이지 잘못한 것이 아니다. 거꾸로 고른
+            것만 짚는다. 그대로는 보낼 수 없는 값이라 화면이 말해 주지 않으면 왜 그대로인지 알
+            길이 없다.
+          */}
+          {reversed && (
+            <p className={styles.periodNote}>
+              <b>시작일이 끝일보다 뒤</b>예요. 날짜를 바꾸면 그 기간으로 다시 그립니다.
+            </p>
+          )}
+          {!reversed && range.from && (
+            <p className={styles.periodNote}>
+              이 기간에 <b>읽은 기사</b>를 기준으로 다시 그립니다.
+            </p>
+          )}
 
           {state === 'loading' && <p className={styles.pageNotice}>기록을 불러오는 중…</p>}
 
@@ -342,13 +454,14 @@ export function DiaryHistoryPane() {
                             </h4>
                             {articles?.state === 'ready' && articles.items.length > 0 && (
                               <ul className={styles.eventArticleList}>
+                                {/*
+                                  읽은 날짜를 왼쪽 열로 빼 세로로 맞춘다. 발언은 사건의
+                                  내용이고 이쪽은 내 행위의 기록이라, 날짜가 열을 이루면
+                                  훑기만 해도 "언제 읽었나"가 보이고 위의 인용 덩어리와
+                                  모양 자체가 갈린다.
+                                */}
                                 {articles.items.map((article) => (
-                                  <li key={article.articleId}>
-                                    <small>
-                                      {article.organizationName} · {formatDate(article.lastReadAt)}
-                                    </small>
-                                    <p>{article.title}</p>
-                                  </li>
+                                  <ArticleRow key={article.articleId} article={article} />
                                 ))}
                               </ul>
                             )}
@@ -430,6 +543,59 @@ export function DiaryHistoryPane() {
       </DiaryShell>
 
     </section>
+  )
+}
+
+/**
+ * 읽은 기사 한 줄. 날짜 · 출처와 제목 · 책갈피 세 칸이다.
+ *
+ * 책갈피가 여기 서는 이유는, 나의 기록이 "무엇을 읽었나"를 보는 자리여서 그중 남겨 둘 것을
+ * 고르는 일이 같은 자리에서 끝나야 하기 때문이다. 이걸 빼면 기사를 다시 찾아 트렌드나 추천
+ * 화면으로 돌아가야 저장할 수 있다.
+ *
+ * 훅이 줄마다 자기 상태를 들고 있어야 해서 컴포넌트로 뺀다 — map 안에서는 훅을 부를 수 없다.
+ * 초기값은 목록 응답의 `bookmarked` 고, 누른 뒤에는 훅이 든 값이 이긴다(useBookmark 참고).
+ */
+function ArticleRow({ article }) {
+  const { on, pending, hint, toggle } = useBookmark({
+    kind: 'article',
+    key: article.articleId,
+    initial: article.bookmarked,
+    copy: ARTICLE_BOOKMARK_COPY,
+  })
+
+  return (
+    <li>
+      <small className={styles.articleWhen}>{formatDate(article.lastReadAt)}</small>
+      <span className={styles.articleBody}>
+        <small className={styles.articleSource}>{article.organizationName}</small>
+        <p>{article.title}</p>
+        {hint && (
+          <small className={styles.articleHint} role="status">
+            {hint}
+          </small>
+        )}
+      </span>
+      <button
+        type="button"
+        className={`${styles.articleBookmark} ${on ? styles.articleBookmarkOn : ''}`}
+        aria-pressed={on}
+        aria-label={`${article.title} ${on ? '북마크 해제' : '북마크'}`}
+        title={on ? '북마크 해제' : '북마크에 담기'}
+        disabled={pending}
+        onClick={toggle}
+      >
+        <svg viewBox="0 0 13 17" aria-hidden>
+          <path
+            d="M1 1.6A.6.6 0 0 1 1.6 1h9.8a.6.6 0 0 1 .6.6v14.2l-5.5-3.6L1 15.8z"
+            fill={on ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </li>
   )
 }
 
