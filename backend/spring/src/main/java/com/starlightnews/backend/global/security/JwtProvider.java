@@ -51,6 +51,7 @@ public class JwtProvider {
 		Instant now = Instant.now();
 		return Jwts.builder()
 				.subject(sessionId)
+				.id(UUID.randomUUID().toString())
 				.claim(CLAIM_TYPE, TYPE_REFRESH)
 				.issuedAt(Date.from(now))
 				.expiration(Date.from(now.plusMillis(refreshTokenValidityMs)))
