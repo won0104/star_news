@@ -188,11 +188,21 @@
   word-break: keep-all;
 }
 
+/* 요약과 원문은 서로 다른 일이라 나란히 선다. 좁은 카드에서는 접힌다 — 카드 크기를
+   사용자가 조절할 수 있어서(useResizableCard) 한 줄에 둘이 다 들어간다고 볼 수 없다. */
+.articleActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  margin-top: 14px;
+}
+
 .detail {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin: 14px 0 0;
+  margin: 0;
   padding: 0;
   border: 0;
   background: none;
@@ -200,7 +210,18 @@
   font-weight: 500;
   font-size: 12.5px;
   color: #e9c477;
+  text-decoration: none;
   cursor: pointer;
+}
+
+/* 원문은 이 화면을 떠나는 길이라 한 단계 물린다. 둘을 같은 밝기로 두면 어느 쪽이
+   이 카드 안에서 끝나는 일인지 구분이 안 된다. */
+.detailAway {
+  color: #cbbe9c;
+}
+
+.detailAway:hover {
+  color: #f6efe2;
 }
 
 .detailCaret {
@@ -250,23 +271,8 @@
   border-color: rgba(233, 196, 119, 0.55);
 }
 
-.origin {
-  display: inline-block;
-  margin: 10px 0 0;
-  font-family: var(--font-sans);
-  font-size: 12px;
-  color: #cbbe9c;
-  text-decoration: underline;
-  text-decoration-color: rgba(203, 190, 156, 0.4);
-  text-underline-offset: 3px;
-}
-
-.origin:hover {
-  color: #f6efe2;
-}
-
 .summaryRetry:focus-visible,
-.origin:focus-visible {
+.detail:focus-visible {
   outline: 2px solid var(--brass-b);
   outline-offset: 3px;
 }
