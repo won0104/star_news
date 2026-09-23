@@ -46,12 +46,13 @@ def _seed_fixture(session):
         SET r2.eventClickCount = 1, r2.lastViewedAt = $recent
 
         // similar만 소비 + 비선호 Topic 아님 + 임베딩도 비슷함 -> CF 점수, CBF 점수 둘 다 받아야 함
-        MERGE (both:Event {nodeId: 'test-final-event-both'})
+        // :PrimaryEvent도 같이 붙임 - CF/CBF 후보 조회가 이제 이 라벨을 요구함
+        MERGE (both:Event:PrimaryEvent {nodeId: 'test-final-event-both'})
         SET both.embedding = $vector, both.occurredAt = $recent
         MERGE (similar)-[:CONSUMED]->(both)
 
         // similar만 소비 + 비선호 Topic -> CF 점수는 나오지만 최종 후보에서 제외되어야 함
-        MERGE (disliked:Event {nodeId: 'test-final-event-disliked-topic'})
+        MERGE (disliked:Event:PrimaryEvent {nodeId: 'test-final-event-disliked-topic'})
         SET disliked.occurredAt = $recent
         MERGE (disliked)-[:CLASSIFIED_AS]->(dislikedTopic)
         MERGE (similar)-[:CONSUMED]->(disliked)

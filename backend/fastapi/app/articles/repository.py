@@ -623,6 +623,8 @@ def merge_covers_edge(
         MERGE (a)-[r:COVERS]->(e)
         SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         FOREACH (_ IN CASE WHEN $isPrimary IS NOT NULL THEN [1] ELSE [] END | SET r.isPrimary = $isPrimary)
+        // 이 기사에서 처음으로 primary가 되는 순간 :PrimaryEvent 라벨을 붙인다 (CBF 전용 인덱스 대상)
+        FOREACH (_ IN CASE WHEN $isPrimary = true THEN [1] ELSE [] END | SET e:PrimaryEvent)
         """,
         articleId=article_node_id,
         eventId=event_node_id,

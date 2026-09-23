@@ -60,7 +60,8 @@ def find_cf_candidate_events(
         LIMIT $similarUserLimit
 
         // 유사 유저는 소비했지만 본인은 아직 소비하지 않은 Event, 공통 후보 조건까지 적용해 유사도 합산으로 점수 매김
-        MATCH (similar)-[:CONSUMED]->(candidate:Event)
+        // :PrimaryEvent만 매칭 - 적어도 한 기사에서 메인 주제로 다뤄진 적 있는 Event만 후보로 인정
+        MATCH (similar)-[:CONSUMED]->(candidate:PrimaryEvent)
         WHERE true
         """
         + _CANDIDATE_CONDITIONS
@@ -115,8 +116,8 @@ def find_similar_events_by_vector(
         """
         MATCH (u:User {userId: $userId})
 
-        // 벡터 인덱스에서 프로필 벡터와 가까운 순으로 rawLimit개 조회
-        CALL db.index.vector.queryNodes('event_embedding_index', $rawLimit, $profileVector)
+        // :PrimaryEvent 전용 인덱스에서 프로필 벡터와 가까운 순으로 rawLimit개 조회
+        CALL db.index.vector.queryNodes('primary_event_embedding_index', $rawLimit, $profileVector)
         YIELD node AS candidate, score
 
         // 공통 후보 조건(미열람/비선호 Topic/관심 Topic/최근성) 적용
@@ -162,7 +163,7 @@ def find_user_interested_topics(session: Session, user_id: int) -> list[str]:
 def find_events_with_consumer_counts(session: Session, topic_codes: list[str]) -> list[dict]:
     result = session.run(
         """
-        MATCH (e:Event)
+        MATCH (e:PrimaryEvent)
         WHERE e.occurredAt IS NOT NULL
           // topicCodes가 None이면 필터 없이 전체 통과, 아니면 그 Topic으로 분류된 Event만
           AND ($topicCodes IS NULL OR EXISTS {
