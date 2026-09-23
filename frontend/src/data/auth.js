@@ -2,7 +2,7 @@
 
 export const authBrand = {
   name: '별빛 뉴스',
-  tagline: '당신만의 뉴스 우주'
+  tagline: '당신만의 뉴스 다락방'
 };
 
 /**
@@ -24,7 +24,7 @@ export const authScene = {
 };
 export const loginCopy = {
   title: '로그인',
-  subtitle: '나만의 뉴스 우주로 다시 돌아오세요',
+  subtitle: '나만의 뉴스 다락방으로 다시 돌아오세요',
   id: {
     label: '아이디',
     placeholder: '아이디를 입력하세요'
@@ -39,7 +39,7 @@ export const loginCopy = {
 };
 export const signupCopy = {
   title: '회원가입',
-  subtitle: '별빛 뉴스에서 나만의 뉴스 우주를 시작하세요',
+  subtitle: '별빛 뉴스에서 나만의 뉴스 기록을 만들어 보세요',
   id: {
     label: '아이디',
     placeholder: '사용할 아이디를 입력하세요'
