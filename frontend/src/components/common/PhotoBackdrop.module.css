@@ -117,26 +117,14 @@
 }
 
 /*
- * The loop was rendered from backdrop.png but came back about a stop under it and a
- * little flatter — measured against the still at matching size, the clip needs a
- * per-channel gain of ~1.22 (R 1.241 / G 1.224 / B 1.217, i.e. exposure, not white
- * balance). Uncorrected the page cools off to grey the moment the video takes over;
- * these two values put it back on the photo (17.1 dB → 36.1 dB, 0.8% of pixels
- * clipping, and those are the already-blown window panes). Re-measure if the clip is
- * ever re-encoded.
+ * 클립을 가진 장면이 생기면 쓰는 규칙. object-position 은 그 장면의 .photo 와 같아야 한다 —
+ * 다르면 그려진 비율이 아닌 화면에서 둘이 다르게 잘려 크로스페이드가 미끄러진다.
  *
- * object-position has to match .photo above or the two crop differently on any
- * viewport that is not 16:9, and the cross-fade slides.
- *
- * Split in two once there was a second scene: .loop is what every clip needs, and
- * .loopHome carries the correction measured for that one clip against that one still.
- * Applied to another clip it would simply be a stop of unwanted exposure.
+ * 여기 .loopHome 이 함께 있었다. 사진풍 홈 스틸과 그 클립의 노출 차(채널당 약 1.22)를
+ * 되돌리는 보정이었는데, 방을 일러스트로 바꾸면서 스틸·클립과 함께 내렸다. 다른 클립에
+ * 그대로 걸면 원하지 않는 한 스톱이 될 뿐이므로 값이 필요하면 git 히스토리에서 꺼낸다.
  */
 .loop {
   object-position: center bottom;
-}
-
-.loopHome {
-  filter: brightness(1.22) saturate(1.12);
 }
 

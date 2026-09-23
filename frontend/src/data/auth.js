@@ -6,11 +6,12 @@ export const authBrand = {
 };
 
 /**
- * 로그인·회원가입이 놓인 방. 다른 화면들과 같은 16:9 캔버스(1672×941)에 그린 일러스트다.
+ * 로그인·회원가입이 놓인 방 — data/home 의 `rooms` 와 같은 방이고, 현관과 기사 상세도 같은
+ * 장을 쓴다.
  *
- * <PhotoBackdrop> 의 scene 모양을 따른다. 비율은 하나뿐이라 cover 로 잘라 쓴다 — 이 화면
- * 위에 놓이는 것은 클립보드 하나뿐이고, 그 자리를 방 안의 무엇에 맞출 필요가 없다.
- * 책상·보드·창틀처럼 비율마다 한 장씩 필요한 화면이 아니다.
+ * <PhotoBackdrop> 의 scene 모양을 따른다. `src` 를 비워 두면 <PhotoBackdrop> 이 비율에 맞는
+ * 장을 골라 깐다. 예전에는 16:9 한 장을 cover 로 잘라 썼는데, 세로로 긴 창에서는 창과 소파가
+ * 잘려 나가 방이 벽만 남았다.
  *
  * `loop` 는 없다. 이 방의 움직이는 클립이 없고, 다른 방의 클립을 붙이면 전혀 다른 방으로
  * 넘어가는 컷이 된다.
@@ -19,7 +20,6 @@ export const authBrand = {
  */
 export const authScene = {
   id: 'auth',
-  src: '/assets/auth/room-16x9-v2.webp',
   loop: null
 };
 export const loginCopy = {

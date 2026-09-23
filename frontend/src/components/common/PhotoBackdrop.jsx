@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { backdrop } from '../../data/home';
+import { backdrop, rooms } from '../../data/home';
+import { useNearestWindow } from '../../hooks/useNearestWindow';
 import { BackgroundVideo } from './BackgroundVideo';
 import styles from './PhotoBackdrop.module.css';
 
@@ -11,9 +12,13 @@ import styles from './PhotoBackdrop.module.css';
  * frame. It defaults to the sunlit room every screen used before there was more than
  * one, so home, login and signup did not have to change.
  *
- * A scene's clip needs its own treatment — the home loop came back a stop under its
- * still and is corrected in CSS, which would be wrong on any other clip — so the class
- * is looked up by scene id rather than shared. A scene with no entry gets none.
+ * 장면이 `src` 를 주지 않으면 그 햇살 방을 비율에 맞춰 고른다. 현관·로그인·회원가입·기사
+ * 상세가 모두 그 경우여서, 한 곳에서 고르면 네 화면이 함께 맞는다 — 화면마다 따로 고르면
+ * 같은 방을 두고 서로 다른 장을 들 수 있다.
+ *
+ * A scene's clip needs its own treatment — an exposure or crop correction is measured
+ * against that one clip and that one still, and would be wrong on any other — so the
+ * class is looked up by scene id rather than shared. A scene with no entry gets none.
  *
  * `motion` is opt-in because the auth screens put a paper card and a form over this
  * photo, and a moving background behind live text is a separate design call.
@@ -26,9 +31,11 @@ import styles from './PhotoBackdrop.module.css';
  * was never going to be one. Screens that want to come in after the movement rather
  * than over it hang off that.
  */
-const LOOP_CLASS = {
-  home: styles.loopHome,
-};
+/*
+ * 지금은 비어 있다 — 클립을 가진 장면이 하나도 없어 <BackgroundVideo> 가 서지 않는다.
+ * 사진풍 홈 스틸과 짝이던 .loopHome 보정은 그 스틸·클립과 함께 내렸다(git 히스토리 참고).
+ */
+const LOOP_CLASS = {};
 
 /*
  * 사진의 크롭 기준이 공용 규칙과 달라야 하는 장면. 오늘의 트렌드는 <TrendStage> 의 .still 이
@@ -59,6 +66,8 @@ export function PhotoBackdrop({
   children,
 }) {
   const [ready, setReady] = useState(false);
+  const room = useNearestWindow(rooms);
+  const src = scene.src ?? room.src;
   const plays = motion && !!scene.loop;
 
   // No clip means the screen is settled from the first frame, and the caller has to be
@@ -85,7 +94,7 @@ export function PhotoBackdrop({
         */}
         <img
           className={`${styles.photo} ${scene.frame ? styles.photoFramed : ''} ${PHOTO_CLASS[scene.id] ?? ''} ${ready ? styles.photoReady : ''}`}
-          src={scene.src}
+          src={src}
           alt=""
           style={
             scene.frame
