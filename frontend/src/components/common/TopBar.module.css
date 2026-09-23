@@ -103,29 +103,34 @@
 }
 
 /*
- * 상단바에서는 갈래 아래로 내려와 띠가 된다.
+ * 상단바에서는 갈래 아래로 반만 나온 책갈피다.
  *
- * 바 안에 둘 수 없는 이유가 둘이다. 바는 높이가 고정이고, .nav 는 좁은 폭에서 overflow-x: auto
- * 라 그 안의 것은 세로로도 잘려 바깥으로 나오지 못한다. position: fixed 는 조상의 overflow 에
- * 잘리지 않으므로(transform·filter 를 건 조상이 없다) 바 바로 아래에 설 수 있다.
+ * 윗동은 바에 물려 보이지 않고 아래만 나온다 — 책에 끼운 책갈피처럼. 그래서 위 테두리가 없고
+ * 아래 모서리만 둥글다. 처음에는 화면 폭을 꽉 채우는 띠였는데 라벨 하나에 한 줄을 통째로 쓰니
+ * 대부분이 빈 칸이었고, 그 빈 칸이 이 물건을 어설퍼 보이게 했다. 이제 내용만큼만 차지한다.
  *
- * z-index 는 바(10)보다 하나 낮다 — 바가 늘 위여야 띠가 바 밑에서 나온 것으로 읽힌다.
+ * 바의 자식이 아니라 형제다. 자식이면 부모 배경이 먼저 칠해지고 그 위에 그려져 뒤로 물릴 수
+ * 없다. <nav> 의 자식도 아니다 — 좁은 폭에서 overflow-x: auto 라 그 안의 것은 세로로도 잘린다.
+ * 자리를 가르는 것은 <TopBar> 이고, 레일에서는 다시 갈래 안에 넣는다.
+ *
+ * 자리는 부모 단추와 바를 재어 인라인 스타일로 받는다. <nav> 가 옆으로 스크롤되므로 정해진
+ * 값으로는 따라갈 수 없다.
  */
 .navSub {
   position: fixed;
-  top: var(--topbar-h);
-  right: 0;
-  left: 0;
   z-index: 9;
   display: flex;
+  width: max-content;
   align-items: center;
   gap: 2px;
-  min-width: 0;
-  padding: 5px 40px;
-  border-bottom: 1px solid var(--topbar-border);
+  /* 위쪽 18px 은 바에 물리는 몫이다 — <TopBar> 의 TAB_TUCK 과 같은 값. */
+  padding: 18px 6px 6px;
+  border: 1px solid var(--topbar-border);
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
   background: var(--topbar-bg);
   backdrop-filter: blur(10px);
-  box-shadow: var(--topbar-shadow);
+  box-shadow: 0 12px 24px rgba(43, 33, 22, 0.16);
 }
 
 /*
@@ -134,16 +139,16 @@
  */
 .navSubItem {
   position: relative;
-  padding: 8px 12px;
+  padding: 8px 13px;
   border: 0;
   border-radius: 18px;
   background: none;
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--nav-ink);
   white-space: nowrap;
   cursor: pointer;
-  opacity: 0.86;
+  opacity: 1;
   transition: background 140ms ease, color 140ms ease, opacity 140ms ease;
 }
 
@@ -284,13 +289,9 @@
   }
 
   /* 띠도 바와 같은 여백으로 선다. */
-  .navSub {
-    padding: 5px 16px;
-  }
-
-  /* 밤 내비 아래에 붙는 띠도 밤이어야 한다 — .bar 의 nightGlass 배경은 상속되지 않는다. */
+  /* 밤 내비 아래에 붙는 말풍선도 밤이어야 한다 — .bar 의 nightGlass 배경은 상속되지 않는다. */
   .nightGlass .navSub {
-    background: linear-gradient(180deg, rgba(9, 15, 27, 0.58), rgba(24, 18, 17, 0.5));
+    background: linear-gradient(180deg, rgba(14, 21, 35, 0.92), rgba(28, 22, 21, 0.9));
     backdrop-filter: blur(14px) saturate(0.82);
   }
 
@@ -434,11 +435,14 @@
   .navSub {
     position: static;
     z-index: auto;
+    width: 100%;
     gap: 0;
     margin: 2px 0 2px 14px;
+    /* 상단바의 책갈피는 위쪽을 바에 물리려고 여백을 이고 있다. 레일에는 물릴 바가 없다. */
     padding: 0 0 0 10px;
-    border-bottom: 0;
+    border: 0;
     border-left: 1px solid var(--topbar-border);
+    border-radius: 0;
     background: none;
     backdrop-filter: none;
     box-shadow: none;
