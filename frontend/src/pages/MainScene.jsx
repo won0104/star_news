@@ -1,6 +1,8 @@
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop';
 import { TopBar } from '../components/common/TopBar';
+import { warmHistoryPlanet } from '../components/world/historyPlanetChunk';
 import { useSettingsValues } from '../store/settings';
 import { SCREEN_TRANSITIONS } from '../utils/motion';
 
@@ -27,10 +29,19 @@ export function MainScene() {
   const navigate = useNavigate();
   const { reduceMotion } = useSettingsValues();
 
+  /*
+   * 나의 기록과 나의 리포트는 같은 책이고, 그 위에 행성이 선다. 둘 중 어느 쪽에 손이
+   * 닿아도 같은 청크가 필요하므로 함께 본다.
+   */
+  const warmOnIntent = useCallback((id) => {
+    if (id === 'log' || id === 'report') warmHistoryPlanet()
+  }, [])
+
   return (
     <PhotoBackdrop motion={SCREEN_TRANSITIONS && !reduceMotion}>
       <TopBar
         onSelect={(id) => navigate(`/app?view=${id}`, { state: { from: 'home' } })}
+        onIntent={warmOnIntent}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
       />

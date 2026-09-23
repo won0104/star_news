@@ -1003,7 +1003,13 @@
     display: none;
   }
 
-  .planetViewport,
+  /*
+   * 단독 지도만 겨냥한다. 책 속 변형은 위에서 이 고정 높이를 풀어 두는데(.diaryPlanetViewport
+   * 의 height: 100%; min-height: 0), 그 규칙이 이 파일에서 더 앞이라 여기서 다시 채워졌다.
+   * 그러면 331px 짜리 정사각 상자 안에 590px 캔버스가 들어가고, 가운데 그려지는 행성이 아래로
+   * 밀려 잘린다 — 720px 이하에서만 행성이 사라지던 이유다.
+   */
+  .planetViewport:not(.diaryPlanetViewport),
   .planetLoading {
     height: 590px;
     min-height: 590px;

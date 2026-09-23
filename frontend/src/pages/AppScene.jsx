@@ -9,6 +9,7 @@ import { nightBackdrop, nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
 import { TopBar } from '../components/common/TopBar'
 import { ViewPane } from '../components/world/ViewPane'
+import { warmHistoryPlanet } from '../components/world/historyPlanetChunk'
 import { useSession } from '../store/session'
 import { useSettingsValues } from '../store/settings'
 import { SCREEN_TRANSITIONS } from '../utils/motion'
@@ -145,6 +146,15 @@ export function AppScene() {
   const [settled, setSettled] = useState(false)
   const onSettled = useCallback(() => setSettled(true), [])
 
+  /*
+   * 나의 기록과 나의 리포트는 같은 책이고, 그 위에 행성이 선다. 둘 중 어느 쪽에 손이
+   * 닿아도 같은 청크가 필요하므로 함께 본다.
+   */
+  const warmOnIntent = useCallback((id) => {
+    if (id === 'log' || id === 'report') warmHistoryPlanet()
+  }, [])
+
+
   return (
     <PhotoBackdrop
       key={scene.id}
@@ -157,6 +167,7 @@ export function AppScene() {
         activeId={view}
         nightGlass={view === 'trend'}
         onSelect={open}
+        onIntent={warmOnIntent}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
         search={view === 'trend'}

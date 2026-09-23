@@ -41,6 +41,7 @@ export function TopBar({
   onSelect,
   onBrand,
   onAuth,
+  onIntent,
   nightGlass = false,
   search = false,
   onSearchSelect,
@@ -93,10 +94,16 @@ export function TopBar({
         {navItems.map((item, index) => (
           <Fragment key={item.id}>
             {index > 0 && <span className={styles.navRule} aria-hidden />}
+            {/*
+              누르기 전에 한 번 알린다 — 포인터가 올라오거나 탭 이동으로 초점이 닿는 순간이
+              목적지를 고른 순간에 가장 가깝다. 무엇을 미리 할지는 받는 쪽이 정한다.
+            */}
             <button
               type="button"
               className={`${styles.navItem} ${item.id === activeId ? styles.navItemActive : ''}`}
               aria-current={item.id === activeId ? 'page' : undefined}
+              onPointerEnter={() => onIntent?.(item.id)}
+              onFocus={() => onIntent?.(item.id)}
               onClick={() => onSelect(item.id)}
             >
               {item.label}
