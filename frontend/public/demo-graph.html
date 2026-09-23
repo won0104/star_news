@@ -79,6 +79,19 @@
     border: 1px solid var(--border);
   }
   .hint { position: absolute; left: 14px; top: 14px; font-size: 11.5px; color: var(--muted); }
+  .detail {
+    position: absolute; right: 14px; top: 48px; width: 320px; max-width: calc(100% - 28px);
+    background: rgba(15,16,20,.95); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; font-size: 13px; line-height: 1.6;
+  }
+  .detail[hidden] { display: none; }
+  .detail .kind { font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+  .detail .full { word-break: break-word; }
+  .detail .rels { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--border);
+                  font-size: 12px; color: var(--muted); }
+  .detail .rels div { margin: 2px 0; }
+  .detail .close { position: absolute; right: 10px; top: 8px; width: auto; margin: 0;
+                   padding: 0 4px; background: none; color: var(--muted); font-size: 15px; }
   .empty {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     color: var(--muted); font-size: 14px;
@@ -127,7 +140,13 @@
 
 <main>
   <svg id="canvas"></svg>
-  <div class="hint">드래그로 이동 · 휠로 확대</div>
+  <div class="hint">드래그로 이동 · 휠로 확대 · 노드를 누르면 전체 이름</div>
+  <div id="detail" class="detail" hidden>
+    <button id="detailClose" class="close">×</button>
+    <div class="kind"></div>
+    <div class="full"></div>
+    <div class="rels"></div>
+  </div>
   <div id="counts" class="counts" hidden></div>
   <div id="empty" class="empty">아직 그래프가 없습니다.</div>
   <div class="legend">
@@ -225,6 +244,35 @@ async function loadArticle() {
    라이브러리 없이 쓰는 최소 force 레이아웃. 노드끼리 밀어내고, 간선이 당기고,
    가운데로 약하게 모은다. 확인용이라 정교할 필요는 없다.                      */
 
+/** 노드를 누르면 여는 상세. 이름이 길어 줄임표로 잘린 것을 여기서 전부 보여 준다. */
+let current = { nodes: [], links: [] };
+
+function showDetail(nodeIndex) {
+  const node = current.nodes[nodeIndex];
+  if (!node) return;
+  const detail = $('detail');
+
+  const kind = node.nodeType + (node.subType ? ' · ' + node.subType : '');
+  detail.querySelector('.kind').textContent = kind;
+  detail.querySelector('.full').textContent = node.label ?? '(이름 없음)';
+
+  // 이 노드에 걸린 관계를 종류별로 센다. 무엇과 어떻게 이어졌는지가 이름만큼 궁금하다.
+  const counts = new Map();
+  for (const link of current.links) {
+    const other = link.source === nodeIndex ? link.target
+      : link.target === nodeIndex ? link.source : null;
+    if (other === null) continue;
+    const direction = link.source === nodeIndex ? '→' : '←';
+    const key = `${direction} ${link.relation}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  detail.querySelector('.rels').innerHTML = counts.size === 0
+    ? '연결 없음'
+    : [...counts].map(([key, count]) => `<div>${escapeHtml(key)} · ${count}개</div>`).join('');
+
+  detail.hidden = false;
+}
+
 function draw(data) {
   const nodes = data.nodes.map((node) => ({ ...node, x: 0, y: 0, vx: 0, vy: 0 }));
   const index = new Map(nodes.map((node, i) => [node.nodeKey, i]));
@@ -232,6 +280,8 @@ function draw(data) {
     .filter((edge) => index.has(edge.from) && index.has(edge.to))
     .map((edge) => ({ ...edge, source: index.get(edge.from), target: index.get(edge.to) }));
 
+  current = { nodes, links };
+  $('detail').hidden = true;
   $('empty').hidden = nodes.length > 0;
   $('counts').hidden = nodes.length === 0;
   $('counts').textContent = `노드 ${nodes.length} · 간선 ${links.length}`;
@@ -306,14 +356,14 @@ function render(nodes, links, width, height) {
           stroke-width="${link.primary ? 2 : 1}"></line>`).join('');
 
   const nodeLayer = svg.querySelector('#nodes');
-  nodeLayer.innerHTML = nodes.map((node) => {
+  nodeLayer.innerHTML = nodes.map((node, index) => {
     const radius = RADIUS[node.nodeType] ?? 6;
     const color = COLORS[node.nodeType] ?? '#888';
     const label = (node.label ?? '').length > 22
       ? node.label.slice(0, 22) + '…'
       : (node.label ?? '');
     const title = `${node.nodeType}${node.subType ? ' · ' + node.subType : ''}\n${node.label ?? ''}`;
-    return `<g><title>${escapeHtml(title)}</title>
+    return `<g data-index="${index}" style="cursor:pointer"><title>${escapeHtml(title)}</title>
       <circle r="${radius}" fill="${color}" stroke="#0f1014" stroke-width="1.5"></circle>
       <text font-size="${node.nodeType === 'ARTICLE' ? 13 : 10.5}" fill="#c9cad2"
             text-anchor="middle" dy="${-radius - 5}">${escapeHtml(label)}</text>
@@ -351,16 +401,33 @@ function applyViewport() {
 }
 
 let dragging = null;
+let moved = 0;
 svg.addEventListener('mousedown', (event) => {
   dragging = { x: event.clientX - viewport.x, y: event.clientY - viewport.y };
+  moved = 0;
 });
 window.addEventListener('mousemove', (event) => {
   if (!dragging) return;
-  viewport.x = event.clientX - dragging.x;
-  viewport.y = event.clientY - dragging.y;
+  const nextX = event.clientX - dragging.x;
+  const nextY = event.clientY - dragging.y;
+  moved += Math.abs(nextX - viewport.x) + Math.abs(nextY - viewport.y);
+  viewport.x = nextX;
+  viewport.y = nextY;
   applyViewport();
 });
 window.addEventListener('mouseup', () => { dragging = null; });
+
+// 화면을 끌고 난 뒤의 mouseup 도 click 으로 오므로, 거의 움직이지 않았을 때만 누른 것으로 본다.
+svg.addEventListener('click', (event) => {
+  if (moved > 5) return;
+  const group = event.target.closest('#nodes > g');
+  if (group) {
+    showDetail(Number(group.dataset.index));
+  } else {
+    $('detail').hidden = true;
+  }
+});
+$('detailClose').addEventListener('click', () => { $('detail').hidden = true; });
 svg.addEventListener('wheel', (event) => {
   event.preventDefault();
   const factor = event.deltaY < 0 ? 1.12 : 1 / 1.12;
