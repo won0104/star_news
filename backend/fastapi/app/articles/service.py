@@ -174,7 +174,7 @@ def _apply_analysis(
             if is_new_event:
                 story_node_id = repository.assign_event_to_story(
                     tx, real_id, props["title"], props["embedding"], props["embeddingModel"],
-                    primary_topic_code, request.published_at, now,
+                    primary_topic_code, request.published_at, now, actor_names, target_names,
                 )
                 if story_node_id:
                     story_node_ids.add(story_node_id)
