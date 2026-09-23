@@ -79,6 +79,20 @@
     border: 1px solid var(--border);
   }
   .hint { position: absolute; left: 14px; top: 14px; font-size: 11.5px; color: var(--muted); }
+  .zoom {
+    position: absolute; right: 14px; bottom: 14px;
+    display: flex; gap: 6px; align-items: center;
+    background: rgba(15,16,20,.85); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 8px;
+  }
+  .zoom button {
+    width: 28px; height: 28px; margin: 0; padding: 0;
+    background: transparent; border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; font-size: 15px; line-height: 1;
+  }
+  .zoom button.wide { width: auto; padding: 0 9px; font-size: 12px; }
+  .zoom span { font-size: 12px; color: var(--muted); min-width: 38px; text-align: center; }
+  .relLabel { font-size: 9px; fill: var(--muted); }
   .detail {
     position: absolute; right: 14px; top: 48px; width: 320px; max-width: calc(100% - 28px);
     background: rgba(15,16,20,.95); border: 1px solid var(--border); border-radius: 10px;
@@ -126,6 +140,10 @@
     <input id="primaryOnly" type="checkbox" checked>
     <label for="primaryOnly">대표 사건만 보기 (즉시 전환)</label>
   </div>
+  <div class="row">
+    <input id="showRelations" type="checkbox" checked>
+    <label for="showRelations">간선에 관계 이름 표시</label>
+  </div>
 
   <button id="submit">기사 넣고 분석</button>
 
@@ -140,7 +158,13 @@
 
 <main>
   <svg id="canvas"></svg>
-  <div class="hint">드래그로 이동 · 휠로 확대 · 노드를 누르면 전체 이름</div>
+  <div class="hint">노드를 끌어 옮기기 · 빈 곳을 끌어 화면 이동 · 노드를 누르면 전체 이름</div>
+  <div class="zoom">
+    <button id="zoomOut" title="축소">−</button>
+    <span id="zoomLevel">100%</span>
+    <button id="zoomIn" title="확대">+</button>
+    <button id="zoomFit" class="wide" title="전체 보기">맞춤</button>
+  </div>
   <div id="detail" class="detail" hidden>
     <button id="detailClose" class="close">×</button>
     <div class="kind"></div>
@@ -368,6 +392,8 @@ function run(nodes, links, width, height) {
       b.vx -= dx * pull; b.vy -= dy * pull;
     }
     for (const node of nodes) {
+      // 사람이 끌어다 놓은 노드는 그 자리에 둔다.
+      if (node.pinned) { node.vx = 0; node.vy = 0; continue; }
       node.vx += (width / 2 - node.x) * 0.0012 * alpha;
       node.vy += (height / 2 - node.y) * 0.0012 * alpha;
       node.x += node.vx; node.y += node.vy;
@@ -387,6 +413,7 @@ function render(nodes, links, width, height) {
   viewport = { x: 0, y: 0, scale: 1 };
   svg.innerHTML = `<g id="viewport">
     <g id="links" stroke-linecap="round"></g>
+    <g id="relLabels"></g>
     <g id="nodes"></g>
   </g>`;
 
@@ -394,6 +421,13 @@ function render(nodes, links, width, height) {
   linkLayer.innerHTML = links.map((link) => `
     <line stroke="${link.primary ? '#7f8aa3' : '#3a3d4a'}"
           stroke-width="${link.primary ? 2 : 1}"></line>`).join('');
+
+  // 관계 이름은 간선 가운데에 둔다. 끄면 아예 만들지 않아 프레임마다 옮길 것도 없다.
+  const labelLayer = svg.querySelector('#relLabels');
+  labelLayer.innerHTML = $('showRelations').checked
+    ? links.map((link) => `<text class="relLabel" text-anchor="middle"
+        >${escapeHtml(link.relation)}</text>`).join('')
+    : '';
 
   const nodeLayer = svg.querySelector('#nodes');
   nodeLayer.innerHTML = nodes.map((node, index) => {
@@ -413,11 +447,17 @@ function render(nodes, links, width, height) {
 
 function update(nodes, links) {
   const lines = svg.querySelectorAll('#links line');
+  const labels = svg.querySelectorAll('#relLabels text');
   links.forEach((link, i) => {
     const a = nodes[link.source]; const b = nodes[link.target];
     const line = lines[i];
     line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
     line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+    const label = labels[i];
+    if (label) {
+      label.setAttribute('x', (a.x + b.x) / 2);
+      label.setAttribute('y', (a.y + b.y) / 2 - 2);
+    }
   });
   const groups = svg.querySelectorAll('#nodes > g');
   nodes.forEach((node, i) => {
@@ -432,21 +472,88 @@ function escapeHtml(value) {
 
 /* ---------- 이동 · 확대 ---------- */
 
+const MIN_SCALE = 0.2;
+const MAX_SCALE = 4;
+
 function applyViewport() {
   const layer = svg.querySelector('#viewport');
   if (layer) {
     layer.setAttribute('transform',
       `translate(${viewport.x},${viewport.y}) scale(${viewport.scale})`);
   }
+  $('zoomLevel').textContent = `${Math.round(viewport.scale * 100)}%`;
+}
+
+/** 화면 가운데를 기준으로 확대·축소한다. 그래야 보고 있던 곳이 밖으로 밀려나지 않는다. */
+function zoomBy(factor) {
+  const next = Math.min(MAX_SCALE, Math.max(MIN_SCALE, viewport.scale * factor));
+  const centerX = svg.clientWidth / 2;
+  const centerY = svg.clientHeight / 2;
+  const ratio = next / viewport.scale;
+  viewport.x = centerX - (centerX - viewport.x) * ratio;
+  viewport.y = centerY - (centerY - viewport.y) * ratio;
+  viewport.scale = next;
+  applyViewport();
+}
+
+/** 노드가 전부 보이도록 배율과 위치를 맞춘다. */
+function zoomToFit() {
+  if (!current.nodes.length) return;
+  const xs = current.nodes.map((node) => node.x);
+  const ys = current.nodes.map((node) => node.y);
+  const margin = 70;
+  const width = Math.max(1, Math.max(...xs) - Math.min(...xs)) + margin * 2;
+  const height = Math.max(1, Math.max(...ys) - Math.min(...ys)) + margin * 2;
+
+  const scale = Math.min(MAX_SCALE,
+    Math.max(MIN_SCALE, Math.min(svg.clientWidth / width, svg.clientHeight / height)));
+  viewport.scale = scale;
+  viewport.x = svg.clientWidth / 2 - ((Math.min(...xs) + Math.max(...xs)) / 2) * scale;
+  viewport.y = svg.clientHeight / 2 - ((Math.min(...ys) + Math.max(...ys)) / 2) * scale;
+  applyViewport();
 }
 
 let dragging = null;
+let draggingNode = null;
 let moved = 0;
+
+/** 화면 좌표를 그래프 좌표로 바꾼다. 확대·이동한 만큼 되돌린다. */
+function toGraphPoint(event) {
+  const box = svg.getBoundingClientRect();
+  return {
+    x: (event.clientX - box.left - viewport.x) / viewport.scale,
+    y: (event.clientY - box.top - viewport.y) / viewport.scale,
+  };
+}
+
 svg.addEventListener('mousedown', (event) => {
-  dragging = { x: event.clientX - viewport.x, y: event.clientY - viewport.y };
   moved = 0;
+  const group = event.target.closest('#nodes > g');
+  if (group) {
+    // 노드를 잡았으면 화면이 아니라 그 노드를 옮긴다.
+    const index = Number(group.dataset.index);
+    const point = toGraphPoint(event);
+    const node = current.nodes[index];
+    draggingNode = { index, dx: node.x - point.x, dy: node.y - point.y };
+    return;
+  }
+  dragging = { x: event.clientX - viewport.x, y: event.clientY - viewport.y };
 });
+
 window.addEventListener('mousemove', (event) => {
+  if (draggingNode) {
+    const point = toGraphPoint(event);
+    const node = current.nodes[draggingNode.index];
+    moved += Math.abs(node.x - (point.x + draggingNode.dx))
+      + Math.abs(node.y - (point.y + draggingNode.dy));
+    node.x = point.x + draggingNode.dx;
+    node.y = point.y + draggingNode.dy;
+    node.vx = 0; node.vy = 0;
+    node.pinned = true;
+    // 배치 계산이 이미 멈췄을 수 있으므로 여기서 직접 다시 그린다.
+    update(current.nodes, current.links);
+    return;
+  }
   if (!dragging) return;
   const nextX = event.clientX - dragging.x;
   const nextY = event.clientY - dragging.y;
@@ -455,7 +562,8 @@ window.addEventListener('mousemove', (event) => {
   viewport.y = nextY;
   applyViewport();
 });
-window.addEventListener('mouseup', () => { dragging = null; });
+
+window.addEventListener('mouseup', () => { dragging = null; draggingNode = null; });
 
 // 화면을 끌고 난 뒤의 mouseup 도 click 으로 오므로, 거의 움직이지 않았을 때만 누른 것으로 본다.
 svg.addEventListener('click', (event) => {
@@ -468,16 +576,21 @@ svg.addEventListener('click', (event) => {
   }
 });
 $('detailClose').addEventListener('click', () => { $('detail').hidden = true; });
+// 휠 한 칸에 5%만 움직인다. 이전 12% 는 두세 칸만 굴려도 화면이 확 튀었다.
+// 트랙패드는 deltaY 가 잘게 여러 번 오므로 그 크기에 비례해 부드럽게 따라가도록 한다.
 svg.addEventListener('wheel', (event) => {
   event.preventDefault();
-  const factor = event.deltaY < 0 ? 1.12 : 1 / 1.12;
-  viewport.scale = Math.min(4, Math.max(0.2, viewport.scale * factor));
-  applyViewport();
+  const steps = Math.max(-3, Math.min(3, -event.deltaY / 100));
+  zoomBy(Math.pow(1.05, steps));
 }, { passive: false });
 
 $('submit').addEventListener('click', submitArticle);
 $('load').addEventListener('click', loadArticle);
 $('primaryOnly').addEventListener('change', applyView);
+$('showRelations').addEventListener('change', applyView);
+$('zoomIn').addEventListener('click', () => zoomBy(1.25));
+$('zoomOut').addEventListener('click', () => zoomBy(1 / 1.25));
+$('zoomFit').addEventListener('click', zoomToFit);
 </script>
 </body>
 </html>
