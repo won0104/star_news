@@ -12,6 +12,7 @@ import {
   mergeTopicMap,
 } from '../../adapters/personalGraph'
 import { TOPICS } from '../../data/topics'
+import { useBookmark } from '../../hooks/useBookmark'
 import { useSettingsValues } from '../../store/settings'
 import { DiaryShell } from './DiaryShell'
 import styles from './DiaryHistoryPane.module.css'
@@ -46,6 +47,17 @@ function kstToday() {
 
 /** 비어 있는 기간 — 이 상태로 두면 파라미터를 보내지 않아 전체 기록이 온다. */
 const NO_RANGE = { from: '', to: '' }
+
+/**
+ * 책갈피가 실패했을 때 줄 밑에 한 줄로 남긴다.
+ *
+ * 로그인 문구도 들고 있지만 이 화면에서는 거의 쓰이지 않는다 — 기록 자체가 로그인해야 보이는
+ * 것이라 여기까지 온 사람은 이미 로그인돼 있다. 세션이 중간에 끊긴 경우를 위해 남겨 둔다.
+ */
+const ARTICLE_BOOKMARK_COPY = {
+  signIn: '로그인하면 담을 수 있어요.',
+  failed: '북마크를 바꾸지 못했어요.',
+}
 
 /**
  * 나의 기록.
@@ -449,17 +461,7 @@ export function DiaryHistoryPane() {
                                   모양 자체가 갈린다.
                                 */}
                                 {articles.items.map((article) => (
-                                  <li key={article.articleId}>
-                                    <small className={styles.articleWhen}>
-                                      {formatDate(article.lastReadAt)}
-                                    </small>
-                                    <span className={styles.articleBody}>
-                                      <small className={styles.articleSource}>
-                                        {article.organizationName}
-                                      </small>
-                                      <p>{article.title}</p>
-                                    </span>
-                                  </li>
+                                  <ArticleRow key={article.articleId} article={article} />
                                 ))}
                               </ul>
                             )}
@@ -541,6 +543,59 @@ export function DiaryHistoryPane() {
       </DiaryShell>
 
     </section>
+  )
+}
+
+/**
+ * 읽은 기사 한 줄. 날짜 · 출처와 제목 · 책갈피 세 칸이다.
+ *
+ * 책갈피가 여기 서는 이유는, 나의 기록이 "무엇을 읽었나"를 보는 자리여서 그중 남겨 둘 것을
+ * 고르는 일이 같은 자리에서 끝나야 하기 때문이다. 이걸 빼면 기사를 다시 찾아 트렌드나 추천
+ * 화면으로 돌아가야 저장할 수 있다.
+ *
+ * 훅이 줄마다 자기 상태를 들고 있어야 해서 컴포넌트로 뺀다 — map 안에서는 훅을 부를 수 없다.
+ * 초기값은 목록 응답의 `bookmarked` 고, 누른 뒤에는 훅이 든 값이 이긴다(useBookmark 참고).
+ */
+function ArticleRow({ article }) {
+  const { on, pending, hint, toggle } = useBookmark({
+    kind: 'article',
+    key: article.articleId,
+    initial: article.bookmarked,
+    copy: ARTICLE_BOOKMARK_COPY,
+  })
+
+  return (
+    <li>
+      <small className={styles.articleWhen}>{formatDate(article.lastReadAt)}</small>
+      <span className={styles.articleBody}>
+        <small className={styles.articleSource}>{article.organizationName}</small>
+        <p>{article.title}</p>
+        {hint && (
+          <small className={styles.articleHint} role="status">
+            {hint}
+          </small>
+        )}
+      </span>
+      <button
+        type="button"
+        className={`${styles.articleBookmark} ${on ? styles.articleBookmarkOn : ''}`}
+        aria-pressed={on}
+        aria-label={`${article.title} ${on ? '북마크 해제' : '북마크'}`}
+        title={on ? '북마크 해제' : '북마크에 담기'}
+        disabled={pending}
+        onClick={toggle}
+      >
+        <svg viewBox="0 0 13 17" aria-hidden>
+          <path
+            d="M1 1.6A.6.6 0 0 1 1.6 1h9.8a.6.6 0 0 1 .6.6v14.2l-5.5-3.6L1 15.8z"
+            fill={on ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </li>
   )
 }
 
