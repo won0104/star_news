@@ -457,19 +457,29 @@ def _find_orphan_event_candidates(
 
 # 새 Story 생성
 def _create_new_story_node(
-    session: Neo4jRunner, title: str, embedding: list[float], embedding_model: str, occurred_at: datetime, added_at: datetime
+    session: Neo4jRunner,
+    title: str,
+    embedding: list[float],
+    embedding_model: str,
+    topic_code: str,
+    occurred_at: datetime,
+    added_at: datetime,
 ) -> str:
     result = session.run(
         """
+        MATCH (t:Topic {topicCode: $topicCode})
         CREATE (s:Story {
             nodeId: randomUUID(), title: $title, embedding: $embedding, embeddingModel: $embeddingModel,
             startedAt: $occurredAt, lastEventAt: $occurredAt, lastEventAddedAt: $addedAt
         })
+        MERGE (s)-[r:CLASSIFIED_AS]->(t)
+        SET r.source = 'ARTICLE_INHERITANCE', r.classifiedAt = $addedAt
         RETURN s.nodeId AS nodeId
         """,
         title=title,
         embedding=embedding,
         embeddingModel=embedding_model,
+        topicCode=topic_code,
         occurredAt=occurred_at,
         addedAt=added_at,
     ).single()
@@ -554,7 +564,7 @@ def assign_event_to_story(
         # 외톨이 Event 둘을 묶어 새 Story로 승격 - 먼저 있던 Event의 title을 시작점으로 사용
         blended_embedding = _ema_update_embedding(orphan_candidate["embedding"], event_embedding, STORY_EMBEDDING_EMA_WEIGHT)
         story_node_id = _create_new_story_node(
-            session, orphan_candidate["title"], blended_embedding, embedding_model, occurred_at, now
+            session, orphan_candidate["title"], blended_embedding, embedding_model, topic_code, occurred_at, now
         )
         merge_part_of_edge(session, orphan_candidate["nodeId"], story_node_id, 1.0, now)
         merge_part_of_edge(session, event_node_id, story_node_id, orphan_candidate["score"], now)
