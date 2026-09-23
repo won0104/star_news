@@ -17,14 +17,16 @@ EVENT_CANDIDATE_TOP_K = 8
 # 대표 벡터(centroid) 갱신 시 새 임베딩을 반영하는 비율 (지수이동평균)
 EVENT_EMBEDDING_EMA_WEIGHT = 0.15
 
-# Story dedup 벡터 유사도 임계값 - Event(0.92)보다 낮음: "같은 사건"이 아니라 "같은 흐름"이라는 느슨한 기준
-STORY_SIMILARITY_THRESHOLD = 0.75
+# Story dedup 벡터 유사도 임계값 - Event(0.92)보다는 낮게 유지
+STORY_SIMILARITY_THRESHOLD = 0.8
 # 벡터 검색 시 후보로 가져올 최대 개수
 STORY_CANDIDATE_TOP_K = 8
 # 대표 벡터(centroid) 갱신 시 새 임베딩을 반영하는 비율 (지수이동평균) - Event와 동일 가중치 재사용
 STORY_EMBEDDING_EMA_WEIGHT = 0.15
 # 이보다 오래 새 Event가 안 붙은 Story/외톨이 Event는 후보에서 제외 (죽은 흐름으로 간주)
 STORY_STALE_DAYS = 30
+# Story 편입 시 Actor/Target 충돌을 체크할 때, 최근 이만큼의 Event만 본다
+STORY_RECENT_MEMBER_WINDOW = 3
 
 
 class ArticleIdentityConflictError(RuntimeError):
@@ -226,10 +228,10 @@ def merge_extracted_entity(
     return result["nodeId"]
 
 # 4. Event
-# 벡터 유사도가 높아도 병합하면 안 되는 "하드 충돌"인지 판단.
-# - 둘 다 Actor가 2명 이상인데 겹치는 사람이 없음  
+# 벡터 유사도가 높아도, 등장인물/대상이 겹치는 게 하나도 없으면 "확실히 다른 사건"으로 확정 판단.
+# - 둘 다 Actor가 2명 이상인데 겹치는 사람이 없음
 # - 둘 다 Target이 있는데 겹치는 대상이 없음
-def _has_event_conflict(
+def _are_definitely_different_events(
     candidate_actor_names: list[str],
     candidate_target_names: list[str],
     new_actor_names: list[str],
@@ -344,10 +346,10 @@ def merge_event_node(
         threshold=EVENT_SIMILARITY_THRESHOLD,
     )
 
-    # 유사도 높은 순서대로 하나씩 확인해서, 하드 충돌 없는 첫 후보를 매칭으로 확정
+    # 유사도 높은 순서대로 하나씩 확인해서, "확실히 다른 사건"이 아닌 첫 후보를 매칭으로 확정
     for row in candidates:
         signals = _fetch_event_dedup_signals(session, row["nodeId"])
-        if _has_event_conflict(
+        if _are_definitely_different_events(
             signals["actorNames"], signals["targetNames"],
             candidate_actor_names, candidate_target_names,
         ):
@@ -363,10 +365,10 @@ def merge_event_node(
 
 # 5. Story
 # Event가 확정될 때마다 이 함수로 어느 Story에 속할지 직접 판단
-# 기존 Story 후보 하나 검색 - Topic이 같고, 너무 오래 방치되지 않은(죽지 않은) Story 중 유사도 1등 반환
-def _find_story_candidate(
+# 기존 Story 후보들 검색(유사도 높은 순) - Topic이 같고, 너무 오래 방치되지 않은(죽지 않은) Story만
+def _find_story_candidates(
     session: Neo4jRunner, embedding: list[float], topic_code: str, stale_cutoff: datetime
-) -> dict | None:
+) -> list[dict]:
     result = session.run(
         """
         CALL db.index.vector.queryNodes('story_embedding_index', $topK, $embedding)
@@ -376,21 +378,50 @@ def _find_story_candidate(
         WHERE node.lastEventAddedAt >= $staleCutoff
         RETURN node.nodeId AS nodeId, node.embedding AS embedding, score
         ORDER BY score DESC
-        LIMIT 1
         """,
         topK=STORY_CANDIDATE_TOP_K,
         embedding=embedding,
         threshold=STORY_SIMILARITY_THRESHOLD,
         topicCode=topic_code,
         staleCutoff=stale_cutoff,
-    ).single()
-    return dict(result) if result else None
+    )
+    return result.data()
 
 
-# 아직 어떤 Story에도 안 속한 "외톨이" Event 후보 중 유사도 1등 반환
-def _find_orphan_event_candidate(
+# Story 후보 하나의 "최근 STORY_RECENT_MEMBER_WINDOW개 멤버"의 Actor/Target을 조회
+def _fetch_story_recent_member_signals(session: Neo4jRunner, story_node_id: str) -> list[dict]:
+    result = session.run(
+        """
+        MATCH (e:Event)-[r:PART_OF]->(:Story {nodeId: $storyId})
+        WITH e ORDER BY r.assignedAt DESC LIMIT $window
+        OPTIONAL MATCH (e)-[:ACTOR]->(actor:Entity)
+        OPTIONAL MATCH (e)-[:TARGET]->(target:Entity)
+        WITH e, collect(DISTINCT actor.canonicalName) AS actorNames, collect(DISTINCT target.canonicalName) AS targetNames
+        RETURN actorNames, targetNames
+        """,
+        storyId=story_node_id,
+        window=STORY_RECENT_MEMBER_WINDOW,
+    )
+    return [{"actorNames": list(r["actorNames"]), "targetNames": list(r["targetNames"])} for r in result]
+
+
+# Story가 새 Event와 "확실히 무관"한지 판단 - 최근 멤버 전원이 각각 다 "확실히 다른 사건"으로 나와야 무관 확정
+def _is_definitely_unrelated_to_story(
+    recent_member_signals: list[dict], new_actor_names: list[str], new_target_names: list[str]
+) -> bool:
+    # 멤버가 하나도 없으면(막 만들어진 Story) 비교할 게 없으니 무관하다고 단정하지 않음(=이 Story 후보 유지)
+    if not recent_member_signals:
+        return False
+    return all(
+        _are_definitely_different_events(member["actorNames"], member["targetNames"], new_actor_names, new_target_names)
+        for member in recent_member_signals
+    )
+
+
+# 아직 어떤 Story에도 안 속한 "외톨이" Event 후보들 검색(유사도 높은 순) - Actor/Target도 같이 조회
+def _find_orphan_event_candidates(
     session: Neo4jRunner, embedding: list[float], topic_code: str, stale_cutoff: datetime, exclude_event_id: str
-) -> dict | None:
+) -> list[dict]:
     result = session.run(
         """
         CALL db.index.vector.queryNodes('event_embedding_index', $topK, $embedding)
@@ -398,9 +429,11 @@ def _find_orphan_event_candidate(
         WHERE score >= $threshold AND node.nodeId <> $excludeEventId AND NOT (node)-[:PART_OF]->(:Story)
         MATCH (node)-[:CLASSIFIED_AS]->(:Topic {topicCode: $topicCode})
         WHERE node.updatedAt >= $staleCutoff
-        RETURN node.nodeId AS nodeId, node.title AS title, node.embedding AS embedding, score
+        OPTIONAL MATCH (node)-[:ACTOR]->(actor:Entity)
+        OPTIONAL MATCH (node)-[:TARGET]->(target:Entity)
+        WITH node, score, collect(DISTINCT actor.canonicalName) AS actorNames, collect(DISTINCT target.canonicalName) AS targetNames
+        RETURN node.nodeId AS nodeId, node.title AS title, node.embedding AS embedding, score, actorNames, targetNames
         ORDER BY score DESC
-        LIMIT 1
         """,
         topK=STORY_CANDIDATE_TOP_K,
         embedding=embedding,
@@ -408,25 +441,45 @@ def _find_orphan_event_candidate(
         topicCode=topic_code,
         staleCutoff=stale_cutoff,
         excludeEventId=exclude_event_id,
-    ).single()
-    return dict(result) if result else None
+    )
+    return [
+        {
+            "nodeId": r["nodeId"],
+            "title": r["title"],
+            "embedding": r["embedding"],
+            "score": r["score"],
+            "actorNames": list(r["actorNames"]),
+            "targetNames": list(r["targetNames"]),
+        }
+        for r in result
+    ]
 
 
 # 새 Story 생성
 def _create_new_story_node(
-    session: Neo4jRunner, title: str, embedding: list[float], embedding_model: str, occurred_at: datetime, added_at: datetime
+    session: Neo4jRunner,
+    title: str,
+    embedding: list[float],
+    embedding_model: str,
+    topic_code: str,
+    occurred_at: datetime,
+    added_at: datetime,
 ) -> str:
     result = session.run(
         """
+        MATCH (t:Topic {topicCode: $topicCode})
         CREATE (s:Story {
             nodeId: randomUUID(), title: $title, embedding: $embedding, embeddingModel: $embeddingModel,
             startedAt: $occurredAt, lastEventAt: $occurredAt, lastEventAddedAt: $addedAt
         })
+        MERGE (s)-[r:CLASSIFIED_AS]->(t)
+        SET r.source = 'ARTICLE_INHERITANCE', r.classifiedAt = $addedAt
         RETURN s.nodeId AS nodeId
         """,
         title=title,
         embedding=embedding,
         embeddingModel=embedding_model,
+        topicCode=topic_code,
         occurredAt=occurred_at,
         addedAt=added_at,
     ).single()
@@ -478,12 +531,27 @@ def assign_event_to_story(
     topic_code: str,
     occurred_at: datetime,
     now: datetime,
+    actor_names: list[str],
+    target_names: list[str],
 ) -> str | None:
     stale_cutoff = now - timedelta(days=STORY_STALE_DAYS)
 
-    # 기존 Story 후보와 외톨이 Event 후보를 둘 다 검색해서, 유사도 점수가 더 높은 쪽을 선택
-    story_candidate = _find_story_candidate(session, event_embedding, topic_code, stale_cutoff)
-    orphan_candidate = _find_orphan_event_candidate(session, event_embedding, topic_code, stale_cutoff, event_node_id)
+    # 기존 Story 후보들을 유사도 높은 순으로 보면서, 확실히 무관한 게 아닌 첫 후보를 채택
+    story_candidate = None
+    for candidate in _find_story_candidates(session, event_embedding, topic_code, stale_cutoff):
+        recent_signals = _fetch_story_recent_member_signals(session, candidate["nodeId"])
+        if _is_definitely_unrelated_to_story(recent_signals, actor_names, target_names):
+            continue
+        story_candidate = candidate
+        break
+
+    # 외톨이 Event 후보들도 마찬가지로, 확실히 다른 사건이 아닌 첫 후보를 채택
+    orphan_candidate = None
+    for candidate in _find_orphan_event_candidates(session, event_embedding, topic_code, stale_cutoff, event_node_id):
+        if _are_definitely_different_events(candidate["actorNames"], candidate["targetNames"], actor_names, target_names):
+            continue
+        orphan_candidate = candidate
+        break
 
     if story_candidate and (not orphan_candidate or story_candidate["score"] >= orphan_candidate["score"]):
         # 기존 Story 편입 - 대표 벡터만 갱신
@@ -496,7 +564,7 @@ def assign_event_to_story(
         # 외톨이 Event 둘을 묶어 새 Story로 승격 - 먼저 있던 Event의 title을 시작점으로 사용
         blended_embedding = _ema_update_embedding(orphan_candidate["embedding"], event_embedding, STORY_EMBEDDING_EMA_WEIGHT)
         story_node_id = _create_new_story_node(
-            session, orphan_candidate["title"], blended_embedding, embedding_model, occurred_at, now
+            session, orphan_candidate["title"], blended_embedding, embedding_model, topic_code, occurred_at, now
         )
         merge_part_of_edge(session, orphan_candidate["nodeId"], story_node_id, 1.0, now)
         merge_part_of_edge(session, event_node_id, story_node_id, orphan_candidate["score"], now)
@@ -623,6 +691,8 @@ def merge_covers_edge(
         MERGE (a)-[r:COVERS]->(e)
         SET r.confidence = CASE WHEN $confidence IS NULL OR $confidence <= coalesce(r.confidence, -1.0) THEN r.confidence ELSE $confidence END, r.createdAt = coalesce(r.createdAt, $createdAt)
         FOREACH (_ IN CASE WHEN $isPrimary IS NOT NULL THEN [1] ELSE [] END | SET r.isPrimary = $isPrimary)
+        // 이 기사에서 처음으로 primary가 되는 순간 :PrimaryEvent 라벨을 붙인다 (CBF 전용 인덱스 대상)
+        FOREACH (_ IN CASE WHEN $isPrimary = true THEN [1] ELSE [] END | SET e:PrimaryEvent)
         """,
         articleId=article_node_id,
         eventId=event_node_id,
