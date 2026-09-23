@@ -1,5 +1,5 @@
 import { Fragment, useLayoutEffect, useRef, useState } from 'react';
-import { authActions, brand, navItems } from '../../data/home';
+import { authActions, brand, navItems, navSectionOf } from '../../data/home';
 import { useHasNavRail } from '../../hooks/useHasNavRail';
 import { useSession } from '../../store/session';
 import { NodeSearch } from './NodeSearch';
@@ -49,6 +49,7 @@ export function TopBar({
   const account = useSession();
   const navRef = useRef(null);
   const rail = useHasNavRail();
+  const section = navSectionOf(activeId);
   // 레일에서는 늘 펼쳐져 있으므로 이 값은 상단바일 때만 읽는다.
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -90,24 +91,49 @@ export function TopBar({
         </div>
       )}
 
+      {/*
+        갈래는 늘 셋이고, 그 아래는 지금 있는 갈래 것만 펼친다 — 다른 갈래의 잎까지 늘 보이면
+        다시 다섯 줄이 되어 갈래로 묶은 뜻이 없어진다. 잎에 들어와 있어도 갈래는 켜진 채로 둔다:
+        오늘의 트렌드에 서 있는 동안 탐색이 꺼지면 내가 어디 있는지 읽히지 않는다.
+      */}
       <nav ref={navRef} className={styles.nav}>
         {navItems.map((item, index) => (
           <Fragment key={item.id}>
             {index > 0 && <span className={styles.navRule} aria-hidden />}
-            {/*
-              누르기 전에 한 번 알린다 — 포인터가 올라오거나 탭 이동으로 초점이 닿는 순간이
-              목적지를 고른 순간에 가장 가깝다. 무엇을 미리 할지는 받는 쪽이 정한다.
-            */}
-            <button
-              type="button"
-              className={`${styles.navItem} ${item.id === activeId ? styles.navItemActive : ''}`}
-              aria-current={item.id === activeId ? 'page' : undefined}
-              onPointerEnter={() => onIntent?.(item.id)}
-              onFocus={() => onIntent?.(item.id)}
-              onClick={() => onSelect(item.id)}
-            >
-              {item.label}
-            </button>
+            <span className={styles.navSection}>
+              {/*
+                누르기 전에 한 번 알린다 — 포인터가 올라오거나 탭 이동으로 초점이 닿는 순간이
+                목적지를 고른 순간에 가장 가깝다. 무엇을 미리 할지는 받는 쪽이 정한다.
+              */}
+              <button
+                type="button"
+                className={`${styles.navItem} ${item.id === section?.id ? styles.navItemActive : ''}`}
+                aria-current={item.id === activeId ? 'page' : undefined}
+                onPointerEnter={() => onIntent?.(item.id)}
+                onFocus={() => onIntent?.(item.id)}
+                onClick={() => onSelect(item.id)}
+              >
+                {item.label}
+              </button>
+
+              {item.id === section?.id && item.children?.length > 0 && (
+                <span className={styles.navSub}>
+                  {item.children.map((child) => (
+                    <button
+                      key={child.id}
+                      type="button"
+                      className={`${styles.navSubItem} ${child.id === activeId ? styles.navSubItemActive : ''}`}
+                      aria-current={child.id === activeId ? 'page' : undefined}
+                      onPointerEnter={() => onIntent?.(child.id)}
+                      onFocus={() => onIntent?.(child.id)}
+                      onClick={() => onSelect(child.id)}
+                    >
+                      {child.label}
+                    </button>
+                  ))}
+                </span>
+              )}
+            </span>
           </Fragment>
         ))}
       </nav>

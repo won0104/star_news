@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { backdrop, extraViews, navItems } from '../data/home'
+import { backdrop, viewIds } from '../data/home'
 import { arrivalScene } from '../data/recommend'
 import { BOARDS } from '../data/recommendBoard'
 import { desks } from '../data/history'
@@ -16,7 +16,7 @@ import { SCREEN_TRANSITIONS } from '../utils/motion'
 
 /** Falls back rather than rendering nothing when `?view=` is absent or unrecognised. */
 const DEFAULT_VIEW = 'trend'
-const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
+const VIEWS = new Set(viewIds)
 
 /**
  * The clip a destination is arrived on, by destination. A destination with no entry is
@@ -88,7 +88,14 @@ export function AppScene() {
   const { reduceMotion } = useSettingsValues()
   const [params, setParams] = useSearchParams()
   const [walked, setWalked] = useState(false)
-  const [selectedNode, setSelectedNode] = useState(null)
+  /*
+   * 현관에서 고른 사건을 안고 올 수 있다. 도착과 함께 아래 효과가 history state 를 비우므로,
+   * 첫 렌더에서 한 번만 도는 초기값으로 집는다 — 그 다음에는 읽을 자리에 없다.
+   */
+  const [selectedNode, setSelectedNode] = useState(() => {
+    const arrived = location.state?.node
+    return arrived ? { ...arrived, selectionId: 1 } : null
+  })
   const [enteredFromHome] = useState(() => location.state?.from === 'home')
 
   const asked = params.get('view')
@@ -111,6 +118,11 @@ export function AppScene() {
 
   // `replace`, so walking the bar does not pile up history entries to back out of.
   const open = (id) => {
+    // 탐색은 /app 의 한 화면이 아니라 현관이다 — `?view=` 로는 갈 수 없다.
+    if (id === 'home') {
+      navigate('/')
+      return
+    }
     setWalked(true)
     setParams(id === DEFAULT_VIEW ? {} : { view: id }, { replace: true })
   }
@@ -170,7 +182,6 @@ export function AppScene() {
         onIntent={warmOnIntent}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
-        search={view === 'trend'}
         onSearchSelect={openSearchedNode}
       />
       <ViewPane

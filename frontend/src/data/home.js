@@ -5,15 +5,22 @@ export const brand = {
   section: '나를 위한 추천',
 }
 /**
- * The bar's destinations. These were two levels until the left menu board was removed —
- * 홈 and 나의 뉴스 세계 in the board, each with a two-tab strip inside its pane — and the
- * leaves are now flat in the bar, so a screen is one click from any other instead of
- * two. `id` is what <AppScene> switches on and what `?view=` carries.
+ * 내비게이션의 목적지 — 세 갈래와, 갈래마다 딸린 화면.
+ *
+ * 한동안 잎을 전부 평평하게 늘어놓았다. 화면이 넷이던 때는 그래서 어디서든 한 번에 갈 수
+ * 있었지만, 현관이 검색을 받으면서 잎이 다섯이 되었고 나란히 두기에는 많아졌다. 그래서 다시
+ * 갈래로 묶되, 예전처럼 판을 열어 들어가는 두 단계가 아니라 **지금 있는 갈래의 아래만** 펼친다.
+ * 다른 갈래로 가는 것은 여전히 한 번이다.
+ *
+ * `id` 는 <AppScene> 이 `?view=` 로 받는 값이다. 탐색만 `route` 를 갖는다 — 현관은 /app 의
+ * 한 화면이 아니라 따로 선 라우트라서, 그쪽은 `?view=` 로 갈 수 없다.
  */
 export const navItems = [
   {
-    id: 'trend',
-    label: '오늘의 트렌드',
+    id: 'home',
+    label: '탐색',
+    route: '/',
+    children: [{ id: 'trend', label: '오늘의 트렌드' }],
   },
   {
     id: 'foryou',
@@ -22,19 +29,32 @@ export const navItems = [
   {
     id: 'log',
     label: '나의 기록',
+    children: [{ id: 'report', label: '나의 리포트' }],
   },
 ]
 
 /**
- * Screens that `?view=` can carry but the bar does not list; see <AppScene>, which
- * accepts both lists.
+ * `?view=` 가 실어 나를 수 있는 화면. 갈래와 그 아래를 모두 세고, 자기 라우트를 가진 것만
+ * 뺀다 — 목록을 두 벌 들고 어긋나느니 한 벌에서 뽑는다.
  */
-export const extraViews = [
-  {
-    id: 'report',
-    label: '나의 리포트',
-  },
-]
+export const viewIds = navItems.flatMap((item) => [
+  ...(item.route ? [] : [item.id]),
+  ...(item.children ?? []).map((child) => child.id),
+])
+
+/** 잎이 속한 갈래. 어느 갈래를 켜고 그 아래를 펼칠지 정한다. */
+export const navSectionOf = (id) =>
+  navItems.find((item) => item.id === id || item.children?.some((child) => child.id === id))
+/**
+ * 현관의 문구.
+ *
+ * 화면에는 손글씨 그림으로 걸리지만(MainScene.module.css 의 .tagline) 읽을 글은 여기 남긴다 —
+ * 그림이 되었다고 문구가 아닌 것은 아니고, 스크린리더와 검색엔진에게는 이쪽이 전부다.
+ */
+export const mainCopy = {
+  tagline: '오늘도, 세상을 조금 더 가까이.',
+}
+
 export const authActions = {
   signIn: '로그인',
   signUp: '회원가입',
