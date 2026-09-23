@@ -124,7 +124,7 @@
 
   <div class="row">
     <input id="primaryOnly" type="checkbox" checked>
-    <label for="primaryOnly">대표 사건만 보기</label>
+    <label for="primaryOnly">대표 사건만 보기 (즉시 전환)</label>
   </div>
 
   <button id="submit">기사 넣고 분석</button>
@@ -173,9 +173,46 @@ const statusBox = $('status');
 
 let simulation = null;
 
+/**
+ * 마지막으로 받아 온 응답 전체.
+ *
+ * 서버에는 항상 전부(primaryOnly=false) 달라고 한다. 대표 사건만 보기는 그 응답의 부분집합이라
+ * 화면에서 걸러내면 되고, 그래야 체크박스를 누를 때마다 30~60초를 다시 기다리지 않는다.
+ */
+let received = null;
+
 function setStatus(html, isError) {
   statusBox.className = isError ? 'status err' : 'status';
   statusBox.innerHTML = html;
+}
+
+/* ---------- 보기 전환 ---------- */
+
+/** 기사가 대표로 다루는 사건만 남긴다. 서버 쪽 primaryOnly 와 같은 규칙이다. */
+function keepPrimaryOnly(data) {
+  const article = data.articleNodeId;
+  const primaryEvents = new Set(data.edges
+    .filter((edge) => edge.relation === 'COVERS' && edge.primary)
+    .map((edge) => edge.to));
+
+  const edges = data.edges.filter((edge) => {
+    if (edge.from === article) {
+      // 스치듯 언급된 개체와 본문 발언은 뺀다. 이 둘이 화면을 채운다.
+      if (edge.relation === 'MENTIONS' || edge.relation === 'CONTAINS_STATEMENT') return false;
+      return edge.relation !== 'COVERS' || edge.primary;
+    }
+    return primaryEvents.has(edge.from);
+  });
+
+  const kept = new Set([article]);
+  for (const edge of edges) { kept.add(edge.from); kept.add(edge.to); }
+  return { ...data, nodes: data.nodes.filter((node) => kept.has(node.nodeKey)), edges };
+}
+
+/** 받아 둔 응답을 지금 선택한 보기로 그린다. 네트워크를 타지 않는다. */
+function applyView() {
+  if (!received) return;
+  draw($('primaryOnly').checked ? keepPrimaryOnly(received) : received);
 }
 
 /* ---------- API ---------- */
@@ -199,7 +236,6 @@ async function submitArticle() {
     return;
   }
 
-  const primaryOnly = $('primaryOnly').checked;
   const started = Date.now();
   const timer = setInterval(() => {
     setStatus(`분석 중… <b>${Math.round((Date.now() - started) / 1000)}초</b> 경과 (최대 150초)`);
@@ -207,17 +243,20 @@ async function submitArticle() {
   $('submit').disabled = true;
 
   try {
-    const data = await call(`/api/v1/demo/articles?primaryOnly=${primaryOnly}`, {
+    // 항상 전부 받아 둔다. 대표 사건만 보기는 받은 것에서 걸러 쓴다.
+    const data = await call('/api/v1/demo/articles?primaryOnly=false', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, content, sourceName: sourceName || undefined }),
     });
     clearInterval(timer);
     $('articleId').value = data.articleId;
+    received = data;
     const seconds = Math.round((Date.now() - started) / 1000);
-    setStatus(`완료 · <b>${seconds}초</b> · 기사 ${data.articleId} · 분류 <b>${data.topicCode ?? '-'}</b>`
+    setStatus(`완료 · <b>${seconds}초</b> 걸림<br>기사 ID <b>${data.articleId}</b>`
+      + ` · 분류 <b>${data.topicCode ?? '-'}</b>`
       + `${data.subtopicCode ? ' / ' + data.subtopicCode : ''}`);
-    draw(data);
+    applyView();
   } catch (failure) {
     clearInterval(timer);
     setStatus(failure.message, true);
@@ -229,12 +268,13 @@ async function submitArticle() {
 async function loadArticle() {
   const articleId = $('articleId').value.trim();
   if (!articleId) return;
-  const primaryOnly = $('primaryOnly').checked;
   setStatus('불러오는 중…');
   try {
-    const data = await call(`/api/v1/demo/articles/${articleId}/graph?primaryOnly=${primaryOnly}`);
-    setStatus(`기사 ${data.articleId} · 분류 <b>${data.topicCode ?? '-'}</b>`);
-    draw(data);
+    const data = await call(`/api/v1/demo/articles/${articleId}/graph?primaryOnly=false`);
+    received = data;
+    setStatus(`기사 ID <b>${data.articleId}</b> · 분류 <b>${data.topicCode ?? '-'}</b>`
+      + `${data.subtopicCode ? ' / ' + data.subtopicCode : ''}`);
+    applyView();
   } catch (failure) {
     setStatus(failure.message, true);
   }
@@ -437,6 +477,7 @@ svg.addEventListener('wheel', (event) => {
 
 $('submit').addEventListener('click', submitArticle);
 $('load').addEventListener('click', loadArticle);
+$('primaryOnly').addEventListener('change', applyView);
 </script>
 </body>
 </html>
