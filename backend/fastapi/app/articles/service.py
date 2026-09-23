@@ -155,7 +155,6 @@ def _apply_analysis(
 
     # Event 노드 반영
     event_node_ids: set[str] = set()
-    story_node_ids: set[str] = set()
     for node in nodes:
         if "Event" in node["labels"]:
             props = node["properties"]
@@ -172,12 +171,10 @@ def _apply_analysis(
 
             # Story 배정은 Event가 새로 생겼을 때 한 번만
             if is_new_event:
-                story_node_id = repository.assign_event_to_story(
+                repository.assign_event_to_story(
                     tx, real_id, props["title"], props["embedding"], props["embeddingModel"],
-                    primary_topic_code, request.published_at, now,
+                    primary_topic_code, request.published_at, now, actor_names, target_names,
                 )
-                if story_node_id:
-                    story_node_ids.add(story_node_id)
 
     # Statement 노드 반영
     statement_node_ids: set[str] = set()
@@ -251,10 +248,9 @@ def _apply_analysis(
         confidence = edge_props.get("confidence")
         repository.merge_simple_edge(tx, edge["type"], start_id, end_id, confidence, now)
 
-    # Topic 분류 - Article은 AI 분류 그대로, Event/Statement/Story는 Article의 대분류를 상속
-    # Story는 다음 기사가 Topic 필터로 후보를 찾을 때 이 분류가 있어야 하므로 반드시 필요
+    # Topic 분류 - Article은 AI 분류 그대로, Event/Statement는 Article의 대분류를 상속
     repository.classify_article(tx, article_node_id, primary_topic_code, now)
-    for node_id in event_node_ids | statement_node_ids | story_node_ids:
+    for node_id in event_node_ids | statement_node_ids:
         repository.inherit_classification_from_article(tx, node_id, primary_topic_code, now)
 
     # PUBLISHED_BY - Spring이 준 언론사 정보로 직접 반영

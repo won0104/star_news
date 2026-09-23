@@ -22,11 +22,12 @@ def _reset_fixture(session):
 # 유사도가 다른 두 유저(High/Low)를 만들어 Jaccard 순위가 제대로 갈리는지 검증할 수 있게 함
 def _seed_fixture(session):
     # 본인: event-a, event-b 소비
+    # :PrimaryEvent도 같이 붙임 - CF 후보 조회가 이제 이 라벨을 요구함(적어도 한 기사에서 메인 주제였던 적 있는 Event만 후보)
     session.run(
         """
         MERGE (u:User {userId: $userId})
-        MERGE (a:Event {nodeId: 'test-cf-event-a'})
-        MERGE (b:Event {nodeId: 'test-cf-event-b'})
+        MERGE (a:Event:PrimaryEvent {nodeId: 'test-cf-event-a'})
+        MERGE (b:Event:PrimaryEvent {nodeId: 'test-cf-event-b'})
         MERGE (u)-[:CONSUMED]->(a)
         MERGE (u)-[:CONSUMED]->(b)
         """,
@@ -36,9 +37,9 @@ def _seed_fixture(session):
     session.run(
         """
         MERGE (u:User {userId: $userId})
-        MERGE (a:Event {nodeId: 'test-cf-event-a'})
-        MERGE (b:Event {nodeId: 'test-cf-event-b'})
-        MERGE (c:Event {nodeId: 'test-cf-event-c'})
+        MERGE (a:Event:PrimaryEvent {nodeId: 'test-cf-event-a'})
+        MERGE (b:Event:PrimaryEvent {nodeId: 'test-cf-event-b'})
+        MERGE (c:Event:PrimaryEvent {nodeId: 'test-cf-event-c'})
         MERGE (u)-[:CONSUMED]->(a)
         MERGE (u)-[:CONSUMED]->(b)
         MERGE (u)-[:CONSUMED]->(c)
@@ -49,10 +50,10 @@ def _seed_fixture(session):
     session.run(
         """
         MERGE (u:User {userId: $userId})
-        MERGE (a:Event {nodeId: 'test-cf-event-a'})
-        MERGE (d:Event {nodeId: 'test-cf-event-d'})
-        MERGE (e:Event {nodeId: 'test-cf-event-e'})
-        MERGE (f:Event {nodeId: 'test-cf-event-f'})
+        MERGE (a:Event:PrimaryEvent {nodeId: 'test-cf-event-a'})
+        MERGE (d:Event:PrimaryEvent {nodeId: 'test-cf-event-d'})
+        MERGE (e:Event:PrimaryEvent {nodeId: 'test-cf-event-e'})
+        MERGE (f:Event:PrimaryEvent {nodeId: 'test-cf-event-f'})
         MERGE (u)-[:CONSUMED]->(a)
         MERGE (u)-[:CONSUMED]->(d)
         MERGE (u)-[:CONSUMED]->(e)
