@@ -2,7 +2,7 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <title>밤 스탠드인 뽑기</title>
+    <title>스탠드인 뽑기</title>
     <style>
       body { font: 14px/1.6 system-ui, sans-serif; margin: 32px; max-width: 900px; }
       h1 { font-size: 18px; }
@@ -13,22 +13,34 @@
     </style>
   </head>
   <body>
-    <h1>밤 스탠드인 뽑기</h1>
+    <h1>스탠드인 뽑기</h1>
     <p>
-      <code>src/data/trend.js</code> 의 <code>nightfall.standIns</code> 에 넣을 data URI 를 만든다.
+      각 장면 목록의 <code>standIn</code> 에 넣을 data URI 를 만든다 — <code>data/trend.js</code> 의 <code>nightfall.standIns</code>, <code>data/home.js</code> 의 <code>rooms</code>, <code>data/history.js</code> 의 <code>desks</code>, <code>data/recommendBoard.js</code> 의 <code>BOARDS</code>.
       개발 서버를 띄운 채 이 파일을 그 서버 주소로 연다 —
       <code>http://localhost:5174/../scripts/make-night-standin.html</code> 이 아니라, 아래 경로가
       같은 출처에서 읽히기만 하면 된다. 캔버스가 원본을 읽어야 하므로 file:// 로 열면 안 된다.
     </p>
-    <p><code>nightfall.backdrops</code> 의 사진을 바꾸면 여기서 두 줄을 다시 뽑아 붙여넣는다.</p>
+    <p>사진을 다시 그리면 그 항목의 <code>standIn</code> 도 여기서 다시 뽑아 붙여넣는다.</p>
     <div id="out">만드는 중…</div>
     <script type="module">
       /* 긴 변 56px, webp 0.72 — 1KB 남짓이면서 산 능선과 호수 불빛이 남는 지점. */
       const LONG_EDGE = 56
       const QUALITY = 0.72
       const SOURCES = {
-        landscape: '/assets/trend/trend-window-backdrop-landscape-v2.webp',
-        portrait: '/assets/trend/trend-window-backdrop-portrait-v2.webp',
+        'trend landscape': '/assets/trend/trend-window-backdrop-landscape-v2.webp',
+        'trend portrait': '/assets/trend/trend-window-backdrop-portrait-v2.webp',
+        'room 16x9': '/assets/auth/room-16x9-v2.webp',
+        'room 4x3': '/assets/auth/room-4x3-v2.webp',
+        'room 3x4': '/assets/auth/room-3x4-v2.webp',
+        'room 9x16': '/assets/auth/room-9x16-v2.webp',
+        'desk 16x9': '/assets/history/desk-16x9-v2.webp',
+        'desk 4x3': '/assets/history/desk-4x3-v2.webp',
+        'desk 3x4': '/assets/history/desk-3x4-v2.webp',
+        'desk 9x16': '/assets/history/desk-9x16-v2.webp',
+        'board 16x9': '/assets/board/recommend-board-empty-16x9-v2.webp',
+        'board 4x3': '/assets/board/recommend-board-empty-4x3-v2.webp',
+        'board 3x4': '/assets/board/recommend-board-empty-3x4-v2.webp',
+        'board 9x16': '/assets/board/recommend-board-empty-9x16-v2.webp',
       }
 
       const shrink = async (url) => {

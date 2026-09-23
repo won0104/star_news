@@ -41,9 +41,12 @@ const LOOP_CLASS = {};
  * 사진의 크롭 기준이 공용 규칙과 달라야 하는 장면. 오늘의 트렌드는 <TrendStage> 의 .still 이
  * 같은 밤 사진을 object-position: center 로 한 겹 더 걸기 때문에, 아래 깔린 이 장이 다른
  * 기준으로 잘리면 위 장이 올라오는 순간 배경이 위아래로 미끄러진다.
+ *
+ * 사진과 스탠드인을 한 항목으로 묶어 둔다 — 둘의 기준이 어긋나면 흐린 장이 선명한 장으로
+ * 바뀌는 순간 배경이 미끄러지고, 그것이 바로 이 스탠드인이 없애려는 현상이다.
  */
-const PHOTO_CLASS = {
-  trend: styles.photoCentred,
+const CROP_CLASS = {
+  trend: { photo: styles.photoCentred, wash: styles.washCentred },
 };
 
 /*
@@ -67,7 +70,10 @@ export function PhotoBackdrop({
 }) {
   const [ready, setReady] = useState(false);
   const room = useNearestWindow(rooms);
+  // 장면이 자기 사진을 가져왔으면 그 짝인 스탠드인도 함께 가져온다. 아니면 둘 다 방에서 온다.
   const src = scene.src ?? room.src;
+  const standIn = scene.src ? scene.standIn : room.standIn;
+  const crop = CROP_CLASS[scene.id];
   const plays = motion && !!scene.loop;
 
   // No clip means the screen is settled from the first frame, and the caller has to be
@@ -83,8 +89,8 @@ export function PhotoBackdrop({
         사진보다 먼저 자리에 있다. 값은 CSS 변수로만 건네고 배치는 .washStandIn 이 정한다.
       */}
       <div
-        className={`${styles.wash} ${WASH_CLASS[scene.id] ?? ''} ${scene.standIn ? styles.washStandIn : ''}`}
-        style={scene.standIn ? { '--stand-in': `url(${scene.standIn})` } : undefined}
+        className={`${styles.wash} ${WASH_CLASS[scene.id] ?? ''} ${standIn ? styles.washStandIn : ''} ${scene.frame ? styles.washFramed : ''} ${crop?.wash ?? ''}`}
+        style={standIn ? { '--stand-in': `url(${standIn})` } : undefined}
         aria-hidden
       >
         {/*
@@ -93,7 +99,7 @@ export function PhotoBackdrop({
           계산할 수 있게, 계산은 CSS 변수 넷으로만 한다 (PhotoBackdrop.module.css .photoFramed).
         */}
         <img
-          className={`${styles.photo} ${scene.frame ? styles.photoFramed : ''} ${PHOTO_CLASS[scene.id] ?? ''} ${ready ? styles.photoReady : ''}`}
+          className={`${styles.photo} ${scene.frame ? styles.photoFramed : ''} ${crop?.photo ?? ''} ${ready ? styles.photoReady : ''}`}
           src={src}
           alt=""
           style={

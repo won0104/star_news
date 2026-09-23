@@ -57,9 +57,20 @@
  */
 .washStandIn {
   background-image: var(--stand-in);
+  /* 기본값은 .photo 와 같다 — 예외는 아래 두 짝 클래스가 맡는다. */
   background-size: cover;
-  background-position: center;
+  background-position: center bottom;
   background-repeat: no-repeat;
+}
+
+/* .photoCentred 와 짝. 같은 명시도라 순서가 승자를 정하므로 위 규칙 뒤에 온다. */
+.washCentred {
+  background-position: center;
+}
+
+/* .photoFramed 와 짝 — 자르지 않고 뷰포트를 그대로 채운다. */
+.washFramed {
+  background-size: 100% 100%;
 }
 
 .photo {

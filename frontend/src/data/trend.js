@@ -56,7 +56,7 @@ export const nightfall = {
    * 이쪽을 쓰는 이유는 산 능선과 호수 불빛이 제자리에 있어, 진짜 사진이 올라올 때 색뿐 아니라
    * 형태까지 이어지기 때문이다.
    *
-   * 다시 뽑으려면 scripts/make-night-standin.html 을 브라우저로 연다. 위 두 사진을 다시
+   * 다시 뽑으려면 scripts/make-standins.html 을 브라우저로 연다. 위 두 사진을 다시
    * 그리면 이 두 줄도 함께 다시 뽑는다.
    */
   standIns: {

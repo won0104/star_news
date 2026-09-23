@@ -135,9 +135,9 @@ export function AppScene() {
   const chosen = (arriving && ARRIVAL[view]) || SCENE_BY_VIEW[view] || backdrop
   const scene =
     chosen === arrivalScene
-      ? { ...arrivalScene, src: board.src }
+      ? { ...arrivalScene, src: board.src, standIn: board.standIn }
       : chosen === HISTORY_BACKDROP
-        ? { ...HISTORY_BACKDROP, src: desk.src }
+        ? { ...HISTORY_BACKDROP, src: desk.src, standIn: desk.standIn }
         : chosen === TREND_BACKDROP
           ? { ...TREND_BACKDROP, ...nightBackdrop(nightWindow) }
           : chosen
