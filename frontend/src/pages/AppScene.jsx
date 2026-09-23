@@ -5,7 +5,7 @@ import { arrivalScene } from '../data/recommend'
 import { BOARDS } from '../data/recommendBoard'
 import { desks } from '../data/history'
 import { useNearestWindow } from '../hooks/useNearestWindow'
-import { nightfall } from '../data/trend'
+import { nightBackdrop, nightfall } from '../data/trend'
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop'
 import { TopBar } from '../components/common/TopBar'
 import { ViewPane } from '../components/world/ViewPane'
@@ -22,8 +22,8 @@ const VIEWS = new Set([...navItems, ...extraViews].map((item) => item.id))
  * simply arrived on without one — which is every destination but 나를 위한 추천 today.
  */
 const ARRIVAL = { foryou: arrivalScene }
-const TREND_BACKDROP = { id: 'trend', src: nightfall.backdrops.landscape, loop: null }
 /** 사진은 비율에 맞춰 아래에서 고른다 — 여기서는 어느 방인지만 정한다. */
+const TREND_BACKDROP = { id: 'trend', loop: null }
 const HISTORY_BACKDROP = { id: 'history', loop: null }
 
 /**
@@ -129,13 +129,18 @@ export function AppScene() {
   const board = useNearestWindow(BOARDS)
   // 책상도 비율마다 그려져 있다. 책은 자기 상자를 가지므로 사진만 갈아끼우면 된다.
   const desk = useNearestWindow(desks)
+  // 밤 창가. <TrendStage> 가 같은 장을 골라야 하므로 양쪽 모두 ref 없이 뷰포트로 잰다 —
+  // useNearestWindow 주석의 "합의해야 하는 두 겹은 둘 다 ref 를 생략한다" 가 이 경우다.
+  const nightWindow = useNearestWindow(nightfall.frames)
   const chosen = (arriving && ARRIVAL[view]) || SCENE_BY_VIEW[view] || backdrop
   const scene =
     chosen === arrivalScene
       ? { ...arrivalScene, src: board.src }
       : chosen === HISTORY_BACKDROP
         ? { ...HISTORY_BACKDROP, src: desk.src }
-        : chosen
+        : chosen === TREND_BACKDROP
+          ? { ...TREND_BACKDROP, ...nightBackdrop(nightWindow) }
+          : chosen
   const motion = SCREEN_TRANSITIONS && !reduceMotion && scene !== backdrop
   const [settled, setSettled] = useState(false)
   const onSettled = useCallback(() => setSettled(true), [])

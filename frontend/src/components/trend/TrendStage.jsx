@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { nightfall } from '../../data/trend'
+import { nightBackdrop, nightfall } from '../../data/trend'
 import { useNearestWindow } from '../../hooks/useNearestWindow'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { useSettingsValues } from '../../store/settings'
@@ -38,6 +38,9 @@ export function TrendStage({ playTransition = false, selectedNode }) {
   const prefersReducedMotion = usePrefersReducedMotion()
   const sceneRef = useRef(null)
   const sceneWindow = useNearestWindow(nightfall.frames, sceneRef)
+  // 나무틀은 이 상자에 그려지므로 레일을 뺀 씬 박스로 고르지만, 배경은 그 아래 <AppScene> 이
+  // 깔아 둔 같은 사진과 합의해야 한다. 그래서 배경만 ref 없이 뷰포트로 잰다.
+  const nightWindow = useNearestWindow(nightfall.frames)
 
   const canPlayTransition = Boolean(
     nightfall.clip?.mp4 &&
@@ -47,8 +50,7 @@ export function TrendStage({ playTransition = false, selectedNode }) {
     !prefersReducedMotion,
   )
   const settled = !canPlayTransition || ended
-  const backdrop =
-    sceneWindow.ratio >= 1 ? nightfall.backdrops.landscape : nightfall.backdrops.portrait
+  const backdrop = nightBackdrop(nightWindow).src
 
   return (
     <div className={styles.stage}>
