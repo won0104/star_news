@@ -94,7 +94,7 @@ docker run --rm \
     -connectRetries=20 \
     migrate
 
-echo "--- Neo4j schema (V1 + V2 + V3) ---"
+echo "--- Neo4j schema (V1 + V2 + V3 + V4) ---"
 compose_ci exec -T neo4j \
     cypher-shell -u "$CI_NEO4J_USER" -p "$CI_NEO4J_PASSWORD" \
     < "${PROJECT_DIR}/backend/fastapi/migrations/neo4j/V1__initial_graph_schema.cypher"
@@ -106,6 +106,10 @@ compose_ci exec -T neo4j \
 compose_ci exec -T neo4j \
     cypher-shell -u "$CI_NEO4J_USER" -p "$CI_NEO4J_PASSWORD" \
     < "${PROJECT_DIR}/backend/fastapi/migrations/neo4j/V3__story_vector_index.cypher"
+
+compose_ci exec -T neo4j \
+    cypher-shell -u "$CI_NEO4J_USER" -p "$CI_NEO4J_PASSWORD" \
+    < "${PROJECT_DIR}/backend/fastapi/migrations/neo4j/V4__primary_event_vector_index.cypher"
 
 echo "--- Spring Boot CI (compose MySQL + Neo4j, no Testcontainers) ---"
 run_in_container "eclipse-temurin:21-jdk" "${PROJECT_DIR}/backend/spring" '

@@ -28,7 +28,8 @@ def _seed_fixture(session):
         MERGE (target)-[:INTERESTED_IN]->(topic)
 
         // 관심 Topic 안 + 인기 있음 (소비자 2명) -> 제일 높은 점수여야 함
-        MERGE (popular:Event {nodeId: 'test-cold-event-intopic-popular'})
+        // :PrimaryEvent도 같이 붙임 - 콜드스타트 폴백이 이제 이 라벨을 요구함
+        MERGE (popular:Event:PrimaryEvent {nodeId: 'test-cold-event-intopic-popular'})
         SET popular.occurredAt = $recent
         MERGE (popular)-[:CLASSIFIED_AS]->(topic)
         WITH target, topic, popular, $recent AS recent
@@ -38,7 +39,7 @@ def _seed_fixture(session):
 
         WITH target, topic
         // 관심 Topic 안 + 인기 없음 (소비자 0명) -> 후보엔 있어야 하지만 popular보다 낮아야 함
-        MERGE (unpopular:Event {nodeId: 'test-cold-event-intopic-unpopular'})
+        MERGE (unpopular:Event:PrimaryEvent {nodeId: 'test-cold-event-intopic-unpopular'})
         SET unpopular.occurredAt = $recent
         MERGE (unpopular)-[:CLASSIFIED_AS]->(topic)
 

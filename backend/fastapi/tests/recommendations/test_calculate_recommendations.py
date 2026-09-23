@@ -54,24 +54,25 @@ def _seed_fixture(session):
         SET r2.eventClickCount = 1, r2.lastViewedAt = $recent
 
         // similar만 소비 + 임베딩 비슷함 + 관심 Topic 안 -> target의 최종 추천 후보가 되어야 함
-        MERGE (rec:Event {nodeId: 'test-calc-event-recommend'})
+        // :PrimaryEvent도 같이 붙임 - CF/CBF/콜드스타트 후보 조회가 이제 이 라벨을 요구함
+        MERGE (rec:Event:PrimaryEvent {nodeId: 'test-calc-event-recommend'})
         SET rec.embedding = $vector, rec.occurredAt = $recent, rec.title = '추천될 이벤트'
         MERGE (rec)-[:CLASSIFIED_AS]->(topic)
         MERGE (similar)-[:CONSUMED]->(rec)
 
         // similar만 소비 + 임베딩 비슷함 + 관심 Topic 밖 -> 관심 Topic 하드 필터에 걸려서 추천되면 안 됨
-        MERGE (outside:Event {nodeId: 'test-calc-event-outside-topic'})
+        MERGE (outside:Event:PrimaryEvent {nodeId: 'test-calc-event-outside-topic'})
         SET outside.embedding = $vector, outside.occurredAt = $recent, outside.title = 'Topic 밖 이벤트'
         MERGE (similar)-[:CONSUMED]->(outside)
 
         // similar만 소비 + 임베딩 비슷함 + 비선호 Topic -> 비선호 필터에 걸려서 추천되면 안 됨
-        MERGE (dislikedEvent:Event {nodeId: 'test-calc-event-disliked'})
+        MERGE (dislikedEvent:Event:PrimaryEvent {nodeId: 'test-calc-event-disliked'})
         SET dislikedEvent.embedding = $vector, dislikedEvent.occurredAt = $recent, dislikedEvent.title = '비선호 이벤트'
         MERGE (dislikedEvent)-[:CLASSIFIED_AS]->(disliked)
         MERGE (similar)-[:CONSUMED]->(dislikedEvent)
 
         // 콜드스타트 유저용 인기 Event (소비자 1명 있어야 인기도 > 0)
-        MERGE (popular:Event {nodeId: 'test-calc-event-popular'})
+        MERGE (popular:Event:PrimaryEvent {nodeId: 'test-calc-event-popular'})
         SET popular.occurredAt = $recent, popular.title = '인기 이벤트'
         MERGE (popular)-[:CLASSIFIED_AS]->(topic)
         MERGE (similar)-[:CONSUMED]->(popular)

@@ -70,17 +70,18 @@ def _seed_fixture(session):
         MERGE (u:User {userId: $userId})
 
         // 본인이 이미 소비한 Event - 이 임베딩으로 취향 벡터가 만들어짐
-        MERGE (consumed:Event {nodeId: 'test-cbf-event-consumed'})
+        MERGE (consumed:Event:PrimaryEvent {nodeId: 'test-cbf-event-consumed'})
         SET consumed.embedding = $consumedVector
         MERGE (u)-[r:CONSUMED]->(consumed)
         SET r.eventClickCount = 3, r.lastViewedAt = $now, r.eventFavorited = true
 
         // 취향 벡터랑 방향이 비슷한 미열람 Event -> 유사도 높게 나와야 함
-        MERGE (similar:Event {nodeId: 'test-cbf-event-similar'})
+        // :PrimaryEvent도 같이 붙임 - CBF 후보 검색이 이제 이 라벨 대상 인덱스만 씀
+        MERGE (similar:Event:PrimaryEvent {nodeId: 'test-cbf-event-similar'})
         SET similar.embedding = $similarVector
 
         // 취향 벡터랑 직교하는 미열람 Event -> 유사도 낮게 나와야 함
-        MERGE (dissimilar:Event {nodeId: 'test-cbf-event-dissimilar'})
+        MERGE (dissimilar:Event:PrimaryEvent {nodeId: 'test-cbf-event-dissimilar'})
         SET dissimilar.embedding = $dissimilarVector
         """,
         userId=USER_ID,
