@@ -208,6 +208,19 @@ def fetch_event_display_info(session: Session, event_ids: list[str]) -> dict[str
     return {record["eventId"]: {"label": record["label"], "topicCode": record["topicCode"]} for record in result}
 
 
+# 후보 Event들의 Story 소속 조회 - event_id -> story_id (Story 없으면 None)
+def fetch_event_story_ids(session: Session, event_ids: list[str]) -> dict[str, str | None]:
+    result = session.run(
+        """
+        MATCH (e:Event) WHERE e.nodeId IN $eventIds
+        OPTIONAL MATCH (e)-[:PART_OF]->(s:Story)
+        RETURN e.nodeId AS eventId, s.nodeId AS storyId
+        """,
+        eventIds=event_ids,
+    )
+    return {record["eventId"]: record["storyId"] for record in result}
+
+
 # 6. 가중치 재튜닝 평가용
 # CONSUMED 이력이 있는 유저별 (event_id, 최근성 자격) 목록 (최근순 정렬)
 def find_users_eligible_for_evaluation(session: Session, recency_threshold: datetime) -> dict[int, list[dict]]:
