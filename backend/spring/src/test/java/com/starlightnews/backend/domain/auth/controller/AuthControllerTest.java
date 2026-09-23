@@ -277,6 +277,16 @@ class AuthControllerTest {
 	}
 
 	@Test
+	void refresh_서비스가_REFRESH_TOKEN_REUSED를_던지면_401을_응답한다() throws Exception {
+		given(authService.refresh("old-rt"))
+				.willThrow(new BusinessException(AuthErrorCode.REFRESH_TOKEN_REUSED));
+
+		mockMvc.perform(post(REFRESH_PATH).cookie(new Cookie("refreshToken", "old-rt")))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("REFRESH_TOKEN_REUSED"));
+	}
+
+	@Test
 	void logout_인증된_요청은_204와_만료된_refreshToken_쿠키를_응답한다() throws Exception {
 		String accessToken = jwtProvider.createAccessToken(1L);
 

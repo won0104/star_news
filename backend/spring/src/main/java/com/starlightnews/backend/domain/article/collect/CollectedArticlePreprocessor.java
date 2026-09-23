@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -40,6 +40,16 @@ public class CollectedArticlePreprocessor {
 
 	/** 본문에서 꺼낸 줄을 제목으로 볼 수 있는 최대 길이.  */
 	private static final int MAX_TITLE_LENGTH = 120;
+
+	/**
+	 * 제공처가 언론사명 대신 도메인을 보내는 경우에도 알아볼 수 있는 대표 제목.
+	 *
+	 * <p>GNews 는 같은 KBS 도메인에 {@code KBS 뉴스}와 {@code news.kbs.co.kr}을 섞어서
+	 * source.name 으로 보낸다. 저장 단계에서는 도메인으로 기존 언론사를 찾지만 제목 보정은 그보다
+	 * 먼저 실행되므로, 여기서는 안정적인 도메인으로 제공처 제목을 판별한다.
+	 */
+	private static final Map<String, Set<String>> OUTLET_TITLES_BY_DOMAIN = Map.of(
+			"news.kbs.co.kr", Set.of("kbs뉴스"));
 
 	/** 통신사 기사의 바이라인. */
 	private static final Pattern BYLINE = Pattern.compile("(기자|특파원|통신원)\\s*=");
@@ -312,11 +322,23 @@ public class CollectedArticlePreprocessor {
 		if (article.title() == null || article.organizationName() == null) {
 			return false;
 		}
-		return withoutWhitespace(article.title()).equals(withoutWhitespace(article.organizationName()));
+
+		String normalizedTitle = normalizedOutletText(article.title());
+		if (normalizedTitle.equals(normalizedOutletText(article.organizationName()))) {
+			return true;
+		}
+
+		String domain = article.organizationDomain();
+		if (domain == null || domain.isBlank()) {
+			return false;
+		}
+		return OUTLET_TITLES_BY_DOMAIN
+				.getOrDefault(domain.strip().toLowerCase(Locale.ROOT), Set.of())
+				.contains(normalizedTitle);
 	}
 
-	private String withoutWhitespace(String value) {
-		return value.replaceAll("\\s+", "");
+	private String normalizedOutletText(String value) {
+		return value.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
 	}
 
 	/** 사이트 UI 문구를 건너뛴 첫 줄. 없으면 빈 문자열 */

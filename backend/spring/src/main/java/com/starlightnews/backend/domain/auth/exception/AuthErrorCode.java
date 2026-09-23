@@ -16,6 +16,7 @@ public enum AuthErrorCode implements ErrorCode {
 	INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
 	INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
 	EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 리프레시 토큰입니다."),
+	REFRESH_TOKEN_REUSED(HttpStatus.UNAUTHORIZED, "이미 사용된 리프레시 토큰입니다. 다시 로그인해 주세요."),
 	REFRESH_SESSION_NOT_FOUND(HttpStatus.UNAUTHORIZED, "세션을 찾을 수 없습니다. 다시 로그인해 주세요."),
 	USER_DELETED(HttpStatus.FORBIDDEN, "탈퇴한 회원입니다.");
 

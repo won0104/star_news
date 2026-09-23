@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,34 @@ public class InMemoryRefreshSessionStore implements RefreshSessionStore {
 			return Optional.empty();
 		}
 		return Optional.of(entry.session());
+	}
+
+	@Override
+	public RefreshSessionRotationResult rotate(
+			String sessionId,
+			String expectedRefreshTokenHash,
+			String newRefreshTokenHash,
+			Duration ttl
+	) {
+		Instant now = Instant.now();
+		AtomicReference<RefreshSessionRotationResult> result =
+				new AtomicReference<>(RefreshSessionRotationResult.notFound());
+		sessions.compute(sessionId, (key, entry) -> {
+			if (entry == null || entry.isExpired(now)) {
+				return null;
+			}
+			if (!entry.session().refreshTokenHash().equals(expectedRefreshTokenHash)) {
+				result.set(RefreshSessionRotationResult.reused());
+				return null;
+			}
+
+			long userId = entry.session().userId();
+			result.set(RefreshSessionRotationResult.rotated(userId));
+			return new Entry(
+					new RefreshSession(userId, newRefreshTokenHash),
+					now.plus(ttl));
+		});
+		return result.get();
 	}
 
 	@Override

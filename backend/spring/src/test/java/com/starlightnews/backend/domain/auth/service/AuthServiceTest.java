@@ -21,6 +21,7 @@ import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.security.JwtProvider;
 import com.starlightnews.backend.global.security.JwtValidationException;
 import com.starlightnews.backend.global.security.RefreshSession;
+import com.starlightnews.backend.global.security.RefreshSessionRotationResult;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
 import com.starlightnews.backend.global.security.TokenBlacklist;
 import com.starlightnews.backend.global.security.TokenHasher;
@@ -262,23 +263,28 @@ class AuthServiceTest {
 
 	private static final String OLD_RT = "old-refresh-token";
 	private static final String OLD_SESSION_ID = "old-session-id";
+	private static final String NEW_RT = "new-refresh-token";
+	private static final Duration REFRESH_TTL = Duration.ofDays(14);
 
-	private void stubValidRefreshToken(long userId) {
+	private void stubRotation(RefreshSessionRotationResult result) {
 		given(jwtProvider.parseRefreshTokenSessionId(OLD_RT)).willReturn(OLD_SESSION_ID);
-		given(refreshSessionStore.find(OLD_SESSION_ID))
-				.willReturn(Optional.of(new RefreshSession(userId, TokenHasher.sha256Hex(OLD_RT))));
+		given(jwtProvider.createRefreshToken(OLD_SESSION_ID)).willReturn(NEW_RT);
+		given(jwtProvider.refreshTokenValidity()).willReturn(REFRESH_TTL);
+		given(refreshSessionStore.rotate(
+				OLD_SESSION_ID,
+				TokenHasher.sha256Hex(OLD_RT),
+				TokenHasher.sha256Hex(NEW_RT),
+				REFRESH_TTL)).willReturn(result);
 	}
 
 	private void stubNewTokenIssuance(long userId) {
 		given(jwtProvider.createAccessToken(userId)).willReturn("new-access-token");
-		given(jwtProvider.createRefreshToken(anyString())).willReturn("new-refresh-token");
 		given(jwtProvider.accessTokenValidity()).willReturn(Duration.ofSeconds(3600));
-		given(jwtProvider.refreshTokenValidity()).willReturn(Duration.ofDays(14));
 	}
 
 	@Test
-	void 유효한_RT로_재발급하면_기존_세션을_지우고_새_토큰과_세션을_만든다() {
-		stubValidRefreshToken(1L);
+	void 유효한_RT로_재발급하면_같은_토큰_계열의_해시를_원자적으로_교체한다() {
+		stubRotation(RefreshSessionRotationResult.rotated(1L));
 		given(userRepository.findById(1L)).willReturn(Optional.of(activeUser(1L)));
 		stubNewTokenIssuance(1L);
 
@@ -287,15 +293,16 @@ class AuthServiceTest {
 		assertThat(result.response().accessToken()).isEqualTo("new-access-token");
 		assertThat(result.response().tokenType()).isEqualTo("Bearer");
 		assertThat(result.response().expiresIn()).isEqualTo(3600);
-		assertThat(result.refreshToken()).isEqualTo("new-refresh-token");
+		assertThat(result.refreshToken()).isEqualTo(NEW_RT);
 		assertThat(result.refreshTokenMaxAgeSeconds()).isEqualTo(Duration.ofDays(14).toSeconds());
 
-		verify(refreshSessionStore).delete(OLD_SESSION_ID);
-
-		ArgumentCaptor<RefreshSession> saved = ArgumentCaptor.forClass(RefreshSession.class);
-		verify(refreshSessionStore).save(anyString(), saved.capture(), any());
-		assertThat(saved.getValue().userId()).isEqualTo(1L);
-		assertThat(saved.getValue().refreshTokenHash()).isEqualTo(TokenHasher.sha256Hex("new-refresh-token"));
+		verify(refreshSessionStore).rotate(
+				OLD_SESSION_ID,
+				TokenHasher.sha256Hex(OLD_RT),
+				TokenHasher.sha256Hex(NEW_RT),
+				REFRESH_TTL);
+		verify(refreshSessionStore, never()).save(any(), any(), any());
+		verify(refreshSessionStore, never()).delete(any());
 	}
 
 	@Test
@@ -306,7 +313,7 @@ class AuthServiceTest {
 		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.EXPIRED_REFRESH_TOKEN);
-		verify(refreshSessionStore, never()).save(any(), any(), any());
+		verify(refreshSessionStore, never()).rotate(any(), any(), any(), any());
 	}
 
 	@Test
@@ -321,8 +328,7 @@ class AuthServiceTest {
 
 	@Test
 	void 세션이_없으면_REFRESH_SESSION_NOT_FOUND_예외() {
-		given(jwtProvider.parseRefreshTokenSessionId(OLD_RT)).willReturn(OLD_SESSION_ID);
-		given(refreshSessionStore.find(OLD_SESSION_ID)).willReturn(Optional.empty());
+		stubRotation(RefreshSessionRotationResult.notFound());
 
 		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
 
@@ -331,20 +337,18 @@ class AuthServiceTest {
 	}
 
 	@Test
-	void 이미_회전된_RT를_다시_쓰면_REFRESH_SESSION_NOT_FOUND_예외() {
-		given(jwtProvider.parseRefreshTokenSessionId(OLD_RT)).willReturn(OLD_SESSION_ID);
-		given(refreshSessionStore.find(OLD_SESSION_ID))
-				.willReturn(Optional.of(new RefreshSession(1L, TokenHasher.sha256Hex("다른-rt"))));
+	void 이미_회전된_RT를_다시_쓰면_REFRESH_TOKEN_REUSED_예외() {
+		stubRotation(RefreshSessionRotationResult.reused());
 
 		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
 
-		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.REFRESH_SESSION_NOT_FOUND);
-		verify(refreshSessionStore, never()).delete(any());
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.REFRESH_TOKEN_REUSED);
+		verify(userRepository, never()).findById(any());
 	}
 
 	@Test
 	void 세션의_사용자가_탈퇴했으면_USER_DELETED_예외() {
-		stubValidRefreshToken(1L);
+		stubRotation(RefreshSessionRotationResult.rotated(1L));
 		User deleted = activeUser(1L);
 		deleted.markDeleted();
 		given(userRepository.findById(1L)).willReturn(Optional.of(deleted));
@@ -352,8 +356,19 @@ class AuthServiceTest {
 		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.USER_DELETED);
-		verify(refreshSessionStore, never()).delete(any());
+		verify(refreshSessionStore).delete(OLD_SESSION_ID);
 		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	@Test
+	void 세션의_사용자가_없으면_교체한_세션을_삭제한다() {
+		stubRotation(RefreshSessionRotationResult.rotated(1L));
+		given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+		Throwable thrown = catchThrowable(() -> authService.refresh(OLD_RT));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.REFRESH_SESSION_NOT_FOUND);
+		verify(refreshSessionStore).delete(OLD_SESSION_ID);
 	}
 
 	@Test
