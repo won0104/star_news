@@ -177,11 +177,11 @@ function ArticleRow({ article }) {
   })
   const account = useSession()
   const [open, setOpen] = useState(false)
-  // 원문 주소는 관련 기사 목록에 없고 상세에만 있다. 그래서 펼칠 때 둘을 나란히 부른다 —
-  // 서로 기다리지 않으므로 요약이 실패해도 원문 링크는 뜬다.
+  // 원문 주소는 관련 기사 목록에 없고 상세에만 있다(RelatedArticleItem 에는 없는 유일한 칸).
+  // 한 번 받으면 들고 있다가 이후로는 그냥 링크로 건다.
   const [origin, setOrigin] = useState(null)
   const { summary, state, load, retry } = useArticleSummary(article.articleId)
-  // 이 기사를 이미 읽음으로 남겼는지. 접었다 펴도 다시 보내지 않기 위한 표시다.
+  // 이 기사를 이미 읽음으로 남겼는지. 접었다 펴도, 원문을 다시 눌러도 보내지 않기 위한 표시다.
   const recorded = useRef(false)
   const bodyId = `article-summary-${article.articleId}`
 
@@ -195,29 +195,48 @@ function ArticleRow({ article }) {
   }, [open, origin, article.articleId])
 
   /**
-   * 펼치는 것이 이 앱의 "기사를 읽었다"이다.
+   * 이 기사를 읽은 것으로 남긴다. 요약을 펼치는 것과 원문으로 나가는 것 둘 다 해당한다 —
+   * 어느 쪽이든 사용자가 이 기사를 읽겠다고 고른 것이다.
    *
-   * 명세가 말하는 상세 화면이 아직 없어서, 목록에서 내용을 펼치는 이 동작이 그 자리를
-   * 대신한다. 목록에 떠 있는 것만으로는 읽었다고 할 수 없고, 펼친 것은 읽겠다는 뜻이다.
-   *
-   * effect 가 아니라 클릭에서 보낸다 — StrictMode 는 effect 를 두 번 실행하므로
-   * 열람 횟수를 증가시키는 요청을 거기 두면 개발 모드에서 두 배가 된다.
-   * 접었다 펴는 것은 새 열람이 아니므로 ref 로 한 번만 보낸다.
-   * 비로그인은 보내지 않는다 — 어차피 401 로 거절될 요청이다.
+   * effect 가 아니라 클릭에서 보낸다 — StrictMode 는 effect 를 두 번 실행하므로 열람 횟수를
+   * 올리는 요청을 거기 두면 개발 모드에서 두 배가 된다. 한 기사에 한 번만 보내려고 ref 로
+   * 막는다. 비로그인은 보내지 않는다 — 어차피 401 로 거절될 요청이다.
    */
+  const markRead = () => {
+    if (!account || recorded.current) return
+    recorded.current = true
+    recordArticleRead(article.articleId).catch(() => {
+      // 읽음 기록은 화면이 하는 일의 곁가지다. 실패해도 읽는 일을 방해하지 않는다.
+      recorded.current = false
+    })
+  }
+
+  /** 요약 토글. 펼칠 때만 만들거나 가져온다 — 접기는 새로 읽는 것이 아니다. */
   const expand = () => {
     const next = !open
     setOpen(next)
     if (!next) return
-
     load()
-    if (account && !recorded.current) {
-      recorded.current = true
-      recordArticleRead(article.articleId).catch(() => {
-        // 읽음 기록은 화면이 하는 일의 곁가지다. 실패해도 요약 읽기를 방해하지 않는다.
-        recorded.current = false
+    markRead()
+  }
+
+  /**
+   * 원문 주소를 아직 모를 때만 쓰는 길. 알고 나면 아래에서 그냥 <a> 로 건다.
+   *
+   * 빈 탭을 **클릭과 같은 흐름에서 먼저** 연 뒤 주소를 넣는다. 응답을 기다렸다가 window.open
+   * 을 부르면 사용자 제스처와 끊겨 팝업 차단에 걸린다. 주소를 못 받으면 열어 둔 탭을 닫는다.
+   */
+  const openOrigin = () => {
+    markRead()
+    const tab = window.open('', '_blank', 'noopener,noreferrer')
+    fetchArticleDetail(article.articleId)
+      .then((detail) => {
+        const url = detail?.originalUrl ?? null
+        setOrigin(url)
+        if (url && tab) tab.location.href = url
+        else tab?.close()
       })
-    }
+      .catch(() => tab?.close())
   }
 
   return (
@@ -249,18 +268,47 @@ function ArticleRow({ article }) {
       <p className={styles.headline}>{article.title}</p>
       {hint && <p className={styles.hint} role="status">{hint}</p>}
 
-      <button
-        type="button"
-        className={styles.detail}
-        aria-expanded={open}
-        aria-controls={bodyId}
-        onClick={expand}
-      >
-        {open ? panelCopy.summaryClose : panelCopy.summaryOpen}
-        <span className={styles.detailCaret} aria-hidden>
-          {open ? '▴' : '▾'}
-        </span>
-      </button>
+      {/*
+        요약과 원문을 나란히 둔다. 요약만 두면 원문이 필요한 사람도 요약을 펼쳐야 해서,
+        아무도 읽지 않을 요약을 만들게 된다(POST /summary 는 없으면 그 자리에서 생성한다).
+        둘은 서로 다른 일이므로 버튼도 둘이다.
+      */}
+      <div className={styles.articleActions}>
+        <button
+          type="button"
+          className={styles.detail}
+          aria-expanded={open}
+          aria-controls={bodyId}
+          onClick={expand}
+        >
+          {open ? panelCopy.summaryClose : panelCopy.summaryOpen}
+          <span className={styles.detailCaret} aria-hidden>
+            {open ? '▴' : '▾'}
+          </span>
+        </button>
+
+        {origin ? (
+          <a
+            className={`${styles.detail} ${styles.detailAway}`}
+            href={origin}
+            target="_blank"
+            rel="noreferrer"
+            onClick={markRead}
+          >
+            {panelCopy.origin}
+            <span className={styles.detailCaret} aria-hidden>↗</span>
+          </a>
+        ) : (
+          <button
+            type="button"
+            className={`${styles.detail} ${styles.detailAway}`}
+            onClick={openOrigin}
+          >
+            {panelCopy.origin}
+            <span className={styles.detailCaret} aria-hidden>↗</span>
+          </button>
+        )}
+      </div>
 
       <div className={styles.summaryBody} id={bodyId} hidden={!open}>
         {summary ? (
@@ -275,12 +323,6 @@ function ArticleRow({ article }) {
           <button type="button" className={styles.summaryRetry} onClick={retry}>
             {panelCopy.summaryRetry}
           </button>
-        )}
-
-        {origin && (
-          <a className={styles.origin} href={origin} target="_blank" rel="noreferrer">
-            {panelCopy.origin} ↗
-          </a>
         )}
       </div>
     </li>
