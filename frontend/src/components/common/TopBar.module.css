@@ -124,10 +124,10 @@
   align-items: center;
   gap: 2px;
   /* 위쪽 18px 은 바에 물리는 몫이다 — <TopBar> 의 TAB_TUCK 과 같은 값. */
-  padding: 18px 6px 6px;
+  padding: 18px 4px 4px;
   border: 1px solid var(--topbar-border);
   border-top: 0;
-  border-radius: 0 0 14px 14px;
+  border-radius: 0 0 12px 12px;
   background: var(--topbar-bg);
   backdrop-filter: blur(10px);
   box-shadow: 0 12px 24px rgba(43, 33, 22, 0.16);
@@ -139,7 +139,8 @@
  */
 .navSubItem {
   position: relative;
-  padding: 8px 13px;
+  /* 책갈피는 나온 부분이 작을수록 책갈피답다. 레일은 아래에서 자기 여백을 따로 갖는다. */
+  padding: 5px 11px;
   border: 0;
   border-radius: 18px;
   background: none;
@@ -166,9 +167,9 @@
 /* 켜진 잎의 표시. 알약 대신 짧은 밑줄이라 갈래의 알약과 섞이지 않는다. */
 .navSubItemActive::after {
   position: absolute;
-  right: 12px;
-  bottom: 3px;
-  left: 12px;
+  right: 10px;
+  bottom: 2px;
+  left: 10px;
   height: 1.5px;
   border-radius: 1px;
   background: currentcolor;
