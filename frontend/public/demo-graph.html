@@ -70,6 +70,10 @@
   .status b { color: var(--text); }
   main { flex: 1; position: relative; min-width: 0; }
 
+  /* 양옆 패널의 너비를 끌어서 조절한다. */
+  .resizer { width: 5px; flex: none; cursor: col-resize; background: var(--border); }
+  .resizer:hover, .resizer.active { background: var(--accent); }
+
   aside.right {
     width: 270px; flex: none; padding: 16px 14px; overflow-y: auto;
     border-right: 0; border-left: 1px solid var(--border); background: var(--panel);
@@ -100,6 +104,8 @@
     font-size: 11px; color: var(--muted); margin: 8px 0 1px; letter-spacing: .02em;
   }
   .events .group:first-child { margin-top: 0; }
+  #articleId { flex: 1; max-width: 150px; }
+  #load { flex: none; width: 86px; margin: 0; padding: 9px 0; font-size: 13px; }
   aside.right .toggle {
     display: flex; align-items: center; gap: 7px; margin: 0;
     font-size: 12.5px; color: var(--text); cursor: pointer;
@@ -194,6 +200,7 @@
       border-bottom: 1px solid var(--border);
     }
     main { height: 70vh; }
+    .resizer { display: none; }
   }
   text { user-select: none; }
   /* 이름을 눌러도 노드를 잡을 수 있게 한다. 관계 이름은 방해만 되므로 통과시킨다. */
@@ -229,11 +236,13 @@
   <label for="articleId">이미 분석된 기사 다시 보기</label>
   <div class="row">
     <input id="articleId" type="text" placeholder="기사 ID">
-    <button id="load" class="ghost" style="width:auto; margin:0; padding:8px 14px;">조회</button>
+    <button id="load" class="ghost">조회</button>
   </div>
 
   <div id="status" class="status">기사를 넣어 보세요.</div>
 </aside>
+
+<div class="resizer" id="resizeLeft"></div>
 
 <main>
   <svg id="canvas"></svg>
@@ -264,11 +273,17 @@
   </div>
 </main>
 
+<div class="resizer" id="resizeRight"></div>
+
 <aside class="right">
   <h2>보기</h2>
   <label class="toggle">
     <input id="primaryOnlyRight" type="checkbox" checked>
     대표 사건만 보기
+  </label>
+  <label class="toggle" style="margin-top:6px">
+    <input id="showRelationsRight" type="checkbox" checked>
+    간선에 관계 이름 표시
   </label>
 
   <h2>종류별 표시</h2>
@@ -428,6 +443,7 @@ function applyView() {
   if (!received) return;
   // 같은 설정을 양쪽 패널에 두었으므로 어느 쪽을 눌러도 둘 다 맞춘다.
   $('primaryOnlyRight').checked = $('primaryOnly').checked;
+  $('showRelationsRight').checked = $('showRelations').checked;
   const view = $('primaryOnly').checked ? keepPrimaryOnly(received) : received;
   // 목록과 개수는 종류 필터를 걸기 전 기준이다. 체크를 꺼도 목록에서 사라지지 않게.
   rebuildFilter(view);
@@ -855,6 +871,46 @@ $('primaryOnlyRight').addEventListener('change', () => {
   $('primaryOnly').checked = $('primaryOnlyRight').checked;
   applyView();
 });
+$('showRelationsRight').addEventListener('change', () => {
+  $('showRelations').checked = $('showRelationsRight').checked;
+  applyView();
+});
+
+/* ---------- 패널 너비 조절 ---------- */
+
+const MIN_PANEL = 200;
+const MAX_PANEL = 640;
+
+/**
+ * 손잡이를 끌어 양옆 패널의 너비를 바꾼다.
+ *
+ * @param side 오른쪽 패널은 커서가 왼쪽으로 갈수록 넓어지므로 부호를 뒤집는다.
+ */
+function makeResizer(handleId, panel, side) {
+  let start = null;
+  $(handleId).addEventListener('mousedown', (event) => {
+    event.preventDefault();
+    start = { x: event.clientX, width: panel.getBoundingClientRect().width };
+    $(handleId).classList.add('active');
+    document.body.style.userSelect = 'none';
+  });
+  window.addEventListener('mousemove', (event) => {
+    if (!start) return;
+    const delta = (event.clientX - start.x) * (side === 'left' ? 1 : -1);
+    panel.style.width = `${Math.max(MIN_PANEL, Math.min(MAX_PANEL, start.width + delta))}px`;
+  });
+  window.addEventListener('mouseup', () => {
+    if (!start) return;
+    start = null;
+    $(handleId).classList.remove('active');
+    document.body.style.userSelect = '';
+    // 그림 영역이 넓어졌으니 상세 카드 위치도 다시 잡는다.
+    positionDetail();
+  });
+}
+
+makeResizer('resizeLeft', document.querySelector('aside'), 'left');
+makeResizer('resizeRight', document.querySelector('aside.right'), 'right');
 $('showRelations').addEventListener('change', applyView);
 $('zoomIn').addEventListener('click', () => zoomBy(1.25));
 $('zoomOut').addEventListener('click', () => zoomBy(1 / 1.25));
