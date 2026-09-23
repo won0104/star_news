@@ -23,6 +23,7 @@ import com.starlightnews.backend.global.error.BusinessException;
 import com.starlightnews.backend.global.security.JwtProvider;
 import com.starlightnews.backend.global.security.JwtValidationException;
 import com.starlightnews.backend.global.security.RefreshSession;
+import com.starlightnews.backend.global.security.RefreshSessionRotationResult;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
 import com.starlightnews.backend.global.security.TokenBlacklist;
 import com.starlightnews.backend.global.security.TokenHasher;
@@ -86,29 +87,30 @@ public class AuthService {
 		}
 
 		String sessionId = parseRefreshSessionId(refreshToken);
-
-		RefreshSession session = refreshSessionStore.find(sessionId)
-				.orElseThrow(() -> new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND));
-
-		if (!session.refreshTokenHash().equals(TokenHasher.sha256Hex(refreshToken))) {
+		String newRefreshToken = jwtProvider.createRefreshToken(sessionId);
+		RefreshSessionRotationResult rotation = refreshSessionStore.rotate(
+				sessionId,
+				TokenHasher.sha256Hex(refreshToken),
+				TokenHasher.sha256Hex(newRefreshToken),
+				jwtProvider.refreshTokenValidity());
+		if (rotation.status() == RefreshSessionRotationResult.Status.NOT_FOUND) {
 			throw new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND);
 		}
+		if (rotation.status() == RefreshSessionRotationResult.Status.REUSED) {
+			throw new BusinessException(AuthErrorCode.REFRESH_TOKEN_REUSED);
+		}
 
-		User user = userRepository.findById(session.userId())
-				.orElseThrow(() -> new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND));
+		User user = userRepository.findById(rotation.userId()).orElse(null);
+		if (user == null) {
+			refreshSessionStore.delete(sessionId);
+			throw new BusinessException(AuthErrorCode.REFRESH_SESSION_NOT_FOUND);
+		}
 		if (user.isDeleted()) {
+			refreshSessionStore.delete(sessionId);
 			throw new BusinessException(AuthErrorCode.USER_DELETED);
 		}
 
-		refreshSessionStore.delete(sessionId);
-
-		String newSessionId = UUID.randomUUID().toString();
 		String newAccessToken = jwtProvider.createAccessToken(user.getId());
-		String newRefreshToken = jwtProvider.createRefreshToken(newSessionId);
-		refreshSessionStore.save(
-				newSessionId,
-				new RefreshSession(user.getId(), TokenHasher.sha256Hex(newRefreshToken)),
-				jwtProvider.refreshTokenValidity());
 
 		RefreshResponse response = new RefreshResponse(
 				newAccessToken,
