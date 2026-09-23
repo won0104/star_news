@@ -138,7 +138,7 @@ public class AuthController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "재발급 성공"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
-					description = "code: INVALID_REFRESH_TOKEN(쿠키 없음/서명 오류) / EXPIRED_REFRESH_TOKEN / REFRESH_SESSION_NOT_FOUND(세션 없음·재사용)",
+					description = "code: INVALID_REFRESH_TOKEN(쿠키 없음/서명 오류) / EXPIRED_REFRESH_TOKEN / REFRESH_TOKEN_REUSED / REFRESH_SESSION_NOT_FOUND",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
 					description = "탈퇴한 회원 (code: USER_DELETED)",

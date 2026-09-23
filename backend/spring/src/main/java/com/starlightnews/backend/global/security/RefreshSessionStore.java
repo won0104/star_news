@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.Optional;
 
 /**
- * Refresh Token 세션 저장소. 현재 구현은 인메모리이며, 인프라에 Redis 가 준비되면
- * 동일 인터페이스의 Redis 구현으로 교체한다. (auth:refresh:{sessionId})
+ * Refresh Token 세션 저장소. 로컬·테스트는 인메모리, 운영은 Redis 구현을 사용한다.
+ * 세션 ID는 한 로그인에서 이어지는 RT 계열을 식별한다. (auth:refresh:{sessionId})
  */
 public interface RefreshSessionStore {
 
@@ -15,7 +15,19 @@ public interface RefreshSessionStore {
 	/** 세션을 조회한다. 없거나 만료됐으면 빈 Optional. */
 	Optional<RefreshSession> find(String sessionId);
 
-	/** 세션을 즉시 삭제한다. (로그아웃 / Refresh Token Rotation) */
+	/**
+	 * 제시된 RT 해시가 현재 해시와 같으면 새 해시로 교체한다.
+	 *
+	 * <p>조회·비교·교체는 한 원자적 연산이어야 한다. 이미 교체된 RT가 다시 들어오면
+	 * {@code REUSED}를 반환하고 해당 토큰 계열의 세션을 삭제한다.
+	 */
+	RefreshSessionRotationResult rotate(
+			String sessionId,
+			String expectedRefreshTokenHash,
+			String newRefreshTokenHash,
+			Duration ttl);
+
+	/** 세션을 즉시 삭제한다. (로그아웃 / 계정 보안 처리) */
 	void delete(String sessionId);
 
 	/**

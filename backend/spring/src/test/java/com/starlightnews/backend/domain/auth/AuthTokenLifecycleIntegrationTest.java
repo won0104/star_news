@@ -9,6 +9,7 @@ import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.security.JwtProvider;
 import com.starlightnews.backend.global.security.RefreshSessionStore;
 import com.starlightnews.backend.global.security.TokenBlacklist;
+import com.starlightnews.backend.global.security.TokenHasher;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,21 +104,24 @@ class AuthTokenLifecycleIntegrationTest {
 		assertThat(newRefreshToken).isNotEqualTo(tokens.refreshToken());
 
 		String newSessionId = jwtProvider.parseRefreshTokenSessionId(newRefreshToken);
-		assertThat(refreshSessionStore.find(oldSessionId)).isEmpty();
-		assertThat(refreshSessionStore.find(newSessionId)).isPresent();
+		assertThat(newSessionId).isEqualTo(oldSessionId);
+		assertThat(refreshSessionStore.find(newSessionId)).hasValueSatisfying(session ->
+				assertThat(session.refreshTokenHash())
+						.isEqualTo(TokenHasher.sha256Hex(newRefreshToken)));
 	}
 
 	@Test
-	void 이미_회전된_RT를_다시_쓰면_401이고_최신_RT는_유효하다() throws Exception {
+	void 이미_회전된_RT를_다시_쓰면_재사용을_감지하고_최신_RT도_폐기한다() throws Exception {
 		Tokens tokens = login("cycle_b");
 		String rotatedRefreshToken = refreshWith(tokens.refreshToken());
 
 		mockMvc.perform(post(REFRESH_PATH).cookie(new Cookie("refreshToken", tokens.refreshToken())))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.code").value("REFRESH_SESSION_NOT_FOUND"));
+				.andExpect(jsonPath("$.code").value("REFRESH_TOKEN_REUSED"));
 
 		mockMvc.perform(post(REFRESH_PATH).cookie(new Cookie("refreshToken", rotatedRefreshToken)))
-				.andExpect(status().isOk());
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("REFRESH_SESSION_NOT_FOUND"));
 	}
 
 	@Test

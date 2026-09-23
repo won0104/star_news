@@ -50,6 +50,16 @@ class JwtProviderTest {
 	}
 
 	@Test
+	void 같은_세션ID로_발급해도_리프레시_토큰은_매번_다르다() {
+		String first = jwtProvider.createRefreshToken("session-abc");
+		String second = jwtProvider.createRefreshToken("session-abc");
+
+		assertThat(first).isNotEqualTo(second);
+		assertThat(jwtProvider.parseRefreshTokenSessionId(first)).isEqualTo("session-abc");
+		assertThat(jwtProvider.parseRefreshTokenSessionId(second)).isEqualTo("session-abc");
+	}
+
+	@Test
 	void 만료된_토큰을_파싱하면_EXPIRED_예외가_발생한다() {
 		JwtProvider alreadyExpired = new JwtProvider(new JwtProperties(SECRET, -1_000L, -1_000L));
 		String token = alreadyExpired.createAccessToken(1L);
