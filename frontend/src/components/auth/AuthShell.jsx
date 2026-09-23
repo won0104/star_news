@@ -17,12 +17,13 @@ export function AuthShell({ title, subtitle, onBrand, children }) {
     <PhotoBackdrop scene={authScene} veil>
       <div className={styles.page}>
         <button type="button" className={styles.homeLink} onClick={onBrand} aria-label="홈으로">
-          {authBrand.name}
+          <span className={`${styles.wordmark} ${styles.homeMark}`} aria-hidden />
         </button>
 
         <div className={styles.inner}>
           <button type="button" className={styles.brand} onClick={onBrand}>
-            {authBrand.name}
+            <span className={`${styles.wordmark} ${styles.brandMark}`} aria-hidden />
+            <span className={styles.srOnly}>{authBrand.name}</span>
           </button>
           <p className={styles.tagline}>{authBrand.tagline}</p>
 

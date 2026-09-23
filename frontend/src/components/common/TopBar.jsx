@@ -72,7 +72,8 @@ export function TopBar({
         className={styles.brand}
         onClick={onBrand ?? (() => onSelect(navItems[0].id))}
       >
-        <span className={styles.brandName}>{brand.name}</span>
+        <span className={styles.wordmark} aria-hidden />
+        <span className={styles.srOnly}>{brand.name}</span>
       </button>
 
       {/* 레일에서는 이름과 목적지 사이의 한 칸, 상단바에서는 자리를 차지하지 않는
