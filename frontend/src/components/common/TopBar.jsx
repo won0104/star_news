@@ -83,7 +83,7 @@ export function TopBar({
         <div className={styles.searchSlot}>
           <NodeSearch
             night={nightGlass}
-            docked={rail}
+            placement={rail ? 'rail' : 'floating'}
             takeFocus={!rail}
             onSelect={onSearchSelect}
           />

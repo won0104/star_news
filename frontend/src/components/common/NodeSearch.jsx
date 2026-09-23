@@ -2,6 +2,10 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { searchNodes } from '../../api/search'
 import styles from './NodeSearch.module.css'
 
+/* 레일만 짧은 쪽을 쓴다 — 176~208px 에 긴 문구는 잘린다. 나머지 자리는 넉넉하다. */
+const PLACEHOLDER = '사건, 인물, 기관, 발언 검색'
+const SHORT_PLACEHOLDER = '사건·인물 검색'
+
 const TYPE_LABEL = {
   EVENT: '사건',
   ENTITY: '인물·기관',
@@ -9,10 +13,17 @@ const TYPE_LABEL = {
 }
 
 /**
- * `docked` 는 검색창이 세로 레일 안에 자리를 받았다는 뜻이다. 스스로 떠 있기를 그만두고,
- * 레일 폭(176~208px)에 안내 문구가 잘리지 않도록 짧은 쪽을 쓴다.
+ * `placement` 는 이 검색창이 어디에 서는가다. 셋뿐이고, 자리마다 결과 목록이 열리는 방향이
+ * 다르다 — 그 방향이 이 값이 존재하는 이유다.
+ *
+ *   floating  스스로 화면 오른쪽 위에 뜬다. 좁은 상단바에서 검색을 펼쳤을 때.
+ *   inline    받은 상자를 채우고 결과는 아래로 연다. 현관 한가운데.
+ *   rail      받은 상자를 채우되 결과는 오른쪽 옆으로 연다. 세로 레일 안.
+ *
+ * rail 만 옆으로 여는 것은 레일이 좁아서다 — 아래로 열면 320px 짜리 목록이 그 아래 목적지
+ * 단추들을 덮는다. 현관은 상자가 넓고 아래가 비어 있어 그냥 아래로 열면 된다.
  */
-export function NodeSearch({ night = false, docked = false, takeFocus = false, onSelect }) {
+export function NodeSearch({ night = false, placement = 'floating', takeFocus = false, onSelect }) {
   const inputId = useId()
   const listId = useId()
   const rootRef = useRef(null)
@@ -65,7 +76,7 @@ export function NodeSearch({ night = false, docked = false, takeFocus = false, o
   return (
     <search
       ref={rootRef}
-      className={`${styles.search} ${night ? styles.night : ''} ${docked ? styles.docked : ''}`}
+      className={`${styles.search} ${night ? styles.night : ''} ${styles[placement] ?? ''}`}
       aria-label="뉴스 그래프 검색"
     >
       <label className={styles.label} htmlFor={inputId}>
@@ -80,7 +91,7 @@ export function NodeSearch({ night = false, docked = false, takeFocus = false, o
           className={styles.input}
           type="search"
           value={query}
-          placeholder={docked ? '사건·인물 검색' : '사건, 인물, 기관, 발언 검색'}
+          placeholder={placement === 'rail' ? SHORT_PLACEHOLDER : PLACEHOLDER}
           autoComplete="off"
           aria-controls={open ? listId : undefined}
           aria-expanded={open}
