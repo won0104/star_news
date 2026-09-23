@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기사 → 지식그래프 (시연 확인용)</title>
+<!--
+  백엔드 /api/v1/demo/articles 를 눈으로 확인하기 위한 목 화면이다.
+  서비스 화면이 아니라 React 앱 밖의 정적 파일로 두고, vite dev 서버가 /api 를 프록시한다.
+
+    cd frontend
+    VITE_API_PROXY_TARGET=http://localhost:8080 npm run dev
+    → http://localhost:5173/demo-graph.html
+
+  로컬 백엔드 대신 배포 서버를 보려면 VITE_API_PROXY_TARGET 을 빼면 된다(배포 후).
+-->
+<style>
+  :root {
+    --bg: #0f1014;
+    --panel: #181920;
+    --border: #2a2c36;
+    --text: #e8e8ea;
+    --muted: #8b8d98;
+    --accent: #5b8def;
+    --article: #5b8def;
+    --event: #e0913a;
+    --entity: #4fb477;
+    --statement: #b06fd4;
+    --topic: #d45f7a;
+    --time: #6fb7c9;
+    --story: #c9b06f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; height: 100vh; display: flex;
+    background: var(--bg); color: var(--text);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+  }
+  aside {
+    width: 380px; flex: none; padding: 18px; overflow-y: auto;
+    border-right: 1px solid var(--border); background: var(--panel);
+  }
+  h1 { margin: 0 0 4px; font-size: 16px; }
+  .sub { margin: 0 0 16px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 4px; }
+  input[type=text], textarea {
+    width: 100%; background: #101119; color: var(--text);
+    border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px;
+    font-size: 13px; font-family: inherit;
+  }
+  textarea { min-height: 220px; resize: vertical; line-height: 1.5; }
+  .row { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+  .row label { margin: 0; color: var(--text); font-size: 13px; }
+  button {
+    width: 100%; margin-top: 14px; padding: 10px;
+    background: var(--accent); color: #fff; border: 0; border-radius: 7px;
+    font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  button:disabled { background: #333644; color: var(--muted); cursor: default; }
+  button.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .status { margin-top: 12px; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+  .status.err { color: #ff8b8b; }
+  .status b { color: var(--text); }
+  main { flex: 1; position: relative; min-width: 0; }
+  svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  svg:active { cursor: grabbing; }
+  .legend {
+    position: absolute; left: 14px; bottom: 14px;
+    display: flex; flex-wrap: wrap; gap: 10px;
+    font-size: 11.5px; color: var(--muted);
+    background: rgba(15,16,20,.85); padding: 8px 11px; border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
+  .counts {
+    position: absolute; right: 14px; top: 14px;
+    font-size: 12px; color: var(--muted);
+    background: rgba(15,16,20,.85); padding: 8px 11px; border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .hint { position: absolute; left: 14px; top: 14px; font-size: 11.5px; color: var(--muted); }
+  .empty {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 14px;
+  }
+  /* 클래스 선택자가 기본 [hidden] 규칙보다 우선하므로 여기서 다시 숨긴다. */
+  .empty[hidden], .counts[hidden] { display: none; }
+
+  @media (max-width: 900px) {
+    body { flex-direction: column; height: auto; }
+    aside { width: 100%; border-right: 0; border-bottom: 1px solid var(--border); }
+    main { height: 70vh; }
+  }
+  text { pointer-events: none; user-select: none; }
+</style>
+</head>
+<body>
+
+<aside>
+  <h1>기사 → 지식그래프</h1>
+  <p class="sub">기사를 넣으면 저장·분석하고 만들어진 그래프를 그린다. 분석에 30~60초 걸린다.</p>
+
+  <label for="title">제목</label>
+  <input id="title" type="text" placeholder="부산 북항 친수공원에 이틀째 상어 출몰">
+
+  <label for="source">언론사 (선택)</label>
+  <input id="source" type="text" placeholder="연합뉴스">
+
+  <label for="content">본문 (100자 이상)</label>
+  <textarea id="content" placeholder="기사 본문을 붙여넣으세요."></textarea>
+
+  <div class="row">
+    <input id="primaryOnly" type="checkbox" checked>
+    <label for="primaryOnly">대표 사건만 보기</label>
+  </div>
+
+  <button id="submit">기사 넣고 분석</button>
+
+  <label for="articleId">이미 분석된 기사 다시 보기</label>
+  <div class="row">
+    <input id="articleId" type="text" placeholder="기사 ID">
+    <button id="load" class="ghost" style="width:auto; margin:0; padding:8px 14px;">조회</button>
+  </div>
+
+  <div id="status" class="status">기사를 넣어 보세요.</div>
+</aside>
+
+<main>
+  <svg id="canvas"></svg>
+  <div class="hint">드래그로 이동 · 휠로 확대</div>
+  <div id="counts" class="counts" hidden></div>
+  <div id="empty" class="empty">아직 그래프가 없습니다.</div>
+  <div class="legend">
+    <span><i style="background:var(--article)"></i>기사</span>
+    <span><i style="background:var(--event)"></i>사건</span>
+    <span><i style="background:var(--entity)"></i>개체</span>
+    <span><i style="background:var(--statement)"></i>발언</span>
+    <span><i style="background:var(--topic)"></i>분류</span>
+    <span><i style="background:var(--time)"></i>시점</span>
+    <span><i style="background:var(--story)"></i>스토리</span>
+  </div>
+</main>
+
+<script>
+const COLORS = {
+  ARTICLE: '#5b8def', EVENT: '#e0913a', ENTITY: '#4fb477',
+  STATEMENT: '#b06fd4', TOPIC: '#d45f7a', TIME: '#6fb7c9', STORY: '#c9b06f',
+};
+const RADIUS = { ARTICLE: 13, EVENT: 9, STORY: 8 };
+
+const $ = (id) => document.getElementById(id);
+const svg = $('canvas');
+const statusBox = $('status');
+
+let simulation = null;
+
+function setStatus(html, isError) {
+  statusBox.className = isError ? 'status err' : 'status';
+  statusBox.innerHTML = html;
+}
+
+/* ---------- API ---------- */
+
+async function call(path, options) {
+  const response = await fetch(path, options);
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    const code = payload?.code ? ` (${payload.code})` : '';
+    throw new Error((payload?.message ?? `요청 실패 ${response.status}`) + code);
+  }
+  return payload?.data ?? null;
+}
+
+async function submitArticle() {
+  const title = $('title').value.trim();
+  const content = $('content').value.trim();
+  const sourceName = $('source').value.trim();
+  if (!title || content.length < 100) {
+    setStatus('제목과 본문(100자 이상)이 필요합니다.', true);
+    return;
+  }
+
+  const primaryOnly = $('primaryOnly').checked;
+  const started = Date.now();
+  const timer = setInterval(() => {
+    setStatus(`분석 중… <b>${Math.round((Date.now() - started) / 1000)}초</b> 경과 (최대 150초)`);
+  }, 1000);
+  $('submit').disabled = true;
+
+  try {
+    const data = await call(`/api/v1/demo/articles?primaryOnly=${primaryOnly}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, content, sourceName: sourceName || undefined }),
+    });
+    clearInterval(timer);
+    $('articleId').value = data.articleId;
+    const seconds = Math.round((Date.now() - started) / 1000);
+    setStatus(`완료 · <b>${seconds}초</b> · 기사 ${data.articleId} · 분류 <b>${data.topicCode ?? '-'}</b>`
+      + `${data.subtopicCode ? ' / ' + data.subtopicCode : ''}`);
+    draw(data);
+  } catch (failure) {
+    clearInterval(timer);
+    setStatus(failure.message, true);
+  } finally {
+    $('submit').disabled = false;
+  }
+}
+
+async function loadArticle() {
+  const articleId = $('articleId').value.trim();
+  if (!articleId) return;
+  const primaryOnly = $('primaryOnly').checked;
+  setStatus('불러오는 중…');
+  try {
+    const data = await call(`/api/v1/demo/articles/${articleId}/graph?primaryOnly=${primaryOnly}`);
+    setStatus(`기사 ${data.articleId} · 분류 <b>${data.topicCode ?? '-'}</b>`);
+    draw(data);
+  } catch (failure) {
+    setStatus(failure.message, true);
+  }
+}
+
+/* ---------- 그리기 ----------
+   라이브러리 없이 쓰는 최소 force 레이아웃. 노드끼리 밀어내고, 간선이 당기고,
+   가운데로 약하게 모은다. 확인용이라 정교할 필요는 없다.                      */
+
+function draw(data) {
+  const nodes = data.nodes.map((node) => ({ ...node, x: 0, y: 0, vx: 0, vy: 0 }));
+  const index = new Map(nodes.map((node, i) => [node.nodeKey, i]));
+  const links = data.edges
+    .filter((edge) => index.has(edge.from) && index.has(edge.to))
+    .map((edge) => ({ ...edge, source: index.get(edge.from), target: index.get(edge.to) }));
+
+  $('empty').hidden = nodes.length > 0;
+  $('counts').hidden = nodes.length === 0;
+  $('counts').textContent = `노드 ${nodes.length} · 간선 ${links.length}`;
+  if (!nodes.length) {
+    svg.innerHTML = '';
+    return;
+  }
+
+  const width = svg.clientWidth || 900;
+  const height = svg.clientHeight || 700;
+  nodes.forEach((node, i) => {
+    const angle = (i / nodes.length) * Math.PI * 2;
+    const spread = node.nodeType === 'ARTICLE' ? 0 : 150 + (i % 7) * 30;
+    node.x = width / 2 + Math.cos(angle) * spread;
+    node.y = height / 2 + Math.sin(angle) * spread;
+  });
+
+  if (simulation) cancelAnimationFrame(simulation);
+  render(nodes, links, width, height);
+  run(nodes, links, width, height);
+}
+
+function run(nodes, links, width, height) {
+  let alpha = 1;
+  const step = () => {
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i]; const b = nodes[j];
+        let dx = b.x - a.x; let dy = b.y - a.y;
+        let distance = Math.hypot(dx, dy) || 0.1;
+        if (distance > 320) continue;
+        const push = (2400 / (distance * distance)) * alpha;
+        dx /= distance; dy /= distance;
+        a.vx -= dx * push; a.vy -= dy * push;
+        b.vx += dx * push; b.vy += dy * push;
+      }
+    }
+    for (const link of links) {
+      const a = nodes[link.source]; const b = nodes[link.target];
+      const dx = b.x - a.x; const dy = b.y - a.y;
+      const distance = Math.hypot(dx, dy) || 0.1;
+      const pull = ((distance - 90) / distance) * 0.035 * alpha;
+      a.vx += dx * pull; a.vy += dy * pull;
+      b.vx -= dx * pull; b.vy -= dy * pull;
+    }
+    for (const node of nodes) {
+      node.vx += (width / 2 - node.x) * 0.0012 * alpha;
+      node.vy += (height / 2 - node.y) * 0.0012 * alpha;
+      node.x += node.vx; node.y += node.vy;
+      node.vx *= 0.82; node.vy *= 0.82;
+    }
+
+    update(nodes, links);
+    alpha *= 0.985;
+    if (alpha > 0.02) simulation = requestAnimationFrame(step);
+  };
+  simulation = requestAnimationFrame(step);
+}
+
+let viewport = { x: 0, y: 0, scale: 1 };
+
+function render(nodes, links, width, height) {
+  viewport = { x: 0, y: 0, scale: 1 };
+  svg.innerHTML = `<g id="viewport">
+    <g id="links" stroke-linecap="round"></g>
+    <g id="nodes"></g>
+  </g>`;
+
+  const linkLayer = svg.querySelector('#links');
+  linkLayer.innerHTML = links.map((link) => `
+    <line stroke="${link.primary ? '#7f8aa3' : '#3a3d4a'}"
+          stroke-width="${link.primary ? 2 : 1}"></line>`).join('');
+
+  const nodeLayer = svg.querySelector('#nodes');
+  nodeLayer.innerHTML = nodes.map((node) => {
+    const radius = RADIUS[node.nodeType] ?? 6;
+    const color = COLORS[node.nodeType] ?? '#888';
+    const label = (node.label ?? '').length > 22
+      ? node.label.slice(0, 22) + '…'
+      : (node.label ?? '');
+    const title = `${node.nodeType}${node.subType ? ' · ' + node.subType : ''}\n${node.label ?? ''}`;
+    return `<g><title>${escapeHtml(title)}</title>
+      <circle r="${radius}" fill="${color}" stroke="#0f1014" stroke-width="1.5"></circle>
+      <text font-size="${node.nodeType === 'ARTICLE' ? 13 : 10.5}" fill="#c9cad2"
+            text-anchor="middle" dy="${-radius - 5}">${escapeHtml(label)}</text>
+    </g>`;
+  }).join('');
+}
+
+function update(nodes, links) {
+  const lines = svg.querySelectorAll('#links line');
+  links.forEach((link, i) => {
+    const a = nodes[link.source]; const b = nodes[link.target];
+    const line = lines[i];
+    line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+    line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+  });
+  const groups = svg.querySelectorAll('#nodes > g');
+  nodes.forEach((node, i) => {
+    groups[i].setAttribute('transform', `translate(${node.x},${node.y})`);
+  });
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"]/g, (ch) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+}
+
+/* ---------- 이동 · 확대 ---------- */
+
+function applyViewport() {
+  const layer = svg.querySelector('#viewport');
+  if (layer) {
+    layer.setAttribute('transform',
+      `translate(${viewport.x},${viewport.y}) scale(${viewport.scale})`);
+  }
+}
+
+let dragging = null;
+svg.addEventListener('mousedown', (event) => {
+  dragging = { x: event.clientX - viewport.x, y: event.clientY - viewport.y };
+});
+window.addEventListener('mousemove', (event) => {
+  if (!dragging) return;
+  viewport.x = event.clientX - dragging.x;
+  viewport.y = event.clientY - dragging.y;
+  applyViewport();
+});
+window.addEventListener('mouseup', () => { dragging = null; });
+svg.addEventListener('wheel', (event) => {
+  event.preventDefault();
+  const factor = event.deltaY < 0 ? 1.12 : 1 / 1.12;
+  viewport.scale = Math.min(4, Math.max(0.2, viewport.scale * factor));
+  applyViewport();
+}, { passive: false });
+
+$('submit').addEventListener('click', submitArticle);
+$('load').addEventListener('click', loadArticle);
+</script>
+</body>
+</html>

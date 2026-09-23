@@ -62,6 +62,8 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/v1/articles/*").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/articles/*/summary").permitAll()
+						// 시연용 기사 투입. 로그인 없이 화면에서 바로 넣을 수 있어야 한다.
+						.requestMatchers("/api/v1/demo/**").permitAll()
 						.requestMatchers(PUBLIC_PATHS).permitAll()
 						.anyRequest().authenticated())
 				.exceptionHandling(handler -> handler

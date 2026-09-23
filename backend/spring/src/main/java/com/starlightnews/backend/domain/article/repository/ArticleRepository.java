@@ -254,4 +254,29 @@ public interface ArticleRepository extends Repository<Article, Long> {
 	List<Long> findArticleIdsByIdInAndAnalysisStatus(
 			@Param("articleIds") Collection<Long> articleIds,
 			@Param("analysisStatus") AnalysisStatus analysisStatus);
+
+	/** 시연 화면이 쓰는 기사 한 행. 분석 요청에 필요한 값과 그래프 진입점을 함께 담는다. */
+	interface DemoArticle {
+		Long getArticleId();
+
+		/** Neo4j Article Node 의 nodeId. 분석 전이면 null. */
+		String getNodeId();
+
+		String getTopicCode();
+
+		String getSubtopicCode();
+
+		LocalDateTime getPublishedAt();
+
+		Long getOrganizationId();
+
+		String getOrganizationName();
+	}
+
+	/** 시연 기사 한 건을 언론사와 함께 조회한다. 분석 상태는 가리지 않는다. */
+	@Query("SELECT a.articleId AS articleId, a.nodeId AS nodeId, a.topicCode AS topicCode, "
+			+ "a.subtopicCode AS subtopicCode, a.publishedAt AS publishedAt, "
+			+ "o.id AS organizationId, o.name AS organizationName "
+			+ "FROM Article a JOIN a.organization o WHERE a.articleId = :articleId")
+	Optional<DemoArticle> findDemoArticle(@Param("articleId") Long articleId);
 }
