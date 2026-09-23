@@ -2,6 +2,12 @@ package com.starlightnews.backend.global.security;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.github.fppt.jedismock.RedisServer;
 import org.junit.jupiter.api.AfterAll;
@@ -70,6 +76,68 @@ class RedisRefreshSessionStoreTest {
 		store.save("sid-1", new RefreshSession(1L, "hash-1"), TTL);
 
 		assertThat(redis.getExpire("auth:refresh:sid-1")).isBetween(1L, 1800L);
+	}
+
+	@Test
+	void 현재_RT_해시가_맞으면_같은_세션의_해시와_TTL을_원자적으로_교체한다() {
+		store.save("sid-1", new RefreshSession(1L, "old"), TTL);
+
+		RefreshSessionRotationResult result = store.rotate("sid-1", "old", "new", TTL);
+
+		assertThat(result).isEqualTo(RefreshSessionRotationResult.rotated(1L));
+		assertThat(store.find("sid-1")).contains(new RefreshSession(1L, "new"));
+		assertThat(redis.getExpire("auth:refresh:sid-1")).isBetween(1L, 1800L);
+	}
+
+	@Test
+	void 이미_교체된_RT를_다시_쓰면_토큰_계열을_삭제한다() {
+		store.save("sid-1", new RefreshSession(1L, "current"), TTL);
+
+		RefreshSessionRotationResult result = store.rotate("sid-1", "old", "next", TTL);
+
+		assertThat(result).isEqualTo(RefreshSessionRotationResult.reused());
+		assertThat(store.find("sid-1")).isEmpty();
+	}
+
+	@Test
+	void 없는_세션을_교체하면_NOT_FOUND를_반환한다() {
+		assertThat(store.rotate("sid-1", "old", "new", TTL))
+				.isEqualTo(RefreshSessionRotationResult.notFound());
+	}
+
+	@Test
+	void 같은_RT를_동시에_교체하면_하나만_성공하고_토큰_계열은_폐기된다() throws Exception {
+		store.save("sid-1", new RefreshSession(1L, "old"), TTL);
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		CountDownLatch ready = new CountDownLatch(2);
+		CountDownLatch start = new CountDownLatch(1);
+		try {
+			Future<RefreshSessionRotationResult> first = executor.submit(
+					() -> rotateAfterSignal(ready, start, "new-1"));
+			Future<RefreshSessionRotationResult> second = executor.submit(
+					() -> rotateAfterSignal(ready, start, "new-2"));
+			assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
+			start.countDown();
+
+			assertThat(List.of(first.get(5, TimeUnit.SECONDS), second.get(5, TimeUnit.SECONDS)))
+					.extracting(RefreshSessionRotationResult::status)
+					.containsExactlyInAnyOrder(
+							RefreshSessionRotationResult.Status.ROTATED,
+							RefreshSessionRotationResult.Status.REUSED);
+			assertThat(store.find("sid-1")).isEmpty();
+		} finally {
+			executor.shutdownNow();
+		}
+	}
+
+	private RefreshSessionRotationResult rotateAfterSignal(
+			CountDownLatch ready,
+			CountDownLatch start,
+			String newHash
+	) throws InterruptedException {
+		ready.countDown();
+		start.await();
+		return store.rotate("sid-1", "old", newHash, TTL);
 	}
 
 	@Test

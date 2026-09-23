@@ -124,9 +124,13 @@ class CollectedArticlePreprocessorTest {
 	// --- 제목 보정 ---
 
 	private CollectedArticle fromOutlet(String title, String outlet, String content) {
+		return fromOutlet(title, outlet, "news.test", content);
+	}
+
+	private CollectedArticle fromOutlet(String title, String outlet, String domain, String content) {
 		return new CollectedArticle(title, "https://news.test/" + title.hashCode(),
 				new byte[] {1}, LocalDateTime.of(2026, 9, 16, 9, 0), content,
-				ContentType.FULL_TEXT, "general", outlet, "news.test");
+				ContentType.FULL_TEXT, "general", outlet, domain);
 	}
 
 	private String repairedTitle(CollectedArticle article) {
@@ -148,6 +152,29 @@ class CollectedArticlePreprocessorTest {
 
 		assertThat(repairedTitle(fromOutlet("KBS 뉴스", "KBS뉴스", content)))
 				.isEqualTo("손흥민 프리킥 데뷔골 ‘MLS 올해의 골’ 선정");
+	}
+
+	@Test
+	void KBS_언론사명이_도메인으로_와도_제목과_본문을_보정한다() {
+		String content = "이 대통령, 북핵 동결과 제재 완화 교환 제안\n"
+				+ "읽어주기 기능은 크롬기반의\n"
+				+ "브라우저에서만 사용하실 수 있습니다.\n"
+				+ REAL_CONTENT;
+
+		CollectedArticle after = preprocessor.process(List.of(
+				fromOutlet("KBS 뉴스", "news.kbs.co.kr", "news.kbs.co.kr", content))).get(0);
+
+		assertThat(after.title()).isEqualTo("이 대통령, 북핵 동결과 제재 완화 교환 제안");
+		assertThat(after.content()).isEqualTo(REAL_CONTENT);
+	}
+
+	@Test
+	void KBS와_무관한_도메인은_KBS_제목으로_보정하지_않는다() {
+		String content = "엉뚱한 첫 줄\n" + REAL_CONTENT;
+
+		assertThat(repairedTitle(fromOutlet(
+				"KBS 뉴스", "news.kbs.co.kr", "other.example", content)))
+				.isEqualTo("KBS 뉴스");
 	}
 
 	@Test
