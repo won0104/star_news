@@ -180,6 +180,23 @@ def _calculate_popularity_score(unique_consumers: int, occurred_at: datetime, no
     return math.log1p(unique_consumers) * math.exp(-decay_rate * days_since)
 
 
+# Story 기반 중복 제거 - 같은 Story에 속한 후보는 점수 제일 높은 것 하나만 남긴다
+# Story가 없는 Event는 자기 자신만 속한 그룹으로 취급해 항상 그대로 남는다
+def _dedupe_by_story(session: Session, scored: list[ScoredEvent], min_required: int) -> list[ScoredEvent]:
+    if not scored:
+        return scored
+    story_ids = repository.fetch_event_story_ids(session, [s.event_id for s in scored])
+    best_by_group: dict[str, ScoredEvent] = {}
+    for s in scored:
+        group_key = story_ids.get(s.event_id) or s.event_id
+        current_best = best_by_group.get(group_key)
+        if current_best is None or s.score > current_best.score:
+            best_by_group[group_key] = s
+    deduped = list(best_by_group.values())
+    # 중복 제거했더니 min_required도 못 채우면(Story 데이터가 과하게 뭉쳐있는 경우), 원본을 그대로 반환한다
+    return deduped if len(deduped) >= min_required else scored
+
+
 # 관심 Topic 안에서(또는 없으면 전체에서) 인기도 순으로 Event를 뽑는 Cold Start 폴백
 def get_cold_start_fallback(user_id: int, session: Session) -> list[ScoredEvent]:
     # 관심 Topic 조회
@@ -197,7 +214,8 @@ def get_cold_start_fallback(user_id: int, session: Session) -> list[ScoredEvent]
         for c in candidates
     ]
 
-    # 점수 높은 순 정렬 후 상위 N개만
+    # 같은 Story의 중복 후보를 정리한 뒤, 점수 높은 순 정렬 후 상위 N개만
+    scored = _dedupe_by_story(session, scored, repository.FALLBACK_EVENT_LIMIT)
     scored.sort(key=lambda s: s.score, reverse=True)
     return scored[: repository.FALLBACK_EVENT_LIMIT]
 
@@ -248,8 +266,9 @@ def calculate_interest_based_recommendations(
         )
         for event_id in candidate_ids
     ]
+    # 같은 Story의 중복 후보를 정리한 뒤, 점수 높은 순 정렬 후 상위 FINAL_RECOMMENDATION_LIMIT개만 반환
+    scored = _dedupe_by_story(session, scored, repository.FINAL_RECOMMENDATION_LIMIT)
     scored.sort(key=lambda s: s.score, reverse=True)
-    # 상위 FINAL_RECOMMENDATION_LIMIT개만 반환
     return scored[: repository.FINAL_RECOMMENDATION_LIMIT]
 
 
