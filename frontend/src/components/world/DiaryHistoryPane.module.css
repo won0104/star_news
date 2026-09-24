@@ -520,13 +520,56 @@
 
 /* The category's events, on the same plaque as the article cards below them — one list
    leads to the other, so they are the same object at two depths. */
+/*
+ * 사건 목록만 흐른다.
+ *
+ * .recordPage 는 책 종이만큼 높이가 고정인데 펼친 사건은 얼마든지 길어질 수 있어서, 전에는
+ * 넘친 만큼 책 바깥으로 그대로 흘러나가 쪽 번호까지 밀어냈다 — 어느 조상도 자르지 않는다.
+ * 여기서 받아 낸다.
+ *
+ * 머리글·기간 칸·쪽 번호는 제자리에 남는다. 분야 이름과 몇 쪽인지는 목록을 훑는 내내 보여야
+ * 한다. `min-height: 0` 은 flex 자식이 제 내용보다 작아질 수 있게 하는 조건이고, 그것 없이는
+ * overflow 를 걸어도 줄어들지 않아 아무 일도 하지 않는다.
+ *
+ * 스크롤 막대는 종이 위라 가늘고 옅게 둔다. 오른쪽 음수 여백은 막대가 글을 밀어내지 않게
+ * 종이 가장자리까지 내보내는 것이다.
+ */
 .eventList {
   display: grid;
   gap: 0;
   min-height: 0;
-  margin: 13px 0 0;
-  padding: 0;
+  flex: 1;
+  margin: 13px -6px 0 0;
+  padding: 0 6px 0 0;
+  overflow-y: auto;
   list-style: none;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 102, 80, 0.4) transparent;
+}
+
+/* 발언이 넷을 넘을 때의 더 보기. 목록의 한 줄이 아니라 그 아래 딸린 조작이라, 인용 글씨가
+   아니라 라벨 글씨로 둔다. */
+.statementMore {
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dashed rgba(111, 92, 71, 0.45);
+  background: none;
+  font: clamp(8px, 0.68vw, 11px) var(--font-sans);
+  color: #8a7862;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.statementMore:hover {
+  border-bottom-color: rgba(58, 47, 38, 0.75);
+  color: #5b4330;
+}
+
+.statementMore:focus-visible {
+  outline: 2px solid #182b43;
+  outline-offset: 2px;
 }
 
 .eventList button {
