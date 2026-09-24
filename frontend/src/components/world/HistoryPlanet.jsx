@@ -11,7 +11,11 @@ import styles from './HistoryPane.module.css';
 const PLANET_RADIUS = 5;
 const EDGE_SURFACE_OFFSET = 0.045;
 const TOPIC_STAR_SCALE = 0.7;
-const STANDARD_CAMERA = { minimum: 8.4, maximum: 14.2, defaultZ: 11.4 };
+/*
+ * 전체화면이 쓰는 카메라. 배율 표시는 `defaultZ / 현재거리` 라 가장 멀리 물러났을 때의
+ * 배율이 `defaultZ / maximum` 으로 정해진다 — 14.2 일 때 80%, 19 이면 60% 다.
+ */
+const STANDARD_CAMERA = { minimum: 8.4, maximum: 19, defaultZ: 11.4 };
 const DIARY_CAMERA = { minimum: 19.5, maximum: 28.2, defaultZ: 23.4 };
 const LABEL_LIMIT = 12;
 const MOBILE_LABEL_LIMIT = 8;
