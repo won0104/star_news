@@ -241,6 +241,282 @@
   box-shadow: none;
 }
 
+/* ---- 전체화면 안의 배치 -------------------------------------------------------- */
+/*
+ * 아래 띠의 높이는 행성이 쓰고 남긴 자리 그대로다.
+ *
+ * 전체화면은 variant='default' 로 그려져서 HistoryPane.module.css 의
+ * `.planetViewport { height: clamp(590px, calc(100vh - 334px), 760px) }` 가 적용된다.
+ * 즉 캔버스가 화면을 다 채우지 않고 아래를 비워 둔다 — 1080px 화면에서 334px 이다.
+ * 그 빈 자리를 띠가 그대로 받는다.
+ *
+ * ⚠ 저 clamp 값은 HistoryPane.module.css 의 .planetViewport 와 같아야 한다. 한쪽만
+ *   고치면 띠가 캔버스를 덮거나 사이가 벌어진다.
+ *
+ * 다만 세로로 아주 긴 화면에서는 남는 자리가 680px 까지 커지므로 300px 에서 끊는다.
+ * 카드가 반 화면을 차지하면 행성을 보러 들어온 화면이 아니게 된다.
+ */
+.planetPortal:fullscreen {
+  --fs-planet-h: clamp(590px, calc(100vh - 334px), 760px);
+  --fs-strip-h: clamp(150px, calc(100vh - var(--fs-planet-h)), 300px);
+}
+/*
+ * 평소에는 행성이 상자를 다 쓴다. 전체화면에서 아래 띠가 열리면 그만큼 물러나고, 사건을
+ * 고르면 오른쪽 절반을 더 내준다. 캔버스가 제 부모를 채우는 구조라, 부모의 자리만 바꾸면
+ * 행성은 따라온다.
+ */
+.planetStage {
+  position: absolute;
+  inset: 0;
+  transition: inset 220ms cubic-bezier(0.16, 0.84, 0.3, 1);
+}
+
+.planetPortal[data-strip='on'] .planetStage {
+  bottom: var(--fs-strip-h);
+}
+
+.planetPortal[data-split='on'] .planetStage {
+  right: 50%;
+}
+
+/* 아래 가로 띠 — 고른 분야의 사건 전부. 옆으로 흐르므로 쪽을 나누지 않는다(오른쪽 종이가
+   넷씩 끊는 것은 종이 높이가 정해져 있어서다). */
+.fsStrip {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  height: var(--fs-strip-h, 150px);
+  padding: 14px 22px;
+  border-top: 1px solid rgba(233, 214, 178, 0.18);
+  background: rgba(6, 15, 26, 0.86);
+  backdrop-filter: blur(6px);
+}
+
+.fsStripLabel {
+  display: grid;
+  flex: none;
+  align-content: center;
+  gap: 2px;
+  font: 700 12px var(--font-sans);
+  letter-spacing: 0.1em;
+  color: #9db3c6;
+}
+
+.fsStripLabel b {
+  font: 700 22px/1 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #e9d6b2;
+}
+
+.fsStripEmpty {
+  align-self: center;
+  margin: 0;
+  font: italic 13px var(--font-serif-kr);
+  color: #8ba0b2;
+}
+
+/* 카드가 띠 높이를 그대로 쓴다. 아래 padding 은 가로 스크롤 막대의 자리다 — 없으면 막대가
+   카드 위에 겹쳐 그려진다. */
+.fsStrip ul {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0;
+  padding: 0 0 9px;
+  overflow-x: auto;
+  list-style: none;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(233, 214, 178, 0.32) transparent;
+}
+
+.fsStrip li {
+  display: flex;
+  flex: none;
+}
+
+/* 카드 폭을 고정해 띠가 일정한 리듬으로 흐르게 한다. 제목이 길면 세 줄에서 자른다 —
+   높이가 들쭉날쭉하면 가로로 훑는 눈이 걸린다.
+   제목은 위, 기사 수는 아래에 붙여 카드가 띠 높이를 채우게 한다. */
+.fsStrip button {
+  display: grid;
+  width: 210px;
+  height: 100%;
+  align-content: space-between;
+  gap: 5px;
+  padding: 10px 13px;
+  border: 1px solid rgba(233, 214, 178, 0.16);
+  border-radius: 6px;
+  background: rgba(255, 252, 244, 0.05);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.fsStrip button:hover {
+  border-color: rgba(233, 214, 178, 0.42);
+  background: rgba(255, 252, 244, 0.1);
+}
+
+.fsStrip button[aria-current='true'] {
+  border-color: rgb(var(--tone));
+  background: rgba(var(--tone), 0.16);
+}
+
+.fsStrip button:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.fsStrip strong {
+  display: -webkit-box;
+  overflow: hidden;
+  font: 700 13px/1.4 var(--font-serif-kr);
+  color: #f2ece1;
+  word-break: keep-all;
+  -webkit-box-orient: vertical;
+  /* 세 줄. line-clamp 은 정수만 받아 calc() 를 쓸 수 없으므로 띠가 가장 낮을 때(150px)를
+     기준으로 정한다 — 그때 카드 속이 93px 이고 세 줄(54.6px)+기사 수(13px)=67.6px 다.
+     띠가 그보다 두꺼운 화면에서는 남는 만큼 제목 아래가 벌어진다. */
+  -webkit-line-clamp: 3;
+}
+
+.fsStrip small {
+  font: 11px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #93a7b8;
+}
+
+/* 오른쪽 칸 — 고른 사건의 속. 종이가 아니라 밤하늘 위라 색을 뒤집는다. */
+.fsDetail {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  width: 50%;
+  flex-direction: column;
+  border-left: 1px solid rgba(233, 214, 178, 0.18);
+  background: rgba(6, 15, 26, 0.9);
+  backdrop-filter: blur(6px);
+}
+
+.planetPortal[data-strip='on'] .fsDetail {
+  bottom: var(--fs-strip-h);
+}
+
+.fsDetail > header {
+  position: relative;
+  flex: none;
+  padding: 22px 52px 16px 26px;
+  border-bottom: 1px solid rgba(233, 214, 178, 0.16);
+}
+
+.fsDetail > header span {
+  font: 700 11px var(--font-sans);
+  letter-spacing: 0.12em;
+  color: rgb(var(--tone));
+}
+
+.fsDetail > header h3 {
+  margin: 6px 0 0;
+  font: 700 clamp(17px, 1.5vw, 24px)/1.35 var(--font-serif-kr);
+  color: #f4efe5;
+  word-break: keep-all;
+}
+
+.fsDetail > header button {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(233, 214, 178, 0.24);
+  border-radius: 50%;
+  background: transparent;
+  color: #cfe0ec;
+  cursor: pointer;
+  place-items: center;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+
+.fsDetail > header button:hover {
+  border-color: rgba(233, 214, 178, 0.6);
+  color: #fff;
+}
+
+/*
+ * 속은 오른쪽 종이의 .statementBox 와 같은 컴포넌트가 그린다. 종이 위에서 쓰던 색만
+ * 뒤집어 씌운다 — 구조를 다시 짜면 두 곳이 어긋나기 시작한다.
+ */
+.fsDetailBody {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  gap: 22px;
+  padding: 20px 26px 26px;
+  overflow-y: auto;
+  align-content: start;
+  color: #dfe7ee;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(233, 214, 178, 0.32) transparent;
+}
+
+.fsDetailBody h4 {
+  margin: 0 0 8px;
+  font: 700 12px var(--font-sans);
+  letter-spacing: 0.08em;
+  color: #9db3c6;
+}
+
+.fsDetailBody li,
+.fsDetailBody p {
+  color: #e4ebf1;
+}
+
+.fsDetailBody .statementList li::before {
+  color: rgba(233, 214, 178, 0.5);
+}
+
+.fsDetailBody .statementEmpty {
+  color: #8ba0b2;
+}
+
+.fsDetailBody .articleWhen {
+  color: #93a7b8;
+}
+
+.fsDetailBody .articleSource {
+  color: #7f94a6;
+}
+
+.fsDetailBody .eventArticleList li {
+  border-top-color: rgba(233, 214, 178, 0.14);
+}
+
+.fsDetailBody .statementMore {
+  border-bottom-color: rgba(233, 214, 178, 0.45);
+  color: #9db3c6;
+}
+
+.fsDetailBody .articleBookmark {
+  color: rgba(207, 224, 236, 0.55);
+}
+
+.fsDetailBody .articleBookmarkOn {
+  color: rgb(var(--tone));
+}
+
 .planetLoading {
   display: grid;
   width: 100%;

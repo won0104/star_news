@@ -128,6 +128,15 @@ export function DiaryHistoryPane() {
 
   const [selectedNode, setSelectedNode] = useState(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  /*
+   * 전체화면에서만 쓰는 두 가지. 행성이 화면을 덮으면 오른쪽 종이가 가려져서, 분야를 골라도
+   * 사건 목록이 보이지 않는다. 그 자리를 아래 가로 띠와 오른쪽 칸이 대신한다.
+   *
+   * stripOpen 은 분야 중심 별을 누른 적이 있는지, fsEventId 는 띠에서 고른 사건이다.
+   * 사건을 골라도 띠는 닫지 않는다 — 옆 사건으로 바로 옮겨 갈 수 있어야 한다.
+   */
+  const [stripOpen, setStripOpen] = useState(false)
+  const [fsEventId, setFsEventId] = useState(null)
   const [eventPageIndex, setEventPageIndex] = useState(0)
   const [openEventId, setOpenEventId] = useState(null)
   // 발언을 다 펼친 사건. 사건 id 로 들고 있어서 다른 사건을 열면 저절로 접힌다.
@@ -177,7 +186,13 @@ export function DiaryHistoryPane() {
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(document.fullscreenElement === planetPortalRef.current)
+      const on = document.fullscreenElement === planetPortalRef.current
+      setIsFullscreen(on)
+      // 나가면 접는다. 남겨 두면 다음에 전체화면을 켤 때 지난번 띠가 그대로 떠 있다.
+      if (!on) {
+        setStripOpen(false)
+        setFsEventId(null)
+      }
     }
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
@@ -218,6 +233,7 @@ export function DiaryHistoryPane() {
   const selectTopic = (nextTopic) => {
     setSelectedNode(null)
     setOpenEventId(null)
+    setFsEventId(null)
     setEventPageIndex(0)
     setParams({ view: 'log', topic: nextTopic.topicCode }, { replace: true })
   }
@@ -253,28 +269,68 @@ export function DiaryHistoryPane() {
    * 행성에서 별을 눌렀을 때. 다른 분야의 별이면 그 분야로 옮겨 간다.
    *
    * 사건이면 오른쪽 목록의 같은 사건도 펼친다 — 행성과 목록이 같은 것을 가리키게.
+   *
+   * 분야 중심 별은 전체화면에서 아래 띠를 연다. 지금 보고 있는 분야의 별도 똑같이 연다 —
+   * 일곱 중 하나만 눌러도 반응이 없으면 그 별만 고장 난 것처럼 보인다.
    */
   const selectNode = (node) => {
     setSelectedNode(node)
     if (!node) return
-    if (node.topicCode && node.topicCode !== topic.topicCode) {
+
+    const otherTopic = node.topicCode && node.topicCode !== topic.topicCode
+    if (otherTopic) {
       setOpenEventId(null)
+      setFsEventId(null)
       setEventPageIndex(0)
       setParams({ view: 'log', topic: node.topicCode }, { replace: true })
+    }
+
+    if (node.kind === 'TOPIC_CLUSTER') {
+      if (isFullscreen) setStripOpen(true)
       return
     }
-    if (node.nodeType !== 'EVENT') return
+
+    // 분야를 막 옮겼으면 events 는 아직 이전 분야의 것이라 여기서 찾으면 엉뚱한 것이 걸린다.
+    if (otherTopic || node.nodeType !== 'EVENT') return
     const event = events.find((item) => item.id === node.id)
     if (!event) return
+    if (isFullscreen) openInFullscreen(event)
     setOpenEventId(event.id)
     setEventPageIndex(Math.floor(events.indexOf(event) / EVENTS_PER_PAGE))
     if (!articlesByEvent[event.nodeKey]) loadArticles(scope, event, range)
+  }
+
+  /**
+   * 전체화면 아래 띠에서 사건을 골랐을 때. 행성이 왼쪽 절반으로 물러나고 오른쪽에 속이 열린다.
+   *
+   * 오른쪽 종이의 토글과 같은 일을 하지만 그쪽 상태(openEventId)는 건드리지 않는다 —
+   * 전체화면을 닫았을 때 종이가 제 상태 그대로 남아 있어야 한다.
+   */
+  const openInFullscreen = (event) => {
+    setFsEventId(event.id)
+    setStripOpen(true)
+    setSelectedNode({
+      id: event.id,
+      nodeType: 'EVENT',
+      nodeKey: event.nodeKey,
+      topicCode: topic.topicCode,
+    })
+    if (!articlesByEvent[event.nodeKey]) loadArticles(scope, event, range)
+    recordNodeClick('EVENT', event.nodeKey).catch(() => {})
   }
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement === planetPortalRef.current) await document.exitFullscreen()
     else await planetPortalRef.current?.requestFullscreen()
   }
+
+  // 띠에서 고른 사건. 분야가 바뀌면 events 가 갈리므로 여기서 못 찾고 저절로 닫힌다.
+  const fsEvent = fsEventId ? (events.find((item) => item.id === fsEventId) ?? null) : null
+  const fsAllStatements = fsEvent ? allStatementsFor === fsEvent.id : false
+  const fsStatements = fsEvent
+    ? (fsAllStatements ? fsEvent.statements : fsEvent.statements.slice(0, STATEMENTS_PER_EVENT))
+    : []
+  const fsRestCount = fsEvent ? fsEvent.statements.length - fsStatements.length : 0
 
   const topicArticleCount = events.reduce((sum, event) => sum + event.articleCount, 0)
   const recordedTopics = new Set(
@@ -328,19 +384,80 @@ export function DiaryHistoryPane() {
           <p>작은 기록들이 모여 하나의 우주가 됩니다.</p>
         </header>
 
-        <div ref={planetPortalRef} className={styles.planetPortal}>
-          <Suspense fallback={<div className={styles.planetLoading}>기록 행성을 불러오는 중…</div>}>
-            <HistoryPlanet
-              graph={graph}
-              activeTopic={topic.topicCode}
-              reduceMotion={reduceMotion}
-              selectedNode={selectedNode}
-              selectedEvent={null}
-              onSelectNode={selectNode}
-              onOpenEvent={selectNode}
-              variant={isFullscreen ? 'default' : 'diary'}
-            />
-          </Suspense>
+        {/*
+          전체화면은 이 상자만 그린다(:fullscreen 은 그 요소의 자손만 띄운다). 그래서 띠와
+          오른쪽 칸도 여기 안에 있어야 한다 — 밖에 두면 전체화면에서 사라진다.
+        */}
+        <div
+          ref={planetPortalRef}
+          className={styles.planetPortal}
+          data-strip={isFullscreen && stripOpen ? 'on' : undefined}
+          data-split={isFullscreen && fsEvent ? 'on' : undefined}
+        >
+          <div className={styles.planetStage}>
+            <Suspense fallback={<div className={styles.planetLoading}>기록 행성을 불러오는 중…</div>}>
+              <HistoryPlanet
+                graph={graph}
+                activeTopic={topic.topicCode}
+                reduceMotion={reduceMotion}
+                selectedNode={selectedNode}
+                selectedEvent={null}
+                onSelectNode={selectNode}
+                onOpenEvent={selectNode}
+                variant={isFullscreen ? 'default' : 'diary'}
+              />
+            </Suspense>
+          </div>
+
+          {isFullscreen && fsEvent && (
+            <aside className={styles.fsDetail} aria-label={`${fsEvent.title} 기록`}>
+              <header>
+                <span>{topic.topicName}</span>
+                <h3>{fsEvent.title}</h3>
+                <button type="button" onClick={() => setFsEventId(null)} aria-label="닫기">
+                  ✕
+                </button>
+              </header>
+              <EventBody
+                className={styles.fsDetailBody}
+                event={fsEvent}
+                articles={articlesByEvent[fsEvent.nodeKey]}
+                statements={fsStatements}
+                restCount={fsRestCount}
+                allStatements={fsAllStatements}
+                onToggleStatements={() =>
+                  setAllStatementsFor(fsAllStatements ? null : fsEvent.id)
+                }
+              />
+            </aside>
+          )}
+
+          {isFullscreen && stripOpen && (
+            <div className={styles.fsStrip}>
+              <span className={styles.fsStripLabel}>
+                {topic.topicName}
+                <b>{events.length}</b>
+              </span>
+              {events.length === 0 ? (
+                <p className={styles.fsStripEmpty}>이 분야에 남은 기록이 없어요.</p>
+              ) : (
+                <ul>
+                  {events.map((event) => (
+                    <li key={event.id}>
+                      <button
+                        type="button"
+                        aria-current={event.id === fsEventId ? 'true' : undefined}
+                        onClick={() => openInFullscreen(event)}
+                      >
+                        <strong>{event.title}</strong>
+                        <small>기사 {event.articleCount}개</small>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Sits on the left page because what it expands is the planet above it, not the
