@@ -97,6 +97,25 @@ export function AppScene() {
     return arrived ? { ...arrived, selectionId: 1 } : null
   })
   const [enteredFromHome] = useState(() => location.state?.from === 'home')
+  /*
+   * 검색으로 실려 온 것인지.
+   *
+   * 화면은 오늘의 트렌드가 맞지만 읽는 이가 고른 것은 그 목적지가 아니라 사건 하나다. 내비에
+   * 오늘의 트렌드가 켜져 있으면 "내가 오늘의 트렌드를 눌렀다"고 읽히므로, 갈래인 탐색만 켠다.
+   * 내비를 직접 누르는 순간 그 말은 더 이상 참이 아니어서 open 에서 끈다.
+   */
+  const [fromSearch, setFromSearch] = useState(() => Boolean(location.state?.node))
+  /*
+   * 목적지를 누른 횟수. 별자리를 처음 상태로 되돌리는 열쇠다.
+   *
+   * 별자리는 어느 사건을 펼쳐 보고 있는지를 스스로 쥐고 있고(<TrendSky> 의 trail), 그 안에만
+   * 돌아가는 길이 있다. 이미 오늘의 트렌드에 서 있는 채로 오늘의 트렌드를 누르면 `?view=` 가
+   * 그대로라 다시 그려지지도 않아, 아무 일도 일어나지 않은 것처럼 보인다.
+   *
+   * 상태를 밖으로 끌어내는 대신 key 를 바꿔 새로 세운다 — 목적지를 누른다는 것은 그 화면을
+   * 처음부터 본다는 뜻이고, 그 말을 그대로 옮긴 것이다.
+   */
+  const [visit, setVisit] = useState(0)
 
   const asked = params.get('view')
   const view = asked === 'log2' ? 'log' : VIEWS.has(asked) ? asked : DEFAULT_VIEW
@@ -123,17 +142,17 @@ export function AppScene() {
       navigate('/')
       return
     }
+    /*
+     * 목적지를 고른 것이므로 보고 있던 사건은 놓는다.
+     *
+     * 검색으로 실려 온 사건을 그대로 안고 있으면, 오늘의 트렌드를 눌러도 화면이 그 사건에
+     * 머물러 아무 일도 일어나지 않은 것처럼 보인다. 누른 것은 사건이 아니라 그 목적지다.
+     */
+    setSelectedNode(null)
+    setFromSearch(false)
+    setVisit((count) => count + 1)
     setWalked(true)
     setParams(id === DEFAULT_VIEW ? {} : { view: id }, { replace: true })
-  }
-
-  const openSearchedNode = (node) => {
-    setWalked(true)
-    setSelectedNode((current) => ({
-      ...node,
-      selectionId: (current?.selectionId ?? 0) + 1,
-    }))
-    if (view !== 'trend') setParams({}, { replace: true })
   }
 
   const arriving = !walked && enteredFromHome
@@ -176,17 +195,17 @@ export function AppScene() {
       onSettled={onSettled}
     >
       <TopBar
-        activeId={view}
+        activeId={fromSearch ? 'home' : view}
         nightGlass={view === 'trend'}
         onSelect={open}
         onIntent={warmOnIntent}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
-        onSearchSelect={openSearchedNode}
       />
       <ViewPane
         key={account?.user?.userId ?? (account ? 'signed-in' : 'guest')}
         view={view}
+        visit={visit}
         settled={settled}
         playTrendTransition={arriving && view === 'trend'}
         selectedNode={selectedNode}
