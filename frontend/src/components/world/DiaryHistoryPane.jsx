@@ -450,12 +450,9 @@ export function DiaryHistoryPane() {
                       <button type="button" aria-expanded={open} onClick={() => toggleEvent(event)}>
                         <small>읽은 기사 {event.articleCount}개</small>
                         <strong>{event.title}</strong>
-                        <p>
-                          <span className={styles.eventCount}>발언 {event.statements.length}</span>
-                          <span className={styles.eventChevron} aria-hidden>
-                            {open ? '▾' : '▸'}
-                          </span>
-                        </p>
+                        <span className={styles.eventChevron} aria-hidden>
+                          {open ? '▾' : '▸'}
+                        </span>
                       </button>
 
                       {open && (
@@ -490,10 +487,10 @@ export function DiaryHistoryPane() {
                           </section>
 
                           <section>
-                            <h4>
-                              내가 읽은 기사
-                              {articles?.state === 'ready' && <b>{articles.items.length}</b>}
-                            </h4>
+                            {/* 총계는 접힌 줄의 `읽은 기사 N개` 가 이미 말한다. 여기 두면
+                                한 화면에 두 수가 서고, 이쪽은 받아온 한 페이지(최대
+                                ARTICLES_PER_EVENT)라 총계와 어긋난다. */}
+                            <h4>내가 읽은 기사</h4>
                             {articles?.state === 'ready' && articles.items.length > 0 && (
                               <ul className={styles.eventArticleList}>
                                 {/*

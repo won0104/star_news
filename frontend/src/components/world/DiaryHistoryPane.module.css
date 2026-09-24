@@ -576,7 +576,7 @@
   position: relative;
   display: grid;
   width: 100%;
-  padding: clamp(11px, 1vw, 15px) 28px clamp(11px, 1vw, 15px) 4px;
+  padding: clamp(6px, 0.58vw, 9px) 26px clamp(6px, 0.58vw, 9px) 4px;
   border: 0;
   border-bottom: 1px solid rgba(69, 57, 45, 0.2);
   background: transparent;
@@ -610,13 +610,6 @@
   margin-top: 3px;
   font: 700 clamp(12px, 1.03vw, 16px)/1.4 var(--font-serif-kr);
   word-break: keep-all;
-}
-
-.eventList p {
-  margin: 3px 0 0;
-  font: clamp(9px, 0.74vw, 12px) var(--font-sans);
-  color: rgb(var(--tone));
-  filter: brightness(0.72);
 }
 
 .eventPager {
@@ -1061,14 +1054,23 @@
 
 /* ---- 사건 토글 ---------------------------------------------------------------- */
 
-/* 행 오른쪽 끝 — 발언 개수와 펼침 표시가 한 줄에 선다. */
-.eventCount {
-  font-variant-numeric: tabular-nums;
-}
-
+/*
+ * 행 오른쪽 끝의 펼침 표시.
+ *
+ * 곁에 두었던 발언 개수를 뺀 뒤로 혼자 남았는데, 그때까지 제 줄을 따로 차지하며 왼쪽 아래에
+ * 서 있었다(주석은 "오른쪽 끝"이라 했지만 실측 x 는 4px 였다). 이제 제목 옆 오른쪽에 세로
+ * 가운데로 세운다 — 버튼의 position:relative 와 오른쪽 패딩이 원래 그 자리를 비워 둔 것이다.
+ *
+ * 줄을 차지하지 않게 되면서 행 높이가 16px 줄어, 사건끼리 붙어 목록으로 읽힌다.
+ */
 .eventChevron {
-  margin-left: 8px;
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  font-size: clamp(12px, 1vw, 16px);
+  line-height: 1;
   color: #8a7862;
+  transform: translateY(-50%);
 }
 
 /* 펼쳐진 내용. 종이 위에 살짝 눌러 넣은 자리처럼, 왼쪽 괘선 하나로만 구분한다 —
@@ -1082,19 +1084,13 @@
   background: rgba(255, 252, 244, 0.34);
 }
 
+/* 자식이 라벨 하나뿐이라 그냥 제목이다. 전에는 flex + space-between 으로 오른쪽 끝에 수를
+   붙였는데, 라벨에서 258px 떨어져 홀로 떠서 무엇의 수인지 읽히지 않았다. */
 .statementBox h4 {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
   margin: 0 0 6px;
   font: 700 clamp(8px, 0.68vw, 11px) var(--font-sans);
   letter-spacing: 0.06em;
   color: #8a7862;
-}
-
-.statementBox h4 b {
-  font-variant-numeric: tabular-nums;
-  color: #6f5c47;
 }
 
 .statementList,
