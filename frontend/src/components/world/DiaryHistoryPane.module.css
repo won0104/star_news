@@ -574,9 +574,15 @@
 
 .eventList button {
   position: relative;
+  /* 제목과 기사 수를 한 줄에 나란히 둔다. 전에는 기사 수가 제목 위에 제 줄을 차지해 행마다
+     12px 을 더 먹었다. baseline 정렬이라 제목이 두 줄로 넘어가도 수는 첫 줄에 남는다.
+     오른쪽 패딩은 절대 배치된 펼침 표시의 자리다. */
   display: grid;
+  grid-template-columns: 1fr max-content;
+  align-items: baseline;
   width: 100%;
-  padding: clamp(6px, 0.58vw, 9px) 26px clamp(6px, 0.58vw, 9px) 4px;
+  column-gap: 10px;
+  padding: clamp(6px, 0.55vw, 9px) 26px clamp(6px, 0.55vw, 9px) 4px;
   border: 0;
   border-bottom: 1px solid rgba(69, 57, 45, 0.2);
   background: transparent;
@@ -603,12 +609,16 @@
 
 .eventList small {
   font: clamp(8px, 0.66vw, 11px) var(--font-sans);
+  font-variant-numeric: tabular-nums;
   color: #8d745e;
+  white-space: nowrap;
 }
 
+/* 줄간을 1.4 에서 1.28 로 조인다. 한 줄짜리 제목이 대부분이라 줄간은 읽기보다 행 높이에
+   더 기여했고, 두 줄이 되는 긴 제목에서도 1.28 이면 붙어 보이지 않는다. */
 .eventList strong {
-  margin-top: 3px;
-  font: 700 clamp(12px, 1.03vw, 16px)/1.4 var(--font-serif-kr);
+  min-width: 0;
+  font: 700 clamp(12px, 1.03vw, 16px)/1.28 var(--font-serif-kr);
   word-break: keep-all;
 }
 

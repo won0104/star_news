@@ -448,8 +448,8 @@ export function DiaryHistoryPane() {
                   return (
                     <li key={event.id} ref={open ? openEventRef : null}>
                       <button type="button" aria-expanded={open} onClick={() => toggleEvent(event)}>
-                        <small>읽은 기사 {event.articleCount}개</small>
                         <strong>{event.title}</strong>
+                        <small>기사 {event.articleCount}개</small>
                         <span className={styles.eventChevron} aria-hidden>
                           {open ? '▾' : '▸'}
                         </span>
