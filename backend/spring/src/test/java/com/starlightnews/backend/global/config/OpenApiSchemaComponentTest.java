@@ -63,6 +63,9 @@ class OpenApiSchemaComponentTest {
 		assertRef(schemas, "GraphNeighborsResponse", "centerNode", "GraphNeighborNodeSummary");
 		assertArrayItemRef(schemas, "GraphNeighborsResponse", "nodes", "GraphNeighborNodeSummary");
 		assertArrayItemRef(schemas, "GraphNeighborsResponse", "edges", "GraphNeighborEdge");
+		assertRef(schemas, "TopicExplorationResponse", "centerTopic", "TopicExplorationCenterTopic");
+		assertArrayItemRef(
+				schemas, "TopicExplorationResponse", "entryNodes", "TopicExplorationEntryNode");
 
 		assertThat(schemas.has("Item")).isFalse();
 		assertThat(schemas.has("Node")).isFalse();
@@ -90,6 +93,23 @@ class OpenApiSchemaComponentTest {
 		JsonNode security = objectMapper.readTree(document)
 				.path("paths")
 				.path("/api/v1/home")
+				.path("get")
+				.path("security");
+
+		assertThat(security.isArray()).isTrue();
+		assertThat(security).isEmpty();
+	}
+
+	@Test
+	void 공개_Topic별_탐색_API는_인증을_요구하지_않는다() throws Exception {
+		String document = mockMvc.perform(get("/v3/api-docs"))
+				.andExpect(status().isOk())
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+		JsonNode security = objectMapper.readTree(document)
+				.path("paths")
+				.path("/api/v1/topics/{topicCode}/exploration")
 				.path("get")
 				.path("security");
 
