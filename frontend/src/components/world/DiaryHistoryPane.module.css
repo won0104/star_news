@@ -520,20 +520,74 @@
 
 /* The category's events, on the same plaque as the article cards below them — one list
    leads to the other, so they are the same object at two depths. */
+/*
+ * 사건 목록만 흐른다.
+ *
+ * .recordPage 는 책 종이만큼 높이가 고정인데 펼친 사건은 얼마든지 길어질 수 있어서, 전에는
+ * 넘친 만큼 책 바깥으로 그대로 흘러나가 쪽 번호까지 밀어냈다 — 어느 조상도 자르지 않는다.
+ * 여기서 받아 낸다.
+ *
+ * 머리글·기간 칸·쪽 번호는 제자리에 남는다. 분야 이름과 몇 쪽인지는 목록을 훑는 내내 보여야
+ * 한다. `min-height: 0` 은 flex 자식이 제 내용보다 작아질 수 있게 하는 조건이고, 그것 없이는
+ * overflow 를 걸어도 줄어들지 않아 아무 일도 하지 않는다.
+ *
+ * 스크롤 막대는 종이 위라 가늘고 옅게 둔다. 오른쪽 음수 여백은 막대가 글을 밀어내지 않게
+ * 종이 가장자리까지 내보내는 것이다.
+ */
 .eventList {
   display: grid;
   gap: 0;
   min-height: 0;
-  margin: 13px 0 0;
-  padding: 0;
+  flex: 1;
+  margin: 13px -6px 0 0;
+  padding: 0 6px 0 0;
+  overflow-y: auto;
   list-style: none;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 102, 80, 0.4) transparent;
 }
 
-.eventList button {
+/* 발언이 넷을 넘을 때의 더 보기. 목록의 한 줄이 아니라 그 아래 딸린 조작이라, 인용 글씨가
+   아니라 라벨 글씨로 둔다. */
+.statementMore {
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dashed rgba(111, 92, 71, 0.45);
+  background: none;
+  font: clamp(8px, 0.68vw, 11px) var(--font-sans);
+  color: #8a7862;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.statementMore:hover {
+  border-bottom-color: rgba(58, 47, 38, 0.75);
+  color: #5b4330;
+}
+
+.statementMore:focus-visible {
+  outline: 2px solid #182b43;
+  outline-offset: 2px;
+}
+
+/*
+ * 사건 줄 토글. 선택자를 `> li >` 로 좁힌 이유는, 펼친 안에도 버튼이 둘 더 있기 때문이다
+ * (기사 북마크·발언 더보기). `.eventList button` 은 명시도가 (0,1,1) 이라 그 둘의
+ * 자기 규칙(0,1,0)을 이겨, 아이콘에 사건 줄의 아래 테두리와 26px 오른쪽 패딩이 얹혔다.
+ */
+.eventList > li > button {
   position: relative;
+  /* 제목과 기사 수를 한 줄에 나란히 둔다. 전에는 기사 수가 제목 위에 제 줄을 차지해 행마다
+     12px 을 더 먹었다. baseline 정렬이라 제목이 두 줄로 넘어가도 수는 첫 줄에 남는다.
+     오른쪽 패딩은 절대 배치된 펼침 표시의 자리다. */
   display: grid;
+  grid-template-columns: 1fr max-content;
+  align-items: baseline;
   width: 100%;
-  padding: clamp(11px, 1vw, 15px) 28px clamp(11px, 1vw, 15px) 4px;
+  column-gap: 10px;
+  padding: clamp(6px, 0.55vw, 9px) 26px clamp(6px, 0.55vw, 9px) 4px;
   border: 0;
   border-bottom: 1px solid rgba(69, 57, 45, 0.2);
   background: transparent;
@@ -548,32 +602,31 @@
 /* 예전의 '›' 꼬리표는 떼어냈다. 이 행은 다른 화면으로 넘어가는 링크가 아니라 제자리에서
    펼쳐지는 토글이고, 방향을 가리키는 표시는 행 안의 ▸/▾ 가 맡는다. */
 
-.eventList button:hover {
+.eventList > li > button:hover {
   color: #193248;
   transform: translateX(2px);
 }
 
-.eventList button:focus-visible {
+.eventList > li > button:focus-visible {
   outline: 2px solid rgb(var(--tone));
   outline-offset: 2px;
 }
 
-.eventList small {
+/* 사건 줄의 기사 수. 같은 이유로 좁힌다 — 펼친 안의 날짜(.articleWhen)와
+   출처(.articleSource)도 <small> 이라 이 규칙에 함께 걸려 있었다. */
+.eventList > li > button small {
   font: clamp(8px, 0.66vw, 11px) var(--font-sans);
+  font-variant-numeric: tabular-nums;
   color: #8d745e;
+  white-space: nowrap;
 }
 
-.eventList strong {
-  margin-top: 3px;
-  font: 700 clamp(12px, 1.03vw, 16px)/1.4 var(--font-serif-kr);
+/* 줄간을 1.4 에서 1.28 로 조인다. 한 줄짜리 제목이 대부분이라 줄간은 읽기보다 행 높이에
+   더 기여했고, 두 줄이 되는 긴 제목에서도 1.28 이면 붙어 보이지 않는다. */
+.eventList > li > button strong {
+  min-width: 0;
+  font: 700 clamp(12px, 1.03vw, 16px)/1.28 var(--font-serif-kr);
   word-break: keep-all;
-}
-
-.eventList p {
-  margin: 3px 0 0;
-  font: clamp(9px, 0.74vw, 12px) var(--font-sans);
-  color: rgb(var(--tone));
-  filter: brightness(0.72);
 }
 
 .eventPager {
@@ -1018,14 +1071,23 @@
 
 /* ---- 사건 토글 ---------------------------------------------------------------- */
 
-/* 행 오른쪽 끝 — 발언 개수와 펼침 표시가 한 줄에 선다. */
-.eventCount {
-  font-variant-numeric: tabular-nums;
-}
-
+/*
+ * 행 오른쪽 끝의 펼침 표시.
+ *
+ * 곁에 두었던 발언 개수를 뺀 뒤로 혼자 남았는데, 그때까지 제 줄을 따로 차지하며 왼쪽 아래에
+ * 서 있었다(주석은 "오른쪽 끝"이라 했지만 실측 x 는 4px 였다). 이제 제목 옆 오른쪽에 세로
+ * 가운데로 세운다 — 버튼의 position:relative 와 오른쪽 패딩이 원래 그 자리를 비워 둔 것이다.
+ *
+ * 줄을 차지하지 않게 되면서 행 높이가 16px 줄어, 사건끼리 붙어 목록으로 읽힌다.
+ */
 .eventChevron {
-  margin-left: 8px;
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  font-size: clamp(12px, 1vw, 16px);
+  line-height: 1;
   color: #8a7862;
+  transform: translateY(-50%);
 }
 
 /* 펼쳐진 내용. 종이 위에 살짝 눌러 넣은 자리처럼, 왼쪽 괘선 하나로만 구분한다 —
@@ -1039,19 +1101,13 @@
   background: rgba(255, 252, 244, 0.34);
 }
 
+/* 자식이 라벨 하나뿐이라 그냥 제목이다. 전에는 flex + space-between 으로 오른쪽 끝에 수를
+   붙였는데, 라벨에서 258px 떨어져 홀로 떠서 무엇의 수인지 읽히지 않았다. */
 .statementBox h4 {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
   margin: 0 0 6px;
   font: 700 clamp(8px, 0.68vw, 11px) var(--font-sans);
   letter-spacing: 0.06em;
   color: #8a7862;
-}
-
-.statementBox h4 b {
-  font-variant-numeric: tabular-nums;
-  color: #6f5c47;
 }
 
 .statementList,
@@ -1139,7 +1195,10 @@
 .articleBookmark {
   display: grid;
   place-items: center;
-  align-self: start;
+  /* 세로 가운데. `start` 였을 때는 행의 border-top 에서 2px 떨어진 자리를 붙잡아, 구분선
+     위에 아이콘이 걸터앉은 것처럼 보였다. 날짜·제목과 달리 이 아이콘은 줄의 어느 글줄에
+     속한 것이 아니라 행 전체에 대한 조작이라, 가운데가 제자리이기도 하다. */
+  align-self: center;
   width: clamp(15px, 1.3vw, 20px);
   height: clamp(15px, 1.3vw, 20px);
   padding: 0;

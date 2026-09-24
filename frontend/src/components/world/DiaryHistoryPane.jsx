@@ -20,8 +20,22 @@ import styles from './DiaryHistoryPane.module.css'
 
 const HistoryPlanet = lazy(loadHistoryPlanet)
 const BOOKMARK_ASSET = '/assets/history/bookmarks'
-const EVENTS_PER_PAGE = 3
+/*
+ * 한 쪽에 세우는 사건 수.
+ *
+ * 셋이던 것을 넷으로 늘린다. 줄 높이를 70px 에서 32px 로 줄이고 목록에 스크롤을 준 뒤로는
+ * 셋이 종이의 위쪽만 쓰고 아래가 비어, 쪽을 넘길 이유가 실제 분량보다 자주 생겼다.
+ */
+const EVENTS_PER_PAGE = 4
 const ARTICLES_PER_EVENT = 5
+/*
+ * 펼친 사건이 처음에 보여 주는 발언 수.
+ *
+ * 서버는 사건에 달린 발언을 개수 제한 없이 준다. 그대로 다 펼치면 발언이 열 개인 사건
+ * 하나가 목록 전체를 먹어, 같은 페이지의 다른 사건이 스크롤 저편으로 밀린다. 넷은 무엇에
+ * 대한 사건인지 감이 오는 최소치다 — 나머지는 눌러서 본다.
+ */
+const STATEMENTS_PER_EVENT = 4
 
 const TONE_CLASS = {
   rose: 'toneRose',
@@ -116,6 +130,11 @@ export function DiaryHistoryPane() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [eventPageIndex, setEventPageIndex] = useState(0)
   const [openEventId, setOpenEventId] = useState(null)
+  // 발언을 다 펼친 사건. 사건 id 로 들고 있어서 다른 사건을 열면 저절로 접힌다.
+  const [allStatementsFor, setAllStatementsFor] = useState(null)
+  // 펼친 사건 줄. 목록이 스크롤되면 아래쪽 사건은 보이는 자리 밖에서 열려 아무 일도 일어나지
+  // 않은 것처럼 보인다. 그래서 펼친 줄을 눈에 들어오는 자리로 끌어온다.
+  const openEventRef = useRef(null)
 
   // 분야를 옮겨 다녀도 대표 별들은 그대로다. 다시 부르는 것은 기간이 바뀔 때뿐이다.
   useEffect(() => {
@@ -146,6 +165,15 @@ export function DiaryHistoryPane() {
     return () => controller.abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scope])
+
+  useEffect(() => {
+    if (!openEventId) return
+    // `nearest` 는 이미 보이면 움직이지 않는다 — 펼칠 때마다 목록이 튀지 않게.
+    openEventRef.current?.scrollIntoView({
+      block: 'nearest',
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    })
+  }, [openEventId, reduceMotion])
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -417,18 +445,20 @@ export function DiaryHistoryPane() {
                 {visibleEvents.map((event) => {
                   const open = openEventId === event.id
                   const articles = articlesByEvent[event.nodeKey]
+                  const allStatements = allStatementsFor === event.id
+                  const statements = allStatements
+                    ? event.statements
+                    : event.statements.slice(0, STATEMENTS_PER_EVENT)
+                  const restCount = event.statements.length - statements.length
 
                   return (
-                    <li key={event.id}>
+                    <li key={event.id} ref={open ? openEventRef : null}>
                       <button type="button" aria-expanded={open} onClick={() => toggleEvent(event)}>
-                        <small>읽은 기사 {event.articleCount}개</small>
                         <strong>{event.title}</strong>
-                        <p>
-                          <span className={styles.eventCount}>발언 {event.statements.length}</span>
-                          <span className={styles.eventChevron} aria-hidden>
-                            {open ? '▾' : '▸'}
-                          </span>
-                        </p>
+                        <small>기사 {event.articleCount}개</small>
+                        <span className={styles.eventChevron} aria-hidden>
+                          {open ? '▾' : '▸'}
+                        </span>
                       </button>
 
                       {open && (
@@ -436,11 +466,25 @@ export function DiaryHistoryPane() {
                           <section>
                             <h4>발언</h4>
                             {event.statements.length > 0 ? (
-                              <ul className={styles.statementList}>
-                                {event.statements.map((statement) => (
-                                  <li key={statement.nodeKey}>{statement.label}</li>
-                                ))}
-                              </ul>
+                              <>
+                                <ul className={styles.statementList}>
+                                  {statements.map((statement) => (
+                                    <li key={statement.nodeKey}>{statement.label}</li>
+                                  ))}
+                                </ul>
+                                {(restCount > 0 || allStatements) && (
+                                  <button
+                                    type="button"
+                                    className={styles.statementMore}
+                                    aria-expanded={allStatements}
+                                    onClick={() =>
+                                      setAllStatementsFor(allStatements ? null : event.id)
+                                    }
+                                  >
+                                    {allStatements ? '발언 접기' : `발언 ${restCount}개 더`}
+                                  </button>
+                                )}
+                              </>
                             ) : (
                               <p className={styles.statementEmpty}>
                                 이 사건에서 접한 발언이 없어요.
@@ -449,10 +493,10 @@ export function DiaryHistoryPane() {
                           </section>
 
                           <section>
-                            <h4>
-                              내가 읽은 기사
-                              {articles?.state === 'ready' && <b>{articles.items.length}</b>}
-                            </h4>
+                            {/* 총계는 접힌 줄의 `읽은 기사 N개` 가 이미 말한다. 여기 두면
+                                한 화면에 두 수가 서고, 이쪽은 받아온 한 페이지(최대
+                                ARTICLES_PER_EVENT)라 총계와 어긋난다. */}
+                            <h4>내가 읽은 기사</h4>
                             {articles?.state === 'ready' && articles.items.length > 0 && (
                               <ul className={styles.eventArticleList}>
                                 {/*
