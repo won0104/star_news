@@ -462,69 +462,17 @@ export function DiaryHistoryPane() {
                       </button>
 
                       {open && (
-                        <div className={styles.statementBox}>
-                          <section>
-                            <h4>발언</h4>
-                            {event.statements.length > 0 ? (
-                              <>
-                                <ul className={styles.statementList}>
-                                  {statements.map((statement) => (
-                                    <li key={statement.nodeKey}>{statement.label}</li>
-                                  ))}
-                                </ul>
-                                {(restCount > 0 || allStatements) && (
-                                  <button
-                                    type="button"
-                                    className={styles.statementMore}
-                                    aria-expanded={allStatements}
-                                    onClick={() =>
-                                      setAllStatementsFor(allStatements ? null : event.id)
-                                    }
-                                  >
-                                    {allStatements ? '발언 접기' : `발언 ${restCount}개 더`}
-                                  </button>
-                                )}
-                              </>
-                            ) : (
-                              <p className={styles.statementEmpty}>
-                                이 사건에서 접한 발언이 없어요.
-                              </p>
-                            )}
-                          </section>
-
-                          <section>
-                            {/* 총계는 접힌 줄의 `읽은 기사 N개` 가 이미 말한다. 여기 두면
-                                한 화면에 두 수가 서고, 이쪽은 받아온 한 페이지(최대
-                                ARTICLES_PER_EVENT)라 총계와 어긋난다. */}
-                            <h4>내가 읽은 기사</h4>
-                            {articles?.state === 'ready' && articles.items.length > 0 && (
-                              <ul className={styles.eventArticleList}>
-                                {/*
-                                  읽은 날짜를 왼쪽 열로 빼 세로로 맞춘다. 발언은 사건의
-                                  내용이고 이쪽은 내 행위의 기록이라, 날짜가 열을 이루면
-                                  훑기만 해도 "언제 읽었나"가 보이고 위의 인용 덩어리와
-                                  모양 자체가 갈린다.
-                                */}
-                                {articles.items.map((article) => (
-                                  <ArticleRow key={article.articleId} article={article} />
-                                ))}
-                              </ul>
-                            )}
-                            {articles?.state === 'ready' && articles.items.length === 0 && (
-                              <p className={styles.statementEmpty}>
-                                이 사건에서 읽은 기사가 없어요.
-                              </p>
-                            )}
-                            {articles?.state === 'loading' && (
-                              <p className={styles.statementEmpty}>기사를 불러오는 중…</p>
-                            )}
-                            {articles?.state === 'failed' && (
-                              <p className={styles.statementEmpty}>
-                                기사를 불러오지 못했어요.
-                              </p>
-                            )}
-                          </section>
-                        </div>
+                        <EventBody
+                          className={styles.statementBox}
+                          event={event}
+                          articles={articles}
+                          statements={statements}
+                          restCount={restCount}
+                          allStatements={allStatements}
+                          onToggleStatements={() =>
+                            setAllStatementsFor(allStatements ? null : event.id)
+                          }
+                        />
                       )}
                     </li>
                   )
@@ -588,6 +536,78 @@ export function DiaryHistoryPane() {
       </DiaryShell>
 
     </section>
+  )
+}
+
+/**
+ * 펼친 사건의 속 — 발언과 내가 읽은 기사.
+ *
+ * 오른쪽 페이지의 목록 안에서도, 행성 전체화면의 오른쪽 칸에서도 같은 것을 보여 주므로
+ * 한 군데에 둔다. 다른 것은 감싸는 상자의 모양뿐이라 className 으로 받는다.
+ */
+function EventBody({
+  className,
+  event,
+  articles,
+  statements,
+  restCount,
+  allStatements,
+  onToggleStatements,
+}) {
+  return (
+    <div className={className}>
+      <section>
+        <h4>발언</h4>
+        {event.statements.length > 0 ? (
+          <>
+            <ul className={styles.statementList}>
+              {statements.map((statement) => (
+                <li key={statement.nodeKey}>{statement.label}</li>
+              ))}
+            </ul>
+            {(restCount > 0 || allStatements) && (
+              <button
+                type="button"
+                className={styles.statementMore}
+                aria-expanded={allStatements}
+                onClick={onToggleStatements}
+              >
+                {allStatements ? '발언 접기' : `발언 ${restCount}개 더`}
+              </button>
+            )}
+          </>
+        ) : (
+          <p className={styles.statementEmpty}>이 사건에서 접한 발언이 없어요.</p>
+        )}
+      </section>
+
+      <section>
+        {/* 총계는 접힌 줄의 `기사 N개` 가 이미 말한다. 여기 두면 한 화면에 두 수가 서고,
+            이쪽은 받아온 한 페이지(최대 ARTICLES_PER_EVENT)라 총계와 어긋난다. */}
+        <h4>내가 읽은 기사</h4>
+        {articles?.state === 'ready' && articles.items.length > 0 && (
+          <ul className={styles.eventArticleList}>
+            {/*
+              읽은 날짜를 왼쪽 열로 빼 세로로 맞춘다. 발언은 사건의 내용이고 이쪽은 내
+              행위의 기록이라, 날짜가 열을 이루면 훑기만 해도 "언제 읽었나"가 보이고 위의
+              인용 덩어리와 모양 자체가 갈린다.
+            */}
+            {articles.items.map((article) => (
+              <ArticleRow key={article.articleId} article={article} />
+            ))}
+          </ul>
+        )}
+        {articles?.state === 'ready' && articles.items.length === 0 && (
+          <p className={styles.statementEmpty}>이 사건에서 읽은 기사가 없어요.</p>
+        )}
+        {articles?.state === 'loading' && (
+          <p className={styles.statementEmpty}>기사를 불러오는 중…</p>
+        )}
+        {articles?.state === 'failed' && (
+          <p className={styles.statementEmpty}>기사를 불러오지 못했어요.</p>
+        )}
+      </section>
+    </div>
   )
 }
 
