@@ -558,6 +558,62 @@
   color: rgba(207, 224, 236, 0.55);
 }
 
+/*
+ * 전체화면 오른쪽 칸의 글씨 크기.
+ *
+ * 기본값은 책 오른쪽 종이의 좁은 칸(폭 31.5%)에 맞춘 clamp 라, 화면 절반을 쓰는 여기서는
+ * 지나치게 작다. 이 칸은 늘 큰 화면의 절반이므로 vw 로 흔들 이유가 없어 고정값으로 둔다.
+ */
+.fsDetailBody h4 {
+  font-size: 13px;
+}
+
+.fsDetailBody .statementList li {
+  font-size: 15px;
+}
+
+.fsDetailBody .statementList li::before {
+  font-size: 22px;
+}
+
+.fsDetailBody .statementEmpty,
+.fsDetailBody .statementMore {
+  font-size: 12px;
+}
+
+.fsDetailBody .articleWhen {
+  font-size: 12px;
+}
+
+.fsDetailBody .articleSource {
+  font-size: 11px;
+}
+
+.fsDetailBody .eventArticleList p {
+  font-size: 14px;
+}
+
+.fsDetailBody .articleAction {
+  font-size: 12px;
+}
+
+.fsDetailBody .articleSummaryText {
+  font-size: 13px;
+}
+
+.fsDetailBody .articleSummaryNote {
+  font-size: 12px;
+}
+
+.fsDetailBody .articleBookmark {
+  width: 22px;
+  height: 22px;
+}
+
+.fsDetailBody .articleBookmark svg {
+  width: 13px;
+}
+
 /* 전체화면 오른쪽 칸은 밤하늘 위라 요약·원문도 색을 뒤집는다. */
 .fsDetailBody .articleAction {
   color: #9db3c6;
