@@ -558,6 +558,31 @@
   color: rgba(207, 224, 236, 0.55);
 }
 
+/* 전체화면 오른쪽 칸은 밤하늘 위라 요약·원문도 색을 뒤집는다. */
+.fsDetailBody .articleAction {
+  color: #9db3c6;
+}
+
+.fsDetailBody .articleAction:hover {
+  color: #f2ece1;
+}
+
+.fsDetailBody .articleActionAway {
+  color: #7f94a6;
+}
+
+.fsDetailBody .articleSummary {
+  border-left-color: rgba(233, 214, 178, 0.28);
+}
+
+.fsDetailBody .articleSummaryText {
+  color: #dbe4ec;
+}
+
+.fsDetailBody .articleSummaryNote {
+  color: #8ba0b2;
+}
+
 .fsDetailBody .articleBookmarkOn {
   color: rgb(var(--tone));
 }
@@ -1546,6 +1571,78 @@
 
 .articleBookmarkOn {
   color: rgb(var(--tone));
+}
+
+/* 요약·원문 두 갈래. 오늘의 트렌드와 같은 구성이다 — 요약만 두면 원문이 필요한 사람도
+   요약을 펼쳐야 해서, 아무도 읽지 않을 요약을 만들게 된다. */
+.articleActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 12px;
+  margin-top: 4px;
+}
+
+.articleAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: clamp(7px, 0.6vw, 10px) var(--font-sans);
+  color: #8a7862;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.articleAction b {
+  font-size: 0.82em;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.articleAction:hover {
+  color: #4a3626;
+}
+
+.articleAction:focus-visible {
+  outline: 2px solid #182b43;
+  outline-offset: 2px;
+}
+
+/* 원문은 이 화면을 떠나는 길이라 한 단계 물린다. */
+.articleActionAway {
+  color: #a08b6d;
+}
+
+/* 펼친 요약. 기사 줄 안에서 열리므로 왼쪽 실선 하나로만 묶는다 — 상자로 띄우면 목록
+   안에 또 다른 목록이 얹힌 것처럼 읽힌다.
+   `hidden` 은 UA 기본값이 display:none 인데, 여기 display:grid 가 그것을 이긴다.
+   그래서 접기가 먹지 않았다 — 되살리려면 이렇게 명시해야 한다. */
+.articleSummary {
+  display: grid;
+  gap: 5px;
+  justify-items: start;
+  margin: 5px 0 3px;
+  padding: 1px 0 1px 8px;
+  border-left: 1px solid rgba(69, 57, 45, 0.22);
+}
+
+.articleSummary[hidden] {
+  display: none;
+}
+
+.articleSummaryText {
+  font: clamp(8px, 0.68vw, 11px)/1.6 var(--font-serif-kr);
+  color: #55463a;
+  word-break: keep-all;
+}
+
+.articleSummaryNote {
+  font: italic clamp(7px, 0.62vw, 10px) var(--font-serif-kr);
+  color: #a08b6d;
 }
 
 .articleHint {

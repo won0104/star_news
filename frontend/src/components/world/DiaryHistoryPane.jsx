@@ -11,7 +11,10 @@ import {
   graphFromSummary,
   mergeTopicMap,
 } from '../../adapters/personalGraph'
+import { fetchArticleDetail } from '../../api/articles'
+import { panelCopy } from '../../data/trend'
 import { TOPICS } from '../../data/topics'
+import { useArticleSummary } from '../../hooks/useArticleSummary'
 import { useBookmark } from '../../hooks/useBookmark'
 import { useSettingsValues } from '../../store/settings'
 import { DiaryShell } from './DiaryShell'
@@ -781,6 +784,40 @@ function ArticleRow({ article }) {
     initial: article.bookmarked,
     copy: ARTICLE_BOOKMARK_COPY,
   })
+  const [open, setOpen] = useState(false)
+  // 원문 주소는 이 목록에 없고 상세에만 있다. 한 번 받으면 들고 있다가 링크로 건다.
+  const [origin, setOrigin] = useState(null)
+  /*
+   * 목록 응답이 저장된 요약의 앞부분(summaryPreview)을 같이 준다. 그것을 씨앗으로 넘기면
+   * 대개 요청 없이 바로 펼쳐진다 — 오늘의 트렌드와 달리 여기 기사는 이미 읽은 것이라
+   * 요약이 만들어져 있는 경우가 많다. 없을 때만 그 자리에서 만든다.
+   */
+  const { summary, state, load, retry } = useArticleSummary(article.articleId, {
+    seed: article.summaryPreview ?? null,
+  })
+  const bodyId = `history-article-summary-${article.articleId}`
+
+  const expand = () => {
+    const next = !open
+    setOpen(next)
+    if (next) load()
+  }
+
+  /**
+   * 원문 주소를 아직 모를 때만 쓰는 길. 빈 탭을 클릭과 같은 흐름에서 먼저 열고 주소를
+   * 넣는다 — 응답을 기다렸다 window.open 을 부르면 팝업 차단에 걸린다.
+   */
+  const openOrigin = () => {
+    const tab = window.open('', '_blank', 'noopener,noreferrer')
+    fetchArticleDetail(article.articleId)
+      .then((detail) => {
+        const url = detail?.originalUrl ?? null
+        setOrigin(url)
+        if (url && tab) tab.location.href = url
+        else tab?.close()
+      })
+      .catch(() => tab?.close())
+  }
 
   return (
     <li>
@@ -793,6 +830,55 @@ function ArticleRow({ article }) {
             {hint}
           </small>
         )}
+
+        <span className={styles.articleActions}>
+          <button
+            type="button"
+            className={styles.articleAction}
+            aria-expanded={open}
+            aria-controls={bodyId}
+            onClick={expand}
+          >
+            {open ? panelCopy.summaryClose : panelCopy.summaryOpen}
+            <b aria-hidden>{open ? '▴' : '▾'}</b>
+          </button>
+
+          {origin ? (
+            <a
+              className={`${styles.articleAction} ${styles.articleActionAway}`}
+              href={origin}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {panelCopy.origin}
+              <b aria-hidden>↗</b>
+            </a>
+          ) : (
+            <button
+              type="button"
+              className={`${styles.articleAction} ${styles.articleActionAway}`}
+              onClick={openOrigin}
+            >
+              {panelCopy.origin}
+              <b aria-hidden>↗</b>
+            </button>
+          )}
+        </span>
+
+        <span className={styles.articleSummary} id={bodyId} hidden={!open}>
+          {summary ? (
+            <span className={styles.articleSummaryText}>{summary}</span>
+          ) : (
+            <span className={styles.articleSummaryNote} role="status">
+              {summaryNote(state)}
+            </span>
+          )}
+          {(state === 'failed' || state === 'pending') && (
+            <button type="button" className={styles.articleAction} onClick={retry}>
+              {panelCopy.summaryRetry}
+            </button>
+          )}
+        </span>
       </span>
       <button
         type="button"
@@ -815,6 +901,15 @@ function ArticleRow({ article }) {
       </button>
     </li>
   )
+}
+
+/** 요약이 비어 있는 이유를 화면 말로 옮긴다. TrendPanel 과 같은 문구를 쓴다. */
+function summaryNote(state) {
+  if (state === 'loading') return panelCopy.summaryLoading
+  if (state === 'pending') return panelCopy.summaryPending
+  if (state === 'unavailable') return panelCopy.summaryUnavailable
+  if (state === 'failed') return panelCopy.summaryFailed
+  return panelCopy.summaryNone
 }
 
 /** `2026-09-16T18:00:00+09:00` → `2026.09.16 기준`. 없으면 머리글 줄을 비운다. */
