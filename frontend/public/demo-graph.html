@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>기사 → 지식그래프 (시연 확인용)</title>
+<!-- 앱(index.html)과 같은 글꼴을 쓴다. 정적 파일이라 번들을 타지 않으므로 여기서 직접 부른다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
 <!--
   백엔드 /api/v1/demo/articles 를 눈으로 확인하기 위한 목 화면이다.
   서비스 화면이 아니라 React 앱 밖의 정적 파일로 두고, vite dev 서버가 /api 를 프록시한다.
@@ -15,36 +19,85 @@
   로컬 백엔드 대신 배포 서버를 보려면 VITE_API_PROXY_TARGET 을 빼면 된다(배포 후).
 -->
 <style>
+  /*
+   * 색은 앱의 밤 창가에서 가져왔다. 서비스 화면은 아니지만 같은 제품에서 열리는 창이고, 하는
+   * 일도 별자리와 같다 — 사건을 점으로 두고 관계를 선으로 잇는다.
+   *
+   * 노드 색 일곱은 앱의 분야 색(HistoryPlanet 의 TOPIC_COLORS)을 그대로 쓴다. 어두운 하늘
+   * 위에서 서로 구별되도록 이미 고른 값이라 여기서 새로 고를 이유가 없다. 아래 스크립트의
+   * COLORS 도 같은 값을 든다 — 한쪽만 고치면 범례와 점의 색이 갈린다.
+   *
+   * 대상은 라벤더, 발언은 민트다. 앱의 별 그림이 그렇게 칠해져 있어서다(star-entity 평균
+   * 232,205,247 / star-statement 평균 197,247,218). 처음에 둘을 바꿔 넣었다가 발언에 별을
+   * 달면서 드러났다 — 그림과 점의 색이 어긋나면 같은 것이 둘로 보인다.
+   */
   :root {
-    --bg: #0f1014;
-    --panel: #181920;
-    --border: #2a2c36;
-    --text: #e8e8ea;
-    --muted: #8b8d98;
-    --accent: #5b8def;
-    --article: #5b8def;
-    --event: #e0913a;
-    --entity: #4fb477;
-    --statement: #b06fd4;
-    --topic: #d45f7a;
-    --time: #6fb7c9;
-    --story: #c9b06f;
+    --bg: #081426;
+    --panel: rgba(10, 23, 40, 0.82);
+    --field: rgba(3, 11, 22, 0.62);
+    --glass: rgba(6, 16, 30, 0.86);
+    --border: rgba(170, 196, 230, 0.16);
+    --text: #ebe8e0;
+    --muted: #93a3ba;
+    --accent: #e7bc5b;
+    --accent-ink: #1b1508;
+    --danger: #ff9e9e;
+    --article: #7aa4ff;
+    --event: #e7bc5b;
+    --entity: #c09bf4;
+    --statement: #80d7c1;
+    --topic: #ec8d9d;
+    --time: #6fcde2;
+    --story: #efb484;
   }
   * { box-sizing: border-box; }
+  /*
+   * 별자리 전체화면의 은하수를 이 화면의 색으로 다시 칠한 것이다.
+   *
+   * 원본은 성운이 보라·분홍이라 이 화면의 남색·금색과 부딪혔다. 밝기만 남기고 남색에서
+   * 금색으로 가는 램프에 다시 얹은 듀오톤이다 — 원본 색은 한 점도 남지 않으므로 부딪힐 것도
+   * 없어진다.
+   *
+   * 금색 마디를 0.85 에 둔 것은 일부러다. 이 사진은 픽셀의 65%가 밝기 0~15 에 몰려 있고
+   * (중앙값 12, p90 42, p99 93) 128 을 넘는 것은 0.1% 뿐이라, 그 자리의 금색은 가장 밝은
+   * 별 몇에만 닿는다. 화면은 거의 남색 하나로 가라앉고 은하수는 옅은 결로만 남는다 — 사이드
+   * 패널이 앞에 서고 배경이 뒤로 물러나는, 이 화면에 필요한 순서가 그것이다.
+   *
+   * 마디를 낮춰 성운 띠 전체를 금빛으로 올린 판도 만들어 봤지만(문턱 0.365) 배경이 앞으로
+   * 나왔다. 값 하나 차이이므로 되돌릴 일이 있으면 그 숫자만 옮기면 된다.
+   *
+   * 검정 막은 걷었다. 앱의 .fieldFull 은 별 위에 글자를 얹으려고 55% 를 덮는데, 여기서는 글자가
+   * 유리 패널 안에 있고 가운데는 그래프만 뜬다. 덮으면 다시 칠한 금빛이 그대로 죽는다.
+   *
+   * space.webp 는 이름과 달리 크림색 그림이라(평균 221,200,177) 밤 배경으로 쓸 수 없다.
+   */
   body {
     margin: 0; height: 100vh; display: flex;
-    background: var(--bg); color: var(--text);
-    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+    color: var(--text);
+    font-family: 'Noto Sans KR', system-ui, sans-serif;
+    background: #071225 url('/assets/demo/galaxy-v1.webp') center / cover no-repeat fixed;
+  }
+
+  /* 상호명. 알파만 쓰는 마스크라 한 장으로 밝은 화면과 어두운 화면을 모두 맞춘다. */
+  .brand {
+    width: 92px; height: 34px; margin: 0 0 10px;
+    background: var(--text); opacity: 0.9;
+    -webkit-mask: url('/assets/brand/wordmark-v1.png') left center / contain no-repeat;
+    mask: url('/assets/brand/wordmark-v1.png') left center / contain no-repeat;
   }
   aside {
     width: 380px; flex: none; padding: 18px; overflow-y: auto;
     border-right: 1px solid var(--border); background: var(--panel);
+    backdrop-filter: blur(14px);
   }
-  h1 { margin: 0 0 4px; font-size: 16px; }
+  h1 {
+    margin: 0 0 4px; font-size: 17px; font-weight: 700;
+    font-family: 'Noto Serif KR', serif; letter-spacing: -0.01em;
+  }
   .sub { margin: 0 0 16px; font-size: 12px; color: var(--muted); line-height: 1.5; }
   label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 4px; }
   input[type=text], textarea {
-    width: 100%; background: #101119; color: var(--text);
+    width: 100%; background: var(--field); color: var(--text);
     border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px;
     font-size: 13px; font-family: inherit;
   }
@@ -60,13 +113,13 @@
   .row label { margin: 0; color: var(--text); font-size: 13px; }
   button {
     width: 100%; margin-top: 14px; padding: 10px;
-    background: var(--accent); color: #fff; border: 0; border-radius: 7px;
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 7px;
     font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
   }
-  button:disabled { background: #333644; color: var(--muted); cursor: default; }
+  button:disabled { background: rgba(120, 138, 165, 0.18); color: var(--muted); cursor: default; }
   button.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
   .status { margin-top: 12px; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
-  .status.err { color: #ff8b8b; }
+  .status.err { color: var(--danger); }
   .status b { color: var(--text); }
   main { flex: 1; position: relative; min-width: 0; }
 
@@ -77,6 +130,7 @@
   aside.right {
     width: 270px; flex: none; padding: 16px 14px; overflow-y: auto;
     border-right: 0; border-left: 1px solid var(--border); background: var(--panel);
+    backdrop-filter: blur(14px);
   }
   aside.right h2 {
     margin: 0 0 8px; font-size: 12px; font-weight: 700; color: var(--muted);
@@ -93,7 +147,7 @@
   .events { display: flex; flex-direction: column; gap: 6px; }
   .events button {
     width: 100%; margin: 0; padding: 8px 10px; text-align: left;
-    background: var(--box-bg, #101119); border: 1px solid var(--border);
+    background: var(--box-bg, var(--field)); border: 1px solid var(--border);
     color: var(--text); border-radius: 7px;
     font-size: 12.5px; font-weight: 400; line-height: 1.45; cursor: pointer;
   }
@@ -121,21 +175,25 @@
     position: absolute; left: 14px; bottom: 14px;
     display: flex; flex-wrap: wrap; gap: 10px;
     font-size: 11.5px; color: var(--muted);
-    background: rgba(15,16,20,.85); padding: 8px 11px; border-radius: 8px;
+    background: var(--glass); padding: 8px 11px; border-radius: 8px; backdrop-filter: blur(10px);
     border: 1px solid var(--border);
   }
   .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
   .counts {
     position: absolute; right: 14px; top: 14px;
     font-size: 12px; color: var(--muted);
-    background: rgba(15,16,20,.85); padding: 8px 11px; border-radius: 8px;
+    background: var(--glass); padding: 8px 11px; border-radius: 8px; backdrop-filter: blur(10px);
     border: 1px solid var(--border);
   }
-  .hint { position: absolute; left: 14px; top: 14px; font-size: 11.5px; color: var(--muted); }
+  .hint {
+    position: absolute; left: 14px; top: 14px; font-size: 11.5px; color: var(--muted);
+    padding: 5px 9px; border-radius: 8px;
+    background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(10px);
+  }
   .zoom {
     position: absolute; right: 14px; bottom: 14px;
     display: flex; gap: 6px; align-items: center;
-    background: rgba(15,16,20,.85); border: 1px solid var(--border);
+    background: var(--glass); border: 1px solid var(--border);
     border-radius: 8px; padding: 6px 8px;
   }
   .zoom button {
@@ -148,7 +206,7 @@
   .relLabel { font-size: 9px; fill: var(--muted); }
   .detail {
     position: absolute; left: 0; top: 0; width: 300px; max-width: calc(100% - 28px);
-    background: rgba(15,16,20,.95); border: 1px solid var(--border); border-radius: 10px;
+    background: var(--glass); border: 1px solid var(--border); border-radius: 10px;
     padding: 12px 14px; font-size: 13px; line-height: 1.6;
   }
   .detail[hidden] { display: none; }
@@ -162,7 +220,7 @@
   .busy {
     position: absolute; inset: 0; z-index: 2;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-    background: rgba(15,16,20,.72);
+    background: rgba(5, 13, 24, 0.72);
   }
   .busy[hidden] { display: none; }
   .spinner {
@@ -186,9 +244,19 @@
   @keyframes slide {
     0% { margin-left: -40%; } 100% { margin-left: 100%; }
   }
+  /*
+   * 안내 글은 자기 판 위에 올린다. 배경이 다시 칠한 은하수라 한가운데로 금빛 띠가 지나가고,
+   * 그 위에서는 흐린 글자가 읽히지 않는다. 하늘 전체를 어둡게 덮으면 다시 칠한 뜻이 없어지므로
+   * 글자가 놓이는 자리만 가린다.
+   */
   .empty {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    color: var(--muted); font-size: 14px; text-align: center; line-height: 2;
+    color: var(--text); font-size: 14px; text-align: center; line-height: 2;
+  }
+  .empty > div {
+    padding: 16px 22px; border-radius: 12px;
+    background: var(--glass); border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
   }
   /* 클래스 선택자가 기본 [hidden] 규칙보다 우선하므로 여기서 다시 숨긴다. */
   .empty[hidden], .counts[hidden] { display: none; }
@@ -202,6 +270,14 @@
     main { height: 70vh; }
     .resizer { display: none; }
   }
+  /*
+   * 노드 이름은 판 없이 하늘 위에 바로 뜬다. 금빛 띠를 지나면 밝은 글자가 밝은 배경에 묻히므로,
+   * 글자 뒤로 어두운 테두리를 한 겹 두른다. paint-order 가 있어야 테두리가 글자 안쪽을 먹지 않는다.
+   */
+  #nodes text {
+    paint-order: stroke fill;
+    stroke: rgba(4, 10, 22, 0.78); stroke-width: 3px; stroke-linejoin: round;
+  }
   text { user-select: none; }
   /* 이름을 눌러도 노드를 잡을 수 있게 한다. 관계 이름은 방해만 되므로 통과시킨다. */
   #nodes text { cursor: pointer; }
@@ -211,6 +287,7 @@
 <body>
 
 <aside>
+  <p class="brand" role="img" aria-label="별빛 뉴스"></p>
   <h1>기사 → 지식그래프</h1>
 
   <label for="title">제목</label>
@@ -299,10 +376,41 @@
 
 <script>
 const COLORS = {
-  ARTICLE: '#5b8def', EVENT: '#e0913a', ENTITY: '#4fb477',
-  STATEMENT: '#b06fd4', TOPIC: '#d45f7a', TIME: '#6fb7c9', STORY: '#c9b06f',
+  ARTICLE: '#7aa4ff', EVENT: '#e7bc5b', ENTITY: '#c09bf4',
+  STATEMENT: '#80d7c1', TOPIC: '#ec8d9d', TIME: '#6fcde2', STORY: '#efb484',
 };
-const RADIUS = { ARTICLE: 13, EVENT: 9, STORY: 8 };
+/* 분류와 발언은 기본 6 이면 별이 점만 해진다. 사건보다 작고 곁가지보다는 큰 자리를 준다. */
+const RADIUS = { ARTICLE: 13, EVENT: 9, STORY: 8, TOPIC: 7, STATEMENT: 7 };
+
+/*
+ * 별로 그리는 두 유형.
+ *
+ * 기사가 들어와 사건이 되고 그 사건이 분야로 묶인다 — 이 화면이 보여 주려는 줄기가 그 셋이다.
+ * 나머지(대상·발언·시점·줄거리)는 그 줄기에 달린 곁가지라 점으로 둔다. 전부 별로 만들면
+ * 무엇이 줄기인지 사라지고 화면만 시끄러워진다. 이 그래프만 해도 대상이 열이다.
+ *
+ * EVENT 와 STATEMENT 는 앱이 별자리에서 쓰는 바로 그 별이다. ARTICLE 과 TOPIC 은 하늘에 뜨는
+ * 것이 아니라 하늘을 만들어 낸 종이와 그 하늘을 묶는 이름이라 앱에 해당하는 별이 없다. 그래서
+ * 같은 별의 명암만 각자의 색(#7aa4ff, #ec8d9d)으로 옮겨 두 장 만들었다 — 모양이 한 식구이니
+ * 색만으로 갈리고, 범례의 점 색과도 어긋나지 않는다.
+ *
+ * 이 기사에서는 발언이 나오지 않았지만 백엔드가 돌려줄 수 있는 일곱 라벨 중 하나다
+ * (Neo4jDemoGraphRepository 의 labels 목록). 나오는 날 점 하나로 뜨지 않도록 미리 달아 둔다.
+ */
+const STAR = {
+  ARTICLE: '/assets/demo/star-article.webp',
+  EVENT: '/assets/trend/star-event.webp',
+  STATEMENT: '/assets/trend/star-statement.webp',
+  TOPIC: '/assets/demo/star-topic.webp',
+};
+
+/*
+ * 별 그림은 캔버스의 74.6% 만 차지하고(240px 중 잉크 179px), 같은 폭이라도 별은 원보다 작게
+ * 읽힌다. 상자를 반지름의 3.4 배로 잡으면 보이는 별이 지름의 약 1.27 배가 되어 원 자리에
+ * 놓았을 때 크기가 맞는다.
+ */
+const STAR_BOX = 3.4;
+const STAR_INK = 0.746;
 
 const $ = (id) => document.getElementById(id);
 const svg = $('canvas');
@@ -697,7 +805,7 @@ function render(nodes, links, width, height) {
 
   const linkLayer = svg.querySelector('#links');
   linkLayer.innerHTML = links.map((link) => `
-    <line stroke="${link.primary ? '#7f8aa3' : '#3a3d4a'}"
+    <line stroke="${link.primary ? '#8fa6c8' : '#2f4159'}"
           stroke-width="${link.primary ? 2 : 1}"></line>`).join('');
 
   // 관계 이름은 간선 가운데에 둔다. 끄면 아예 만들지 않아 프레임마다 옮길 것도 없다.
@@ -710,15 +818,22 @@ function render(nodes, links, width, height) {
   const nodeLayer = svg.querySelector('#nodes');
   nodeLayer.innerHTML = nodes.map((node, index) => {
     const radius = RADIUS[node.nodeType] ?? 6;
-    const color = COLORS[node.nodeType] ?? '#888';
+    const color = COLORS[node.nodeType] ?? '#8895a8';
     const label = (node.label ?? '').length > 22
       ? node.label.slice(0, 22) + '…'
       : (node.label ?? '');
     const title = `${node.nodeType}${node.subType ? ' · ' + node.subType : ''}\n${node.label ?? ''}`;
+    const star = STAR[node.nodeType];
+    const box = radius * STAR_BOX;
+    const mark = star
+      ? `<image href="${star}" x="${-box / 2}" y="${-box / 2}" width="${box}" height="${box}"></image>`
+      : `<circle r="${radius}" fill="${color}" stroke="#061120" stroke-width="1.5"></circle>`;
+    // 이름은 표시된 것의 위쪽 끝에서 띄운다 — 별은 원보다 크므로 같은 값을 쓰면 글자가 별을 문다.
+    const top = star ? (box * STAR_INK) / 2 : radius;
     return `<g data-index="${index}" style="cursor:pointer"><title>${escapeHtml(title)}</title>
-      <circle r="${radius}" fill="${color}" stroke="#0f1014" stroke-width="1.5"></circle>
-      <text font-size="${node.nodeType === 'ARTICLE' ? 13 : 10.5}" fill="#c9cad2"
-            text-anchor="middle" dy="${-radius - 5}">${escapeHtml(label)}</text>
+      ${mark}
+      <text font-size="${node.nodeType === 'ARTICLE' ? 13 : 10.5}" fill="#d7dfea"
+            text-anchor="middle" dy="${-top - 6}">${escapeHtml(label)}</text>
     </g>`;
   }).join('');
 }
