@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { recordNodeClick } from '../../api/personalGraph'
-import { fetchHomeTrends, fetchNeighbors } from '../../api/trend'
+import { fetchHomeTrends, fetchNeighbors, fetchTopicExploration } from '../../api/trend'
 import { stars } from '../../data/trend'
 import {
   trendNeighbors,
@@ -14,7 +14,7 @@ import styles from './TrendSky.module.css'
 
 /**
  * 오늘의 트렌드 — the ten events `GET /home` ranks, and the graph behind whichever one is
- * pressed.
+ * pressed. 분야를 고르면 같은 자리에 `GET /topics/{topicCode}/exploration` 의 열이 선다.
  *
  * Two states in one screen, because they are two views of the same sky rather than two
  * places: the ranked ten, and one of them opened out into its own neighbours. Pressing a
@@ -33,13 +33,30 @@ import styles from './TrendSky.module.css'
  *
  * Until the aggregation publishes a round the endpoint answers an empty list, which would
  * leave this screen with nothing on it, so an empty or failed load falls back to the
- * sample in data/trendTop.js — and says so on the page. The screen stays worth looking at
+ * sample in data/trendTop.js — and says so on the page. 분야 회차에는 그 대역을 쓰지
+ * 않는다: 샘플 열은 여러 분야에 걸쳐 쓰여 있어서, 정치를 골랐는데 스포츠 별이 뜬다. The screen stays worth looking at
  * while the pipeline is being finished, and nobody reads ten invented events as today's
  * news. Set SAMPLE_WHEN_EMPTY to false, or delete it and the `sample` branches, once real
  * rounds are landing.
  */
 const SAMPLE_WHEN_EMPTY = true
 const TRACKED_NODE_TYPES = new Set(['EVENT', 'ENTITY', 'STATEMENT'])
+
+/**
+ * 분야 회차를 오늘의 트렌드와 같은 모양으로 맞춘다.
+ *
+ * 두 응답은 이름만 다르다 — `entryNodes` 가 `trends` 자리에 온다. 별을 놓는 코드가 어느
+ * 회차를 보고 있는지 몰라도 되도록 여기서 한 번 맞춘다.
+ *
+ * `entryNodeId` 는 옮기지 않는다. 짝인 `trendItemId` 도 화면이 읽는 곳이 없고(별의 key 는
+ * nodeKey 다), 쓰지 않는 값을 옮겨 두면 나중에 읽는 사람이 쓰이는 줄 안다.
+ *
+ * `centerTopic` 도 버린다 — 고른 분야는 창틀의 쪽지가 이미 쓰고 있어서, 화면 가운데에 한 번
+ * 더 세우면 같은 말이 두 번 선다.
+ */
+function asRound(payload) {
+  return { snapshotAt: payload?.snapshotAt ?? null, trends: payload?.entryNodes ?? [] }
+}
 
 function trailNode(node) {
   return {
@@ -51,8 +68,17 @@ function trailNode(node) {
 
 export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, selectedNode, topic = null }) {
   const account = useSession()
-  const [home, setHome] = useState(given ?? null)
-  const [homeState, setHomeState] = useState(given ? 'ready' : 'loading')
+  /*
+   * 받아 둔 회차와, 그것이 어느 분야의 것인지.
+   *
+   * 분야를 한 쌍으로 들고 다니는 것이 요점이다. 분야를 갈아타는 순간 이 값은 헌 것이 되는데,
+   * 효과 안에서 'loading' 으로 되돌리려면 렌더 중에 상태를 쓰게 된다. 지금 보고 있는 분야와
+   * 견주기만 하면 되돌릴 것이 없다 — 짝이 맞지 않으면 그것이 곧 기다리는 중이다.
+   */
+  const [round, setRound] = useState(() => (given ? { topic, state: 'ready', payload: given } : null))
+  const arrived = round?.topic === topic ? round : null
+  const home = given ?? arrived?.payload ?? null
+  const homeState = given ? 'ready' : (arrived?.state ?? 'loading')
   const [openKey, setOpenKey] = useState(null)
   const [graph, setGraph] = useState(null)
   const [graphState, setGraphState] = useState('idle')
@@ -68,19 +94,20 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
   useEffect(() => {
     if (given) return
     const controller = new AbortController()
-    // No synchronous setState here: `homeState` already starts at 'loading' when nothing
-    // was handed in, so the only writes are the async ones below.
-    fetchHomeTrends({ signal: controller.signal })
-      .then((payload) => {
-        setHome(payload)
-        setHomeState('ready')
-      })
+    // 답이 오면 어느 분야의 것인지와 함께 적는다 — 늦게 온 앞 분야의 답이 지금 화면을
+    // 차지하지 못한다. abort 가 대부분 막아 주지만, 짝을 보는 쪽이 최종 판단이다.
+    const asked = topic
+    const pending = asked
+      ? fetchTopicExploration(asked, { signal: controller.signal }).then(asRound)
+      : fetchHomeTrends({ signal: controller.signal })
+    pending
+      .then((payload) => setRound({ topic: asked, state: 'ready', payload }))
       .catch((error) => {
         if (error?.name === 'AbortError') return
-        setHomeState('failed')
+        setRound({ topic: asked, state: 'failed', payload: null })
       })
     return () => controller.abort()
-  }, [given])
+  }, [given, topic])
 
   const close = useCallback(() => {
     activeKeyRef.current = null
@@ -90,6 +117,20 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
     setArticlePanelOpen(false)
     setTrail([])
   }, [])
+
+  /*
+   * 분야를 갈아타면 펼쳐 둔 별자리를 접는다. 그 별은 앞 회차의 것이고, 접지 않으면 쪽지에는
+   * 정치라고 쓰인 채 경제 사건의 이웃 그래프가 남는다.
+   *
+   * 첫 렌더는 건너뛴다 — 현관에서 검색으로 실려 온 사건이 그때 펼쳐지는데, 여기서 같이
+   * 접으면 그 사건이 곧바로 닫힌다.
+   */
+  const shownTopic = useRef(topic)
+  useEffect(() => {
+    if (shownTopic.current === topic) return
+    shownTopic.current = topic
+    close()
+  }, [topic, close])
 
   useEffect(() => {
     if (!openKey) return
@@ -101,8 +142,9 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
   }, [openKey, close])
 
   const live = home?.trends ?? []
-  // A published round is the only case that needs no help.
-  const sample = SAMPLE_WHEN_EMPTY && homeState !== 'loading' && live.length === 0
+  // A published round is the only case that needs no help. 분야 회차는 비어 있어도 대신
+  // 세우지 않는다 — 위 머리말 참고.
+  const sample = SAMPLE_WHEN_EMPTY && !topic && homeState !== 'loading' && live.length === 0
   const source = sample ? homeTrends : home
   const trends = source?.trends ?? []
   const ranked = [...trends].sort((a, b) => a.rank - b.rank).slice(0, trendSlots.length)
@@ -207,21 +249,6 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
     return () => controller.abort()
   }, [givenNeighbors, graph, graphState, previewGraphs, sample])
 
-  /*
-   * 분야별 집계는 아직 서버에 없다.
-   *
-   * 전체 결과를 대신 보여주면 정치를 골랐는데 스포츠 별이 뜬다. 비어 있는 편이 정직하고,
-   * 무엇을 기다리는지는 쪽지에 쓰인 분야 이름이 말한다.
-   *
-   * 엔드포인트가 생기면 이 분기를 지우고 topic 을 fetchHomeTrends 로 내려보낸다 — 그 한 곳
-   * 말고는 움직일 것이 없도록 여기까지 값을 들고 와 두었다.
-   */
-  if (topic) {
-    return (
-      <Notice mark="✦" title={trendSkyCopy.topicPending} hint={trendSkyCopy.topicPendingHint} />
-    )
-  }
-
   if (openKey) {
     if (!graph) {
       const chosen = ranked.find((trend) => trend.nodeKey === openKey)
@@ -280,11 +307,19 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
   }
 
   if (ranked.length === 0) {
+    /*
+     * 빈 회차의 문구는 회차 종류를 따른다. 전체가 비었다면 아직 아무것도 모이지 않은 것이고,
+     * 분야가 비었다면 다른 분야에는 있을 수 있다 — 읽는 이가 할 일이 다르다.
+     */
+    const failed = homeState === 'failed'
+    const emptyTitle = topic ? trendSkyCopy.topicEmpty : trendSkyCopy.empty
+    const emptyHint = topic ? trendSkyCopy.topicEmptyHint : trendSkyCopy.emptyHint
+
     return (
       <Notice
-        mark={homeState === 'failed' ? '⚠' : '✦'}
-        title={homeState === 'failed' ? trendSkyCopy.failed : trendSkyCopy.empty}
-        hint={homeState === 'failed' ? trendSkyCopy.failedHint : trendSkyCopy.emptyHint}
+        mark={failed ? '⚠' : '✦'}
+        title={failed ? trendSkyCopy.failed : emptyTitle}
+        hint={failed ? trendSkyCopy.failedHint : emptyHint}
       />
     )
   }
