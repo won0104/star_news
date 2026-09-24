@@ -71,6 +71,6 @@ export const trendSkyCopy = {
   loading: '오늘의 트렌드를 불러오는 중…',
   failed: '트렌드를 불러오지 못했어요.',
   failedHint: '잠시 후 다시 시도해 주세요.',
-  topicPending: '분야별 트렌드는 준비 중이에요.',
-  topicPendingHint: '지금은 전체 트렌드만 모이고 있어요.',
+  topicEmpty: '이 분야는 아직 모인 트렌드가 없어요.',
+  topicEmptyHint: '분야마다 따로 모이므로, 다른 분야에는 있을 수 있어요.',
 }

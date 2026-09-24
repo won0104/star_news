@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PhotoBackdrop } from '../components/common/PhotoBackdrop';
+import { DemoEntry } from '../components/common/DemoEntry';
 import { NodeSearch } from '../components/common/NodeSearch';
 import { TopBar } from '../components/common/TopBar';
 import { warmHistoryPlanet } from '../components/world/historyPlanetChunk';
@@ -67,6 +68,9 @@ export function MainScene() {
           />
         </div>
       </div>
+
+      {/* 시연 페이지로 가는 작은 입구. 방의 소품 자리라 검색보다 아래 층에 둔다. */}
+      <DemoEntry />
     </PhotoBackdrop>
   );
 }

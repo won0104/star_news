@@ -1,0 +1,36 @@
+/*
+ * 화면 오른쪽 아래 구석.
+ *
+ * 앞서 소파에 종이 한 장을 끼워 두었는데, 방의 소품인 척하려다 보니 비율마다 가구가 옮겨 서는
+ * 것을 따라다녀야 했고 왼쪽에서는 레일 내비에 덮이기까지 했다. 글자 두 자는 방에 속하지 않으므로
+ * 그런 것을 따질 일이 없다 — 구석은 어느 비율에서나 구석이고, 레일은 왼쪽에만 선다.
+ */
+.root {
+  position: absolute;
+  z-index: 3;
+  right: 2.4%;
+  bottom: 2.4%;
+  font-family: var(--font-sans);
+  font-size: clamp(10px, 1.1cqw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  /*
+   * 글자 뒤가 방 사진이고, 그 구석은 밝은 마루와 어두운 잎이 섞여 있다 — 비율 네 장에서 재니
+   * 평균 108~140 에 최소 48 최대 245 였다. 먹색(휘도 102)이든 크림색이든 맨글씨로는 어딘가에서
+   * 묻히므로, 밝은 글자에 어두운 그림자를 둘러 배경이 밝으면 그림자가, 어두우면 글자가 보이게
+   * 한다. 시연 페이지의 노드 이름에 테두리를 두른 것과 같은 이유다.
+   */
+  color: var(--ink-on-dark);
+  text-shadow: 0 1px 2px rgba(24, 18, 10, 0.9), 0 0 7px rgba(24, 18, 10, 0.55);
+  /* 평소에는 물러나 있다가 손이 닿으면 또렷해진다. 시연용 문이지 목적지가 아니다. */
+  opacity: 0.68;
+  transition: opacity 160ms ease;
+}
+
+.root:hover,
+.root:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
