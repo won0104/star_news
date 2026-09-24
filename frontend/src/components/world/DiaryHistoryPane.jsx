@@ -15,9 +15,10 @@ import { TOPICS } from '../../data/topics'
 import { useBookmark } from '../../hooks/useBookmark'
 import { useSettingsValues } from '../../store/settings'
 import { DiaryShell } from './DiaryShell'
+import { loadHistoryPlanet } from './historyPlanetChunk'
 import styles from './DiaryHistoryPane.module.css'
 
-const HistoryPlanet = lazy(() => import('./HistoryPlanet'))
+const HistoryPlanet = lazy(loadHistoryPlanet)
 const BOOKMARK_ASSET = '/assets/history/bookmarks'
 const EVENTS_PER_PAGE = 3
 const ARTICLES_PER_EVENT = 5

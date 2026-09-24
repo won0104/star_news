@@ -740,36 +740,17 @@
   }
 
   /*
-   * 세로에서는 책배가 왼쪽이고 오른쪽은 제본이다 — 가로와 좌우가 반대다. 값은 나의 기록의
-   * .reportSlot / .categoryBookmarks 와 같아야 한다.
+   * 이 폭에서는 리본을 내린다.
    *
-   * 리본은 책 위로 올린다 — 길쭉해서 책배에 세우면 탭 기둥과 자리를 다툰다. transform-origin:
-   * 0 0 + rotate(90deg) 이면 지역 +x 가 화면 아래로, 지역 +y 가 화면 왼쪽으로 가므로
-   * left/top 꼭지점이 회전 뒤 보이는 영역의 오른쪽 위가 된다 — 화면 x 39.6~86%, y −2.5~4.81%.
-   * clip 도 함께 돌아가 지역 오른쪽 22% 가 화면 아래 22% 를 자르고, 잘리는 선 3.20%H 는
-   * 위쪽 가죽(0.1~2.2%)·책배(2.2~2.7%)를 지나 종이로 0.5%p 들어간 자리다.
+   * 내비가 상단바로 서면서 갈래 아래에 같은 이름의 책갈피가 걸리고, 둘이 같은 자리에 같은
+   * 모양으로 겹쳤다. 가는 길은 하나면 된다 — 화면 안의 리본 대신 내비의 책갈피를 남긴다.
+   * 오가는 두 방향 모두 내비가 쥐고 있으므로 길이 끊기지는 않는다.
+   *
+   * 여기 있던 회전 배치(책 위로 90도 돌려 꽂던 것)는 함께 지웠다. 되살릴 일이 있으면 git
+   * 히스토리에 있고, 그때는 내비의 책갈피와 자리를 다시 나눠야 한다.
    */
   .historySlot {
-    top: -2.5%;
-    left: 86%;
-    width: 10.63%;
-    transform-origin: 0 0;
-    transform: rotate(90deg);
-    clip-path: inset(-2% 22% -2% -25%);
-  }
-
-  /*
-   * 글자는 상자와 함께 돌아가므로 자기 중심 기준 −90도 되돌린다 — 합이 0 이라 똑바로 서고
-   * 왼쪽→오른쪽으로 읽힌다. 지역 오른쪽 26% 를 비워 글자 중심이 잘리는 78% 안쪽에 온다.
-   */
-  .historyBookmark span {
-    inset: 0 26% 0 0;
-    font-size: clamp(9px, 2.6vw, 13px);
-    letter-spacing: 0.06em;
-    text-orientation: mixed;
-    transform: rotate(-90deg);
-    transform-origin: center;
-    writing-mode: horizontal-tb;
+    display: none;
   }
 
   /*

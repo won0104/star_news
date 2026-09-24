@@ -49,7 +49,7 @@ function trailNode(node) {
   }
 }
 
-export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, selectedNode }) {
+export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, selectedNode, topic = null }) {
   const account = useSession()
   const [home, setHome] = useState(given ?? null)
   const [homeState, setHomeState] = useState(given ? 'ready' : 'loading')
@@ -206,6 +206,21 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
 
     return () => controller.abort()
   }, [givenNeighbors, graph, graphState, previewGraphs, sample])
+
+  /*
+   * 분야별 집계는 아직 서버에 없다.
+   *
+   * 전체 결과를 대신 보여주면 정치를 골랐는데 스포츠 별이 뜬다. 비어 있는 편이 정직하고,
+   * 무엇을 기다리는지는 쪽지에 쓰인 분야 이름이 말한다.
+   *
+   * 엔드포인트가 생기면 이 분기를 지우고 topic 을 fetchHomeTrends 로 내려보낸다 — 그 한 곳
+   * 말고는 움직일 것이 없도록 여기까지 값을 들고 와 두었다.
+   */
+  if (topic) {
+    return (
+      <Notice mark="✦" title={trendSkyCopy.topicPending} hint={trendSkyCopy.topicPendingHint} />
+    )
+  }
 
   if (openKey) {
     if (!graph) {
