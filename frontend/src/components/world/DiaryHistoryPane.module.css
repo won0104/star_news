@@ -572,7 +572,12 @@
   outline-offset: 2px;
 }
 
-.eventList button {
+/*
+ * 사건 줄 토글. 선택자를 `> li >` 로 좁힌 이유는, 펼친 안에도 버튼이 둘 더 있기 때문이다
+ * (기사 북마크·발언 더보기). `.eventList button` 은 명시도가 (0,1,1) 이라 그 둘의
+ * 자기 규칙(0,1,0)을 이겨, 아이콘에 사건 줄의 아래 테두리와 26px 오른쪽 패딩이 얹혔다.
+ */
+.eventList > li > button {
   position: relative;
   /* 제목과 기사 수를 한 줄에 나란히 둔다. 전에는 기사 수가 제목 위에 제 줄을 차지해 행마다
      12px 을 더 먹었다. baseline 정렬이라 제목이 두 줄로 넘어가도 수는 첫 줄에 남는다.
@@ -597,17 +602,19 @@
 /* 예전의 '›' 꼬리표는 떼어냈다. 이 행은 다른 화면으로 넘어가는 링크가 아니라 제자리에서
    펼쳐지는 토글이고, 방향을 가리키는 표시는 행 안의 ▸/▾ 가 맡는다. */
 
-.eventList button:hover {
+.eventList > li > button:hover {
   color: #193248;
   transform: translateX(2px);
 }
 
-.eventList button:focus-visible {
+.eventList > li > button:focus-visible {
   outline: 2px solid rgb(var(--tone));
   outline-offset: 2px;
 }
 
-.eventList small {
+/* 사건 줄의 기사 수. 같은 이유로 좁힌다 — 펼친 안의 날짜(.articleWhen)와
+   출처(.articleSource)도 <small> 이라 이 규칙에 함께 걸려 있었다. */
+.eventList > li > button small {
   font: clamp(8px, 0.66vw, 11px) var(--font-sans);
   font-variant-numeric: tabular-nums;
   color: #8d745e;
@@ -616,7 +623,7 @@
 
 /* 줄간을 1.4 에서 1.28 로 조인다. 한 줄짜리 제목이 대부분이라 줄간은 읽기보다 행 높이에
    더 기여했고, 두 줄이 되는 긴 제목에서도 1.28 이면 붙어 보이지 않는다. */
-.eventList strong {
+.eventList > li > button strong {
   min-width: 0;
   font: 700 clamp(12px, 1.03vw, 16px)/1.28 var(--font-serif-kr);
   word-break: keep-all;
