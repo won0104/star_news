@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { backdrop, viewIds } from '../data/home'
+import { topicByCode } from '../data/topics'
 import { arrivalScene } from '../data/recommend'
 import { BOARDS } from '../data/recommendBoard'
 import { desks } from '../data/history'
@@ -119,6 +120,11 @@ export function AppScene() {
 
   const asked = params.get('view')
   const view = asked === 'log2' ? 'log' : VIEWS.has(asked) ? asked : DEFAULT_VIEW
+  /*
+   * 오늘의 트렌드를 어느 분야로 볼지. 목적지와 같은 이유로 URL 이 쥔다 — 링크로 건넬 수 있고
+   * 새로고침을 넘긴다. 모르는 코드는 없는 것으로 친다(전체).
+   */
+  const topic = topicByCode.has(params.get('topic')) ? params.get('topic') : null
 
   useEffect(() => {
     if (asked !== 'log2') return
@@ -152,7 +158,13 @@ export function AppScene() {
     setFromSearch(false)
     setVisit((count) => count + 1)
     setWalked(true)
+    // 목적지를 갈아타면 분야도 떨어진다 — 통째로 새 값이라 `topic` 은 따로 지울 것이 없다.
     setParams(id === DEFAULT_VIEW ? {} : { view: id }, { replace: true })
+  }
+
+  /* 분야는 오늘의 트렌드 안에서만 고른다. 전체(null)는 담지 않는 것으로 나타낸다. */
+  const chooseTopic = (topicCode) => {
+    setParams(topicCode ? { topic: topicCode } : {}, { replace: true })
   }
 
   const arriving = !walked && enteredFromHome
@@ -206,6 +218,8 @@ export function AppScene() {
         key={account?.user?.userId ?? (account ? 'signed-in' : 'guest')}
         view={view}
         visit={visit}
+        topic={topic}
+        onTopicChange={chooseTopic}
         settled={settled}
         playTrendTransition={arriving && view === 'trend'}
         selectedNode={selectedNode}

@@ -18,6 +18,14 @@ export const TOPICS = [
   { topicCode: 'IT_SCIENCE', topicName: 'IT·과학', tone: 'blue' },
 ]
 
+/**
+ * 분야를 고르지 않은 상태.
+ *
+ * `topicCode` 가 null 인 것이 요점이다 — "전체"라는 분야가 따로 있는 것이 아니라 고르지
+ * 않았다는 뜻이고, 그래서 URL 에도 담기지 않는다. 서버에도 보낼 값이 없다.
+ */
+export const TOPIC_ALL = { topicCode: null, topicName: '전체' }
+
 export const topicByCode = new Map(TOPICS.map((topic) => [topic.topicCode, topic]))
 
 export const topicName = (topicCode) => topicByCode.get(topicCode)?.topicName ?? topicCode

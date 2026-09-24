@@ -37,6 +37,11 @@
  * alpha rather than authored. <TrendStage> insets the sky by it and then lets it run a
  * little under the wood; the margin is its business, so these stay the measurement.
  *
+ * `opening.left` doubles as the inner edge of the left wooden post — the post ends
+ * exactly where the glass begins (measured: 11.54 / 12.43 / 16.19 / 13.44 / 15.30
+ * against the openings below). <TopicNote> hangs off it, which is why it is not free
+ * to drift from the asset.
+ *
  * A transition stays disabled until a clip is authored to end on this exact room —
  * handing off from the former attic image would read as a flash cut.
  */
