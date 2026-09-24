@@ -68,7 +68,10 @@
 
 .still {
   opacity: 0;
-  transition: opacity 400ms ease;
+  /* 화면 전환 애니메이션 정지 중이라 즉시 나타난다. 원래 값은 400ms ease —
+     styles/global.css와 utils/motion.js를 되돌릴 때 함께 복구한다. 이 한 겹만 페이드하면
+     같은 순간에 즉시 그려지는 나무틀·사이드 연장과 어긋나 배경만 혼자 뜨는 것으로 보인다. */
+  transition: opacity 0ms;
 }
 
 .stillReady {

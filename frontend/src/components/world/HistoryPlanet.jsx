@@ -19,7 +19,15 @@ const EVENT_CARD_STAR_SCALE = 0.3;
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const FRONT = new THREE.Vector3(0, 0, 1);
 const MODEL_FRONT = new THREE.Vector3(1, 0, 0);
-const STAR_MODEL_URL = '/assets/history/star-node.glb';
+/*
+ * 별 모델. 인덱스를 uint32 에서 uint16 으로 줄인 판이다 — 정점이 10,769 개뿐이라 최대
+ * 인덱스가 10,768 이고 uint16(65,535)에 여유롭게 들어간다. 같은 숫자를 좁은 칸에 담을
+ * 뿐이라 형태는 바이트 단위로 같고 437KB 가 345KB 가 된다.
+ *
+ * public/ 아래 파일은 빌드 해시가 붙지 않으므로 갈아끼울 때는 이름을 올려야 한다 —
+ * 같은 이름으로 덮으면 CDN 이 옛 바이트를 계속 내준다.
+ */
+const STAR_MODEL_URL = '/assets/history/star-node-v2.glb';
 
 const TOPIC_COLORS = {
   POLITICS: 0xec8d9d,

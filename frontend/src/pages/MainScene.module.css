@@ -1,0 +1,80 @@
+/*
+ * 현관 한가운데 서는 안내문구와 검색.
+ *
+ * <NodeSearch> 는 원래 화면 오른쪽 위에 스스로 떠 있는 물건이다(position: fixed).
+ * `placement="inline"` 이 그 자리를 반납하고 받은 상자를 채우되 결과는 아래로 열라는 뜻이다.
+ *
+ * 방을 덮되 방을 막지는 않는다 — 덮개는 pointer-events 를 통과시키고 안쪽만 받는다. 지금
+ * 현관에 누를 것이 없더라도, 이 층이 방 전체를 가로채고 있으면 나중에 무엇을 놓든 걸린다.
+ */
+.searchArea {
+  /* 결과가 열릴 때 상자가 비켜주는 거리. 목록이 아래로 쓸 높이를 이만큼 벌어 준다. */
+  --rise: 120px;
+
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 0 24px;
+  pointer-events: none;
+}
+
+.searchBox {
+  display: flex;
+  width: min(520px, 100%);
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  pointer-events: auto;
+  transition: translate 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/*
+ * 결과가 열리면 상자가 위로 비킨다. 목록은 흐름 밖에 있어 상자 높이가 그대로이므로, 움직이는
+ * 것은 translate 하나뿐이고 그래서 보간된다.
+ *
+ * 열렸다는 사실은 입력칸의 aria-expanded 가 이미 말하고 있다 — 그 상태를 <MainScene> 까지
+ * 끌어올리지 않아도 :has() 로 읽을 수 있다. 화면이 상태를 두 벌 들지 않는 편이 낫다.
+ *
+ * 화면 전환 애니메이션 정지(utils/motion.js)는 animation 만 뭉개고 transition 은 두므로 이
+ * 움직임은 살아 있다. 제자리에서 자리를 내주는 피드백이지 화면을 바꾸는 전환이 아니다.
+ */
+.searchArea:has(input[aria-expanded='true']) .searchBox {
+  translate: 0 calc(-1 * var(--rise));
+}
+
+/* 읽는 이가 움직임을 원치 않으면 자리만 바뀌고 움직이지는 않는다. */
+@media (prefers-reduced-motion: reduce) {
+  .searchBox {
+    transition: none;
+  }
+}
+
+/*
+ * 손글씨 안내문구. 워드마크와 같이 그림이 아니라 마스크로 건다 — 알파만 쓰고 색은 글자가 쓰는
+ * 토큰으로 칠하면, 잉크가 거의 검정인 원본이 앱의 먹색으로 맞춰진다.
+ *
+ * 에셋은 잉크 범위로 자르고 줄여 두었다(697x240). 원본은 2172x724 라 여기 보이는 크기의 다섯
+ * 배가 넘었다 — 늘릴 일이 없는 그림에 그만한 해상도는 내려받는 값만 든다.
+ *
+ * 폭이 좁아지면 글씨도 함께 준다 — 두 줄짜리라 검색창보다 길어지면 방보다 문구가 커 보인다.
+ */
+.tagline {
+  width: min(380px, 82%);
+  aspect-ratio: 697 / 240;
+  background: var(--nav-ink-active);
+  opacity: 0.82;
+  -webkit-mask: url('/assets/brand/tagline-v1.png') center / contain no-repeat;
+  mask: url('/assets/brand/tagline-v1.png') center / contain no-repeat;
+}
+
+/*
+ * 레일이 방의 왼쪽을 가져가므로 가운데도 그만큼 오른쪽이다 — 뷰포트 기준으로 가운데를 잡으면
+ * 검색창이 레일 쪽으로 치우쳐 보인다.
+ */
+@media (min-width: 1024px) {
+  .searchArea {
+    padding-left: calc(var(--desktop-nav-width) + 24px);
+  }
+}
