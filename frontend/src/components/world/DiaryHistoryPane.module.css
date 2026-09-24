@@ -1188,7 +1188,10 @@
 .articleBookmark {
   display: grid;
   place-items: center;
-  align-self: start;
+  /* 세로 가운데. `start` 였을 때는 행의 border-top 에서 2px 떨어진 자리를 붙잡아, 구분선
+     위에 아이콘이 걸터앉은 것처럼 보였다. 날짜·제목과 달리 이 아이콘은 줄의 어느 글줄에
+     속한 것이 아니라 행 전체에 대한 조작이라, 가운데가 제자리이기도 하다. */
+  align-self: center;
   width: clamp(15px, 1.3vw, 20px);
   height: clamp(15px, 1.3vw, 20px);
   padding: 0;
