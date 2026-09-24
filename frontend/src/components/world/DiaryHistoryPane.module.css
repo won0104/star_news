@@ -288,33 +288,76 @@
   bottom: 0;
   left: 0;
   display: flex;
-  align-items: stretch;
-  gap: 16px;
+  flex-direction: column;
+  gap: 9px;
   height: var(--fs-strip-h, 150px);
-  padding: 14px 22px;
+  padding: 11px 22px 14px;
   border-top: 1px solid rgba(233, 214, 178, 0.18);
   background: rgba(6, 15, 26, 0.86);
   backdrop-filter: blur(6px);
 }
 
-.fsStripLabel {
-  display: grid;
+/* 분야 탭. 밤하늘 위라 책갈피 에셋 대신 글자와 밑줄로만 그린다 — 종이 질감의 탭을 여기
+   올리면 화면에서 그 조각만 다른 세계가 된다. */
+/* 아래 선은 띠 폭을 꽉 채운다. 음수 여백으로 띠의 좌우 패딩을 되돌려, 탭과 카드가 한
+   상자 안의 두 층으로 읽히게 한다. */
+.fsTabs {
+  display: flex;
   flex: none;
-  align-content: center;
-  gap: 2px;
-  font: 700 12px var(--font-sans);
-  letter-spacing: 0.1em;
-  color: #9db3c6;
+  align-items: center;
+  gap: 4px;
+  margin: 0 -22px;
+  padding: 0 22px 7px;
+  border-bottom: 1px solid rgba(233, 214, 178, 0.16);
 }
 
-.fsStripLabel b {
-  font: 700 22px/1 var(--font-sans);
+.fsTab {
+  padding: 3px 9px 5px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font: 13px var(--font-sans);
+  color: #93a7b8;
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.fsTab:hover {
+  color: #e6eef5;
+}
+
+/* 고른 분야는 제 색으로 밝힌다. --tone 은 탭마다 제 분야 값이 걸려 있다. */
+.fsTab[aria-selected='true'] {
+  border-bottom-color: rgb(var(--tone));
+  color: #f4efe5;
+  font-weight: 700;
+}
+
+/* 기록이 없는 분야. 눌리기는 한다 — 막아 두면 왜 안 되는지 알 수 없다. */
+.fsTab[data-empty='on'] {
+  color: #56687a;
+}
+
+.fsTab[data-empty='on']:hover {
+  color: #8ba0b2;
+}
+
+.fsTab:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.fsTabsCount {
+  margin-left: auto;
+  font: 12px var(--font-sans);
   font-variant-numeric: tabular-nums;
-  color: #e9d6b2;
+  color: #7f94a6;
 }
 
 .fsStripEmpty {
-  align-self: center;
+  display: grid;
+  flex: 1;
+  align-content: center;
   margin: 0;
   font: italic 13px var(--font-serif-kr);
   color: #8ba0b2;
@@ -332,7 +375,9 @@
   padding: 0 0 9px;
   overflow-x: auto;
   list-style: none;
-  overscroll-behavior-x: contain;
+  /* 휠은 위 effect 가 가로 이동으로 바꾼다. 이것은 끝에 닿았을 때 뒤쪽으로 넘어가는 것까지
+     막아, 카드를 끝까지 민 뒤에도 뒤 화면이 따라 움직이지 않게 한다. */
+  overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: rgba(233, 214, 178, 0.32) transparent;
 }

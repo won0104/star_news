@@ -129,13 +129,12 @@ export function DiaryHistoryPane() {
   const [selectedNode, setSelectedNode] = useState(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   /*
-   * 전체화면에서만 쓰는 두 가지. 행성이 화면을 덮으면 오른쪽 종이가 가려져서, 분야를 골라도
-   * 사건 목록이 보이지 않는다. 그 자리를 아래 가로 띠와 오른쪽 칸이 대신한다.
+   * 전체화면에서 띠가 보여 주는 사건. 행성이 화면을 덮으면 오른쪽 종이가 가려지므로,
+   * 아래 가로 띠와 오른쪽 칸이 그 자리를 대신한다.
    *
-   * stripOpen 은 분야 중심 별을 누른 적이 있는지, fsEventId 는 띠에서 고른 사건이다.
-   * 사건을 골라도 띠는 닫지 않는다 — 옆 사건으로 바로 옮겨 갈 수 있어야 한다.
+   * 띠 자체는 전체화면이면 늘 떠 있다 — 분야 탭이 거기 있어서, 접혀 있으면 고를 것이
+   * 어디에도 보이지 않는다.
    */
-  const [stripOpen, setStripOpen] = useState(false)
   const [fsEventId, setFsEventId] = useState(null)
   const [eventPageIndex, setEventPageIndex] = useState(0)
   const [openEventId, setOpenEventId] = useState(null)
@@ -144,6 +143,8 @@ export function DiaryHistoryPane() {
   // 펼친 사건 줄. 목록이 스크롤되면 아래쪽 사건은 보이는 자리 밖에서 열려 아무 일도 일어나지
   // 않은 것처럼 보인다. 그래서 펼친 줄을 눈에 들어오는 자리로 끌어온다.
   const openEventRef = useRef(null)
+  // 전체화면 카드 띠. 휠을 가로 이동으로 바꾸려면 네이티브 리스너가 필요하다(아래 effect).
+  const fsStripRef = useRef(null)
 
   // 분야를 옮겨 다녀도 대표 별들은 그대로다. 다시 부르는 것은 기간이 바뀔 때뿐이다.
   useEffect(() => {
@@ -184,19 +185,41 @@ export function DiaryHistoryPane() {
     })
   }, [openEventId, reduceMotion])
 
+  /*
+   * 카드 띠 위에서 굴린 휠을 좌우 이동으로 바꾼다.
+   *
+   * React 의 onWheel 은 루트에 passive 로 붙어 preventDefault 가 듣지 않으므로, 요소에
+   * 직접 `{ passive: false }` 로 건다. 막지 않으면 휠이 카드도 옮기고 뒤쪽도 함께 굴려
+   * 한 번의 조작이 두 군데에 먹는다.
+   *
+   * 트랙패드의 가로 제스처(deltaX)는 건드리지 않는다 — 브라우저가 이미 옳게 처리한다.
+   */
+  useEffect(() => {
+    const strip = fsStripRef.current
+    if (!strip) return undefined
+    const handleWheel = (event) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return
+      event.preventDefault()
+      strip.scrollLeft += event.deltaY
+    }
+    strip.addEventListener('wheel', handleWheel, { passive: false })
+    return () => strip.removeEventListener('wheel', handleWheel)
+  }, [isFullscreen])
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       const on = document.fullscreenElement === planetPortalRef.current
       setIsFullscreen(on)
-      // 나가면 접는다. 남겨 두면 다음에 전체화면을 켤 때 지난번 띠가 그대로 떠 있다.
-      if (!on) {
-        setStripOpen(false)
-        setFsEventId(null)
-      }
+      // 들어갈 때는 종이에서 펼쳐 둔 사건을 그대로 이어받고, 나갈 때는 놓는다. 펼친 채로
+      // 전체화면을 켰는데 아무것도 안 골라져 있으면 보던 것을 잃은 것처럼 보인다.
+      setFsEventId(on ? openEventId : null)
     }
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
+    // openEventId 가 바뀔 때마다 리스너를 다시 건다. ref 로 최신값을 훔쳐보는 편이 리스너를
+    // 한 번만 걸지만, 렌더 중에 ref 를 쓰게 되어 규칙에 어긋난다. 이 리스너는 붙였다 떼는
+    // 비용이 없는 쪽이라 의존성에 넣는 것이 낫다.
+  }, [openEventId])
 
   const current = map.scope === scope ? map : { state: 'loading', data: null }
   const articlesByEvent = articles.scope === scope ? articles.byEvent : {}
@@ -233,7 +256,6 @@ export function DiaryHistoryPane() {
   const selectTopic = (nextTopic) => {
     setSelectedNode(null)
     setOpenEventId(null)
-    setFsEventId(null)
     setEventPageIndex(0)
     setParams({ view: 'log', topic: nextTopic.topicCode }, { replace: true })
   }
@@ -280,15 +302,12 @@ export function DiaryHistoryPane() {
     const otherTopic = node.topicCode && node.topicCode !== topic.topicCode
     if (otherTopic) {
       setOpenEventId(null)
-      setFsEventId(null)
       setEventPageIndex(0)
       setParams({ view: 'log', topic: node.topicCode }, { replace: true })
     }
 
-    if (node.kind === 'TOPIC_CLUSTER') {
-      if (isFullscreen) setStripOpen(true)
-      return
-    }
+    // 분야 중심 별은 그 분야로 옮기는 것으로 끝난다. 띠는 이미 떠 있다.
+    if (node.kind === 'TOPIC_CLUSTER') return
 
     // 분야를 막 옮겼으면 events 는 아직 이전 분야의 것이라 여기서 찾으면 엉뚱한 것이 걸린다.
     if (otherTopic || node.nodeType !== 'EVENT') return
@@ -308,7 +327,6 @@ export function DiaryHistoryPane() {
    */
   const openInFullscreen = (event) => {
     setFsEventId(event.id)
-    setStripOpen(true)
     setSelectedNode({
       id: event.id,
       nodeType: 'EVENT',
@@ -391,7 +409,7 @@ export function DiaryHistoryPane() {
         <div
           ref={planetPortalRef}
           className={styles.planetPortal}
-          data-strip={isFullscreen && stripOpen ? 'on' : undefined}
+          data-strip={isFullscreen ? 'on' : undefined}
           data-split={isFullscreen && fsEvent ? 'on' : undefined}
         >
           <div className={styles.planetStage}>
@@ -432,16 +450,34 @@ export function DiaryHistoryPane() {
             </aside>
           )}
 
-          {isFullscreen && stripOpen && (
+          {isFullscreen && (
             <div className={styles.fsStrip}>
-              <span className={styles.fsStripLabel}>
-                {topic.topicName}
-                <b>{events.length}</b>
-              </span>
+              {/*
+                분야 탭. 행성의 분야 중심 별과 같은 일을 하지만, 별은 돌려서 찾아야 하고
+                이쪽은 일곱이 한눈에 선다. 기록이 없는 분야는 흐리게 두되 막지는 않는다 —
+                눌리지 않으면 왜 안 되는지 알 수 없다.
+              */}
+              <div className={styles.fsTabs} role="tablist" aria-label="분야">
+                {TOPICS.map((item) => (
+                  <button
+                    key={item.topicCode}
+                    type="button"
+                    role="tab"
+                    aria-selected={item.topicCode === topic.topicCode}
+                    className={`${styles.fsTab} ${styles[TONE_CLASS[item.tone]]}`}
+                    data-empty={recordedTopics.has(item.topicCode) ? undefined : 'on'}
+                    onClick={() => selectTopic(item)}
+                  >
+                    {item.topicName}
+                  </button>
+                ))}
+                <span className={styles.fsTabsCount}>사건 {events.length}</span>
+              </div>
+
               {events.length === 0 ? (
                 <p className={styles.fsStripEmpty}>이 분야에 남은 기록이 없어요.</p>
               ) : (
-                <ul>
+                <ul ref={fsStripRef}>
                   {events.map((event) => (
                     <li key={event.id}>
                       <button
