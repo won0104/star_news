@@ -20,7 +20,13 @@ import styles from './DiaryHistoryPane.module.css'
 
 const HistoryPlanet = lazy(loadHistoryPlanet)
 const BOOKMARK_ASSET = '/assets/history/bookmarks'
-const EVENTS_PER_PAGE = 3
+/*
+ * 한 쪽에 세우는 사건 수.
+ *
+ * 셋이던 것을 넷으로 늘린다. 줄 높이를 70px 에서 32px 로 줄이고 목록에 스크롤을 준 뒤로는
+ * 셋이 종이의 위쪽만 쓰고 아래가 비어, 쪽을 넘길 이유가 실제 분량보다 자주 생겼다.
+ */
+const EVENTS_PER_PAGE = 4
 const ARTICLES_PER_EVENT = 5
 /*
  * 펼친 사건이 처음에 보여 주는 발언 수.
