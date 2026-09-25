@@ -87,7 +87,14 @@ def calculate_cf_scores(
     recency_threshold: datetime | None = None,
 ) -> list[CFCandidate]:
     candidates = repository.find_cf_candidate_events(session, user_id, interested_topic_codes, recency_threshold)
-    return [CFCandidate(event_id=c["eventId"], cf_score=c["cfScore"]) for c in candidates]
+    if not candidates:
+        return []
+
+    max_cf_score = max(c["cfScore"] for c in candidates)
+    if max_cf_score <= 0:
+        return [CFCandidate(event_id=c["eventId"], cf_score=0.0) for c in candidates]
+    # 최댓값으로 나눠 0~1로 정규화
+    return [CFCandidate(event_id=c["eventId"], cf_score=c["cfScore"] / max_cf_score) for c in candidates]
 
 # 2. 콘텐츠 기반 필터링(CBF) 공용 모듈
 # CONSUMED 이력 하나의 가중치 계산 - 많이 클릭할수록(로그 스케일), 최근에 볼수록(지수 감쇠) 가중치 증가
