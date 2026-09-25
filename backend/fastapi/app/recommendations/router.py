@@ -3,7 +3,11 @@ from fastapi import APIRouter, Depends
 from app.database import get_neo4j_session
 from app.dependencies import verify_internal_service
 from app.recommendations import service
-from app.recommendations.schemas import RecommendationCalculateRequest, RecommendationRetuneResult
+from app.recommendations.schemas import (
+    RecommendationCalculateRequest,
+    RecommendationRetuneRequest,
+    RecommendationRetuneResult,
+)
 
 router = APIRouter(dependencies=[Depends(verify_internal_service)])
 
@@ -19,8 +23,10 @@ def calculate_recommendations(request: RecommendationCalculateRequest, session=D
 
 # 호출될 때마다 그리드서치 전체를 새로 돌려서 최적 가중치를 반환하는 내부 API
 @router.post("/recommendations/retune")
-def retune_recommendations() -> dict:
-    cbf_weight, cf_weight, ndcg, hit_rate, recall = service.select_best_weights()
+def retune_recommendations(request: RecommendationRetuneRequest = RecommendationRetuneRequest()) -> dict:
+    cbf_weight, cf_weight, ndcg, hit_rate, recall = service.select_best_weights(
+        current_cbf_weight=request.current_cbf_weight
+    )
     result = RecommendationRetuneResult(
         cbf_weight=cbf_weight,
         cf_weight=cf_weight,

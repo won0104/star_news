@@ -72,3 +72,52 @@ def test_select_best_weights_returns_a_grid_combination_with_valid_metrics():
     assert 0.0 <= ndcg <= 1.0
     assert 0.0 <= hit_rate <= 1.0
     assert 0.0 <= recall <= 1.0
+
+
+# current_cbf_weight를 넘기면, 전체 그리드에서 최고점이 아니라 그 값 기준 ±MAX_WEIGHT_STEP 안에서만 골라야 함
+def test_select_best_weights_clamps_to_current_weight_plus_minus_max_step():
+    with _driver.session() as session:
+        _reset_fixture(session)
+        _seed_fixture(session)
+
+    # 그리드 왼쪽 끝(0.0) 기준 - cbf_weight는 0.0 또는 0.1만 나올 수 있음
+    cbf_weight, _cf_weight, _ndcg, _hit_rate, _recall = service.select_best_weights(current_cbf_weight=0.0)
+    assert cbf_weight in {0.0, 0.1}
+
+    # 그리드 오른쪽 끝(1.0) 기준 - cbf_weight는 0.9 또는 1.0만 나올 수 있음
+    cbf_weight, _cf_weight, _ndcg, _hit_rate, _recall = service.select_best_weights(current_cbf_weight=1.0)
+    assert cbf_weight in {0.9, 1.0}
+
+
+# NDCG 최고점 후보를 조합별로 다르게 조작해서, 동률(0.9/0.1 vs 0.6/0.4)일 때 그리드 순서(0.9쪽이 먼저 나옴)가
+# 아니라 기준값(기본값 0.7)에 더 가까운 쪽(0.6/0.4)을 고르는지 확인
+def test_select_best_weights_breaks_ties_by_distance_to_reference(monkeypatch):
+    monkeypatch.setattr(service.repository, "find_users_eligible_for_evaluation", lambda session, recency_threshold: {1: []})
+    monkeypatch.setattr(service, "build_holdout_splits", lambda all_histories: {1: (["held-1"], ["visible-1"])})
+
+    def fake_evaluate(user_id, held_out_ids):
+        return {
+            combo: (["held-1"] if combo in {(0.9, 0.1), (0.6, 0.4)} else ["other"])
+            for combo in service.WEIGHT_GRID
+        }
+
+    monkeypatch.setattr(service, "evaluate_user_across_weight_grid", fake_evaluate)
+
+    cbf_weight, cf_weight, ndcg, _hit_rate, _recall = service.select_best_weights()
+
+    assert (cbf_weight, cf_weight) == (0.6, 0.4)
+    assert ndcg == 1.0
+
+
+# 모든 조합이 동률(전부 0)로 나오는 퇴화 상황 - 그리드 첫 항목(1.0/0.0)이 아니라 기본값(0.7/0.3)을 골라야 함
+def test_select_best_weights_falls_back_to_default_when_every_combo_ties_at_zero(monkeypatch):
+    monkeypatch.setattr(service.repository, "find_users_eligible_for_evaluation", lambda session, recency_threshold: {1: []})
+    monkeypatch.setattr(service, "build_holdout_splits", lambda all_histories: {1: (["held-1"], ["visible-1"])})
+    monkeypatch.setattr(
+        service, "evaluate_user_across_weight_grid", lambda user_id, held_out_ids: {combo: ["other"] for combo in service.WEIGHT_GRID}
+    )
+
+    cbf_weight, cf_weight, ndcg, hit_rate, recall = service.select_best_weights()
+
+    assert (cbf_weight, cf_weight) == (service.DEFAULT_CBF_WEIGHT, service.DEFAULT_CF_WEIGHT)
+    assert (ndcg, hit_rate, recall) == (0.0, 0.0, 0.0)

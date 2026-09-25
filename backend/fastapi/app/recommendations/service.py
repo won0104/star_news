@@ -353,8 +353,12 @@ def evaluate_user_across_weight_grid(user_id: int, held_out_ids: list[str]) -> d
             tx.rollback()
 
 
+# 재튜닝 한 번에 cbf_weight가 직전 값 대비 최대 이만큼만 움직이게 제한(그리드 간격 1칸) - 노이즈로 값이 널뛰는 것 방지
+MAX_WEIGHT_STEP = 0.1
+
+
 # 재튜닝 메인 함수 - 그리드서치 전체를 돌려서 NDCG@10이 가장 높은 (cbf_weight, cf_weight) 조합을 고른다
-def select_best_weights() -> tuple[float, float, float, float, float]:
+def select_best_weights(current_cbf_weight: float | None = None) -> tuple[float, float, float, float, float]:
     # 홀드아웃 정답 자격 판단에도 실제 추천 후보 조건과 같은 최근성 기준을 쓴다
     recency_threshold = datetime.now(timezone.utc) - timedelta(days=repository.RECENCY_WINDOW_DAYS)
     with _driver.session() as session:
@@ -387,15 +391,28 @@ def select_best_weights() -> tuple[float, float, float, float, float]:
     if all(not scores for scores in metrics_by_weight.values()):
         return DEFAULT_CBF_WEIGHT, DEFAULT_CF_WEIGHT, 0.0, 0.0, 0.0
 
-    best = None  # (cbf_weight, cf_weight, ndcg, hit_rate, recall) - NDCG 기준 최고 조합
-    for cbf_weight, cf_weight in WEIGHT_GRID:
-        scores = metrics_by_weight[(cbf_weight, cf_weight)]
+    # 직전 값이 있으면 그 값 기준 ±MAX_WEIGHT_STEP 안의 조합에서만 고른다(급변 방지)
+    candidate_grid = WEIGHT_GRID
+    if current_cbf_weight is not None:
+        candidate_grid = [
+            combo for combo in WEIGHT_GRID if abs(combo[0] - current_cbf_weight) <= MAX_WEIGHT_STEP + 1e-9
+        ] or WEIGHT_GRID  # 직전 값이 그리드에서 너무 벗어나 있는 등 비정상 상황이면 안전하게 전체로 폴백
+
+    averaged: dict[tuple[float, float], tuple[float, float, float]] = {}
+    for combo in candidate_grid:
+        scores = metrics_by_weight[combo]
         avg_ndcg = sum(s[0] for s in scores) / len(scores) if scores else 0.0
         avg_hit = sum(s[1] for s in scores) / len(scores) if scores else 0.0
         avg_recall = sum(s[2] for s in scores) / len(scores) if scores else 0.0
+        averaged[combo] = (avg_ndcg, avg_hit, avg_recall)
 
-        if best is None or avg_ndcg > best[2]:
-            best = (cbf_weight, cf_weight, avg_ndcg, avg_hit, avg_recall)
-
-    cbf_weight, cf_weight, ndcg, hit_rate, recall = best
+    # NDCG 최고점을 찍은 조합이 여럿(동률)이면
+    # 그중 직전 값(없으면 기본값)에 가장 가까운 것을 고른다 - 그리드 순서에 따른 임의 편향을 없애기 위함
+    best_ndcg = max(avg[0] for avg in averaged.values())
+    reference = current_cbf_weight if current_cbf_weight is not None else DEFAULT_CBF_WEIGHT
+    cbf_weight, cf_weight = min(
+        (combo for combo, avg in averaged.items() if avg[0] == best_ndcg),
+        key=lambda combo: abs(combo[0] - reference),
+    )
+    ndcg, hit_rate, recall = averaged[(cbf_weight, cf_weight)]
     return cbf_weight, cf_weight, ndcg, hit_rate, recall
