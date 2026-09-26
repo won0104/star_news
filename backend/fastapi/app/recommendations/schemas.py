@@ -59,6 +59,12 @@ class RecommendationCalculateResponse(CamelModel):
     results: list[UserRecommendationResult]
 
 
+# POST /internal/v1/recommendations/retune 요청 스키마(처음 재튜닝이면 없음)
+class RecommendationRetuneRequest(CamelModel):
+    current_cbf_weight: float | None = None
+    current_cf_weight: float | None = None
+
+
 # POST /internal/v1/recommendations/retune 응답 스키마
 class RecommendationRetuneResult(CamelModel):
     cbf_weight: float
