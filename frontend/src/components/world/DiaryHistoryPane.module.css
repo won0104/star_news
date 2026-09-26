@@ -241,6 +241,408 @@
   box-shadow: none;
 }
 
+/* ---- 전체화면 안의 배치 -------------------------------------------------------- */
+/*
+ * 아래 띠의 높이는 행성이 쓰고 남긴 자리 그대로다.
+ *
+ * 전체화면은 variant='default' 로 그려져서 HistoryPane.module.css 의
+ * `.planetViewport { height: clamp(590px, calc(100vh - 334px), 760px) }` 가 적용된다.
+ * 즉 캔버스가 화면을 다 채우지 않고 아래를 비워 둔다 — 1080px 화면에서 334px 이다.
+ * 그 빈 자리를 띠가 그대로 받는다.
+ *
+ * ⚠ 저 clamp 값은 HistoryPane.module.css 의 .planetViewport 와 같아야 한다. 한쪽만
+ *   고치면 띠가 캔버스를 덮거나 사이가 벌어진다.
+ *
+ * 다만 세로로 아주 긴 화면에서는 남는 자리가 680px 까지 커지므로 300px 에서 끊는다.
+ * 카드가 반 화면을 차지하면 행성을 보러 들어온 화면이 아니게 된다.
+ */
+.planetPortal:fullscreen {
+  --fs-planet-h: clamp(590px, calc(100vh - 334px), 760px);
+  --fs-strip-h: clamp(150px, calc(100vh - var(--fs-planet-h)), 300px);
+}
+/*
+ * 평소에는 행성이 상자를 다 쓴다. 전체화면에서 아래 띠가 열리면 그만큼 물러나고, 사건을
+ * 고르면 오른쪽 절반을 더 내준다. 캔버스가 제 부모를 채우는 구조라, 부모의 자리만 바꾸면
+ * 행성은 따라온다.
+ */
+.planetStage {
+  position: absolute;
+  inset: 0;
+  transition: inset 220ms cubic-bezier(0.16, 0.84, 0.3, 1);
+}
+
+.planetPortal[data-strip='on'] .planetStage {
+  bottom: var(--fs-strip-h);
+}
+
+.planetPortal[data-split='on'] .planetStage {
+  right: 50%;
+}
+
+/* 아래 가로 띠 — 고른 분야의 사건 전부. 옆으로 흐르므로 쪽을 나누지 않는다(오른쪽 종이가
+   넷씩 끊는 것은 종이 높이가 정해져 있어서다). */
+.fsStrip {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  height: var(--fs-strip-h, 150px);
+  padding: 11px 22px 14px;
+  border-top: 1px solid rgba(233, 214, 178, 0.18);
+  background: rgba(6, 15, 26, 0.86);
+  backdrop-filter: blur(6px);
+}
+
+/* 분야 탭. 밤하늘 위라 책갈피 에셋 대신 글자와 밑줄로만 그린다 — 종이 질감의 탭을 여기
+   올리면 화면에서 그 조각만 다른 세계가 된다. */
+/* 아래 선은 띠 폭을 꽉 채운다. 음수 여백으로 띠의 좌우 패딩을 되돌려, 탭과 카드가 한
+   상자 안의 두 층으로 읽히게 한다. */
+.fsTabs {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  margin: 0 -22px;
+  padding: 0 22px 7px;
+  border-bottom: 1px solid rgba(233, 214, 178, 0.16);
+}
+
+.fsTab {
+  padding: 3px 9px 5px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font: 13px var(--font-sans);
+  color: #93a7b8;
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.fsTab:hover {
+  color: #e6eef5;
+}
+
+/* 고른 분야는 제 색으로 밝힌다. --tone 은 탭마다 제 분야 값이 걸려 있다. */
+.fsTab[aria-selected='true'] {
+  border-bottom-color: rgb(var(--tone));
+  color: #f4efe5;
+  font-weight: 700;
+}
+
+/* 기록이 없는 분야. 눌리기는 한다 — 막아 두면 왜 안 되는지 알 수 없다. */
+.fsTab[data-empty='on'] {
+  color: #56687a;
+}
+
+.fsTab[data-empty='on']:hover {
+  color: #8ba0b2;
+}
+
+.fsTab:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.fsTabsCount {
+  margin-left: auto;
+  font: 12px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #7f94a6;
+}
+
+.fsStripEmpty {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  margin: 0;
+  font: italic 13px var(--font-serif-kr);
+  color: #8ba0b2;
+}
+
+/* 카드가 띠 높이를 그대로 쓴다. 아래 padding 은 가로 스크롤 막대의 자리다 — 없으면 막대가
+   카드 위에 겹쳐 그려진다. */
+.fsStrip ul {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0;
+  padding: 0 0 9px;
+  overflow-x: auto;
+  list-style: none;
+  /* 휠은 위 effect 가 가로 이동으로 바꾼다. 이것은 끝에 닿았을 때 뒤쪽으로 넘어가는 것까지
+     막아, 카드를 끝까지 민 뒤에도 뒤 화면이 따라 움직이지 않게 한다. */
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(233, 214, 178, 0.32) transparent;
+}
+
+.fsStrip li {
+  display: flex;
+  flex: none;
+}
+
+/* 카드 폭을 고정해 띠가 일정한 리듬으로 흐르게 한다. 제목이 길면 세 줄에서 자른다 —
+   높이가 들쭉날쭉하면 가로로 훑는 눈이 걸린다.
+   제목은 위, 기사 수는 아래에 붙여 카드가 띠 높이를 채우게 한다. */
+.fsStrip button {
+  display: grid;
+  width: 210px;
+  height: 100%;
+  align-content: space-between;
+  gap: 5px;
+  padding: 10px 13px;
+  border: 1px solid rgba(233, 214, 178, 0.16);
+  border-radius: 6px;
+  background: rgba(255, 252, 244, 0.05);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.fsStrip button:hover {
+  border-color: rgba(233, 214, 178, 0.42);
+  background: rgba(255, 252, 244, 0.1);
+}
+
+.fsStrip button[aria-current='true'] {
+  border-color: rgb(var(--tone));
+  background: rgba(var(--tone), 0.16);
+}
+
+.fsStrip button:focus-visible {
+  outline: 2px solid rgb(var(--tone));
+  outline-offset: 2px;
+}
+
+.fsStrip strong {
+  display: -webkit-box;
+  overflow: hidden;
+  font: 700 13px/1.4 var(--font-serif-kr);
+  color: #f2ece1;
+  word-break: keep-all;
+  -webkit-box-orient: vertical;
+  /* 세 줄. line-clamp 은 정수만 받아 calc() 를 쓸 수 없으므로 띠가 가장 낮을 때(150px)를
+     기준으로 정한다 — 그때 카드 속이 93px 이고 세 줄(54.6px)+기사 수(13px)=67.6px 다.
+     띠가 그보다 두꺼운 화면에서는 남는 만큼 제목 아래가 벌어진다. */
+  -webkit-line-clamp: 3;
+}
+
+.fsStrip small {
+  font: 11px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #93a7b8;
+}
+
+/* 오른쪽 칸 — 고른 사건의 속. 종이가 아니라 밤하늘 위라 색을 뒤집는다. */
+.fsDetail {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  width: 50%;
+  flex-direction: column;
+  border-left: 1px solid rgba(233, 214, 178, 0.18);
+  background: rgba(6, 15, 26, 0.9);
+  backdrop-filter: blur(6px);
+}
+
+.planetPortal[data-strip='on'] .fsDetail {
+  bottom: var(--fs-strip-h);
+}
+
+.fsDetail > header {
+  position: relative;
+  flex: none;
+  padding: 22px 52px 16px 26px;
+  border-bottom: 1px solid rgba(233, 214, 178, 0.16);
+}
+
+.fsDetail > header span {
+  font: 700 11px var(--font-sans);
+  letter-spacing: 0.12em;
+  color: rgb(var(--tone));
+}
+
+.fsDetail > header h3 {
+  margin: 6px 0 0;
+  font: 700 clamp(17px, 1.5vw, 24px)/1.35 var(--font-serif-kr);
+  color: #f4efe5;
+  word-break: keep-all;
+}
+
+.fsDetail > header button {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(233, 214, 178, 0.24);
+  border-radius: 50%;
+  background: transparent;
+  color: #cfe0ec;
+  cursor: pointer;
+  place-items: center;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+
+.fsDetail > header button:hover {
+  border-color: rgba(233, 214, 178, 0.6);
+  color: #fff;
+}
+
+/*
+ * 속은 오른쪽 종이의 .statementBox 와 같은 컴포넌트가 그린다. 종이 위에서 쓰던 색만
+ * 뒤집어 씌운다 — 구조를 다시 짜면 두 곳이 어긋나기 시작한다.
+ */
+.fsDetailBody {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  gap: 22px;
+  padding: 20px 26px 26px;
+  overflow-y: auto;
+  align-content: start;
+  color: #dfe7ee;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(233, 214, 178, 0.32) transparent;
+}
+
+.fsDetailBody h4 {
+  margin: 0 0 8px;
+  font: 700 12px var(--font-sans);
+  letter-spacing: 0.08em;
+  color: #9db3c6;
+}
+
+.fsDetailBody li,
+.fsDetailBody p {
+  color: #e4ebf1;
+}
+
+.fsDetailBody .statementList li::before {
+  color: rgba(233, 214, 178, 0.5);
+}
+
+.fsDetailBody .statementEmpty {
+  color: #8ba0b2;
+}
+
+.fsDetailBody .articleWhen {
+  color: #93a7b8;
+}
+
+.fsDetailBody .articleSource {
+  color: #7f94a6;
+}
+
+.fsDetailBody .eventArticleList li {
+  border-top-color: rgba(233, 214, 178, 0.14);
+}
+
+.fsDetailBody .statementMore {
+  border-bottom-color: rgba(233, 214, 178, 0.45);
+  color: #9db3c6;
+}
+
+.fsDetailBody .articleBookmark {
+  color: rgba(207, 224, 236, 0.55);
+}
+
+/*
+ * 전체화면 오른쪽 칸의 글씨 크기.
+ *
+ * 기본값은 책 오른쪽 종이의 좁은 칸(폭 31.5%)에 맞춘 clamp 라, 화면 절반을 쓰는 여기서는
+ * 지나치게 작다. 이 칸은 늘 큰 화면의 절반이므로 vw 로 흔들 이유가 없어 고정값으로 둔다.
+ */
+.fsDetailBody h4 {
+  font-size: 13px;
+}
+
+.fsDetailBody .statementList li {
+  font-size: 15px;
+}
+
+.fsDetailBody .statementList li::before {
+  font-size: 22px;
+}
+
+.fsDetailBody .statementEmpty,
+.fsDetailBody .statementMore {
+  font-size: 12px;
+}
+
+.fsDetailBody .articleWhen {
+  font-size: 12px;
+}
+
+.fsDetailBody .articleSource {
+  font-size: 11px;
+}
+
+.fsDetailBody .eventArticleList p {
+  font-size: 14px;
+}
+
+.fsDetailBody .articleAction {
+  font-size: 12px;
+}
+
+.fsDetailBody .articleSummaryText {
+  font-size: 13px;
+}
+
+.fsDetailBody .articleSummaryNote {
+  font-size: 12px;
+}
+
+.fsDetailBody .articleBookmark {
+  width: 22px;
+  height: 22px;
+}
+
+.fsDetailBody .articleBookmark svg {
+  width: 13px;
+}
+
+/* 전체화면 오른쪽 칸은 밤하늘 위라 요약·원문도 색을 뒤집는다. */
+.fsDetailBody .articleAction {
+  color: #9db3c6;
+}
+
+.fsDetailBody .articleAction:hover {
+  color: #f2ece1;
+}
+
+.fsDetailBody .articleActionAway {
+  color: #7f94a6;
+}
+
+.fsDetailBody .articleSummary {
+  border-left-color: rgba(233, 214, 178, 0.28);
+}
+
+.fsDetailBody .articleSummaryText {
+  color: #dbe4ec;
+}
+
+.fsDetailBody .articleSummaryNote {
+  color: #8ba0b2;
+}
+
+.fsDetailBody .articleBookmarkOn {
+  color: rgb(var(--tone));
+}
+
 .planetLoading {
   display: grid;
   width: 100%;
@@ -520,20 +922,74 @@
 
 /* The category's events, on the same plaque as the article cards below them — one list
    leads to the other, so they are the same object at two depths. */
+/*
+ * 사건 목록만 흐른다.
+ *
+ * .recordPage 는 책 종이만큼 높이가 고정인데 펼친 사건은 얼마든지 길어질 수 있어서, 전에는
+ * 넘친 만큼 책 바깥으로 그대로 흘러나가 쪽 번호까지 밀어냈다 — 어느 조상도 자르지 않는다.
+ * 여기서 받아 낸다.
+ *
+ * 머리글·기간 칸·쪽 번호는 제자리에 남는다. 분야 이름과 몇 쪽인지는 목록을 훑는 내내 보여야
+ * 한다. `min-height: 0` 은 flex 자식이 제 내용보다 작아질 수 있게 하는 조건이고, 그것 없이는
+ * overflow 를 걸어도 줄어들지 않아 아무 일도 하지 않는다.
+ *
+ * 스크롤 막대는 종이 위라 가늘고 옅게 둔다. 오른쪽 음수 여백은 막대가 글을 밀어내지 않게
+ * 종이 가장자리까지 내보내는 것이다.
+ */
 .eventList {
   display: grid;
   gap: 0;
   min-height: 0;
-  margin: 13px 0 0;
-  padding: 0;
+  flex: 1;
+  margin: 13px -6px 0 0;
+  padding: 0 6px 0 0;
+  overflow-y: auto;
   list-style: none;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 102, 80, 0.4) transparent;
 }
 
-.eventList button {
+/* 발언이 넷을 넘을 때의 더 보기. 목록의 한 줄이 아니라 그 아래 딸린 조작이라, 인용 글씨가
+   아니라 라벨 글씨로 둔다. */
+.statementMore {
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dashed rgba(111, 92, 71, 0.45);
+  background: none;
+  font: clamp(8px, 0.68vw, 11px) var(--font-sans);
+  color: #8a7862;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.statementMore:hover {
+  border-bottom-color: rgba(58, 47, 38, 0.75);
+  color: #5b4330;
+}
+
+.statementMore:focus-visible {
+  outline: 2px solid #182b43;
+  outline-offset: 2px;
+}
+
+/*
+ * 사건 줄 토글. 선택자를 `> li >` 로 좁힌 이유는, 펼친 안에도 버튼이 둘 더 있기 때문이다
+ * (기사 북마크·발언 더보기). `.eventList button` 은 명시도가 (0,1,1) 이라 그 둘의
+ * 자기 규칙(0,1,0)을 이겨, 아이콘에 사건 줄의 아래 테두리와 26px 오른쪽 패딩이 얹혔다.
+ */
+.eventList > li > button {
   position: relative;
+  /* 제목과 기사 수를 한 줄에 나란히 둔다. 전에는 기사 수가 제목 위에 제 줄을 차지해 행마다
+     12px 을 더 먹었다. baseline 정렬이라 제목이 두 줄로 넘어가도 수는 첫 줄에 남는다.
+     오른쪽 패딩은 절대 배치된 펼침 표시의 자리다. */
   display: grid;
+  grid-template-columns: 1fr max-content;
+  align-items: baseline;
   width: 100%;
-  padding: clamp(11px, 1vw, 15px) 28px clamp(11px, 1vw, 15px) 4px;
+  column-gap: 10px;
+  padding: clamp(6px, 0.55vw, 9px) 26px clamp(6px, 0.55vw, 9px) 4px;
   border: 0;
   border-bottom: 1px solid rgba(69, 57, 45, 0.2);
   background: transparent;
@@ -548,32 +1004,31 @@
 /* 예전의 '›' 꼬리표는 떼어냈다. 이 행은 다른 화면으로 넘어가는 링크가 아니라 제자리에서
    펼쳐지는 토글이고, 방향을 가리키는 표시는 행 안의 ▸/▾ 가 맡는다. */
 
-.eventList button:hover {
+.eventList > li > button:hover {
   color: #193248;
   transform: translateX(2px);
 }
 
-.eventList button:focus-visible {
+.eventList > li > button:focus-visible {
   outline: 2px solid rgb(var(--tone));
   outline-offset: 2px;
 }
 
-.eventList small {
+/* 사건 줄의 기사 수. 같은 이유로 좁힌다 — 펼친 안의 날짜(.articleWhen)와
+   출처(.articleSource)도 <small> 이라 이 규칙에 함께 걸려 있었다. */
+.eventList > li > button small {
   font: clamp(8px, 0.66vw, 11px) var(--font-sans);
+  font-variant-numeric: tabular-nums;
   color: #8d745e;
+  white-space: nowrap;
 }
 
-.eventList strong {
-  margin-top: 3px;
-  font: 700 clamp(12px, 1.03vw, 16px)/1.4 var(--font-serif-kr);
+/* 줄간을 1.4 에서 1.28 로 조인다. 한 줄짜리 제목이 대부분이라 줄간은 읽기보다 행 높이에
+   더 기여했고, 두 줄이 되는 긴 제목에서도 1.28 이면 붙어 보이지 않는다. */
+.eventList > li > button strong {
+  min-width: 0;
+  font: 700 clamp(12px, 1.03vw, 16px)/1.28 var(--font-serif-kr);
   word-break: keep-all;
-}
-
-.eventList p {
-  margin: 3px 0 0;
-  font: clamp(9px, 0.74vw, 12px) var(--font-sans);
-  color: rgb(var(--tone));
-  filter: brightness(0.72);
 }
 
 .eventPager {
@@ -888,41 +1343,17 @@
   }
 
   /*
-   * 리본은 책 위로 올린다 — 길쭉해서 책배에 세우면 탭 기둥과 자리를 다툰다. 위에서는 실제
-   * 책갈피처럼 책 위쪽으로 삐져나온다.
+   * 이 폭에서는 리본을 내린다.
    *
-   * transform-origin: 0 0 + rotate(90deg) 이면 자리 계산이 단순하다: 지역 +x 가 화면 아래로,
-   * 지역 +y 가 화면 왼쪽으로 간다. 그래서 상자의 왼쪽 위 꼭지점(left/top)이 회전 뒤 보이는
-   * 영역의 오른쪽 위 꼭지점이 되고, 보이는 영역은
-   *   화면 x : left − 폭×4.368 → left      (46.4%W → 39.6~86%)
-   *   화면 y : top → top + 폭×0.6876      ( 7.31%H → −2.5~4.81%)
-   * 이 된다. clip 도 함께 돌아가므로 지역 오른쪽 22% 를 자르면 화면에서는 아래 22% 가 잘려
-   * 꽂히는 끝이 아래를 본다. 잘리는 선 3.20%H 는 위쪽 가죽(0.1~2.2%)·책배(2.2~2.7%)를 지나
-   * 종이로 0.5%p 들어간 자리다. 숨은 깊이 1.61%H 가 호버 이동 0.73%H 보다 크다.
+   * 내비가 상단바로 서면서 갈래 아래에 같은 이름의 책갈피가 걸리고, 둘이 같은 자리에 같은
+   * 모양으로 겹쳤다. 가는 길은 하나면 된다 — 화면 안의 리본 대신 내비의 책갈피를 남긴다.
+   * 오가는 두 방향 모두 내비가 쥐고 있으므로 길이 끊기지는 않는다.
+   *
+   * 여기 있던 회전 배치(책 위로 90도 돌려 꽂던 것)는 함께 지웠다. 되살릴 일이 있으면 git
+   * 히스토리에 있고, 그때는 내비의 책갈피와 자리를 다시 나눠야 한다.
    */
   .reportSlot {
-    top: -2.5%;
-    left: 86%;
-    width: 10.63%;
-    transform-origin: 0 0;
-    transform: rotate(90deg);
-    clip-path: inset(-2% 22% -2% -25%);
-  }
-
-  /*
-   * 글자는 상자와 함께 돌아가므로 그대로 두면 옆으로 눕고 읽는 방향도 뒤집힌다. 자기 중심을
-   * 기준으로 −90도 되돌리면 합이 0 이 되어 똑바로 서고 왼쪽→오른쪽으로 읽힌다. 되돌린 상자는
-   * 가로로 길어져 리본 방향과 맞는다. 지역 오른쪽 26% 를 비워 글자 중심이 잘리는 78% 안쪽에
-   * 오게 한다.
-   */
-  .reportBookmark span {
-    inset: 0 26% 0 0;
-    font-size: clamp(9px, 2.6vw, 13px);
-    letter-spacing: 0.06em;
-    text-orientation: mixed;
-    transform: rotate(-90deg);
-    transform-origin: center;
-    writing-mode: horizontal-tb;
+    display: none;
   }
 
   /*
@@ -1042,14 +1473,23 @@
 
 /* ---- 사건 토글 ---------------------------------------------------------------- */
 
-/* 행 오른쪽 끝 — 발언 개수와 펼침 표시가 한 줄에 선다. */
-.eventCount {
-  font-variant-numeric: tabular-nums;
-}
-
+/*
+ * 행 오른쪽 끝의 펼침 표시.
+ *
+ * 곁에 두었던 발언 개수를 뺀 뒤로 혼자 남았는데, 그때까지 제 줄을 따로 차지하며 왼쪽 아래에
+ * 서 있었다(주석은 "오른쪽 끝"이라 했지만 실측 x 는 4px 였다). 이제 제목 옆 오른쪽에 세로
+ * 가운데로 세운다 — 버튼의 position:relative 와 오른쪽 패딩이 원래 그 자리를 비워 둔 것이다.
+ *
+ * 줄을 차지하지 않게 되면서 행 높이가 16px 줄어, 사건끼리 붙어 목록으로 읽힌다.
+ */
 .eventChevron {
-  margin-left: 8px;
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  font-size: clamp(12px, 1vw, 16px);
+  line-height: 1;
   color: #8a7862;
+  transform: translateY(-50%);
 }
 
 /* 펼쳐진 내용. 종이 위에 살짝 눌러 넣은 자리처럼, 왼쪽 괘선 하나로만 구분한다 —
@@ -1063,19 +1503,13 @@
   background: rgba(255, 252, 244, 0.34);
 }
 
+/* 자식이 라벨 하나뿐이라 그냥 제목이다. 전에는 flex + space-between 으로 오른쪽 끝에 수를
+   붙였는데, 라벨에서 258px 떨어져 홀로 떠서 무엇의 수인지 읽히지 않았다. */
 .statementBox h4 {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
   margin: 0 0 6px;
   font: 700 clamp(8px, 0.68vw, 11px) var(--font-sans);
   letter-spacing: 0.06em;
   color: #8a7862;
-}
-
-.statementBox h4 b {
-  font-variant-numeric: tabular-nums;
-  color: #6f5c47;
 }
 
 .statementList,
@@ -1163,7 +1597,10 @@
 .articleBookmark {
   display: grid;
   place-items: center;
-  align-self: start;
+  /* 세로 가운데. `start` 였을 때는 행의 border-top 에서 2px 떨어진 자리를 붙잡아, 구분선
+     위에 아이콘이 걸터앉은 것처럼 보였다. 날짜·제목과 달리 이 아이콘은 줄의 어느 글줄에
+     속한 것이 아니라 행 전체에 대한 조작이라, 가운데가 제자리이기도 하다. */
+  align-self: center;
   width: clamp(15px, 1.3vw, 20px);
   height: clamp(15px, 1.3vw, 20px);
   padding: 0;
@@ -1190,6 +1627,78 @@
 
 .articleBookmarkOn {
   color: rgb(var(--tone));
+}
+
+/* 요약·원문 두 갈래. 오늘의 트렌드와 같은 구성이다 — 요약만 두면 원문이 필요한 사람도
+   요약을 펼쳐야 해서, 아무도 읽지 않을 요약을 만들게 된다. */
+.articleActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 12px;
+  margin-top: 4px;
+}
+
+.articleAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: clamp(7px, 0.6vw, 10px) var(--font-sans);
+  color: #8a7862;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.articleAction b {
+  font-size: 0.82em;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.articleAction:hover {
+  color: #4a3626;
+}
+
+.articleAction:focus-visible {
+  outline: 2px solid #182b43;
+  outline-offset: 2px;
+}
+
+/* 원문은 이 화면을 떠나는 길이라 한 단계 물린다. */
+.articleActionAway {
+  color: #a08b6d;
+}
+
+/* 펼친 요약. 기사 줄 안에서 열리므로 왼쪽 실선 하나로만 묶는다 — 상자로 띄우면 목록
+   안에 또 다른 목록이 얹힌 것처럼 읽힌다.
+   `hidden` 은 UA 기본값이 display:none 인데, 여기 display:grid 가 그것을 이긴다.
+   그래서 접기가 먹지 않았다 — 되살리려면 이렇게 명시해야 한다. */
+.articleSummary {
+  display: grid;
+  gap: 5px;
+  justify-items: start;
+  margin: 5px 0 3px;
+  padding: 1px 0 1px 8px;
+  border-left: 1px solid rgba(69, 57, 45, 0.22);
+}
+
+.articleSummary[hidden] {
+  display: none;
+}
+
+.articleSummaryText {
+  font: clamp(8px, 0.68vw, 11px)/1.6 var(--font-serif-kr);
+  color: #55463a;
+  word-break: keep-all;
+}
+
+.articleSummaryNote {
+  font: italic clamp(7px, 0.62vw, 10px) var(--font-serif-kr);
+  color: #a08b6d;
 }
 
 .articleHint {

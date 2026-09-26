@@ -22,6 +22,26 @@ export async function fetchHomeTrends({ signal } = {}) {
 }
 
 /**
+ * `GET /topics/{topicCode}/exploration` — 그 분야의 공개된 최신 회차, 최대 10개.
+ *
+ * `/home` 과 같은 일을 분야 하나에 대해 한다. 응답도 거의 같은 모양인데 이름만 다르다 —
+ * `trends`/`trendItemId` 자리에 `entryNodes`/`entryNodeId` 가 온다. 나머지 다섯 필드
+ * (rank·nodeType·nodeKey·label·articleCount)는 글자까지 같다. 맞추는 일은 <TrendSky> 가
+ * 한 곳에서 하고, 여기서는 서버가 준 모양 그대로 돌려준다.
+ *
+ * `centerTopic` 이 하나 더 온다 — 중앙에 세울 Topic 이고 순위에는 들어가지 않는다.
+ *
+ * `/home` 과 마찬가지로 인증이 필요 없고, 빈 회차는 실패가 아니다 —
+ * `{ snapshotAt: null, centerTopic, entryNodes: [] }` 를 200 으로 답한다.
+ *
+ * 지원하지 않는 코드는 400 INVALID_TOPIC_CODE 다. 화면은 URL 의 분야를 topicByCode 로
+ * 걸러 보내므로 정상 경로에서는 닿지 않는다.
+ */
+export async function fetchTopicExploration(topicCode, { signal } = {}) {
+  return request(`/topics/${encodeURIComponent(topicCode)}/exploration`, { signal })
+}
+
+/**
  * `GET /graphs/nodes/{nodeType}/{nodeKey}` — Node 한 개의 상세.
  *
  * `{ nodeType, nodeKey, title, type, time, bookmarked }`. `type` is the Entity/Statement

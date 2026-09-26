@@ -1,8 +1,10 @@
 package com.starlightnews.backend.domain.recommendation.service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationWeights;
 import com.starlightnews.backend.global.client.FastApiClient;
 import com.starlightnews.backend.global.client.FastApiProperties;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +16,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -29,6 +32,9 @@ class RecommendationRetuneClientTest {
 			          "ndcgAt10": 0.4123, "hitRateAt10": 0.5833, "recallAt10": 0.3912}}
 			""";
 
+	private static final RecommendationWeights CURRENT =
+			new RecommendationWeights(new BigDecimal("0.7000"), new BigDecimal("0.3000"));
+
 	private MockRestServiceServer server;
 	private RecommendationRetuneClient client;
 
@@ -41,13 +47,16 @@ class RecommendationRetuneClientTest {
 	}
 
 	@Test
-	void 내부_인증_헤더를_붙여_본문_없이_POST_한다() {
+	void 내부_인증_헤더를_붙여_지금_가중치를_본문에_담아_POST_한다() {
 		server.expect(requestTo(BASE_URL + PATH))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(header(FastApiClient.INTERNAL_API_KEY_HEADER, "test-key"))
+				.andExpect(content().json("""
+						{"currentCbfWeight": 0.7, "currentCfWeight": 0.3}
+						"""))
 				.andRespond(withSuccess(BODY, MediaType.APPLICATION_JSON));
 
-		client.retune();
+		client.retune(CURRENT);
 
 		server.verify();
 	}
@@ -57,7 +66,7 @@ class RecommendationRetuneClientTest {
 		server.expect(requestTo(BASE_URL + PATH))
 				.andRespond(withSuccess(BODY, MediaType.APPLICATION_JSON));
 
-		assertThat(client.retune()).hasValueSatisfying(data -> {
+		assertThat(client.retune(CURRENT)).hasValueSatisfying(data -> {
 			assertThat(data.cbfWeight()).isEqualByComparingTo("0.8");
 			assertThat(data.cfWeight()).isEqualByComparingTo("0.2");
 			assertThat(data.ndcgAt10()).isEqualByComparingTo("0.4123");
@@ -70,7 +79,7 @@ class RecommendationRetuneClientTest {
 		server.expect(requestTo(BASE_URL + PATH))
 				.andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
 
-		assertThat(client.retune()).isEmpty();
+		assertThat(client.retune(CURRENT)).isEmpty();
 	}
 
 	@Test
@@ -78,6 +87,6 @@ class RecommendationRetuneClientTest {
 		server.expect(requestTo(BASE_URL + PATH))
 				.andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-		assertThat(client.retune()).isEmpty();
+		assertThat(client.retune(CURRENT)).isEmpty();
 	}
 }
