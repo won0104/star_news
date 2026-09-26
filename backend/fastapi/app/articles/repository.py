@@ -16,6 +16,9 @@ EVENT_SIMILARITY_THRESHOLD = 0.92
 EVENT_CANDIDATE_TOP_K = 8
 # 대표 벡터(centroid) 갱신 시 새 임베딩을 반영하는 비율 (지수이동평균)
 EVENT_EMBEDDING_EMA_WEIGHT = 0.15
+# EVENT_SIMILARITY_THRESHOLD를 raw cosine 기준으로 환산한 값
+# - Neo4j 벡터 인덱스 score는 (1+raw_cosine)/2 로 변환된 값이라, 같은 기준으로 파이썬에서 직접 비교하려면 역산이 필요함
+EVENT_RAW_COSINE_THRESHOLD = 2 * EVENT_SIMILARITY_THRESHOLD - 1
 
 # Story dedup 벡터 유사도 임계값 - Event(0.92)보다는 낮게 유지
 STORY_SIMILARITY_THRESHOLD = 0.8
@@ -321,8 +324,20 @@ def _create_new_event_node(
     return result["nodeId"]
 
 
+# 두 임베딩의 코사인 유사도(raw, Neo4j 벡터 인덱스 score로 변환하기 전 값)
+# 같은 트랜잭션 안에서 아직 커밋 안 된 Event끼리 비교할 때 씀
+def _cosine_similarity(a: list[float], b: list[float]) -> float:
+    dot = sum(x * y for x, y in zip(a, b))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(x * x for x in b))
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
 # AI에서 추출된 Event 후보 하나를 기존 Event와 dedup 판단해서 재사용하거나 새로 생성
 # candidate_*는 이번 기사 쪽 Event가 가진 Actor/Target (아직 Neo4j에 없는, AI 응답에서 바로 파싱한 값)
+# in_batch_candidates: 같은 기사(같은 트랜잭션) 안에서 이미 처리한 Event들
 def merge_event_node(
     session: Neo4jRunner,
     title: str,
@@ -332,7 +347,28 @@ def merge_event_node(
     created_at: datetime,
     candidate_actor_names: list[str],
     candidate_target_names: list[str],
+    in_batch_candidates: list[dict] | None = None,
 ) -> tuple[str, bool]:
+    # 1) 같은 기사 안에서 먼저 처리한 Event부터 확인 (파이썬 직접 비교, 유사도 높은 순)
+    similar_in_batch = sorted(
+        ((c, _cosine_similarity(c["embedding"], embedding)) for c in (in_batch_candidates or [])),
+        key=lambda pair: pair[1],
+        reverse=True,
+    )
+    for candidate, similarity in similar_in_batch:
+        if similarity < EVENT_RAW_COSINE_THRESHOLD:
+            break  # 유사도 순 정렬이라 이후로는 전부 더 낮음
+        if _are_definitely_different_events(
+            candidate["actorNames"], candidate["targetNames"],
+            candidate_actor_names, candidate_target_names,
+        ):
+            continue
+
+        # 매칭 확정 - 기존 Event를 재사용하고 대표 벡터(centroid)만 갱신
+        blended_embedding = _ema_update_embedding(candidate["embedding"], embedding, EVENT_EMBEDDING_EMA_WEIGHT)
+        return _update_matched_event(session, candidate["nodeId"], title, blended_embedding, occurred_at, created_at), False
+
+    # 2) 여기서 못 찾으면 기존 방식대로 - 이미 커밋된(다른 기사에서 만들어진) Event 대상 벡터 검색
     candidates = session.run(
         """
         CALL db.index.vector.queryNodes('event_embedding_index', $topK, $embedding)
