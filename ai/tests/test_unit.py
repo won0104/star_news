@@ -273,7 +273,10 @@ def test_adapt_maps_v23_compact_statement_fields():
 
 
 def _v3_public_kg(covers_primary: list[bool | None]) -> dict:
-    """v3 PUBLIC(articlelocal-kg-public-v3) 출력 모양을 줄인 fixture."""
+    """v3 PUBLIC(articlelocal-kg-public-v3, projection r6) 출력 모양을 줄인 fixture.
+
+    r6부터 모든 edge 최상위에 confidence([0, 1])가 있다.
+    """
     article_id = "ARTICLE:a3:v1"
     nodes = [
         {"node_id": article_id, "kind": "ARTICLE", "properties": {"title": "테스트"}, "evidence": []},
@@ -315,19 +318,20 @@ def _v3_public_kg(covers_primary: list[bool | None]) -> dict:
                 "edge_type": "COVERS",
                 "source_id": article_id,
                 "target_id": event_id,
+                "confidence": 0.9 - index / 10,
                 "properties": {"isPrimary": primary},
                 "evidence": [],
             }
         )
     edges += [
         {"edge_id": "ASSERTED_BY:1", "edge_type": "ASSERTED_BY", "source_id": "STMT:1",
-         "target_id": "ENT:1", "properties": {"endpoint_status": "RESOLVED"}},
+         "target_id": "ENT:1", "confidence": 0.8, "properties": {"endpoint_status": "RESOLVED"}},
         {"edge_id": "ABOUT:1", "edge_type": "ABOUT", "source_id": "STMT:1",
-         "target_id": "EVCL:0", "properties": {}},
+         "target_id": "EVCL:0", "confidence": 0.7, "properties": {}},
     ]
     if len(covers_primary) > 1:
         edges.append({"edge_id": "CAUSES:1", "edge_type": "CAUSES", "source_id": "EVCL:0",
-                      "target_id": "EVCL:1", "properties": {}})
+                      "target_id": "EVCL:1", "confidence": 0.6, "properties": {}})
     return {
         "schema_version": "articlelocal-kg-public-v3",
         "status": "PERSISTENCE_READY",
@@ -350,13 +354,18 @@ def _adapt_v3(kg: dict) -> dict:
 
 
 def test_adapt_v3_passes_covers_primary_and_relation_edges():
-    """v3 COVERS isPrimary와 ASSERTED_BY/ABOUT/CAUSES를 서비스 스키마로 넘긴다."""
+    """v3 edge confidence, COVERS isPrimary, ASSERTED_BY/ABOUT/CAUSES를 서비스 스키마로 넘긴다."""
     out = _adapt_v3(_v3_public_kg([True, False]))
 
     covers = {e["endNodeId"]: e["properties"] for e in out["edges"] if e["type"] == "COVERS"}
-    assert covers == {"EVCL:0": {"isPrimary": True}, "EVCL:1": {"isPrimary": False}}
-    types = {e["type"] for e in out["edges"]}
-    assert {"ASSERTED_BY", "ABOUT", "CAUSES"} <= types
+    assert covers == {
+        "EVCL:0": {"confidence": 0.9, "isPrimary": True},
+        "EVCL:1": {"confidence": 0.8, "isPrimary": False},
+    }
+    confidence_by_type = {e["type"]: e["properties"].get("confidence") for e in out["edges"]}
+    assert confidence_by_type["ASSERTED_BY"] == 0.8
+    assert confidence_by_type["ABOUT"] == 0.7
+    assert confidence_by_type["CAUSES"] == 0.6
     assert not [w for w in out["warnings"] if w.startswith("skipped_edge_type")]
 
     statement = next(n for n in out["nodes"] if "Statement" in n["labels"])
@@ -375,8 +384,7 @@ def test_adapt_v3_drops_null_covers_primary():
     out = _adapt_v3(_v3_public_kg([None]))
 
     covers = [e for e in out["edges"] if e["type"] == "COVERS"]
-    assert len(covers) == 1
-    assert "isPrimary" not in covers[0]["properties"]
+    assert covers[0]["properties"] == {"confidence": 0.9}
 
 
 def test_postprocess_merges_entity_and_drops_noise(tmp_path: Path):
