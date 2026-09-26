@@ -272,6 +272,113 @@ def test_adapt_maps_v23_compact_statement_fields():
     assert event["properties"]["title"] == "서울시가 주거 지원을 확대했다"
 
 
+def _v3_public_kg(covers_primary: list[bool | None]) -> dict:
+    """v3 PUBLIC(articlelocal-kg-public-v3) 출력 모양을 줄인 fixture."""
+    article_id = "ARTICLE:a3:v1"
+    nodes = [
+        {"node_id": article_id, "kind": "ARTICLE", "properties": {"title": "테스트"}, "evidence": []},
+        {
+            "node_id": "STMT:1",
+            "kind": "STATEMENT",
+            "properties": {
+                "local_id": "STMT:1",
+                "canonical_text": "다음 달부터 신청을 받는다",
+                "statement_type": "FORECAST",
+                "primary_score": 1.2,
+                "primary_score_status": "TRAINED_PHASE6_CHECKPOINT_BOUND",
+            },
+            "evidence": [{"start": 0, "end": 5, "text": "x"}],
+        },
+        {
+            "node_id": "ENT:1",
+            "kind": "ENTITY",
+            "properties": {"canonical_name": "김민수", "entity_type": "PERSON", "merged_mentions": []},
+        },
+    ]
+    edges = []
+    for index, primary in enumerate(covers_primary):
+        event_id = f"EVCL:{index}"
+        nodes.append(
+            {
+                "node_id": event_id,
+                "kind": "EVENT",
+                "properties": {
+                    "canonical_text": f"사건 {index}",
+                    "primary_score": 3.0 - index,
+                    "primary_score_status": "TRAINED_PHASE6_CHECKPOINT_BOUND",
+                },
+            }
+        )
+        edges.append(
+            {
+                "edge_id": f"COVERS:{index}",
+                "edge_type": "COVERS",
+                "source_id": article_id,
+                "target_id": event_id,
+                "properties": {"isPrimary": primary},
+                "evidence": [],
+            }
+        )
+    edges += [
+        {"edge_id": "ASSERTED_BY:1", "edge_type": "ASSERTED_BY", "source_id": "STMT:1",
+         "target_id": "ENT:1", "properties": {"endpoint_status": "RESOLVED"}},
+        {"edge_id": "ABOUT:1", "edge_type": "ABOUT", "source_id": "STMT:1",
+         "target_id": "EVCL:0", "properties": {}},
+    ]
+    if len(covers_primary) > 1:
+        edges.append({"edge_id": "CAUSES:1", "edge_type": "CAUSES", "source_id": "EVCL:0",
+                      "target_id": "EVCL:1", "properties": {}})
+    return {
+        "schema_version": "articlelocal-kg-public-v3",
+        "status": "PERSISTENCE_READY",
+        "persistence_ready": True,
+        "nodes": nodes,
+        "edges": edges,
+        "diagnostics": {},
+    }
+
+
+def _adapt_v3(kg: dict) -> dict:
+    return adapt_to_schema(
+        article={"article_id": "a3", "title": "테스트", "content": "x"},
+        kg=kg,
+        classification=None,
+        event_embeddings={},
+        embedding_model="nlpai-lab/KURE-v1",
+        embedding_dim=3,
+    )
+
+
+def test_adapt_v3_passes_covers_primary_and_relation_edges():
+    """v3 COVERS isPrimary와 ASSERTED_BY/ABOUT/CAUSES를 서비스 스키마로 넘긴다."""
+    out = _adapt_v3(_v3_public_kg([True, False]))
+
+    covers = {e["endNodeId"]: e["properties"] for e in out["edges"] if e["type"] == "COVERS"}
+    assert covers == {"EVCL:0": {"isPrimary": True}, "EVCL:1": {"isPrimary": False}}
+    types = {e["type"] for e in out["edges"]}
+    assert {"ASSERTED_BY", "ABOUT", "CAUSES"} <= types
+    assert not [w for w in out["warnings"] if w.startswith("skipped_edge_type")]
+
+    statement = next(n for n in out["nodes"] if "Statement" in n["labels"])
+    assert statement["properties"] == {
+        "nodeId": "STMT:1",
+        "text": "다음 달부터 신청을 받는다",
+        "statementType": "FORECAST",
+    }
+    event = next(n for n in out["nodes"] if n["properties"]["nodeId"] == "EVCL:0")
+    # primary_score 등 v3 부가 속성은 저장 스키마가 정해지기 전까지 넘기지 않는다.
+    assert event["properties"] == {"nodeId": "EVCL:0", "title": "사건 0"}
+
+
+def test_adapt_v3_drops_null_covers_primary():
+    """PERSISTENCE_NOT_READY처럼 isPrimary가 null이면 속성을 빼서 백엔드 기본 규칙에 맡긴다."""
+    out = _adapt_v3(_v3_public_kg([None]))
+
+    covers = [e for e in out["edges"] if e["type"] == "COVERS"]
+    assert len(covers) == 1
+    assert "isPrimary" not in covers[0]["properties"]
+
+
 def test_postprocess_merges_entity_and_drops_noise(tmp_path: Path):
     nodes = [
         {"labels": ["Entity"], "properties": {"nodeId": "E1", "canonicalName": "그"}},

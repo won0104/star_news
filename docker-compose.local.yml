@@ -93,7 +93,7 @@ services:
       HF_HUB_OFFLINE: "1"
       TRANSFORMERS_OFFLINE: "1"
       STARLIGHT_AI_DEVICE: cpu
-      KG_MODEL_DIR: /models/artifacts/kg-extractor
+      KG_MODEL_DIR: /models/artifacts/kg-extractor-v3
       ARTICLELOCAL_HF_CACHE: /models/cache/hub
       HF_HUB_CACHE: /models/cache/hub
     volumes:
