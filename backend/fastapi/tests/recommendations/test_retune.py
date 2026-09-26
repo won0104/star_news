@@ -1,7 +1,13 @@
 from datetime import datetime, timedelta, timezone
 
+from fastapi.testclient import TestClient
+
+from app.config import settings
 from app.database import _driver
+from app.main import app
 from app.recommendations import service
+
+client = TestClient(app)
 
 # 최소 평가 조건(이력 2개 이상)만 채우는 간단한 유저 - 홀드아웃 안전성/그리드서치 동작만 확인하면 되므로
 EVAL_USER_ID = 8601
@@ -121,3 +127,20 @@ def test_select_best_weights_falls_back_to_default_when_every_combo_ties_at_zero
 
     assert (cbf_weight, cf_weight) == (service.DEFAULT_CBF_WEIGHT, service.DEFAULT_CF_WEIGHT)
     assert (ndcg, hit_rate, recall) == (0.0, 0.0, 0.0)
+
+
+# /retune는 요청 본문이 완전히 새로 생긴 필드라, Spring 배포 순서와 무관하게 깨지면 안 됨:
+# 구버전 Spring(본문 없음 또는 빈 {}) / 신버전 Spring(currentCbfWeight 포함) 셋 다 확인
+def test_retune_endpoint_accepts_missing_or_empty_or_full_request_body():
+    headers = {"x-internal-api-key": settings.internal_api_key}
+
+    no_body = client.post("/internal/v1/recommendations/retune", headers=headers)
+    empty_body = client.post("/internal/v1/recommendations/retune", headers=headers, json={})
+    full_body = client.post(
+        "/internal/v1/recommendations/retune", headers=headers,
+        json={"currentCbfWeight": 0.7, "currentCfWeight": 0.3},
+    )
+
+    for response in (no_body, empty_body, full_body):
+        assert response.status_code == 200
+        assert "cbfWeight" in response.json()["data"]

@@ -155,8 +155,10 @@ def _apply_analysis(
 
     # Event 노드 반영
     event_node_ids: set[str] = set()
-    # 이 기사 안에서 먼저 처리한 Event들 - 벡터 인덱스가 같은 트랜잭션의 미커밋 쓰기를 못 보는 사각지대가 있어서(실측으로 확인함)
+    # 이 기사 안에서 먼저 처리한 Event/Story들 - 벡터 인덱스가 같은 트랜잭션의 미커밋 쓰기를 못 보는 사각지대가 있어서(실측으로 확인함)
     events_in_this_article: list[dict] = []
+    stories_in_this_article: list[dict] = []
+    orphans_in_this_article: list[dict] = []
     for node in nodes:
         if "Event" in node["labels"]:
             props = node["properties"]
@@ -180,6 +182,7 @@ def _apply_analysis(
                 repository.assign_event_to_story(
                     tx, real_id, props["title"], props["embedding"], props["embeddingModel"],
                     primary_topic_code, request.published_at, now, actor_names, target_names,
+                    stories_in_this_article, orphans_in_this_article,
                 )
 
     # Statement 노드 반영
