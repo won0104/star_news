@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.starlightnews.backend.domain.recommendation.domain.RecommendationParameter;
+import com.starlightnews.backend.domain.recommendation.domain.RecommendationWeights;
 import com.starlightnews.backend.domain.recommendation.dto.RecommendationRetuneResponse;
 import com.starlightnews.backend.domain.recommendation.repository.RecommendationParameterRepository;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.verify;
 class RecommendationRetuneServiceTest {
 
 	private static final LocalDateTime NOW = LocalDateTime.of(2026, 9, 27, 3, 0);
+	private static final RecommendationWeights CURRENT = RecommendationWeights.DEFAULT;
 
 	@Mock
 	private RecommendationRetuneClient retuneClient;
@@ -31,11 +33,15 @@ class RecommendationRetuneServiceTest {
 	@Mock
 	private RecommendationParameterRepository parameterRepository;
 
+	@Mock
+	private RecommendationWeightProvider weightProvider;
+
 	@InjectMocks
 	private RecommendationRetuneService service;
 
 	private void givenResult(String cbf, String cf) {
-		given(retuneClient.retune()).willReturn(Optional.of(new RecommendationRetuneResponse.Data(
+		given(weightProvider.current()).willReturn(CURRENT);
+		given(retuneClient.retune(CURRENT)).willReturn(Optional.of(new RecommendationRetuneResponse.Data(
 				new BigDecimal(cbf), new BigDecimal(cf),
 				new BigDecimal("0.4123"), new BigDecimal("0.5833"), new BigDecimal("0.3912"))));
 	}
@@ -71,7 +77,8 @@ class RecommendationRetuneServiceTest {
 	@Test
 	void 호출이_실패하면_아무것도_저장하지_않는다() {
 		// 기존 가중치로 추천은 계속 돈다. 다음 주에 다시 시도한다.
-		given(retuneClient.retune()).willReturn(Optional.empty());
+		given(weightProvider.current()).willReturn(CURRENT);
+		given(retuneClient.retune(CURRENT)).willReturn(Optional.empty());
 
 		assertThat(service.retune(NOW)).isFalse();
 
@@ -90,7 +97,8 @@ class RecommendationRetuneServiceTest {
 
 	@Test
 	void 가중치가_비어_있으면_저장하지_않는다() {
-		given(retuneClient.retune()).willReturn(Optional.of(new RecommendationRetuneResponse.Data(
+		given(weightProvider.current()).willReturn(CURRENT);
+		given(retuneClient.retune(CURRENT)).willReturn(Optional.of(new RecommendationRetuneResponse.Data(
 				null, new BigDecimal("0.3000"), null, null, null)));
 
 		assertThat(service.retune(NOW)).isFalse();
@@ -101,7 +109,8 @@ class RecommendationRetuneServiceTest {
 	@Test
 	void 지표가_비어_있어도_가중치는_저장한다() {
 		// 지표는 참고용이다. 없다고 가중치를 버릴 이유가 없다.
-		given(retuneClient.retune()).willReturn(Optional.of(new RecommendationRetuneResponse.Data(
+		given(weightProvider.current()).willReturn(CURRENT);
+		given(retuneClient.retune(CURRENT)).willReturn(Optional.of(new RecommendationRetuneResponse.Data(
 				new BigDecimal("0.6000"), new BigDecimal("0.4000"), null, null, null)));
 
 		assertThat(service.retune(NOW)).isTrue();

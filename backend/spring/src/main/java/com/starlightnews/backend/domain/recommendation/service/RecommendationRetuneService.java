@@ -28,6 +28,7 @@ public class RecommendationRetuneService {
 
 	private final RecommendationRetuneClient retuneClient;
 	private final RecommendationParameterRepository parameterRepository;
+	private final RecommendationWeightProvider weightProvider;
 
 	/**
 	 * 재튜닝을 한 번 수행한다.
@@ -36,7 +37,7 @@ public class RecommendationRetuneService {
 	 */
 	@Transactional
 	public boolean retune(LocalDateTime now) {
-		return retuneClient.retune()
+		return retuneClient.retune(weightProvider.current())
 				.filter(this::isUsable)
 				.map(data -> save(data, now))
 				.orElse(false);

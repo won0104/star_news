@@ -16,6 +16,9 @@ EVENT_SIMILARITY_THRESHOLD = 0.92
 EVENT_CANDIDATE_TOP_K = 8
 # 대표 벡터(centroid) 갱신 시 새 임베딩을 반영하는 비율 (지수이동평균)
 EVENT_EMBEDDING_EMA_WEIGHT = 0.15
+# EVENT_SIMILARITY_THRESHOLD를 raw cosine 기준으로 환산한 값
+# - Neo4j 벡터 인덱스 score는 (1+raw_cosine)/2 로 변환된 값이라, 같은 기준으로 파이썬에서 직접 비교하려면 역산이 필요함
+EVENT_RAW_COSINE_THRESHOLD = 2 * EVENT_SIMILARITY_THRESHOLD - 1
 
 # Story dedup 벡터 유사도 임계값 - Event(0.92)보다는 낮게 유지
 STORY_SIMILARITY_THRESHOLD = 0.8
@@ -321,8 +324,26 @@ def _create_new_event_node(
     return result["nodeId"]
 
 
+# 두 임베딩의 코사인 유사도(raw, Neo4j 벡터 인덱스 score로 변환하기 전 값)
+# 같은 트랜잭션 안에서 아직 커밋 안 된 노드끼리 비교할 때 씀
+def _cosine_similarity(a: list[float], b: list[float]) -> float:
+    dot = sum(x * y for x, y in zip(a, b))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(x * x for x in b))
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
+# raw cosine 유사도를 Neo4j 벡터 인덱스 score 형태로 변환
+# - 커밋된 후보(Neo4j가 준 score)와 in-batch 후보(파이썬에서 직접 계산한 raw cosine)를 같은 척도로 섞어서 비교하기 위함
+def _cosine_to_score(raw_cosine: float) -> float:
+    return (1 + raw_cosine) / 2
+
+
 # AI에서 추출된 Event 후보 하나를 기존 Event와 dedup 판단해서 재사용하거나 새로 생성
 # candidate_*는 이번 기사 쪽 Event가 가진 Actor/Target (아직 Neo4j에 없는, AI 응답에서 바로 파싱한 값)
+# in_batch_candidates: 같은 기사(같은 트랜잭션) 안에서 이미 처리한 Event들
 def merge_event_node(
     session: Neo4jRunner,
     title: str,
@@ -332,7 +353,28 @@ def merge_event_node(
     created_at: datetime,
     candidate_actor_names: list[str],
     candidate_target_names: list[str],
+    in_batch_candidates: list[dict] | None = None,
 ) -> tuple[str, bool]:
+    # 1) 같은 기사 안에서 먼저 처리한 Event부터 확인 (파이썬 직접 비교, 유사도 높은 순)
+    similar_in_batch = sorted(
+        ((c, _cosine_similarity(c["embedding"], embedding)) for c in (in_batch_candidates or [])),
+        key=lambda pair: pair[1],
+        reverse=True,
+    )
+    for candidate, similarity in similar_in_batch:
+        if similarity < EVENT_RAW_COSINE_THRESHOLD:
+            break  # 유사도 순 정렬이라 이후로는 전부 더 낮음
+        if _are_definitely_different_events(
+            candidate["actorNames"], candidate["targetNames"],
+            candidate_actor_names, candidate_target_names,
+        ):
+            continue
+
+        # 매칭 확정 - 기존 Event를 재사용하고 대표 벡터(centroid)만 갱신
+        blended_embedding = _ema_update_embedding(candidate["embedding"], embedding, EVENT_EMBEDDING_EMA_WEIGHT)
+        return _update_matched_event(session, candidate["nodeId"], title, blended_embedding, occurred_at, created_at), False
+
+    # 2) 여기서 못 찾으면 기존 방식대로 - 이미 커밋된(다른 기사에서 만들어진) Event 대상 벡터 검색
     candidates = session.run(
         """
         CALL db.index.vector.queryNodes('event_embedding_index', $topK, $embedding)
@@ -533,26 +575,60 @@ def assign_event_to_story(
     now: datetime,
     actor_names: list[str],
     target_names: list[str],
+    in_batch_stories: list[dict] | None = None,
+    in_batch_orphans: list[dict] | None = None,
 ) -> str | None:
+    # in_batch_stories/in_batch_orphans: "기사 내" 후보 저장소
+    # - 같은 기사(같은 트랜잭션) 안에서 방금 새로 만든 Story/외톨이 Event를 담아둠
+    if in_batch_stories is None:
+        in_batch_stories = []
+    if in_batch_orphans is None:
+        in_batch_orphans = []
+
     stale_cutoff = now - timedelta(days=STORY_STALE_DAYS)
 
-    # 기존 Story 후보들을 유사도 높은 순으로 보면서, 확실히 무관한 게 아닌 첫 후보를 채택
+    # 1) Story 후보
+    # - 기사 외(다른 기사에서 이미 만들어져 커밋된 Story) - 벡터 인덱스 검색으로 찾음
+    story_candidates = list(_find_story_candidates(session, event_embedding, topic_code, stale_cutoff))
+    # - 기사 내(이 기사 안에서 방금 만든 Story, 아직 미커밋) - 벡터 인덱스에 안 잡히니 파이썬으로 직접 비교
+    for story in in_batch_stories:
+        if story["topicCode"] != topic_code:
+            continue
+        score = _cosine_to_score(_cosine_similarity(story["embedding"], event_embedding))
+        if score >= STORY_SIMILARITY_THRESHOLD:
+            story_candidates.append({"nodeId": story["nodeId"], "embedding": story["embedding"], "score": score})
+    story_candidates.sort(key=lambda c: c["score"], reverse=True)  # 기사 외 + 기사 내를 합쳐서 다시 점수순 정렬
+
+    # 유사도 높은 순으로 보면서, 확실히 무관한 게 아닌 첫 후보를 채택
     story_candidate = None
-    for candidate in _find_story_candidates(session, event_embedding, topic_code, stale_cutoff):
+    for candidate in story_candidates:
         recent_signals = _fetch_story_recent_member_signals(session, candidate["nodeId"])
         if _is_definitely_unrelated_to_story(recent_signals, actor_names, target_names):
             continue
         story_candidate = candidate
         break
 
-    # 외톨이 Event 후보들도 마찬가지로, 확실히 다른 사건이 아닌 첫 후보를 채택
+    # 2) 외톨이 Event 후보
+    # - 기사 외(다른 기사에서 이미 만들어져 커밋된 외톨이 Event) - 벡터 인덱스 검색으로 찾음
+    orphan_candidates = list(_find_orphan_event_candidates(session, event_embedding, topic_code, stale_cutoff, event_node_id))
+    # - 기사 내(이 기사 안에서 아직 Story 없이 남은 Event, 아직 미커밋) - 마찬가지로 파이썬 직접 비교
+    for orphan in in_batch_orphans:
+        if orphan["topicCode"] != topic_code:
+            continue
+        score = _cosine_to_score(_cosine_similarity(orphan["embedding"], event_embedding))
+        if score >= STORY_SIMILARITY_THRESHOLD:
+            orphan_candidates.append({**orphan, "score": score})
+    orphan_candidates.sort(key=lambda c: c["score"], reverse=True)  # 기사 외 + 기사 내를 합쳐서 다시 점수순 정렬
+
+    # 마찬가지로 확실히 다른 사건이 아닌 첫 후보를 채택
     orphan_candidate = None
-    for candidate in _find_orphan_event_candidates(session, event_embedding, topic_code, stale_cutoff, event_node_id):
+    for candidate in orphan_candidates:
         if _are_definitely_different_events(candidate["actorNames"], candidate["targetNames"], actor_names, target_names):
             continue
         orphan_candidate = candidate
         break
 
+    # 3) 최종 결정 - Story 후보가 있고, 외톨이 후보보다 점수가 같거나 높으면 Story 편입을 우선함
     if story_candidate and (not orphan_candidate or story_candidate["score"] >= orphan_candidate["score"]):
         # 기존 Story 편입 - 대표 벡터만 갱신
         blended_embedding = _ema_update_embedding(story_candidate["embedding"], event_embedding, STORY_EMBEDDING_EMA_WEIGHT)
@@ -568,9 +644,17 @@ def assign_event_to_story(
         )
         merge_part_of_edge(session, orphan_candidate["nodeId"], story_node_id, 1.0, now)
         merge_part_of_edge(session, event_node_id, story_node_id, orphan_candidate["score"], now)
+
+        # (기사 내 갱신) 방금 승격시킨 외톨이는 더 이상 외톨이가 아니므로 목록에서 빼고, 새로 만든 Story는 이 기사 안에서 이어질 다른 Event가 찾을 수 있게 등록
+        in_batch_orphans[:] = [o for o in in_batch_orphans if o["nodeId"] != orphan_candidate["nodeId"]]
+        in_batch_stories.append({"nodeId": story_node_id, "embedding": blended_embedding, "topicCode": topic_code})
         return story_node_id
 
     # 후보가 하나도 없음 - 아직은 외톨이 Event로 남김
+    in_batch_orphans.append({
+        "nodeId": event_node_id, "title": event_title, "embedding": event_embedding,
+        "topicCode": topic_code, "actorNames": actor_names, "targetNames": target_names,
+    })
     return None
 
 
