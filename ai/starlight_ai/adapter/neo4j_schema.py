@@ -24,6 +24,10 @@ PUBLIC_EDGE_TYPES = {
     "TARGET",
     "PLACE",
     "OCCURRED_ON",
+    # 백엔드 _SIMPLE_EDGE_QUERIES가 이미 MERGE를 지원하는 명제·발언 관계
+    "ASSERTED_BY",
+    "ABOUT",
+    "CAUSES",
 }
 
 # V1 leftovers still seen in some local bundles — drop for service schema.
@@ -279,6 +283,10 @@ def adapt_to_schema(
         out_eprops: dict[str, Any] = {}
         if conf is not None:
             out_eprops["confidence"] = conf
+        # v3는 COVERS에 학습된 Primary 판정을 싣는다. null(판정 불가)은 넘기지 않아
+        # 백엔드가 기존 방식으로 primary를 정하게 한다.
+        if etype == "COVERS" and isinstance(eprops.get("isPrimary"), bool):
+            out_eprops["isPrimary"] = eprops["isPrimary"]
         edges_out.append(
             {
                 "edgeId": edge.get("edge_id") or edge.get("edgeId") or f"edge_{uuid.uuid4().hex[:12]}",
