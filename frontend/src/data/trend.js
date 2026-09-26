@@ -37,6 +37,11 @@
  * alpha rather than authored. <TrendStage> insets the sky by it and then lets it run a
  * little under the wood; the margin is its business, so these stay the measurement.
  *
+ * `opening.left` doubles as the inner edge of the left wooden post — the post ends
+ * exactly where the glass begins (measured: 11.54 / 12.43 / 16.19 / 13.44 / 15.30
+ * against the openings below). <TopicNote> hangs off it, which is why it is not free
+ * to drift from the asset.
+ *
  * A transition stays disabled until a clip is authored to end on this exact room —
  * handing off from the former attic image would read as a flash cut.
  */
@@ -44,6 +49,24 @@ export const nightfall = {
   backdrops: {
     landscape: '/assets/trend/trend-window-backdrop-landscape-v2.webp',
     portrait: '/assets/trend/trend-window-backdrop-portrait-v2.webp',
+  },
+  /**
+   * 위 사진이 도착하기 전 그 자리에 깔아 두는, 같은 풍경의 축소판.
+   *
+   * 긴 변 56px, webp 품질 0.72, 1KB 남짓. 파일이 아니라 data URI 인 것이 요점이다 — 번들에
+   * 실려 오므로 요청이 늘지 않고, 사진을 기다리지 않는다. 늘려 그리면 브라우저가 부드럽게
+   * 뭉개므로 흐릿한 밤 풍경으로 읽힌다.
+   *
+   * 색만 맞춘 단색 그라디언트로도 번쩍임 자체는 사라진다(.washNight 가 그 역할로 남아 있다).
+   * 이쪽을 쓰는 이유는 산 능선과 호수 불빛이 제자리에 있어, 진짜 사진이 올라올 때 색뿐 아니라
+   * 형태까지 이어지기 때문이다.
+   *
+   * 다시 뽑으려면 scripts/make-standins.html 을 브라우저로 연다. 위 두 사진을 다시
+   * 그리면 이 두 줄도 함께 다시 뽑는다.
+   */
+  standIns: {
+    landscape: 'data:image/webp;base64,UklGRvoCAABXRUJQVlA4WAoAAAAgAAAANwAAHwAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggDAEAAHAIAJ0BKjgAIAA+iTqVSCUjoiEz+Z1QoBEJYwC7NBcAHDcAy7OtvVdbqPIRhKhLcb+1E8y4kGFtULHiosOj7kG2iO4J2jYqa7IXMwAA/vtop77onNut94eJpP+tKZtoDxH92Uwdhy4vGpjbKY79KG5gtRpTBNN602IlkPKKKlQLyZbW3CzFRTGV4C12djtyF5tzN2a93rhPCje3v29CWiT1NV+TZivmpV53B5cuIjWslpJToOdXyS3yR3raQtfQRit4MizvAuTkQcwIzJmY0saOxauLYXMc8rP6yaLK7aQMRa6LMyeKHb7d2qRomOS+Pp4Xq6eqc+PulKfXuY+ofoCeQ1WZv5OLoO2ioAA=',
+    portrait: 'data:image/webp;base64,UklGRvYCAABXRUJQVlA4WAoAAAAgAAAAHwAANwAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggCAEAAHAHAJ0BKiAAOAA+kUCWSCWkIiEz9mgAsBIJYwC+e41EoIQAFUJwGFQQJJKGxRjvXPtBuzIqNM+q1aFUVEq5FRvshF9gAP78Q/ticEr7hJPvH+BIQpjj719WYqSz2dW8cpfFbSJzEGzfG5d8miZixcxXPbfv7KCqhKQU0NL5hDYrNEnI0EcsOZKb6A7H4QtjWe4Os+WP9wJU9olvUze/2ub/XykC8XYfQ/xjTUIfi+0DeOffJ2cnzVqpHNrQZ0viKXQON0y0X2vruagr8a6WXx7uzx+B2gKn7cOR4/uR2v7eoWnyV2ywpylAutoeoVvPFj7M6ZprBsHLWeIGQCg9DXNr6L3h14kwAA==',
   },
   frames: [
     {
@@ -75,6 +98,22 @@ export const nightfall = {
   sidebarStill: '/assets/trend/trend-window-night-sidebar-v3.webp',
   clip: null,
 }
+
+/**
+ * 고른 창틀에 맞는 밤 사진. 가로/세로 두 장뿐이므로 고를 것은 방향뿐이다.
+ *
+ * 밤 사진은 한 겹이 아니다: <AppScene> 이 <PhotoBackdrop> 의 바닥에 한 장을 깔고,
+ * <TrendStage> 의 .still 이 그 위에 한 장을 더 건다. 두 겹이 서로 다른 장을 들고 있으면
+ * 위 장이 올라오는 순간 배경이 다른 사진으로 갈아치워진다 — 창틀은 가만히 있는데 그 뒤가
+ * 혼자 깜빡이는 것으로 읽힌다. 규칙을 여기 한 곳에 두어 양쪽이 같은 장을 고르게 한다.
+ *
+ * 사진과 그 스탠드인은 짝이라 함께 돌려준다 — 한쪽만 방향이 바뀌면 흐린 세로 풍경 위에 선명한
+ * 가로 풍경이 얹힌다.
+ */
+export const nightBackdrop = (frame) =>
+  frame.ratio >= 1
+    ? { src: nightfall.backdrops.landscape, standIn: nightfall.standIns.landscape }
+    : { src: nightfall.backdrops.portrait, standIn: nightfall.standIns.portrait }
 
 /** Exact exported layers from Figma frame 870:2. The relation layer includes the
  * ambient stars, six authored edges, the centre sticker, the upper entity and the

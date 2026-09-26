@@ -19,11 +19,29 @@ import styles from './ViewPane.module.css'
  * 나를 위한 추천's board waits for `settled` — the arrival clip reaching its end — and then
  * comes in, so it does not appear over a room that is still moving.
  */
-export function ViewPane({ view, settled = true, playTrendTransition = false, selectedNode }) {
+export function ViewPane({
+  view,
+  visit = 0,
+  topic = null,
+  onTopicChange,
+  settled = true,
+  playTrendTransition = false,
+  selectedNode,
+}) {
   return (
     <div className={`${styles.page} ${view === 'trend' ? styles.trendPage : ''}`}>
+      {/*
+        `key` 가 방문 횟수다 — 목적지를 다시 누르면 별자리가 펼쳐 보던 사건을 접고 처음 상태로
+        다시 선다. 그 상태는 <TrendSky> 안에만 있어 바깥에서 되돌릴 길이 없다.
+      */}
       {view === 'trend' && (
-        <TrendStage playTransition={playTrendTransition} selectedNode={selectedNode} />
+        <TrendStage
+          key={visit}
+          playTransition={playTrendTransition}
+          selectedNode={selectedNode}
+          topic={topic}
+          onTopicChange={onTopicChange}
+        />
       )}
       {view === 'foryou' && <RecommendPane settled={settled} />}
       {view === 'log' && <DiaryHistoryPane />}

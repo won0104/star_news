@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "토픽", description = "선택 가능한 토픽 목록")
+@Tag(name = "토픽", description = "토픽 목록 및 토픽별 탐색")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(ApiPaths.API_V1 + "/topics")

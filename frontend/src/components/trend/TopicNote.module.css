@@ -1,0 +1,153 @@
+/*
+ * 창틀 왼쪽 위에 붙은 쪽지.
+ *
+ * 자리는 장면에 대한 비율이다 — 창틀 그림이 비율마다 다른 장으로 갈리므로(useNearestWindow),
+ * px 로 두면 어느 비율에서는 유리 한가운데로 들어가고 어느 비율에서는 밖으로 나간다.
+ */
+.root {
+  position: absolute;
+  z-index: 5;
+  /* 폭을 여기 두는 것은 위 left 계산이 이 값을 빼야 하기 때문이다. */
+  --note-w: clamp(70px, 10cqw, 96px);
+  /*
+   * 높이: 상단바와 그 아래 딸린 책갈피를 지난 자리. 장면은 바 아래에서 시작하지 않고 화면
+   * 꼭대기부터다 — 위쪽 13% 는 바(8.2%)와 책갈피(12.9%)가 지나간다.
+   */
+  top: 14.5%;
+  /*
+   * 좌우: 오른쪽 끝을 기둥의 안쪽 모서리(= 유리가 열리는 선)에 건다. 그 선은 인라인으로
+   * 들어온다 — 창틀이 비율마다 다른 장이라 함께 옮겨 서므로, 장을 고르는 쪽만이 안다.
+   *
+   * 기둥은 폭이 5~7.5% 뿐이라 쪽지가 그 안에 다 들어갈 수는 없다(기둥보다 작은 쪽지는
+   * "분야"와 "IT·과학"을 담지 못한다). 그러면 남는 문제는 어느 쪽으로 넘치느냐인데,
+   * 기둥을 가운데 두면 절반이 유리로 들어가 별을 가리므로 바깥쪽 곁창으로 넘긴다.
+   *
+   * max() 의 1.5% 는 세로에서 필요하다 — 9:16 은 유리가 15.3% 에서 열려 그대로 빼면 쪽지가
+   * 화면 왼쪽으로 잘려 나간다(430px 에서 −4px). 그때는 기둥을 조금 넘더라도 화면 안에 둔다.
+   */
+  left: max(1.5%, calc(var(--pillar-inner) - var(--note-w)));
+}
+
+/*
+ * 접힌 쪽지. 테이프가 그려진 정사각 종이라 비율을 지킨다 — 늘리면 테이프가 고무처럼 늘어난다.
+ *
+ * 에셋은 투명 여백을 잘라내고 담았다(원본 1254² 중 잉크 933×936, 비율 0.9968). 그래서
+ * 100% 100% 로 깔면 그려진 종이가 곧 상자가 되고, 아래 패딩이 그대로 종이 안쪽 여백이 된다.
+ *
+ * 위쪽 22% 는 테이프가 지나는 자리다 — 테이프는 종이 높이의 위 13.8% 를 지난다.
+ */
+.note {
+  display: grid;
+  width: var(--note-w);
+  aspect-ratio: 1;
+  padding: 22% 14% 12%;
+  border: 0;
+  background: url('/assets/trend/notes/note-square-v2.webp') center / 100% 100% no-repeat;
+  cursor: pointer;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+}
+
+.noteLabel {
+  font-family: var(--font-sans);
+  font-size: clamp(10px, 1.15cqw, 12px);
+  font-weight: 700;
+  color: #4a3b28;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.noteHint {
+  font-family: var(--font-sans);
+  font-size: clamp(7px, 0.85cqw, 9px);
+  color: rgba(74, 59, 40, 0.62);
+  letter-spacing: 0.08em;
+}
+
+.note:hover .noteLabel,
+.note:focus-visible .noteLabel {
+  color: #2f2417;
+}
+
+/*
+ * 펼친 목록.
+ *
+ * 여기만 종이를 쓰지 않는다. 두 번째 종이를 겹치니 쪽지가 어느 쪽인지 흐려지고, 찢긴 가장자리
+ * 안쪽으로 글자를 밀어 넣느라 쓸 수 있는 폭이 계속 줄었다. 고르는 동안만 잠깐 뜨는 물건이라
+ * 밤하늘이 비치는 유리 한 장이면 충분하다.
+ *
+ * 결은 검색 결과창(NodeSearch .results)을 따른다 — 같은 화면에서 같은 일을 하는 층이 둘이니
+ * 다르게 생길 이유가 없다. 다만 알파를 0.96 대신 0.82 로 둔다. 그 창은 방 안에 뜨지만 이것은
+ * 창밖 하늘 위에 떠서, 별이 비쳐야 유리로 읽힌다.
+ */
+.sheet {
+  position: absolute;
+  z-index: 6;
+  /* 쪽지 바로 아래. .root 가 쪽지에 맞춰 줄어드니 100% 가 곧 쪽지의 아랫변이다. */
+  top: calc(100% + 6px);
+  left: 0;
+  width: max-content;
+  /* 쪽지를 줄이면서 목록까지 70px 로 따라 좁아졌다 — 여덟 줄이 기둥처럼 선다. 바닥을 둔다. */
+  min-width: max(100%, 96px);
+  /* 여덟은 늘 들어가지만 창이 낮으면 스크롤로 넘긴다. */
+  max-height: min(268px, 52vh);
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid rgba(120, 102, 82, 0.2);
+  border-radius: 14px;
+  background: rgba(250, 246, 238, 0.82);
+  box-shadow: 0 16px 38px rgba(28, 22, 16, 0.26);
+  backdrop-filter: blur(18px);
+  list-style: none;
+  /* 기본 회색 막대는 밤하늘 위에서 혼자 튄다. 결과창과 같은 결로 맞춘다. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 102, 82, 0.38) transparent;
+}
+
+.sheet::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sheet::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sheet::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(120, 102, 82, 0.38);
+}
+
+.sheet::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 102, 82, 0.6);
+}
+
+.choice {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: clamp(11px, 1.3cqw, 13px);
+  color: #55452f;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.choice:hover {
+  background: rgba(120, 96, 58, 0.14);
+  color: #33280f;
+}
+
+/* 고른 것은 색과 굵기로 말한다 — 종이 위에 또 알약을 얹지 않는다. */
+.choiceSelected,
+.choiceSelected:hover {
+  background: rgba(120, 96, 58, 0.2);
+  font-weight: 700;
+  color: #2f2417;
+}

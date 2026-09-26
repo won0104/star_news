@@ -102,6 +102,21 @@ def test_calculate_cf_scores_wraps_repository_result_as_cf_candidate():
     }
 
 
+# service 레벨은 repository의 원본 Jaccard 합을 그대로 안 쓰고, 최댓값으로 나눠 0~1로 정규화해서 반환해야 함
+# (원본은 event-c=2/3, event-d/e/f=1/5 - 최댓값 2/3으로 나누면 event-c=1.0, 나머지=(1/5)/(2/3)=0.3)
+def test_calculate_cf_scores_normalizes_by_max_so_top_candidate_is_one():
+    with _driver.session() as session:
+        _reset_fixture(session)
+        _seed_fixture(session)
+        scores = service.calculate_cf_scores(TARGET_USER_ID, session)
+
+    by_event_id = {score.event_id: score.cf_score for score in scores}
+    assert by_event_id["test-cf-event-c"] == pytest.approx(1.0)
+    assert by_event_id["test-cf-event-d"] == pytest.approx(0.3)
+    assert by_event_id["test-cf-event-e"] == pytest.approx(0.3)
+    assert by_event_id["test-cf-event-f"] == pytest.approx(0.3)
+
+
 # Cold Start 검증: CONSUMED 이력이 없어도 에러 없이 빈 리스트를 반환하는지 확인
 def test_calculate_cf_scores_returns_empty_list_when_no_consumed_history():
     with _driver.session() as session:
