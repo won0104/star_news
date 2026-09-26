@@ -3,6 +3,7 @@ import math
 from pathlib import Path
 from uuid import UUID
 
+import pytest
 from fastapi.testclient import TestClient
 
 import app.articles.service as service
@@ -292,3 +293,76 @@ def test_two_related_events_get_promoted_into_shared_story(monkeypatch):
 
     # 둘 다 정확히 같은 Story 하나로 묶여야 함 (승격 시나리오)
     assert len(story_ids) == 1
+
+
+# v3 모델이 COVERS에 isPrimary를 주면 UUID 순서 대신 그 Event를 primary로 저장하는지 확인.
+# 어느 쪽을 골라도 맞아야 하므로 두 경우를 모두 돌린다 (UUID 순서 규칙이면 한쪽은 실패한다).
+@pytest.mark.parametrize("primary_index", [0, 1])
+def test_analyze_article_uses_model_covers_primary(monkeypatch, primary_index):
+    test_article_id = 900401 + primary_index
+    test_source_id = 900001
+
+    with _driver.session() as session:
+        session.run("MATCH (a:Article {mysqlArticleId: $id}) DETACH DELETE a", id=test_article_id)
+
+    result = _mock_ai_result()
+    article_ai_id = next(n for n in result["nodes"] if "Article" in n["labels"])["properties"]["nodeId"]
+    base_event = next(n for n in result["nodes"] if "Event" in n["labels"])
+    base_embedding = base_event["properties"]["embedding"]
+    # 두 Event가 dedup(0.92)되거나 같은 Story로 묶이지 않을 만큼 다른 벡터
+    second_event = json.loads(json.dumps(base_event))
+    second_event["properties"]["nodeId"] = "EFR-v3-second"
+    second_event["properties"]["title"] = "김민수 주거정책과장은 다음 달부터 신청을 받는다"
+    second_event["properties"]["embedding"] = _vector_with_similarity(base_embedding, 0.3)
+    result["nodes"].append(second_event)
+
+    event_ids = [base_event["properties"]["nodeId"], "EFR-v3-second"]
+    result["edges"] = [e for e in result["edges"] if e["type"] != "COVERS"]
+    for index, event_id in enumerate(event_ids):
+        result["edges"].append({
+            "edgeId": f"edge_covers_{index}",
+            "type": "COVERS",
+            "startNodeId": article_ai_id,
+            "endNodeId": event_id,
+            "properties": {"isPrimary": index == primary_index},
+        })
+    result["edges"].append({
+        "edgeId": "edge_causes_0",
+        "type": "CAUSES",
+        "startNodeId": event_ids[0],
+        "endNodeId": event_ids[1],
+        "properties": {},
+    })
+    monkeypatch.setattr(service, "_call_ai", lambda request: result)
+
+    response = client.post(
+        "/internal/v1/articles/analyze",
+        json={
+            "articleId": test_article_id,
+            "title": "서울시, 청년 주거 지원 확대",
+            "content": "목업 대체",
+            "sourceId": test_source_id,
+            "sourceName": "테스트뉴스",
+            "publishedAt": "2026-09-08T09:00:00+09:00",
+        },
+        headers={"x-internal-api-key": settings.internal_api_key},
+    )
+    assert response.status_code == 200
+    article_node_id = response.json()["data"]["articleNodeId"]
+
+    with _driver.session() as session:
+        record = session.run(
+            """
+            MATCH (a:Article {nodeId: $articleId})-[c:COVERS]->(ev:Event)
+            WITH a, collect(CASE WHEN c.isPrimary = true THEN ev.title END) AS primaryTitles,
+                 count(ev) AS eventCount
+            OPTIONAL MATCH (a)-[:COVERS]->(:Event)-[causes:CAUSES]->(:Event)
+            RETURN primaryTitles, eventCount, count(causes) AS causesCount
+            """,
+            articleId=article_node_id,
+        ).single()
+
+    expected_title = (base_event if primary_index == 0 else second_event)["properties"]["title"]
+    assert record["eventCount"] == 2
+    assert record["primaryTitles"] == [expected_title]
+    assert record["causesCount"] == 1

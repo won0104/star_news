@@ -206,9 +206,10 @@ def _apply_analysis(
                 consumed_edge_ids.add(edge["edgeId"])
 
     # COVERS는 AI 임시 Event 여러 개가 같은 실제 Event로 병합될 수 있으므로
-    # 실제 UUID 매핑 후 중복 제거한다. 모델은 primary를 주지 않으므로 안정적인
-    # Event UUID 순서의 첫 관계 하나만 primary로 정한다.
+    # 실제 UUID 매핑 후 중복 제거한다. 모델(v3)이 isPrimary=true를 준 Event를 primary로 쓰고,
+    # 판정이 없으면(v2.x 또는 v3 저장 불가) 안정적인 Event UUID 순서의 첫 관계 하나로 정한다.
     covers_by_event: dict[str, float | None] = {}
+    model_primary_ids: set[str] = set()
     for edge in edges:
         if edge["type"] != "COVERS":
             continue
@@ -216,7 +217,10 @@ def _apply_analysis(
         end_id = id_map.get(edge["endNodeId"])
         if start_id != article_node_id or end_id is None:
             continue
-        confidence = (edge.get("properties") or {}).get("confidence")
+        edge_props = edge.get("properties") or {}
+        confidence = edge_props.get("confidence")
+        if edge_props.get("isPrimary") is True:
+            model_primary_ids.add(end_id)
         previous = covers_by_event.get(end_id)
         if previous is None or (confidence is not None and confidence > previous):
             covers_by_event[end_id] = confidence
@@ -227,13 +231,15 @@ def _apply_analysis(
     # 재분석 전에 과거 primary를 모두 해제해야 이전 Event가 더 이상 결과에 없어도
     # primary=true 관계가 두 개 이상 남지 않는다.
     repository.reset_covers_primary(tx, article_node_id)
-    for index, event_id in enumerate(sorted(covers_by_event)):
+    # 서로 다른 AI Event가 모두 primary로 왔다면 같은 UUID 순서 규칙으로 하나만 남긴다.
+    primary_event_id = min(model_primary_ids or covers_by_event)
+    for event_id in sorted(covers_by_event):
         repository.merge_covers_edge(
             tx,
             article_node_id,
             event_id,
             covers_by_event[event_id],
-            index == 0,
+            event_id == primary_event_id,
             now,
         )
 
