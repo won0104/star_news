@@ -364,6 +364,12 @@ def evaluate_user_across_weight_grid(user_id: int, held_out_ids: list[str]) -> d
 MAX_WEIGHT_STEP = 0.1
 
 
+# 그리드서치 자체가 불가능한 상황(평가 유저 없음/평가 전부 실패)의 폴백값 - 직전 값이 있으면 그대로 유지하고, 없으면(첫 재튜닝) 기본값
+def _fallback_weights(current_cbf_weight: float | None) -> tuple[float, float]:
+    cbf_weight = current_cbf_weight if current_cbf_weight is not None else DEFAULT_CBF_WEIGHT
+    return cbf_weight, round(1 - cbf_weight, 1)
+
+
 # 재튜닝 메인 함수 - 그리드서치 전체를 돌려서 NDCG@10이 가장 높은 (cbf_weight, cf_weight) 조합을 고른다
 def select_best_weights(current_cbf_weight: float | None = None) -> tuple[float, float, float, float, float]:
     # 홀드아웃 정답 자격 판단에도 실제 추천 후보 조건과 같은 최근성 기준을 쓴다
@@ -372,9 +378,10 @@ def select_best_weights(current_cbf_weight: float | None = None) -> tuple[float,
         all_histories = repository.find_users_eligible_for_evaluation(session, recency_threshold)
     splits = build_holdout_splits(all_histories)
 
-    # 평가 가능한 유저가 없으면 그리드서치가 무의미하니 현재 기본값을 그대로 반환
+    # 평가 가능한 유저가 없으면 그리드서치가 무의미하니 폴백값을 그대로 반환
     if not splits:
-        return DEFAULT_CBF_WEIGHT, DEFAULT_CF_WEIGHT, 0.0, 0.0, 0.0
+        cbf_weight, cf_weight = _fallback_weights(current_cbf_weight)
+        return cbf_weight, cf_weight, 0.0, 0.0, 0.0
 
     # 가중치 조합별로 유저들의 (ndcg, hit_rate, recall)을 누적
     metrics_by_weight: dict[tuple[float, float], list[tuple[float, float, float]]] = {
@@ -396,7 +403,8 @@ def select_best_weights(current_cbf_weight: float | None = None) -> tuple[float,
             )
 
     if all(not scores for scores in metrics_by_weight.values()):
-        return DEFAULT_CBF_WEIGHT, DEFAULT_CF_WEIGHT, 0.0, 0.0, 0.0
+        cbf_weight, cf_weight = _fallback_weights(current_cbf_weight)
+        return cbf_weight, cf_weight, 0.0, 0.0, 0.0
 
     # 직전 값이 있으면 그 값 기준 ±MAX_WEIGHT_STEP 안의 조합에서만 고른다(급변 방지)
     candidate_grid = WEIGHT_GRID

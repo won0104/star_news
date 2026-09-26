@@ -129,6 +129,33 @@ def test_select_best_weights_falls_back_to_default_when_every_combo_ties_at_zero
     assert (ndcg, hit_rate, recall) == (0.0, 0.0, 0.0)
 
 
+# current_cbf_weight가 있으면, 평가 가능한 유저가 아예 없어도 기본값이 아니라 직전 값을 그대로 유지해야 함
+# (안 그러면 데이터가 잠깐 없었다는 이유만으로 가중치가 기본값으로 확 튀어서 ±MAX_WEIGHT_STEP 제한이 무의미해짐)
+def test_select_best_weights_keeps_current_weight_when_no_eligible_users(monkeypatch):
+    monkeypatch.setattr(service.repository, "find_users_eligible_for_evaluation", lambda session, recency_threshold: {})
+
+    cbf_weight, cf_weight, ndcg, hit_rate, recall = service.select_best_weights(current_cbf_weight=0.4)
+
+    assert (cbf_weight, cf_weight) == (0.4, 0.6)
+    assert (ndcg, hit_rate, recall) == (0.0, 0.0, 0.0)
+
+
+# current_cbf_weight가 있으면, 유저 평가가 전부 예외로 실패해도 기본값이 아니라 직전 값을 유지해야 함
+def test_select_best_weights_keeps_current_weight_when_every_evaluation_fails(monkeypatch):
+    monkeypatch.setattr(service.repository, "find_users_eligible_for_evaluation", lambda session, recency_threshold: {1: []})
+    monkeypatch.setattr(service, "build_holdout_splits", lambda all_histories: {1: (["held-1"], ["visible-1"])})
+
+    def failing_evaluate(user_id, held_out_ids):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(service, "evaluate_user_across_weight_grid", failing_evaluate)
+
+    cbf_weight, cf_weight, ndcg, hit_rate, recall = service.select_best_weights(current_cbf_weight=0.4)
+
+    assert (cbf_weight, cf_weight) == (0.4, 0.6)
+    assert (ndcg, hit_rate, recall) == (0.0, 0.0, 0.0)
+
+
 # /retune는 요청 본문이 완전히 새로 생긴 필드라, Spring 배포 순서와 무관하게 깨지면 안 됨:
 # 구버전 Spring(본문 없음 또는 빈 {}) / 신버전 Spring(currentCbfWeight 포함) 셋 다 확인
 def test_retune_endpoint_accepts_missing_or_empty_or_full_request_body():
