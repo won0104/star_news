@@ -92,3 +92,6 @@ temp/
 
 # data Log & test Logs
 ai/outputs/
+
+# 개인 학습 메모 — 저장소에 올리지 않는다
+프로젝트_아키텍처_학습_현황.md

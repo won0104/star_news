@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
-import { nightfall } from '../../data/trend'
+import { nightBackdrop, nightfall } from '../../data/trend'
 import { useNearestWindow } from '../../hooks/useNearestWindow'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { useSettingsValues } from '../../store/settings'
 import { SCREEN_TRANSITIONS } from '../../utils/motion'
 import { BackgroundVideo } from '../common/BackgroundVideo'
+import { TopicNote } from './TopicNote'
 import { TrendSky } from './TrendSky'
 import styles from './TrendStage.module.css'
 
@@ -30,7 +31,7 @@ const GLASS_OVERLAP = 1
 const glassInset = ({ top, right, bottom, left }) =>
   [top, right, bottom, left].map((edge) => `${Math.max(0, edge - GLASS_OVERLAP)}%`).join(' ')
 
-export function TrendStage({ playTransition = false, selectedNode }) {
+export function TrendStage({ playTransition = false, selectedNode, topic = null, onTopicChange }) {
   const [ready, setReady] = useState(false)
   const [ended, setEnded] = useState(false)
   const [overlayRoot, setOverlayRoot] = useState(null)
@@ -38,6 +39,9 @@ export function TrendStage({ playTransition = false, selectedNode }) {
   const prefersReducedMotion = usePrefersReducedMotion()
   const sceneRef = useRef(null)
   const sceneWindow = useNearestWindow(nightfall.frames, sceneRef)
+  // 나무틀은 이 상자에 그려지므로 레일을 뺀 씬 박스로 고르지만, 배경은 그 아래 <AppScene> 이
+  // 깔아 둔 같은 사진과 합의해야 한다. 그래서 배경만 ref 없이 뷰포트로 잰다.
+  const nightWindow = useNearestWindow(nightfall.frames)
 
   const canPlayTransition = Boolean(
     nightfall.clip?.mp4 &&
@@ -47,8 +51,7 @@ export function TrendStage({ playTransition = false, selectedNode }) {
     !prefersReducedMotion,
   )
   const settled = !canPlayTransition || ended
-  const backdrop =
-    sceneWindow.ratio >= 1 ? nightfall.backdrops.landscape : nightfall.backdrops.portrait
+  const backdrop = nightBackdrop(nightWindow).src
 
   return (
     <div className={styles.stage}>
@@ -76,14 +79,22 @@ export function TrendStage({ playTransition = false, selectedNode }) {
         <div className={styles.windowLayer}>
           {settled && (
             <div className={styles.windowGlass} style={{ inset: glassInset(sceneWindow.opening) }}>
-              <TrendSky overlayRoot={overlayRoot} selectedNode={selectedNode} />
+              <TrendSky overlayRoot={overlayRoot} selectedNode={selectedNode} topic={topic} />
             </div>
           )}
 
           <img className={styles.frame} src={sceneWindow.src} alt="" aria-hidden />
         </div>
 
-        <div ref={setOverlayRoot} className={styles.sceneOverlay} />
+        {/*
+          쪽지는 방의 물건이지 창밖이 아니다. 이 층이 나무틀 위에 뜨면서 별은 유리 안에 갇히는
+          자리라, 쪽지가 창틀에 붙은 것으로 읽힌다.
+        */}
+        <div ref={setOverlayRoot} className={styles.sceneOverlay}>
+          {onTopicChange && (
+            <TopicNote topic={topic} onSelect={onTopicChange} pillar={sceneWindow.opening.left} />
+          )}
+        </div>
       </div>
     </div>
   )

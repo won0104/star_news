@@ -11,16 +11,34 @@ import {
   graphFromSummary,
   mergeTopicMap,
 } from '../../adapters/personalGraph'
+import { fetchArticleDetail } from '../../api/articles'
+import { panelCopy } from '../../data/trend'
 import { TOPICS } from '../../data/topics'
+import { useArticleSummary } from '../../hooks/useArticleSummary'
 import { useBookmark } from '../../hooks/useBookmark'
 import { useSettingsValues } from '../../store/settings'
 import { DiaryShell } from './DiaryShell'
+import { loadHistoryPlanet } from './historyPlanetChunk'
 import styles from './DiaryHistoryPane.module.css'
 
-const HistoryPlanet = lazy(() => import('./HistoryPlanet'))
+const HistoryPlanet = lazy(loadHistoryPlanet)
 const BOOKMARK_ASSET = '/assets/history/bookmarks'
-const EVENTS_PER_PAGE = 3
+/*
+ * 한 쪽에 세우는 사건 수.
+ *
+ * 셋이던 것을 넷으로 늘린다. 줄 높이를 70px 에서 32px 로 줄이고 목록에 스크롤을 준 뒤로는
+ * 셋이 종이의 위쪽만 쓰고 아래가 비어, 쪽을 넘길 이유가 실제 분량보다 자주 생겼다.
+ */
+const EVENTS_PER_PAGE = 4
 const ARTICLES_PER_EVENT = 5
+/*
+ * 펼친 사건이 처음에 보여 주는 발언 수.
+ *
+ * 서버는 사건에 달린 발언을 개수 제한 없이 준다. 그대로 다 펼치면 발언이 열 개인 사건
+ * 하나가 목록 전체를 먹어, 같은 페이지의 다른 사건이 스크롤 저편으로 밀린다. 넷은 무엇에
+ * 대한 사건인지 감이 오는 최소치다 — 나머지는 눌러서 본다.
+ */
+const STATEMENTS_PER_EVENT = 4
 
 const TONE_CLASS = {
   rose: 'toneRose',
@@ -113,8 +131,23 @@ export function DiaryHistoryPane() {
 
   const [selectedNode, setSelectedNode] = useState(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  /*
+   * 전체화면에서 띠가 보여 주는 사건. 행성이 화면을 덮으면 오른쪽 종이가 가려지므로,
+   * 아래 가로 띠와 오른쪽 칸이 그 자리를 대신한다.
+   *
+   * 띠 자체는 전체화면이면 늘 떠 있다 — 분야 탭이 거기 있어서, 접혀 있으면 고를 것이
+   * 어디에도 보이지 않는다.
+   */
+  const [fsEventId, setFsEventId] = useState(null)
   const [eventPageIndex, setEventPageIndex] = useState(0)
   const [openEventId, setOpenEventId] = useState(null)
+  // 발언을 다 펼친 사건. 사건 id 로 들고 있어서 다른 사건을 열면 저절로 접힌다.
+  const [allStatementsFor, setAllStatementsFor] = useState(null)
+  // 펼친 사건 줄. 목록이 스크롤되면 아래쪽 사건은 보이는 자리 밖에서 열려 아무 일도 일어나지
+  // 않은 것처럼 보인다. 그래서 펼친 줄을 눈에 들어오는 자리로 끌어온다.
+  const openEventRef = useRef(null)
+  // 전체화면 카드 띠. 휠을 가로 이동으로 바꾸려면 네이티브 리스너가 필요하다(아래 effect).
+  const fsStripRef = useRef(null)
 
   // 분야를 옮겨 다녀도 대표 별들은 그대로다. 다시 부르는 것은 기간이 바뀔 때뿐이다.
   useEffect(() => {
@@ -147,12 +180,49 @@ export function DiaryHistoryPane() {
   }, [scope])
 
   useEffect(() => {
+    if (!openEventId) return
+    // `nearest` 는 이미 보이면 움직이지 않는다 — 펼칠 때마다 목록이 튀지 않게.
+    openEventRef.current?.scrollIntoView({
+      block: 'nearest',
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    })
+  }, [openEventId, reduceMotion])
+
+  /*
+   * 카드 띠 위에서 굴린 휠을 좌우 이동으로 바꾼다.
+   *
+   * React 의 onWheel 은 루트에 passive 로 붙어 preventDefault 가 듣지 않으므로, 요소에
+   * 직접 `{ passive: false }` 로 건다. 막지 않으면 휠이 카드도 옮기고 뒤쪽도 함께 굴려
+   * 한 번의 조작이 두 군데에 먹는다.
+   *
+   * 트랙패드의 가로 제스처(deltaX)는 건드리지 않는다 — 브라우저가 이미 옳게 처리한다.
+   */
+  useEffect(() => {
+    const strip = fsStripRef.current
+    if (!strip) return undefined
+    const handleWheel = (event) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return
+      event.preventDefault()
+      strip.scrollLeft += event.deltaY
+    }
+    strip.addEventListener('wheel', handleWheel, { passive: false })
+    return () => strip.removeEventListener('wheel', handleWheel)
+  }, [isFullscreen])
+
+  useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(document.fullscreenElement === planetPortalRef.current)
+      const on = document.fullscreenElement === planetPortalRef.current
+      setIsFullscreen(on)
+      // 들어갈 때는 종이에서 펼쳐 둔 사건을 그대로 이어받고, 나갈 때는 놓는다. 펼친 채로
+      // 전체화면을 켰는데 아무것도 안 골라져 있으면 보던 것을 잃은 것처럼 보인다.
+      setFsEventId(on ? openEventId : null)
     }
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
+    // openEventId 가 바뀔 때마다 리스너를 다시 건다. ref 로 최신값을 훔쳐보는 편이 리스너를
+    // 한 번만 걸지만, 렌더 중에 ref 를 쓰게 되어 규칙에 어긋난다. 이 리스너는 붙였다 떼는
+    // 비용이 없는 쪽이라 의존성에 넣는 것이 낫다.
+  }, [openEventId])
 
   const current = map.scope === scope ? map : { state: 'loading', data: null }
   const articlesByEvent = articles.scope === scope ? articles.byEvent : {}
@@ -224,28 +294,64 @@ export function DiaryHistoryPane() {
    * 행성에서 별을 눌렀을 때. 다른 분야의 별이면 그 분야로 옮겨 간다.
    *
    * 사건이면 오른쪽 목록의 같은 사건도 펼친다 — 행성과 목록이 같은 것을 가리키게.
+   *
+   * 분야 중심 별은 전체화면에서 아래 띠를 연다. 지금 보고 있는 분야의 별도 똑같이 연다 —
+   * 일곱 중 하나만 눌러도 반응이 없으면 그 별만 고장 난 것처럼 보인다.
    */
   const selectNode = (node) => {
     setSelectedNode(node)
     if (!node) return
-    if (node.topicCode && node.topicCode !== topic.topicCode) {
+
+    const otherTopic = node.topicCode && node.topicCode !== topic.topicCode
+    if (otherTopic) {
       setOpenEventId(null)
       setEventPageIndex(0)
       setParams({ view: 'log', topic: node.topicCode }, { replace: true })
-      return
     }
-    if (node.nodeType !== 'EVENT') return
+
+    // 분야 중심 별은 그 분야로 옮기는 것으로 끝난다. 띠는 이미 떠 있다.
+    if (node.kind === 'TOPIC_CLUSTER') return
+
+    // 분야를 막 옮겼으면 events 는 아직 이전 분야의 것이라 여기서 찾으면 엉뚱한 것이 걸린다.
+    if (otherTopic || node.nodeType !== 'EVENT') return
     const event = events.find((item) => item.id === node.id)
     if (!event) return
+    if (isFullscreen) openInFullscreen(event)
     setOpenEventId(event.id)
     setEventPageIndex(Math.floor(events.indexOf(event) / EVENTS_PER_PAGE))
     if (!articlesByEvent[event.nodeKey]) loadArticles(scope, event, range)
+  }
+
+  /**
+   * 전체화면 아래 띠에서 사건을 골랐을 때. 행성이 왼쪽 절반으로 물러나고 오른쪽에 속이 열린다.
+   *
+   * 오른쪽 종이의 토글과 같은 일을 하지만 그쪽 상태(openEventId)는 건드리지 않는다 —
+   * 전체화면을 닫았을 때 종이가 제 상태 그대로 남아 있어야 한다.
+   */
+  const openInFullscreen = (event) => {
+    setFsEventId(event.id)
+    setSelectedNode({
+      id: event.id,
+      nodeType: 'EVENT',
+      nodeKey: event.nodeKey,
+      topicCode: topic.topicCode,
+    })
+    if (!articlesByEvent[event.nodeKey]) loadArticles(scope, event, range)
+    recordNodeClick('EVENT', event.nodeKey).catch(() => {})
   }
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement === planetPortalRef.current) await document.exitFullscreen()
     else await planetPortalRef.current?.requestFullscreen()
   }
+
+  // 띠에서 고른 사건. 분야가 바뀌면 events 가 갈리므로 여기서 못 찾고 저절로 닫힌다.
+  const fsEvent = fsEventId ? (events.find((item) => item.id === fsEventId) ?? null) : null
+  const fsAllStatements = fsEvent ? allStatementsFor === fsEvent.id : false
+  const fsStatements = fsEvent
+    ? (fsAllStatements ? fsEvent.statements : fsEvent.statements.slice(0, STATEMENTS_PER_EVENT))
+    : []
+  const fsRestCount = fsEvent ? fsEvent.statements.length - fsStatements.length : 0
 
   const topicArticleCount = events.reduce((sum, event) => sum + event.articleCount, 0)
   const recordedTopics = new Set(
@@ -299,19 +405,98 @@ export function DiaryHistoryPane() {
           <p>작은 기록들이 모여 하나의 우주가 됩니다.</p>
         </header>
 
-        <div ref={planetPortalRef} className={styles.planetPortal}>
-          <Suspense fallback={<div className={styles.planetLoading}>기록 행성을 불러오는 중…</div>}>
-            <HistoryPlanet
-              graph={graph}
-              activeTopic={topic.topicCode}
-              reduceMotion={reduceMotion}
-              selectedNode={selectedNode}
-              selectedEvent={null}
-              onSelectNode={selectNode}
-              onOpenEvent={selectNode}
-              variant={isFullscreen ? 'default' : 'diary'}
-            />
-          </Suspense>
+        {/*
+          전체화면은 이 상자만 그린다(:fullscreen 은 그 요소의 자손만 띄운다). 그래서 띠와
+          오른쪽 칸도 여기 안에 있어야 한다 — 밖에 두면 전체화면에서 사라진다.
+        */}
+        <div
+          ref={planetPortalRef}
+          className={styles.planetPortal}
+          data-strip={isFullscreen ? 'on' : undefined}
+          data-split={isFullscreen && fsEvent ? 'on' : undefined}
+        >
+          <div className={styles.planetStage}>
+            <Suspense fallback={<div className={styles.planetLoading}>기록 행성을 불러오는 중…</div>}>
+              <HistoryPlanet
+                graph={graph}
+                activeTopic={topic.topicCode}
+                reduceMotion={reduceMotion}
+                selectedNode={selectedNode}
+                selectedEvent={null}
+                onSelectNode={selectNode}
+                onOpenEvent={selectNode}
+                variant={isFullscreen ? 'default' : 'diary'}
+              />
+            </Suspense>
+          </div>
+
+          {isFullscreen && fsEvent && (
+            <aside className={styles.fsDetail} aria-label={`${fsEvent.title} 기록`}>
+              <header>
+                <span>{topic.topicName}</span>
+                <h3>{fsEvent.title}</h3>
+                <button type="button" onClick={() => setFsEventId(null)} aria-label="닫기">
+                  ✕
+                </button>
+              </header>
+              <EventBody
+                className={styles.fsDetailBody}
+                event={fsEvent}
+                articles={articlesByEvent[fsEvent.nodeKey]}
+                statements={fsStatements}
+                restCount={fsRestCount}
+                allStatements={fsAllStatements}
+                onToggleStatements={() =>
+                  setAllStatementsFor(fsAllStatements ? null : fsEvent.id)
+                }
+              />
+            </aside>
+          )}
+
+          {isFullscreen && (
+            <div className={styles.fsStrip}>
+              {/*
+                분야 탭. 행성의 분야 중심 별과 같은 일을 하지만, 별은 돌려서 찾아야 하고
+                이쪽은 일곱이 한눈에 선다. 기록이 없는 분야는 흐리게 두되 막지는 않는다 —
+                눌리지 않으면 왜 안 되는지 알 수 없다.
+              */}
+              <div className={styles.fsTabs} role="tablist" aria-label="분야">
+                {TOPICS.map((item) => (
+                  <button
+                    key={item.topicCode}
+                    type="button"
+                    role="tab"
+                    aria-selected={item.topicCode === topic.topicCode}
+                    className={`${styles.fsTab} ${styles[TONE_CLASS[item.tone]]}`}
+                    data-empty={recordedTopics.has(item.topicCode) ? undefined : 'on'}
+                    onClick={() => selectTopic(item)}
+                  >
+                    {item.topicName}
+                  </button>
+                ))}
+                <span className={styles.fsTabsCount}>사건 {events.length}</span>
+              </div>
+
+              {events.length === 0 ? (
+                <p className={styles.fsStripEmpty}>이 분야에 남은 기록이 없어요.</p>
+              ) : (
+                <ul ref={fsStripRef}>
+                  {events.map((event) => (
+                    <li key={event.id}>
+                      <button
+                        type="button"
+                        aria-current={event.id === fsEventId ? 'true' : undefined}
+                        onClick={() => openInFullscreen(event)}
+                      >
+                        <strong>{event.title}</strong>
+                        <small>기사 {event.articleCount}개</small>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Sits on the left page because what it expands is the planet above it, not the
@@ -416,70 +601,34 @@ export function DiaryHistoryPane() {
                 {visibleEvents.map((event) => {
                   const open = openEventId === event.id
                   const articles = articlesByEvent[event.nodeKey]
+                  const allStatements = allStatementsFor === event.id
+                  const statements = allStatements
+                    ? event.statements
+                    : event.statements.slice(0, STATEMENTS_PER_EVENT)
+                  const restCount = event.statements.length - statements.length
 
                   return (
-                    <li key={event.id}>
+                    <li key={event.id} ref={open ? openEventRef : null}>
                       <button type="button" aria-expanded={open} onClick={() => toggleEvent(event)}>
-                        <small>읽은 기사 {event.articleCount}개</small>
                         <strong>{event.title}</strong>
-                        <p>
-                          <span className={styles.eventCount}>발언 {event.statements.length}</span>
-                          <span className={styles.eventChevron} aria-hidden>
-                            {open ? '▾' : '▸'}
-                          </span>
-                        </p>
+                        <small>기사 {event.articleCount}개</small>
+                        <span className={styles.eventChevron} aria-hidden>
+                          {open ? '▾' : '▸'}
+                        </span>
                       </button>
 
                       {open && (
-                        <div className={styles.statementBox}>
-                          <section>
-                            <h4>발언</h4>
-                            {event.statements.length > 0 ? (
-                              <ul className={styles.statementList}>
-                                {event.statements.map((statement) => (
-                                  <li key={statement.nodeKey}>{statement.label}</li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className={styles.statementEmpty}>
-                                이 사건에서 접한 발언이 없어요.
-                              </p>
-                            )}
-                          </section>
-
-                          <section>
-                            <h4>
-                              내가 읽은 기사
-                              {articles?.state === 'ready' && <b>{articles.items.length}</b>}
-                            </h4>
-                            {articles?.state === 'ready' && articles.items.length > 0 && (
-                              <ul className={styles.eventArticleList}>
-                                {/*
-                                  읽은 날짜를 왼쪽 열로 빼 세로로 맞춘다. 발언은 사건의
-                                  내용이고 이쪽은 내 행위의 기록이라, 날짜가 열을 이루면
-                                  훑기만 해도 "언제 읽었나"가 보이고 위의 인용 덩어리와
-                                  모양 자체가 갈린다.
-                                */}
-                                {articles.items.map((article) => (
-                                  <ArticleRow key={article.articleId} article={article} />
-                                ))}
-                              </ul>
-                            )}
-                            {articles?.state === 'ready' && articles.items.length === 0 && (
-                              <p className={styles.statementEmpty}>
-                                이 사건에서 읽은 기사가 없어요.
-                              </p>
-                            )}
-                            {articles?.state === 'loading' && (
-                              <p className={styles.statementEmpty}>기사를 불러오는 중…</p>
-                            )}
-                            {articles?.state === 'failed' && (
-                              <p className={styles.statementEmpty}>
-                                기사를 불러오지 못했어요.
-                              </p>
-                            )}
-                          </section>
-                        </div>
+                        <EventBody
+                          className={styles.statementBox}
+                          event={event}
+                          articles={articles}
+                          statements={statements}
+                          restCount={restCount}
+                          allStatements={allStatements}
+                          onToggleStatements={() =>
+                            setAllStatementsFor(allStatements ? null : event.id)
+                          }
+                        />
                       )}
                     </li>
                   )
@@ -547,6 +696,78 @@ export function DiaryHistoryPane() {
 }
 
 /**
+ * 펼친 사건의 속 — 발언과 내가 읽은 기사.
+ *
+ * 오른쪽 페이지의 목록 안에서도, 행성 전체화면의 오른쪽 칸에서도 같은 것을 보여 주므로
+ * 한 군데에 둔다. 다른 것은 감싸는 상자의 모양뿐이라 className 으로 받는다.
+ */
+function EventBody({
+  className,
+  event,
+  articles,
+  statements,
+  restCount,
+  allStatements,
+  onToggleStatements,
+}) {
+  return (
+    <div className={className}>
+      <section>
+        <h4>발언</h4>
+        {event.statements.length > 0 ? (
+          <>
+            <ul className={styles.statementList}>
+              {statements.map((statement) => (
+                <li key={statement.nodeKey}>{statement.label}</li>
+              ))}
+            </ul>
+            {(restCount > 0 || allStatements) && (
+              <button
+                type="button"
+                className={styles.statementMore}
+                aria-expanded={allStatements}
+                onClick={onToggleStatements}
+              >
+                {allStatements ? '발언 접기' : `발언 ${restCount}개 더`}
+              </button>
+            )}
+          </>
+        ) : (
+          <p className={styles.statementEmpty}>이 사건에서 접한 발언이 없어요.</p>
+        )}
+      </section>
+
+      <section>
+        {/* 총계는 접힌 줄의 `기사 N개` 가 이미 말한다. 여기 두면 한 화면에 두 수가 서고,
+            이쪽은 받아온 한 페이지(최대 ARTICLES_PER_EVENT)라 총계와 어긋난다. */}
+        <h4>내가 읽은 기사</h4>
+        {articles?.state === 'ready' && articles.items.length > 0 && (
+          <ul className={styles.eventArticleList}>
+            {/*
+              읽은 날짜를 왼쪽 열로 빼 세로로 맞춘다. 발언은 사건의 내용이고 이쪽은 내
+              행위의 기록이라, 날짜가 열을 이루면 훑기만 해도 "언제 읽었나"가 보이고 위의
+              인용 덩어리와 모양 자체가 갈린다.
+            */}
+            {articles.items.map((article) => (
+              <ArticleRow key={article.articleId} article={article} />
+            ))}
+          </ul>
+        )}
+        {articles?.state === 'ready' && articles.items.length === 0 && (
+          <p className={styles.statementEmpty}>이 사건에서 읽은 기사가 없어요.</p>
+        )}
+        {articles?.state === 'loading' && (
+          <p className={styles.statementEmpty}>기사를 불러오는 중…</p>
+        )}
+        {articles?.state === 'failed' && (
+          <p className={styles.statementEmpty}>기사를 불러오지 못했어요.</p>
+        )}
+      </section>
+    </div>
+  )
+}
+
+/**
  * 읽은 기사 한 줄. 날짜 · 출처와 제목 · 책갈피 세 칸이다.
  *
  * 책갈피가 여기 서는 이유는, 나의 기록이 "무엇을 읽었나"를 보는 자리여서 그중 남겨 둘 것을
@@ -563,6 +784,40 @@ function ArticleRow({ article }) {
     initial: article.bookmarked,
     copy: ARTICLE_BOOKMARK_COPY,
   })
+  const [open, setOpen] = useState(false)
+  // 원문 주소는 이 목록에 없고 상세에만 있다. 한 번 받으면 들고 있다가 링크로 건다.
+  const [origin, setOrigin] = useState(null)
+  /*
+   * 목록 응답이 저장된 요약의 앞부분(summaryPreview)을 같이 준다. 그것을 씨앗으로 넘기면
+   * 대개 요청 없이 바로 펼쳐진다 — 오늘의 트렌드와 달리 여기 기사는 이미 읽은 것이라
+   * 요약이 만들어져 있는 경우가 많다. 없을 때만 그 자리에서 만든다.
+   */
+  const { summary, state, load, retry } = useArticleSummary(article.articleId, {
+    seed: article.summaryPreview ?? null,
+  })
+  const bodyId = `history-article-summary-${article.articleId}`
+
+  const expand = () => {
+    const next = !open
+    setOpen(next)
+    if (next) load()
+  }
+
+  /**
+   * 원문 주소를 아직 모를 때만 쓰는 길. 빈 탭을 클릭과 같은 흐름에서 먼저 열고 주소를
+   * 넣는다 — 응답을 기다렸다 window.open 을 부르면 팝업 차단에 걸린다.
+   */
+  const openOrigin = () => {
+    const tab = window.open('', '_blank', 'noopener,noreferrer')
+    fetchArticleDetail(article.articleId)
+      .then((detail) => {
+        const url = detail?.originalUrl ?? null
+        setOrigin(url)
+        if (url && tab) tab.location.href = url
+        else tab?.close()
+      })
+      .catch(() => tab?.close())
+  }
 
   return (
     <li>
@@ -575,6 +830,55 @@ function ArticleRow({ article }) {
             {hint}
           </small>
         )}
+
+        <span className={styles.articleActions}>
+          <button
+            type="button"
+            className={styles.articleAction}
+            aria-expanded={open}
+            aria-controls={bodyId}
+            onClick={expand}
+          >
+            {open ? panelCopy.summaryClose : panelCopy.summaryOpen}
+            <b aria-hidden>{open ? '▴' : '▾'}</b>
+          </button>
+
+          {origin ? (
+            <a
+              className={`${styles.articleAction} ${styles.articleActionAway}`}
+              href={origin}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {panelCopy.origin}
+              <b aria-hidden>↗</b>
+            </a>
+          ) : (
+            <button
+              type="button"
+              className={`${styles.articleAction} ${styles.articleActionAway}`}
+              onClick={openOrigin}
+            >
+              {panelCopy.origin}
+              <b aria-hidden>↗</b>
+            </button>
+          )}
+        </span>
+
+        <span className={styles.articleSummary} id={bodyId} hidden={!open}>
+          {summary ? (
+            <span className={styles.articleSummaryText}>{summary}</span>
+          ) : (
+            <span className={styles.articleSummaryNote} role="status">
+              {summaryNote(state)}
+            </span>
+          )}
+          {(state === 'failed' || state === 'pending') && (
+            <button type="button" className={styles.articleAction} onClick={retry}>
+              {panelCopy.summaryRetry}
+            </button>
+          )}
+        </span>
       </span>
       <button
         type="button"
@@ -597,6 +901,15 @@ function ArticleRow({ article }) {
       </button>
     </li>
   )
+}
+
+/** 요약이 비어 있는 이유를 화면 말로 옮긴다. TrendPanel 과 같은 문구를 쓴다. */
+function summaryNote(state) {
+  if (state === 'loading') return panelCopy.summaryLoading
+  if (state === 'pending') return panelCopy.summaryPending
+  if (state === 'unavailable') return panelCopy.summaryUnavailable
+  if (state === 'failed') return panelCopy.summaryFailed
+  return panelCopy.summaryNone
 }
 
 /** `2026-09-16T18:00:00+09:00` → `2026.09.16 기준`. 없으면 머리글 줄을 비운다. */

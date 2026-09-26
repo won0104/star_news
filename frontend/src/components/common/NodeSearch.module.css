@@ -258,24 +258,58 @@
 }
 
 /*
- * 세로 레일 안에 놓일 때. 자리는 레일이 정하므로 스스로 떠 있기를 그만둔다.
+ * 자리를 남이 정해 준 두 경우. 스스로 떠 있기(position: fixed)를 그만두고 받은 상자를 채운다.
  *
- * 결과 목록만 레일 밖으로 넓게 펼친다. 레일은 176~208px 라 분류 딱지(64px)와 이름이 한 줄에
- * 들어가지 않고, 흐름에 그대로 두면 목록이 열릴 때마다 아래 목적지들이 밀려 내려간다.
+ * 폭과 무관하다 — 넓은 화면이라서가 아니라 놓일 자리를 이미 받았기 때문이다.
+ *
+ * 클래스를 둘 겹쳐 쓰는 것은 순서에 기대지 않기 위해서다. 아래 좁은 폭 규칙이 .search 에 다시
+ * top/right/width 를 주는데 한 클래스끼리는 파일에서 뒤가 이긴다. 게다가 여기서 position 이
+ * relative 라 그 top/right 는 무시되지 않고 상대 이동이 되어, 받은 자리에서 68px 아래 16px
+ * 왼쪽으로 밀려 앉았다.
+ */
+.search.inline,
+.search.rail {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 100%;
+}
+
+/*
+ * 현관에서는 목록을 흐름 밖으로 뺀다.
+ *
+ * 흐름에 두면 목록이 열릴 때 상자가 그만큼 자라고, 가운데 정렬이 다시 계산되어 검색창이 위로
+ * 뛴다. 그 뜀은 transition 으로 잡을 수 없다 — 바뀌는 것이 위치가 아니라 레이아웃이라 보간할
+ * 값이 없다. 상자 높이를 고정해 두어야 <MainScene> 이 translate 하나로 부드럽게 비켜줄 수 있다.
+ */
+.inline .results {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  margin-top: 0;
+}
+
+/*
+ * 현관에서 목록이 쓸 수 있는 높이.
+ *
+ * 기본 상한(100vh - 94px)은 떠 있는 검색창 기준이다 — 화면 위쪽 20px 에 서니 아래가 통째로
+ * 비어 있다. 현관은 문구와 입력칸을 이고 가운데 서다가 열릴 때 조금 올라가므로, 입력칸 아래로
+ * 남는 높이는 화면의 절반 남짓이다. 50vh 에서 숨통 40px 을 뺀다.
+ */
+.inline .list {
+  max-height: min(440px, calc(50vh - 40px));
+}
+
+/*
+ * 레일 안에서만 손보는 것들. 레일은 1024px 이상에만 서므로 이 안에 둔다.
  */
 @media (min-width: 1024px) {
-  .docked {
-    position: relative;
-    top: auto;
-    right: auto;
-    width: 100%;
-  }
-
-  .docked .control {
+  .rail .control {
     height: 38px;
   }
 
-  .docked .icon {
+  .rail .icon {
     margin: 0 5px 0 11px;
     font-size: 17px;
   }
@@ -284,8 +318,11 @@
    * 레일 위가 아니라 레일 오른쪽 옆. 아래로 펼치면 320px 짜리 목록이 레일을 덮어 목적지
    * 단추들이 가려진다. 18px 은 레일의 안쪽 여백이라 100% + 18px 이 곧 레일의 바깥 변이고,
    * 거기서 10px 더 띄운다 — 레일 폭이 176~208px 사이에서 변해도 같은 간격으로 남는다.
+   *
+   * 현관(inline)은 이 규칙을 받지 않는다. 상자가 넓고 아래가 비어 있어 아래로 여는 것이 맞고,
+   * 옆으로 열면 방 한가운데 선 검색창의 결과가 오른쪽 허공으로 날아간다.
    */
-  .docked .results {
+  .rail .results {
     position: absolute;
     top: 0;
     left: calc(100% + 28px);
