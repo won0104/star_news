@@ -76,6 +76,11 @@
       "scope": "graph-next-event-preview",
       "decision": "Preview each visible related Event's two-hop Event neighbors as one miniature star per returned Event, arranged in outward concentric half-rings with an explicit count on hover.",
       "rationale": "A literal star count lets readers estimate how much Event exploration lies beyond a node before committing to recentering the graph."
+    },
+    {
+      "scope": "graph-label-quality",
+      "decision": "Preserve graph candidates and truncate only their displayed labels with an ellipsis: Entity labels after nineteen characters and Event labels after one hundred ninety-nine characters, including the initial top-ten trend view.",
+      "rationale": "Truncation keeps graph ranking and connectivity intact while preventing unusually long labels from overwhelming the authored frame; full source labels remain available to accessible names and data flows."
     }
   ],
   "evidence": [

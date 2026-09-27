@@ -10,7 +10,7 @@ import {
   trendFigmaAssets,
 } from '../../data/trend'
 import { fetchNodeArticles } from '../../api/trend'
-import { edgeLabels, nodeTypeLabels } from '../../data/trendNeighbors'
+import { edgeLabels, formatTrendGraphLabel, nodeTypeLabels } from '../../data/trendNeighbors'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { TrendPanel } from './TrendPanel'
 import styles from './TrendConstellation.module.css'
@@ -102,7 +102,8 @@ function bySlotFromGraph(graph) {
       .filter((node) => node.nodeType === nodeType)
       .map((node) => ({
         id: node.nodeKey,
-        label: node.label,
+        label: formatTrendGraphLabel(node),
+        fullLabel: node.label,
         meta: metaFor(node.nodeKey),
         event: node.nodeKey,
         nodeType: node.nodeType,
@@ -112,7 +113,8 @@ function bySlotFromGraph(graph) {
     centre: [
       {
         id: centre.nodeKey,
-        label: centre.label,
+        label: formatTrendGraphLabel(centre),
+        fullLabel: centre.label,
         meta: '지금 보는 중심 노드',
         event: centre.nodeKey,
         nodeType: centre.nodeType,
@@ -218,7 +220,7 @@ export function TrendConstellation({
   const centre = nodes[0]
   const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
   const visibleNodeKeys = new Set(nodes.map((node) => node.id))
-  const candidates = graph?.nodes ?? []
+  const candidates = (graph?.nodes ?? []).slice(0, 15)
   // trail 의 마지막은 지금 중심이다. 그 앞의 것들이 이미 지나온 별이다.
   const visitedKeys = new Set((trail ?? []).slice(0, -1).map((item) => item.nodeKey))
   const at = (node) => (narrow ? node.slot.atNarrow : node.slot.at)
@@ -262,7 +264,7 @@ export function TrendConstellation({
   const walkTo = (node) => {
     if (onWalk) {
       onWalk(
-        node,
+        { ...node, label: node.fullLabel ?? node.label },
         node.slot
           ? {
               x: at(node)[0],
@@ -535,8 +537,8 @@ export function TrendConstellation({
                 aria-controls={isCentre ? PANEL_ID : undefined}
                 aria-label={
                   isCentre
-                    ? `${node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
-                    : `${node.label} — ${panelCopy.recentre}${previewText ? `; ${previewText}` : ''}`
+                    ? `${node.fullLabel ?? node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
+                    : `${node.fullLabel ?? node.label} — ${panelCopy.recentre}${previewText ? `; ${previewText}` : ''}`
                 }
                 onClick={isCentre ? togglePanel : () => walkTo(node)}
               >
@@ -586,7 +588,7 @@ export function TrendConstellation({
                   >
                     <span className={styles.candidateRank}>{String(index + 1).padStart(2, '0')}</span>
                     <span className={styles.candidateCopy}>
-                      <b>{candidate.label || '이름 없는 노드'}</b>
+                      <b>{formatTrendGraphLabel(candidate) || '이름 없는 노드'}</b>
                       <small>
                         {nodeTypeLabels[candidate.nodeType] ?? candidate.nodeType}
                         {visible ? ' · 별자리에 표시 중' : ''}
