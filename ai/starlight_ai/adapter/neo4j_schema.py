@@ -178,16 +178,18 @@ def adapt_to_schema(
             cname = normalize_entity_name(cname) or cname
             if et_str and et_str.upper() == "ORGANIZATION":
                 warnings.append(f"entity_type_ORGANIZATION_unrefined:{nid}")
-            nodes_out.append(
-                {
-                    "labels": _entity_labels(et_str),
-                    "properties": {
-                        "nodeId": nid,
-                        "canonicalName": cname,
-                        "entityType": et,
-                    },
-                }
-            )
+            entity_props: dict[str, Any] = {
+                "nodeId": nid,
+                "canonicalName": cname,
+                "entityType": et,
+            }
+            # v3: merged_mentions에 코레퍼런스로 합쳐진 다른 표현들이 옴 - 백엔드가
+            # 기존 Entity 재사용 시 alias로 누적할 수 있게 텍스트만 뽑아 전달한다
+            mentions = props.get("merged_mentions") or []
+            aliases = [m["text"] for m in mentions if m.get("text")]
+            if aliases:
+                entity_props["aliases"] = aliases
+            nodes_out.append({"labels": _entity_labels(et_str), "properties": entity_props})
             seen_ids.add(nid)
             continue
 
