@@ -147,11 +147,6 @@ function previewNodesFor(graph) {
   return (graph?.nodes ?? []).filter((node) => node.nodeType === 'EVENT')
 }
 
-function previewSummary(nodes, graph) {
-  if (nodes.length === 0) return ''
-  return `다음 사건 ${nodes.length}개${graph?.hasNext ? ' 이상' : ''}`
-}
-
 function scrollTrailHorizontally(event) {
   const list = event.currentTarget
   if (list.scrollWidth <= list.clientWidth) return
@@ -478,7 +473,6 @@ export function TrendConstellation({
           )
           const previewGraph = role === 'related' ? previewGraphs?.[node.id] : null
           const previewNodes = previewNodesFor(previewGraph)
-          const previewText = previewSummary(previewNodes, previewGraph)
 
           return (
             <div
@@ -526,7 +520,6 @@ export function TrendConstellation({
                       </Fragment>
                     )
                   })}
-                  <span className={styles.previewCount}>{previewText}</span>
                 </div>
               )}
 
@@ -538,7 +531,7 @@ export function TrendConstellation({
                 aria-label={
                   isCentre
                     ? `${node.fullLabel ?? node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
-                    : `${node.fullLabel ?? node.label} — ${panelCopy.recentre}${previewText ? `; ${previewText}` : ''}`
+                    : `${node.fullLabel ?? node.label} — ${panelCopy.recentre}`
                 }
                 onClick={isCentre ? togglePanel : () => walkTo(node)}
               >

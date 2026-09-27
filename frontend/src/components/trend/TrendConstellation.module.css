@@ -388,38 +388,6 @@
   transition: opacity 240ms ease;
 }
 
-.previewCount {
-  position: absolute;
-  z-index: 3;
-  width: 11cqw;
-  padding: 0.35cqw 0.7cqw;
-  border: 1px solid rgba(238, 207, 132, 0.28);
-  border-radius: 999px;
-  background: rgba(10, 14, 24, 0.82);
-  color: rgba(248, 226, 181, 0.92);
-  font: 700 0.72cqw var(--font-sans);
-  text-align: center;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 180ms ease;
-  backdrop-filter: blur(6px);
-}
-
-.relatedLeftPreview .previewCount {
-  left: -19cqw;
-  top: -19cqw;
-}
-
-.relatedRightPreview .previewCount {
-  left: 8cqw;
-  top: -19cqw;
-}
-
-.relatedBottomPreview .previewCount {
-  left: 5cqw;
-  top: 17cqw;
-}
-
 .previewStar img {
   display: block;
   width: 100%;
@@ -455,11 +423,6 @@
 .relatedNode:hover .previewLink,
 .relatedNode:focus-within .previewLink {
   opacity: 0.72;
-}
-
-.relatedNode:hover .previewCount,
-.relatedNode:focus-within .previewCount {
-  opacity: 1;
 }
 
 .mobileLinks {

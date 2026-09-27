@@ -5,9 +5,8 @@
  * percentage of it — same authoring as <TrendConstellation>, so the two screens sit in
  * the same coordinate space and a star does not jump when one hands over to the other.
  *
- * `container-type: size` on the field and a cover-sized canvas over it keep the type
- * scale tied to the picture rather than to the viewport: at any window the labels hold
- * their proportion to the stars they belong to.
+ * `container-type: size` on the field keeps the type scale tied to the measured glass
+ * opening rather than to the viewport.
  */
 
 .field {
@@ -21,37 +20,14 @@
   container-type: size;
 }
 
-/* The source frame is 1440 × 900. A cover-sized canvas keeps the star coordinates and the
-   type scale in one system, the way the constellation screen does. */
+/* <TrendStage> already clips this field to the measured transparent opening of the chosen
+   frame. Fill that exact box: a cover canvas used to grow past it and crop an upper star. */
 .canvas {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: max(100cqw, 160cqh);
-  aspect-ratio: 8 / 5;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   container-type: inline-size;
-}
-
-/* The compact background is 4:3. The live coordinates use the same frame, so reducing
-   the background scale also reduces the stars instead of only clipping their field. */
-@media (max-aspect-ratio: 4/3) {
-  .canvas {
-    width: max(100cqw, 133.333cqh);
-    aspect-ratio: 4 / 3;
-  }
-}
-
-/* The 3:4 asset already follows the visible tablet pane closely. Percent coordinates
-   should span that pane directly; cover-cropping a landscape canvas clipped side stars. */
-@media (max-aspect-ratio: 1/1) {
-  .canvas {
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    aspect-ratio: auto;
-    transform: none;
-  }
 }
 
 /* ---- 별 ---------------------------------------------------------------------- */
