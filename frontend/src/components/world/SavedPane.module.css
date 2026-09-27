@@ -173,6 +173,9 @@
    a list that can move should look like it can. */
 .list {
   display: grid;
+  /* 위에서부터 제 높이로 쌓는다 — 기본값(stretch)이면 한 건뿐일 때 칸 하나가 페이지 높이만큼
+     늘어나 글이 가운데에 떴다. */
+  align-content: start;
   gap: 8px;
   min-height: 0;
   flex: 1;
