@@ -52,6 +52,11 @@ const SHEET_BESIDE_MIN_WIDTH = 900
 /* 하단 sheet 을 끝까지 밀어 넣었을 때 남는 높이 — 제목 한 줄은 보이게 한다. */
 const SHEET_PEEK_MIN_HEIGHT = 132
 const SHEET_PEEK_MAX_RATIO = 0.92
+/*
+ * 사건 제목은 기사에서 뽑은 문장이라 절반이 40자를 넘는다(2026-09-27 Neo4j 실측, 중앙값 42자).
+ * 이 길이를 넘으면 상세 종이의 제목을 한 단계 낮춰 부제처럼 읽히게 한다. 잠정값이다.
+ */
+const LONG_TITLE_LENGTH = 40
 const RESIZE_CORNERS = [
   { direction: 'nw', label: '왼쪽 위 모서리에서 종이 크기 조절' },
   { direction: 'ne', label: '오른쪽 위 모서리에서 종이 크기 조절' },
@@ -287,7 +292,12 @@ function DetailSheet({ item, side, anchorIndex, onClose }) {
         <span className={styles.sheetKind}>
           {String(item.rank).padStart(2, '0')} · {topicName(item.topicCode)}
         </span>
-        <h2 id="recommend-sheet-title">{item.label}</h2>
+        <h2
+          id="recommend-sheet-title"
+          data-long={(item.label?.length ?? 0) > LONG_TITLE_LENGTH || undefined}
+        >
+          {item.label}
+        </h2>
       </header>
       {item.reason && (
         <p className={styles.sheetReason}>
