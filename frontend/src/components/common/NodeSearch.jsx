@@ -1,16 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { searchNodes } from '../../api/search'
+import { nodeTypeLabels } from '../../data/graphLabels'
 import styles from './NodeSearch.module.css'
 
 /* 레일만 짧은 쪽을 쓴다 — 176~208px 에 긴 문구는 잘린다. 나머지 자리는 넉넉하다. */
 const PLACEHOLDER = '사건, 인물, 기관, 발언 검색'
 const SHORT_PLACEHOLDER = '사건·인물 검색'
-
-const TYPE_LABEL = {
-  EVENT: '사건',
-  ENTITY: '인물·기관',
-  STATEMENT: '발언',
-}
 
 /**
  * `placement` 는 이 검색창이 어디에 서는가다. 셋뿐이고, 자리마다 결과 목록이 열리는 방향이
@@ -147,7 +142,7 @@ export function NodeSearch({ night = false, placement = 'floating', takeFocus = 
                       onSelect?.(item)
                     }}
                   >
-                    <span className={styles.type}>{TYPE_LABEL[item.nodeType] ?? item.nodeType}</span>
+                    <span className={styles.type}>{nodeTypeLabels[item.nodeType] ?? item.nodeType}</span>
                     <span className={styles.name}>{item.label}</span>
                     <span className={styles.enter} aria-hidden>→</span>
                   </button>
