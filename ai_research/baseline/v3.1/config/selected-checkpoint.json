@@ -1,0 +1,15 @@
+{
+  "calibration_executed": false,
+  "completed_epochs": 3,
+  "dev_ids_sha256": "b715491f362a2f8baae208e49f217c68724bad48233ab8d7f235bee64ad4b6c4",
+  "phase": "cluster_consumers",
+  "predicted_runtime_executed": false,
+  "schedule_contract": "V23_BASELINE_SIX_PHASE_MAX3_REHEARSAL_ONLY_V1",
+  "schema_version": "v3-downstream-gold-epoch-selection-v3-unified-entity-no-priority",
+  "selected_checkpoint_path": "/Users/shinyang-com/Desktop/project-free/ArticleLocal-KG-DeBERTa/training/results/v3-gold100-p1-p6-3epoch-mini-rehearsal-v2/phase6/epochs/epoch-01/checkpoint.pt",
+  "selected_checkpoint_sha256": "6441484865c2c020e0a808b056eb9d991e0195d30c8342d6ff4789c01453c36f",
+  "selected_epoch": 1,
+  "selection_code_snapshot_sha256": "cc6602a3238f7e34434ec077f63b15ecf0c338015a7715994e17fefc634d695d",
+  "selection_metric": -1.815105949129377,
+  "test_access_count": 0
+}

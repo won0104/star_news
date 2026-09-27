@@ -4,27 +4,27 @@
     "db_write": 0,
     "forward_backward": 0,
     "main_training": 0,
-    "model_load": "MULTIPLE_LOCAL_DIAGNOSTIC_NOT_CENSUSED",
+    "model_load": "1_STAGED_DIAGNOSTIC_WORKER_EXCLUDING_UNIT_TESTS",
     "optimizer_step": 0,
-    "pretrained_smoke_invocations": 0,
-    "raw_article_inference": "MULTIPLE_LOCAL_DIAGNOSTIC_NOT_CENSUSED",
+    "pretrained_smoke_invocations": "1_STAGED_DIAGNOSTIC_ONLY_EXCLUDING_UNIT_TESTS",
+    "raw_article_inference": "1_STAGED_DIAGNOSTIC_RAW_ARTICLE_EXCLUDING_UNIT_TESTS",
     "remote_publish": 0,
     "selected_dev": 0,
     "selected_test": 0,
     "service_threshold_selection": 0,
     "tiny_fit": 0
   },
-  "current_step": 14,
+  "current_step": 16,
   "document_id": "ARTICLELOCAL_V3_PRETRAINING_CODEX_PLAN_V1",
   "head_at_start": "d756efb1953619a4a1a9b0e1d01c2f98e23eebbf",
   "initialized_at_utc": "2026-09-20T14:08:26.127796+00:00",
   "measurement_this_step": {
-    "cuda": "NOT_AVAILABLE",
-    "memory": "serving-audit-report.json: ru_maxrss process high-water and Python tracemalloc",
-    "timing": "serving-audit-report.json: warmup then three on/three off CPU requests"
+    "cuda": "NO_NEW_MEASUREMENT_STEP15_CPU_FP32_RECORD_REUSED",
+    "memory": "NO_NEW_MEASUREMENT_STEP15_ISOLATED_ARTIFACTS_REUSED",
+    "timing": "NO_NEW_MEASUREMENT_STEP15_RUNTIME_ARTIFACTS_REUSED"
   },
-  "next_step_requires_user_request": 15,
-  "overall_status": "STEP_14_GOLD_FREE_SERVING_VERIFIED_UPSTREAM_GOLD_BLOCKED",
+  "next_step_requires_user_request": null,
+  "overall_status": "V3_CODE_READY_FOR_MAIN_TRAINING__MAIN_TRAINING_DATA_GATE_BLOCKED",
   "schema_version": "articlelocal-v3-pretraining-execution-state-v1",
   "scope": {
     "documentation_root": "ArticleLocal-KG-DeBERTa/docs/v3-pretraining",
@@ -268,20 +268,104 @@
       }
     },
     "15": {
+      "artifacts": [
+        "step15-engineering-report.md",
+        "step15-engineering-summary.json",
+        "engineering50-serving-runtime.json",
+        "step15-training-subsets.json",
+        "step15-tiny-fit-report.json",
+        "step15-sweep-acc1.json",
+        "step15-sweep-acc2.json",
+        "step15-sweep-acc4.json",
+        "step15-sweep-acc8.json",
+        "step15-memory-shortest.json",
+        "step15-memory-median.json",
+        "step15-memory-longest.json",
+        "step15-memory-pair-heavy.json",
+        "training/scripts/v3_engineering50_serving.py",
+        "training/scripts/v3_step15_engineering_train.py",
+        "training/scripts/v3_step15_finalize.py",
+        "tests/test_v3_step15_engineering.py"
+      ],
+      "blocked_by_step2": true,
+      "completed_at_utc": "2026-09-20T19:24:32.728112+00:00",
       "initial_status": "NOT_STARTED",
-      "name": "Engineering50 smoke·소규모 tiny-fit·성능/메모리 검증",
+      "name": "Engineering50 Gold-free serving·bounded tiny-fit·batch/accumulation engineering",
       "prerequisites": [
         14
       ],
-      "status": "NOT_STARTED"
+      "status": "ENGINEERING_VERIFIED_GOLD_BLOCKED",
+      "verification": {
+        "actual_db_write": 0,
+        "backbone_dce_calls_per_serving_request": [
+          1,
+          1
+        ],
+        "canary10": 10,
+        "canary10_optimizer_updates": 0,
+        "dangling_public_endpoints": 0,
+        "dev_test_tuning": 0,
+        "direct_gather_global_stack": "DIRECT_GATHER_ONLY_ZERO_GLOBAL_STACK",
+        "engineering50_gold_free_requests": 50,
+        "fit40": 40,
+        "frozen_backbone_unchanged": true,
+        "hf_publish": 0,
+        "isolated_fresh_process_memory_articles": 4,
+        "main_training": 0,
+        "physical_micro_batch_articles": 1,
+        "production_calibration": 0,
+        "provisional_accumulation_candidate": [
+          4,
+          8
+        ],
+        "request_tensor_weakrefs_after_gc": 0,
+        "sweep_optimizer_steps": {
+          "1": 8,
+          "2": 4,
+          "4": 2,
+          "8": 1
+        },
+        "tiny_fit_final_active_finite_loss_channels": 20,
+        "tiny_fit_final_gradient_owners": 24,
+        "tiny_fit_final_optimizer_state_parameter_tensors": 281,
+        "tiny_fit_final_optimizer_steps": 4,
+        "v3_harness_public_rc2_regression": "89_PASS"
+      }
     },
     "16": {
+      "artifacts": [
+        "step16-readiness-report.md",
+        "step16-readiness-bundle.json",
+        "training-readiness.json",
+        "step16-diagnostic-package-manifest.json",
+        "training/scripts/v3_step16_readiness.py",
+        "training/scripts/v3_step16_package.py",
+        "training/scripts/v3_step16_diagnostic_runner.py",
+        "tests/test_v3_step16_readiness.py"
+      ],
+      "authoritative_input_head": "f320f50ed5402d67353c10387bec04387a8dd2c1",
+      "blocked_by_step2": true,
+      "code_ready_for_main_training": true,
+      "completed_at_utc": "2026-09-20T19:50:41Z",
+      "data_gate_ready": false,
       "initial_status": "NOT_STARTED",
       "name": "진단 bundle·본학습 준비 상태·최종 인수",
       "prerequisites": [
         15
       ],
-      "status": "NOT_STARTED"
+      "status": "V3_CODE_READY_FOR_MAIN_TRAINING__MAIN_TRAINING_DATA_GATE_BLOCKED",
+      "verification": {
+        "artifact_integrity": "STAGE15_13_FILES_MATCH_F320F50E",
+        "checkpoint_cross_projection_optimizer_moments": "4_FINITE_NONZERO",
+        "current_gold": "500_FILES_499_VALID_1_QUARANTINE",
+        "main_training": 0,
+        "regression_unittest": "91_PASS",
+        "serving_or_tiny_sweep_rerun": 0,
+        "staged_diagnostic_new_process": "158_LOCAL_MODULES_PUBLIC_PASS_BACKBONE_1_DCE_1",
+        "source_guideline_schema_producer_hashes": "PASS",
+        "split_final_approved": false,
+        "step15_finalizer": "PASS_NO_METRIC_RECOMPUTE"
+      }
     },
     "2": {
       "artifacts": [
