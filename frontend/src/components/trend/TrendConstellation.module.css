@@ -126,21 +126,26 @@
   gap: 6px;
   max-width: 210px;
   padding: 6px 8px;
-  overflow: hidden;
   border: 0;
   border-radius: 8px;
   background: transparent;
   font: 500 11px var(--font-sans);
   color: rgba(238, 228, 209, 0.76);
-  text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
 }
 
-.trailNode span {
+.trailType {
   flex: none;
   font-size: 9px;
   color: rgba(238, 207, 132, 0.72);
+}
+
+.trailLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trailNode:hover {
@@ -305,7 +310,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(calc(100cqw - 48px), calc(160cqh - 122px));
+  width: min(calc(100cqw - 24px), calc(160cqh - 64px));
   max-width: 100%;
   aspect-ratio: 8 / 5;
   transform: translate(-50%, -50%);
@@ -388,38 +393,6 @@
   transition: opacity 240ms ease;
 }
 
-.previewCount {
-  position: absolute;
-  z-index: 3;
-  width: 11cqw;
-  padding: 0.35cqw 0.7cqw;
-  border: 1px solid rgba(238, 207, 132, 0.28);
-  border-radius: 999px;
-  background: rgba(10, 14, 24, 0.82);
-  color: rgba(248, 226, 181, 0.92);
-  font: 700 0.72cqw var(--font-sans);
-  text-align: center;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 180ms ease;
-  backdrop-filter: blur(6px);
-}
-
-.relatedLeftPreview .previewCount {
-  left: -19cqw;
-  top: -19cqw;
-}
-
-.relatedRightPreview .previewCount {
-  left: 8cqw;
-  top: -19cqw;
-}
-
-.relatedBottomPreview .previewCount {
-  left: 5cqw;
-  top: 17cqw;
-}
-
 .previewStar img {
   display: block;
   width: 100%;
@@ -455,11 +428,6 @@
 .relatedNode:hover .previewLink,
 .relatedNode:focus-within .previewLink {
   opacity: 0.72;
-}
-
-.relatedNode:hover .previewCount,
-.relatedNode:focus-within .previewCount {
-  opacity: 1;
 }
 
 .mobileLinks {

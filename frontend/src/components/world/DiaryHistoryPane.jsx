@@ -39,6 +39,8 @@ const ARTICLES_PER_EVENT = 5
  * 대한 사건인지 감이 오는 최소치다 — 나머지는 눌러서 본다.
  */
 const STATEMENTS_PER_EVENT = 4
+const FS_DETAIL_MIN_WIDTH = 32
+const FS_DETAIL_MAX_WIDTH = 70
 
 const TONE_CLASS = {
   rose: 'toneRose',
@@ -139,6 +141,9 @@ export function DiaryHistoryPane() {
    * 어디에도 보이지 않는다.
    */
   const [fsEventId, setFsEventId] = useState(null)
+  const [fsDetailWidth, setFsDetailWidth] = useState(FS_DETAIL_MIN_WIDTH)
+  const [fsDetailResizing, setFsDetailResizing] = useState(false)
+  const fsDetailPointerRef = useRef(null)
   const [eventPageIndex, setEventPageIndex] = useState(0)
   const [openEventId, setOpenEventId] = useState(null)
   // 발언을 다 펼친 사건. 사건 id 로 들고 있어서 다른 사건을 열면 저절로 접힌다.
@@ -148,6 +153,7 @@ export function DiaryHistoryPane() {
   const openEventRef = useRef(null)
   // 전체화면 카드 띠. 휠을 가로 이동으로 바꾸려면 네이티브 리스너가 필요하다(아래 effect).
   const fsStripRef = useRef(null)
+  const fsEventCardRefs = useRef(new Map())
 
   // 분야를 옮겨 다녀도 대표 별들은 그대로다. 다시 부르는 것은 기간이 바뀔 때뿐이다.
   useEffect(() => {
@@ -208,6 +214,18 @@ export function DiaryHistoryPane() {
     strip.addEventListener('wheel', handleWheel, { passive: false })
     return () => strip.removeEventListener('wheel', handleWheel)
   }, [isFullscreen])
+
+  useEffect(() => {
+    if (!isFullscreen || !fsEventId) return undefined
+    const frameId = window.requestAnimationFrame(() => {
+      fsEventCardRefs.current.get(fsEventId)?.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
+    })
+    return () => window.cancelAnimationFrame(frameId)
+  }, [fsEventId, isFullscreen, reduceMotion])
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -345,6 +363,43 @@ export function DiaryHistoryPane() {
     else await planetPortalRef.current?.requestFullscreen()
   }
 
+  const resizeFsDetail = (clientX) => {
+    const bounds = planetPortalRef.current?.getBoundingClientRect()
+    if (!bounds?.width) return
+    const next = ((bounds.right - clientX) / bounds.width) * 100
+    setFsDetailWidth(Math.min(FS_DETAIL_MAX_WIDTH, Math.max(FS_DETAIL_MIN_WIDTH, next)))
+  }
+
+  const beginFsDetailResize = (event) => {
+    if (event.button !== 0) return
+    fsDetailPointerRef.current = event.pointerId
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    resizeFsDetail(event.clientX)
+    setFsDetailResizing(true)
+    event.preventDefault()
+  }
+
+  const moveFsDetailResize = (event) => {
+    if (fsDetailPointerRef.current !== event.pointerId) return
+    resizeFsDetail(event.clientX)
+  }
+
+  const endFsDetailResize = (event) => {
+    if (fsDetailPointerRef.current !== event.pointerId) return
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    fsDetailPointerRef.current = null
+    setFsDetailResizing(false)
+  }
+
+  const nudgeFsDetailResize = (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+    const direction = event.key === 'ArrowLeft' ? 1 : -1
+    setFsDetailWidth((width) =>
+      Math.min(FS_DETAIL_MAX_WIDTH, Math.max(FS_DETAIL_MIN_WIDTH, width + direction * 2)),
+    )
+    event.preventDefault()
+  }
+
   // 띠에서 고른 사건. 분야가 바뀌면 events 가 갈리므로 여기서 못 찾고 저절로 닫힌다.
   const fsEvent = fsEventId ? (events.find((item) => item.id === fsEventId) ?? null) : null
   const fsAllStatements = fsEvent ? allStatementsFor === fsEvent.id : false
@@ -414,6 +469,8 @@ export function DiaryHistoryPane() {
           className={styles.planetPortal}
           data-strip={isFullscreen ? 'on' : undefined}
           data-split={isFullscreen && fsEvent ? 'on' : undefined}
+          data-resizing={fsDetailResizing ? 'on' : undefined}
+          style={{ '--fs-detail-width': `${fsDetailWidth}%` }}
         >
           <div className={styles.planetStage}>
             <Suspense fallback={<div className={styles.planetLoading}>기록 행성을 불러오는 중…</div>}>
@@ -426,12 +483,34 @@ export function DiaryHistoryPane() {
                 onSelectNode={selectNode}
                 onOpenEvent={selectNode}
                 variant={isFullscreen ? 'default' : 'diary'}
+                showInspector={false}
               />
             </Suspense>
           </div>
 
           {isFullscreen && fsEvent && (
-            <aside className={styles.fsDetail} aria-label={`${fsEvent.title} 기록`}>
+            <aside
+              className={styles.fsDetail}
+              data-resizing={fsDetailResizing ? 'on' : undefined}
+              aria-label={`${fsEvent.title} 기록`}
+            >
+              <div
+                className={styles.fsDetailResize}
+                role="separator"
+                tabIndex={0}
+                aria-label="상세보기 너비 조절"
+                aria-orientation="vertical"
+                aria-valuemin={FS_DETAIL_MIN_WIDTH}
+                aria-valuemax={FS_DETAIL_MAX_WIDTH}
+                aria-valuenow={Math.round(fsDetailWidth)}
+                title="좌우로 끌어 상세보기 너비 조절"
+                onPointerDown={beginFsDetailResize}
+                onPointerMove={moveFsDetailResize}
+                onPointerUp={endFsDetailResize}
+                onPointerCancel={endFsDetailResize}
+                onDoubleClick={() => setFsDetailWidth(FS_DETAIL_MIN_WIDTH)}
+                onKeyDown={nudgeFsDetailResize}
+              />
               <header>
                 <span>{topic.topicName}</span>
                 <h3>{fsEvent.title}</h3>
@@ -446,6 +525,7 @@ export function DiaryHistoryPane() {
                 statements={fsStatements}
                 restCount={fsRestCount}
                 allStatements={fsAllStatements}
+                dark
                 onToggleStatements={() =>
                   setAllStatementsFor(fsAllStatements ? null : fsEvent.id)
                 }
@@ -484,6 +564,10 @@ export function DiaryHistoryPane() {
                   {events.map((event) => (
                     <li key={event.id}>
                       <button
+                        ref={(element) => {
+                          if (element) fsEventCardRefs.current.set(event.id, element)
+                          else fsEventCardRefs.current.delete(event.id)
+                        }}
                         type="button"
                         aria-current={event.id === fsEventId ? 'true' : undefined}
                         onClick={() => openInFullscreen(event)}
@@ -600,6 +684,7 @@ export function DiaryHistoryPane() {
               <ul className={styles.eventList}>
                 {visibleEvents.map((event) => {
                   const open = openEventId === event.id
+                  const titleCanExpand = event.title.length > 72
                   const articles = articlesByEvent[event.nodeKey]
                   const allStatements = allStatementsFor === event.id
                   const statements = allStatements
@@ -609,8 +694,18 @@ export function DiaryHistoryPane() {
 
                   return (
                     <li key={event.id} ref={open ? openEventRef : null}>
-                      <button type="button" aria-expanded={open} onClick={() => toggleEvent(event)}>
-                        <strong>{event.title}</strong>
+                      <button
+                        type="button"
+                        aria-expanded={open}
+                        onClick={() => toggleEvent(event)}
+                      >
+                        <strong
+                          className={
+                            titleCanExpand && !open ? styles.eventTitlePreview : undefined
+                          }
+                        >
+                          {event.title}
+                        </strong>
                         <small>기사 {event.articleCount}개</small>
                         <span className={styles.eventChevron} aria-hidden>
                           {open ? '▾' : '▸'}
@@ -708,6 +803,7 @@ function EventBody({
   statements,
   restCount,
   allStatements,
+  dark = false,
   onToggleStatements,
 }) {
   return (
@@ -718,7 +814,12 @@ function EventBody({
           <>
             <ul className={styles.statementList}>
               {statements.map((statement) => (
-                <li key={statement.nodeKey}>{statement.label}</li>
+                <li
+                  key={statement.nodeKey}
+                  className={dark ? styles.statementOnDark : undefined}
+                >
+                  {statement.label}
+                </li>
               ))}
             </ul>
             {(restCount > 0 || allStatements) && (
@@ -742,7 +843,9 @@ function EventBody({
             이쪽은 받아온 한 페이지(최대 ARTICLES_PER_EVENT)라 총계와 어긋난다. */}
         <h4>내가 읽은 기사</h4>
         {articles?.state === 'ready' && articles.items.length > 0 && (
-          <ul className={styles.eventArticleList}>
+          <ul
+            className={`${styles.eventArticleList} ${dark ? styles.articleListOnDark : ''}`}
+          >
             {/*
               읽은 날짜를 왼쪽 열로 빼 세로로 맞춘다. 발언은 사건의 내용이고 이쪽은 내
               행위의 기록이라, 날짜가 열을 이루면 훑기만 해도 "언제 읽었나"가 보이고 위의

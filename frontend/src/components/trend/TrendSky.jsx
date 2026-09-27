@@ -6,6 +6,7 @@ import {
   trendNeighbors,
   trendNodeArticles,
   trendSkyExpandCopy,
+  formatTrendGraphLabel,
 } from '../../data/trendNeighbors'
 import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlots } from '../../data/trendTop'
 import { useSession } from '../../store/session'
@@ -216,7 +217,8 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
     setGraphState('loading')
     // Event-to-event links usually pass through a shared Entity, so the main graph
     // needs two hops. A one-hop response contains only the Event's direct parts.
-    fetchNeighbors(nodeType, trend.nodeKey, { depth: 2 })
+    // Share one graph between the main constellation and its hover previews.
+    fetchNeighbors(nodeType, trend.nodeKey, { depth: 2, limit: 30 })
       .then((payload) => {
         cache.current.set(trend.nodeKey, payload)
         commitGraph(payload)
@@ -240,8 +242,8 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
 
   /**
    * 화면에 보이는 관련 Event가 다음 중심이 되었을 때의 2-Hop 구성을 최대 30개까지
-   * 미리 가져온다. 작은 별 하나가 다음 Event 하나를 뜻하며, 넓은 미리보기 응답은
-   * 실제 중심 그래프의 15개 cache와 섞지 않는다.
+   * 미리 가져온다. 작은 별 하나가 다음 Event 하나를 뜻하며, 중심 이동도 같은 2-Hop·30개
+   * 응답을 쓰므로 이미 받은 결과는 공용 cache에 보관한다.
    */
   useEffect(() => {
     if (graphState !== 'ready' || !graph || sample) return undefined
@@ -264,8 +266,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
             limit: 30,
             signal: controller.signal,
           }))
-        // Preview responses use a wider page than the main graph, so keep them out of
-        // the main cache and preserve the main view's stable 15-candidate composition.
+        cache.current.set(node.nodeKey, payload)
         return [node.nodeKey, payload]
       }),
     ).then((results) => {
@@ -384,16 +385,15 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
                 type="button"
                 className={styles.star}
                 onClick={() => open(trend, { trailMode: 'reset' })}
-                aria-label={`${trendSkyCopy.rank(trend.rank)} ${trend.label} — ${trendSkyCopy.articles(trend.articleCount)}`}
+                aria-label={`${trendSkyCopy.rank(trend.rank)} ${trend.label}`}
               >
                 <img src={stars.event} alt="" aria-hidden />
               </button>
 
               <div className={styles.text}>
-                <p className={styles.label}>{trend.label}</p>
+                <p className={styles.label}>{formatTrendGraphLabel(trend)}</p>
                 <p className={styles.meta}>
                   <span className={styles.rank}>{trendSkyCopy.rank(trend.rank)}</span>
-                  {trendSkyCopy.articles(trend.articleCount)}
                 </p>
               </div>
             </div>

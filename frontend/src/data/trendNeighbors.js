@@ -131,6 +131,15 @@ export const trendNeighbors = {
   ]),
 }
 
+/** 원문은 보존하고, 화면에 그릴 때만 유형별 최대 길이 뒤를 말줄임한다. */
+export function formatTrendGraphLabel(node) {
+  const label = (node?.label ?? '').trim()
+  const characters = [...label]
+  const limit = node?.nodeType === 'ENTITY' ? 19 : node?.nodeType === 'EVENT' ? 199 : null
+  if (limit == null || characters.length <= limit) return label
+  return `${characters.slice(0, limit).join('')}…`
+}
+
 /**
  * Entity·Statement 의 세부 유형. 서버 응답의 `type` 자리에 들어가는 값이다.
  * 목업에 없는 키는 `null` — 실제 응답에서도 유형에 따라 비어 올 수 있는 필드다.
