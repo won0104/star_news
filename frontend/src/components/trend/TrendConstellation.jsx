@@ -45,7 +45,7 @@ const PREVIEW_STAR = {
 }
 
 const PREVIEW_RING_CAPACITIES = [6, 10, 14]
-const PREVIEW_RING_RADII = [8, 12, 16]
+const PREVIEW_RING_RADII = [10, 14, 18]
 
 /** 다음 Event들을 현재 별에서 바깥쪽으로 펼친 세 겹의 반원에 놓는다. */
 function previewPoint(index, total, visual) {
@@ -139,6 +139,22 @@ function nodesFor(bySlot, narrow, layoutSlots) {
     .filter(Boolean)
 }
 
+/** 유형별 표시 슬롯을 고려한 실제 주변 별 수에 맞춰 상세 탐색 구도를 고른다. */
+function graphLayoutKey(graph) {
+  const counts = (graph?.nodes ?? []).reduce(
+    (result, node) => ({ ...result, [node.nodeType]: (result[node.nodeType] ?? 0) + 1 }),
+    {},
+  )
+  const visibleCount =
+    Math.min(counts.EVENT ?? 0, 3) +
+    Math.min(counts.ENTITY ?? 0, 4) +
+    Math.min(counts.STATEMENT ?? 0, 1)
+
+  if (visibleCount <= 3) return 'graphSparse'
+  if (visibleCount <= 6) return 'graphBalanced'
+  return 'graphDense'
+}
+
 /**
  * 다음 중심 화면에 실제로 배치될 후보만 고른 뒤, 현재 화면에서 이미 보이는 Node는
  * 중복으로 그리지 않는다. 보이는 Node도 슬롯 수에는 포함해야 전환 뒤 구성과 어긋나지 않는다.
@@ -208,7 +224,7 @@ export function TrendConstellation({
   }
   const narrow = useIsNarrow()
   // A graph has no authored layout key of its own, so it takes the default composition.
-  const layoutKey = graph ? 'spread' : constellationEvents[centreId].layout
+  const layoutKey = graph ? graphLayoutKey(graph) : constellationEvents[centreId].layout
   const layout = constellationLayouts[layoutKey] ?? constellationLayouts.spread
   const bySlot = graph ? bySlotFromGraph(graph) : bySlotFromMock(centreId)
   const nodes = nodesFor(bySlot, narrow, layout.slots)

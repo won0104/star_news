@@ -305,7 +305,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(calc(100cqw - 48px), calc(160cqh - 122px));
+  width: min(calc(100cqw - 24px), calc(160cqh - 64px));
   max-width: 100%;
   aspect-ratio: 8 / 5;
   transform: translate(-50%, -50%);

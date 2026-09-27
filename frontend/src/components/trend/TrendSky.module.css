@@ -163,11 +163,15 @@
 }
 
 .label {
+  display: -webkit-box;
+  overflow: hidden;
   margin: 0;
   font: 700 clamp(11px, 1.18cqw, 19px)/1.34 var(--font-serif-kr);
   color: rgba(252, 244, 228, 0.95);
   text-shadow: 0 1px 6px rgba(8, 10, 18, 0.72);
   word-break: keep-all;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .meta {

@@ -511,6 +511,48 @@ export const ambientLayouts = {
 }
 export const constellationLayouts = {
   spread: { label: '펼침형', slots: constellationSlots },
+  graphSparse: {
+    label: '희소 탐색형',
+    slots: [
+      { role: 'centre', visual: 'centre', at: [50, 52], atNarrow: [50, 28] },
+      { role: 'related', visual: 'relatedLeft', at: [18, 29], atNarrow: [23, 52] },
+      { role: 'related', visual: 'relatedRight', at: [82, 31], atNarrow: [77, 52] },
+      { role: 'entity', visual: 'entityLeft', at: [17, 68], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [55, 14], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [56, 84], atNarrow: [50, 76] },
+      { role: 'related', visual: 'relatedBottom', at: [82, 76], hideNarrow: true },
+      { role: 'entity', visual: 'entityBottom', at: [34, 88], hideNarrow: true },
+      { role: 'entity', visual: 'entityRight', at: [90, 58], hideNarrow: true },
+    ],
+  },
+  graphBalanced: {
+    label: '균형 탐색형',
+    slots: [
+      { role: 'centre', visual: 'centre', at: [48, 53], atNarrow: [50, 28] },
+      { role: 'related', visual: 'relatedLeft', at: [17, 30], atNarrow: [23, 52] },
+      { role: 'related', visual: 'relatedRight', at: [82, 35], atNarrow: [77, 52] },
+      { role: 'entity', visual: 'entityLeft', at: [17, 64], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [62, 14], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [53, 83], atNarrow: [50, 76] },
+      { role: 'related', visual: 'relatedBottom', at: [81, 77], hideNarrow: true },
+      { role: 'entity', visual: 'entityBottom', at: [29, 88], hideNarrow: true },
+      { role: 'entity', visual: 'entityRight', at: [90, 57], hideNarrow: true },
+    ],
+  },
+  graphDense: {
+    label: '밀집 탐색형',
+    slots: [
+      { role: 'centre', visual: 'centre', at: [46, 53], atNarrow: [50, 28] },
+      { role: 'related', visual: 'relatedLeft', at: [18, 29], atNarrow: [23, 52] },
+      { role: 'related', visual: 'relatedRight', at: [77, 38], atNarrow: [77, 52] },
+      { role: 'entity', visual: 'entityLeft', at: [17, 63], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [65, 14], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [52, 82], atNarrow: [50, 76] },
+      { role: 'related', visual: 'relatedBottom', at: [82, 77], hideNarrow: true },
+      { role: 'entity', visual: 'entityBottom', at: [28, 88], hideNarrow: true },
+      { role: 'entity', visual: 'entityRight', at: [91, 57], hideNarrow: true },
+    ],
+  },
   orbit: {
     label: '궤도형',
     slots: [
