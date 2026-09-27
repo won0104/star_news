@@ -94,7 +94,7 @@
  */
 .windowGlass {
   position: absolute;
-  z-index: 2;
+  z-index: 4;
   overflow: hidden;
   box-shadow: inset 0 0 38px rgba(4, 10, 24, 0.2);
 }
