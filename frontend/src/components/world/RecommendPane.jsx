@@ -7,6 +7,7 @@ import {
   BOARDS,
   SLOTS,
   boardCopy,
+  corkCentre,
   corkPlacement,
 } from '../../data/recommendBoard'
 import { topicName } from '../../data/topics'
@@ -134,8 +135,10 @@ export function RecommendPane({ settled = true }) {
           <header className={styles.banner}>
             <img className={styles.bannerPaper} src={BOARD_ASSETS.title} alt="" aria-hidden />
             <span className={styles.bannerCopy}>
-              <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
-              <h1 id="recommend-board-title">{boardCopy.title}</h1>
+              <span className={styles.bannerMain}>
+                <span className={styles.eyebrow}>{boardCopy.eyebrow}</span>
+                <h1 id="recommend-board-title">{boardCopy.title}</h1>
+              </span>
               <span className={styles.cycle}>{boardCopy.updateSchedule}</span>
             </span>
           </header>
@@ -190,7 +193,7 @@ export function RecommendPane({ settled = true }) {
       {/* 종이 밖의 것들은 사진 상자가 아니라 뷰포트에 붙인다 — 사진이 뷰포트보다 넓어져
           양옆이 잘릴 때 함께 잘려 나가지 않도록. */}
       {notice && (
-        <div className={styles.notice} role="status">
+        <div className={styles.notice} role="status" style={corkCentre(boardArt)}>
           <p>{notice}</p>
           {noticeHint && <p className={styles.noticeHint}>{noticeHint}</p>}
         </div>

@@ -101,6 +101,12 @@ export const corkPlacement = (board) => ({
   height: `${board.cork.h * 100}%`,
 })
 
+/** 코르크 면의 한가운데 — 화면에 대한 %. 상태 문구처럼 보드 가운데에 세울 것에 쓴다. */
+export const corkCentre = (board) => ({
+  left: `${(board.cork.x + board.cork.w / 2) * 100}%`,
+  top: `${(board.cork.y + board.cork.h / 2) * 100}%`,
+})
+
 export const boardCopy = {
   title: '나를 위한 추천',
   eyebrow: 'PINNED FOR YOU',

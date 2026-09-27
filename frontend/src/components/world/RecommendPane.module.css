@@ -100,15 +100,26 @@
   filter: drop-shadow(0 6px 8px rgb(76 43 20 / 0.2));
 }
 
+/*
+ * 띠 그림은 두 장이다 — 위의 큰 띠가 높이의 약 3~69.5%, 그 아래 찢어진 종이의 안쪽이
+ * 69.5~96.8%(위아래 테두리 선 사이).
+ * 글자를 띠 전체의 가운데에 세우면 업데이트 시각이 두 종이의 경계선에 걸치므로,
+ * 제목은 위 띠에, 업데이트 시각은 아래 종이에 따로 앉힌다. 비율은 에셋에서 잰 값이다.
+ */
 .bannerCopy {
   position: absolute;
   inset: 0;
   display: grid;
+  grid-template-rows: 69.5% 27.3% 1fr;
+  padding: 0 6%;
+  text-align: center;
+}
+
+.bannerMain {
+  display: grid;
   align-content: center;
   justify-items: center;
   gap: 0.6cqw;
-  padding: 0 6%;
-  text-align: center;
 }
 
 .eyebrow {
@@ -125,8 +136,9 @@
 }
 
 .cycle {
+  align-self: center;
   min-height: 1em;
-  font: 500 clamp(10px, 2.4cqw, 15px) var(--font-sans);
+  font: 500 clamp(10px, 2.4cqw, 15px)/1 var(--font-sans);
   color: #8a6f5c;
 }
 
@@ -346,12 +358,11 @@
 
 /* ---- 상태 문구 (뷰포트 기준) ------------------------------------------------ */
 
-/* 보드 한가운데. 종이 한 장 크기의 종이. */
+/* 코르크 한가운데. 자리는 보드마다 달라서 left/top 은 JSX 가 코르크 좌표로 준다 —
+   뷰포트 가운데에 두면 왼쪽 메뉴 몫만큼 보드 중심에서 비껴 선다. */
 .notice {
   position: absolute;
   z-index: 4;
-  top: 46%;
-  left: 50%;
   display: grid;
   gap: 0.35cqw;
   width: min(32cqw, 460px);
