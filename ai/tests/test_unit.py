@@ -387,6 +387,29 @@ def test_adapt_v3_drops_null_covers_primary():
     assert covers[0]["properties"] == {"confidence": 0.9}
 
 
+def test_adapt_v3_passes_merged_mentions_as_aliases():
+    """코레퍼런스로 합쳐진 다른 표현들(merged_mentions)을 aliases로 넘긴다."""
+    kg = _v3_public_kg([True])
+    entity = next(n for n in kg["nodes"] if n["node_id"] == "ENT:1")
+    entity["properties"]["merged_mentions"] = [
+        {"text": "김민수 주거정책과장", "start": 10, "end": 20},
+        {"text": "그는", "start": 40, "end": 42},
+    ]
+
+    out = _adapt_v3(kg)
+
+    entity_out = next(n for n in out["nodes"] if n["properties"]["nodeId"] == "ENT:1")
+    assert entity_out["properties"]["aliases"] == ["김민수 주거정책과장", "그는"]
+
+
+def test_adapt_v3_omits_aliases_when_merged_mentions_empty():
+    """singleton(다른 표현으로 안 겹침)이면 merged_mentions가 빈 배열이라 aliases 자체를 안 만든다."""
+    out = _adapt_v3(_v3_public_kg([True]))  # 기본 fixture의 ENT:1은 merged_mentions=[]
+
+    entity_out = next(n for n in out["nodes"] if n["properties"]["nodeId"] == "ENT:1")
+    assert "aliases" not in entity_out["properties"]
+
+
 def test_postprocess_merges_entity_and_drops_noise(tmp_path: Path):
     nodes = [
         {"labels": ["Entity"], "properties": {"nodeId": "E1", "canonicalName": "그"}},

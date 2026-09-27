@@ -150,7 +150,9 @@ def _apply_analysis(
     for node in nodes:
         if "Entity" in node["labels"]:
             props = node["properties"]
-            id_map[props["nodeId"]] = repository.merge_extracted_entity(tx, props["canonicalName"], props["entityType"], now)
+            id_map[props["nodeId"]] = repository.merge_extracted_entity(
+                tx, props["canonicalName"], props["entityType"], now, props.get("aliases")
+            )
             normalized_name_by_ai_id[props["nodeId"]] = normalize_entity_name(props["canonicalName"])
 
     # Event 노드 반영

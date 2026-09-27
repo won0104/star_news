@@ -21,6 +21,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserKnowledgeNode {
 
+	/**
+	 * node_label 의 컬럼 길이.
+	 *
+	 * <p>사건 제목이 개체명이 아니라 기사 본문 한 문장으로 들어오는 경우가 있어 400자를 넘기도 한다.
+	 * 그대로 저장하면 Data truncation 으로 그 Node 는 영영 클릭할 수 없다.
+	 */
+	public static final int NODE_LABEL_MAX_LENGTH = 255;
+
 	@EmbeddedId
 	private UserKnowledgeNodeId id;
 
@@ -41,6 +49,14 @@ public class UserKnowledgeNode {
 
 	@Column(name = "last_seen_at", nullable = false)
 	private LocalDateTime lastSeenAt;
+
+	/** 컬럼 길이에 맞춰 이름을 자른다. 화면에 보일 이름이라 잘려도 앞부분이면 알아볼 수 있다. */
+	public static String truncateLabel(String nodeLabel) {
+		if (nodeLabel == null || nodeLabel.length() <= NODE_LABEL_MAX_LENGTH) {
+			return nodeLabel;
+		}
+		return nodeLabel.substring(0, NODE_LABEL_MAX_LENGTH);
+	}
 
 	private UserKnowledgeNode(UserKnowledgeNodeId id, String nodeLabel, String topicCode,
 			int readArticleCount, int nodeClickCount, LocalDateTime now) {
