@@ -1,0 +1,41 @@
+{
+  "acceptance_artifact_sha256": "9e37248eaf57c744b33a764713a23eed305963886912c1e1a7cdd208cff64501",
+  "article_guard": null,
+  "borrowing_dedup_policy": null,
+  "checkpoint_sha256": "6441484865c2c020e0a808b056eb9d991e0195d30c8342d6ff4789c01453c36f",
+  "entity_candidate_budget": null,
+  "execution_order": [
+    "lane_specific_bounded_retrieval",
+    "additive_cross_window_extension",
+    "chunked_native_or_canonical_scoring",
+    "single_lane_acceptance",
+    "optional_trigger_attachment",
+    "native_and_role_mentions",
+    "selected_pair_entity_coreference",
+    "event_role_projection",
+    "downstream"
+  ],
+  "per_kind_cap": null,
+  "per_kind_retrieval_override": [],
+  "retrieval_budget": {
+    "candidate_profile": "V23_BASELINE",
+    "chunk_size": 128,
+    "cross_window_ends": 12,
+    "cross_window_pairs": 24,
+    "cross_window_starts": 12,
+    "max_scored_candidates": 192,
+    "max_span_tokens": 96,
+    "per_window_ends": 12,
+    "per_window_pairs": 16,
+    "per_window_starts": 12,
+    "proposal_top_k": 32,
+    "status": "PROVISIONAL_ENGINEERING_ONLY"
+  },
+  "route_quota": null,
+  "schema_version": "v23-phase1-selected-source-calibration-v2-trigger-fine",
+  "score_contract_version": "v3-unified-entity-identity-r4",
+  "source_execution_version": "v23-unified-mention-coreference-v2-native-argmax",
+  "status": "PROVISIONAL_ENGINEERING_ONLY",
+  "test_access": 0,
+  "trigger_containment_policy": "OPTIONAL_CONTAINED_TRIGGER_ATTACHMENT"
+}

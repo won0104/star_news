@@ -22,6 +22,12 @@
 
 `EventFeatureProvenance`의 oracle/predicted membership·role 표시는 평가 메타데이터이며 모델 feature에 넣지 않는다. `score_event_identity`는 oracle lease를 거부한다. 임시 pair cap 4,096과 margin 0.0은 engineering 설정이며 서비스 threshold가 아니다. ABOUT/CAUSES/Primary head·loss·selection은 이 단계에서 구현하지 않았다.
 
+## Entity representative consumer 분리
+
+Entity identity closure가 고른 `LocalEntity.representative_candidate_id`는 Gold oracle과 predicted runtime의 공통 deterministic source selector 결과다. Event의 resolved Entity 채널 `ENTITY:<local_entity_id>`는 그 candidate의 ENTITY/L12 exact state를 그대로 사용하며, 별도의 earliest mention fallback이나 display-only 대표를 두지 않는다. PUBLIC `canonical_name`과 evidence span도 같은 `LocalEntity.text/start/end`를 사용한다.
+
+ASSERTED_BY의 `ASSERTOR_ENTITY:<local_entity_id>`는 이 대표와 독립적으로 cluster의 모든 `ENTITY_MEMBER:<candidate_id>` state를 source-order로 모아 mean한다. 대표가 대명사에서 뒤의 명시 mention으로 바뀌어도 이 all-member inventory와 평균 수식은 바뀌지 않는다. 따라서 Event representative channel과 ASSERTED_BY all-member channel의 책임을 서로 대체하지 않는다.
+
 ## 검증 범위
 
 `event-coverage-report.json`: 기존 train 400기사 EventMention 4,422, 최종 cluster 3,908, 다중 member cluster 401, same-event 양성 pair 675, 다른 occurrence eligible 음성 33,399. role evidence 6,656/6,656, Time attachment support 2,302/2,302가 최종 remap에 남았다. 기존 train engineering50의 same-event 양성은 104개다. 이는 Gold oracle 구조 검사이며 예측 품질이 아니다. 실제 pretrained checkpoint load·optimizer step·tiny-fit·본학습·서비스 threshold 선정은 0이다. 단계 2의 dev Gold blocker가 지속된다.
