@@ -201,7 +201,6 @@ export function TrendConstellation({
   journey,
   articlePanelOpen,
   onArticlePanelOpenChange,
-  onBack,
   onWalk,
   articleSamples,
   overlayRoot,
@@ -423,14 +422,8 @@ export function TrendConstellation({
         '--journey-arrive-y': `${((journey?.y ?? 50) - 50) * 0.1}%`,
       }}
     >
+      {/* 순위로 돌아가는 단추는 두지 않는다 — Esc 와 레일의 "오늘의 트렌드"가 그 길이다. */}
       <div className={styles.fieldActions}>
-        {onBack && !full && (
-          <button type="button" className={styles.fieldAction} onClick={onBack}>
-            <span aria-hidden>←</span>
-            오늘의 트렌드
-          </button>
-        )}
-
         <button
           type="button"
           className={styles.fieldAction}
