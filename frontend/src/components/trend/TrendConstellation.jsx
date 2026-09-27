@@ -443,7 +443,7 @@ export function TrendConstellation({
             onClick={toggleCandidatePanel}
           >
             <span aria-hidden>✦</span>
-            후보 {candidates.length}
+            더보기 {candidates.length}
           </button>
         )}
       </div>
