@@ -46,16 +46,16 @@ export const homeTrends = {
  * strip the toolbar sits in and leave room under each star for its label.
  */
 export const trendSlots = [
-  { at: [45, 47], atNarrow: [50, 30] },
-  { at: [22, 29], atNarrow: [24, 16] },
-  { at: [69, 32], atNarrow: [76, 18] },
-  { at: [62, 64], atNarrow: [72, 44] },
-  { at: [36, 70], atNarrow: [28, 45] },
-  { at: [16, 47], atNarrow: [50, 58] },
-  { at: [86, 54], atNarrow: [22, 70] },
-  { at: [51, 18], atNarrow: [78, 70] },
-  { at: [77, 75], atNarrow: [28, 84] },
-  { at: [17, 72], atNarrow: [72, 84] },
+  { at: [46, 47], atNarrow: [50, 29] },
+  { at: [19, 27], atNarrow: [20, 14] },
+  { at: [73, 29], atNarrow: [80, 14] },
+  { at: [65, 63], atNarrow: [75, 42] },
+  { at: [35, 71], atNarrow: [25, 43] },
+  { at: [13, 48], atNarrow: [50, 58] },
+  { at: [87, 52], atNarrow: [18, 69] },
+  { at: [51, 16], atNarrow: [82, 69] },
+  { at: [80, 80], atNarrow: [25, 86] },
+  { at: [17, 80], atNarrow: [75, 86] },
 ]
 
 /** 별 크기는 기사 수가 정한다. 가장 많은 Event가 1.0, 가장 적은 Event가 이 값. */

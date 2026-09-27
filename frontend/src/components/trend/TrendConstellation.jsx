@@ -10,7 +10,7 @@ import {
   trendFigmaAssets,
 } from '../../data/trend'
 import { fetchNodeArticles } from '../../api/trend'
-import { edgeLabels, nodeTypeLabels } from '../../data/trendNeighbors'
+import { edgeLabels, formatTrendGraphLabel, nodeTypeLabels } from '../../data/trendNeighbors'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { TrendPanel } from './TrendPanel'
 import styles from './TrendConstellation.module.css'
@@ -45,7 +45,7 @@ const PREVIEW_STAR = {
 }
 
 const PREVIEW_RING_CAPACITIES = [6, 10, 14]
-const PREVIEW_RING_RADII = [8, 12, 16]
+const PREVIEW_RING_RADII = [10, 14, 18]
 
 /** 다음 Event들을 현재 별에서 바깥쪽으로 펼친 세 겹의 반원에 놓는다. */
 function previewPoint(index, total, visual) {
@@ -102,7 +102,8 @@ function bySlotFromGraph(graph) {
       .filter((node) => node.nodeType === nodeType)
       .map((node) => ({
         id: node.nodeKey,
-        label: node.label,
+        label: formatTrendGraphLabel(node),
+        fullLabel: node.label,
         meta: metaFor(node.nodeKey),
         event: node.nodeKey,
         nodeType: node.nodeType,
@@ -112,7 +113,8 @@ function bySlotFromGraph(graph) {
     centre: [
       {
         id: centre.nodeKey,
-        label: centre.label,
+        label: formatTrendGraphLabel(centre),
+        fullLabel: centre.label,
         meta: '지금 보는 중심 노드',
         event: centre.nodeKey,
         nodeType: centre.nodeType,
@@ -137,17 +139,28 @@ function nodesFor(bySlot, narrow, layoutSlots) {
     .filter(Boolean)
 }
 
+/** 유형별 표시 슬롯을 고려한 실제 주변 별 수에 맞춰 상세 탐색 구도를 고른다. */
+function graphLayoutKey(graph) {
+  const counts = (graph?.nodes ?? []).reduce(
+    (result, node) => ({ ...result, [node.nodeType]: (result[node.nodeType] ?? 0) + 1 }),
+    {},
+  )
+  const visibleCount =
+    Math.min(counts.EVENT ?? 0, 3) +
+    Math.min(counts.ENTITY ?? 0, 4) +
+    Math.min(counts.STATEMENT ?? 0, 1)
+
+  if (visibleCount <= 3) return 'graphSparse'
+  if (visibleCount <= 6) return 'graphBalanced'
+  return 'graphDense'
+}
+
 /**
  * 다음 중심 화면에 실제로 배치될 후보만 고른 뒤, 현재 화면에서 이미 보이는 Node는
  * 중복으로 그리지 않는다. 보이는 Node도 슬롯 수에는 포함해야 전환 뒤 구성과 어긋나지 않는다.
  */
 function previewNodesFor(graph) {
   return (graph?.nodes ?? []).filter((node) => node.nodeType === 'EVENT')
-}
-
-function previewSummary(nodes, graph) {
-  if (nodes.length === 0) return ''
-  return `다음 사건 ${nodes.length}개${graph?.hasNext ? ' 이상' : ''}`
 }
 
 function scrollTrailHorizontally(event) {
@@ -211,14 +224,14 @@ export function TrendConstellation({
   }
   const narrow = useIsNarrow()
   // A graph has no authored layout key of its own, so it takes the default composition.
-  const layoutKey = graph ? 'spread' : constellationEvents[centreId].layout
+  const layoutKey = graph ? graphLayoutKey(graph) : constellationEvents[centreId].layout
   const layout = constellationLayouts[layoutKey] ?? constellationLayouts.spread
   const bySlot = graph ? bySlotFromGraph(graph) : bySlotFromMock(centreId)
   const nodes = nodesFor(bySlot, narrow, layout.slots)
   const centre = nodes[0]
   const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
   const visibleNodeKeys = new Set(nodes.map((node) => node.id))
-  const candidates = graph?.nodes ?? []
+  const candidates = (graph?.nodes ?? []).slice(0, 15)
   // trail 의 마지막은 지금 중심이다. 그 앞의 것들이 이미 지나온 별이다.
   const visitedKeys = new Set((trail ?? []).slice(0, -1).map((item) => item.nodeKey))
   const at = (node) => (narrow ? node.slot.atNarrow : node.slot.at)
@@ -262,7 +275,7 @@ export function TrendConstellation({
   const walkTo = (node) => {
     if (onWalk) {
       onWalk(
-        node,
+        { ...node, label: node.fullLabel ?? node.label },
         node.slot
           ? {
               x: at(node)[0],
@@ -436,8 +449,10 @@ export function TrendConstellation({
                     title={item.label}
                     onClick={() => onTrailSelect?.(item, index)}
                   >
-                    <span>{nodeTypeLabels[item.nodeType] ?? item.nodeType}</span>
-                    {item.label}
+                    <span className={styles.trailType}>
+                      {nodeTypeLabels[item.nodeType] ?? item.nodeType}
+                    </span>
+                    <span className={styles.trailLabel}>{item.label}</span>
                   </button>
                 </li>
               )
@@ -476,7 +491,6 @@ export function TrendConstellation({
           )
           const previewGraph = role === 'related' ? previewGraphs?.[node.id] : null
           const previewNodes = previewNodesFor(previewGraph)
-          const previewText = previewSummary(previewNodes, previewGraph)
 
           return (
             <div
@@ -524,7 +538,6 @@ export function TrendConstellation({
                       </Fragment>
                     )
                   })}
-                  <span className={styles.previewCount}>{previewText}</span>
                 </div>
               )}
 
@@ -535,8 +548,8 @@ export function TrendConstellation({
                 aria-controls={isCentre ? PANEL_ID : undefined}
                 aria-label={
                   isCentre
-                    ? `${node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
-                    : `${node.label} — ${panelCopy.recentre}${previewText ? `; ${previewText}` : ''}`
+                    ? `${node.fullLabel ?? node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
+                    : `${node.fullLabel ?? node.label} — ${panelCopy.recentre}`
                 }
                 onClick={isCentre ? togglePanel : () => walkTo(node)}
               >
@@ -586,7 +599,7 @@ export function TrendConstellation({
                   >
                     <span className={styles.candidateRank}>{String(index + 1).padStart(2, '0')}</span>
                     <span className={styles.candidateCopy}>
-                      <b>{candidate.label || '이름 없는 노드'}</b>
+                      <b>{formatTrendGraphLabel(candidate) || '이름 없는 노드'}</b>
                       <small>
                         {nodeTypeLabels[candidate.nodeType] ?? candidate.nodeType}
                         {visible ? ' · 별자리에 표시 중' : ''}
