@@ -401,7 +401,13 @@
   right: 2.5%;
   display: flex;
   flex-direction: column;
-  gap: 0.68cqw;
+  /*
+   * 종이 안 글자의 기준 크기 — 본문(요약)이 이 값이고, 나머지는 모두 이 값의 배수다.
+   * 제목·본문·기사 목록의 위계를 한 줄로 다루려는 것으로, 가로(옆 종이)와 세로(하단
+   * sheet)는 이 값만 다르고 비율과 간격은 같다. 배수는 제목 ≈ 본문 × 1.55 가 되도록
+   * 잡은 잠정값이다.
+   */
+  --sheet-type: clamp(13px, 0.9cqw, 17px);
   /* 액자 종이 에셋(1122×1402)의 비율. 높이가 정해지면 폭이 따라온다 — 종이를 늘리지 않아야
      그려진 테두리 선의 두께가 네 변에서 같다. */
   height: var(--sheet-h, 78vh);
@@ -532,7 +538,8 @@
 
 .sheetHead {
   display: grid;
-  gap: 0.3cqw;
+  gap: calc(var(--sheet-type) * 0.67);
+  margin-bottom: calc(var(--sheet-type) * 1.2);
   padding-right: 2.6cqw;
   cursor: grab;
   touch-action: none;
@@ -565,44 +572,45 @@
   outline-offset: 2px;
 }
 
+/* 작은 글자는 기준 크기를 따라 줄되 11px 아래로는 내려가지 않는다. */
 .sheetKind {
-  font: 700 0.65cqw var(--font-sans);
-  letter-spacing: 0.12em;
+  font: 600 max(11px, calc(var(--sheet-type) * 0.8)) var(--font-sans);
+  letter-spacing: 0.08em;
   color: #9b7a63;
 }
 
 .sheet h2 {
   margin: 0;
-  font: 700 1.35cqw/1.35 var(--font-serif-kr);
+  font: 700 calc(var(--sheet-type) * 1.55) / 1.36 var(--font-serif-kr);
   word-break: keep-all;
 }
 
 .sheetReason {
-  margin: 0;
-  padding: 0.55cqw 0.75cqw;
+  margin: 0 0 calc(var(--sheet-type) * 1.2);
+  padding: 0.6em 0.8em;
   border-left: 2px solid #d9a765;
   background: rgb(217 167 101 / 0.12);
-  font: 0.78cqw/1.5 var(--font-serif-kr);
+  font: calc(var(--sheet-type) * 0.86) / 1.6 var(--font-serif-kr);
   color: #6b5a4a;
   word-break: keep-all;
 }
 
 .sheetReason b {
-  margin-right: 0.3cqw;
-  font: 700 0.62cqw var(--font-sans);
+  margin-right: 0.4em;
+  font: 700 max(10px, calc(var(--sheet-type) * 0.72)) var(--font-sans);
   color: #9b7a63;
 }
 
 .summary {
   margin: 0;
-  font: 0.85cqw/1.7 var(--font-serif-kr);
+  font: var(--sheet-type) / 1.8 var(--font-serif-kr);
   color: #4a3d32;
   word-break: keep-all;
 }
 
 .sheetNote {
   margin: 0;
-  font: italic 0.78cqw/1.6 var(--font-serif-kr);
+  font: italic calc(var(--sheet-type) * 0.9) / 1.6 var(--font-serif-kr);
   color: #9b8672;
 }
 
@@ -617,28 +625,30 @@
   min-height: 0;
 }
 
+/* 개수는 제목과 같은 baseline 의 오른쪽 끝에 둔다 — 떨어져 있으면 쪽 번호처럼 읽힌다. */
 .articles h3 {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin: 0.4cqw 0 0;
-  padding-top: 0.65cqw;
+  margin: calc(var(--sheet-type) * 1.67) 0 calc(var(--sheet-type) * 1);
+  padding-top: calc(var(--sheet-type) * 1.1);
   border-top: 1px solid rgb(59 49 40 / 0.16);
-  font: 700 0.86cqw var(--font-serif-kr);
+  font: 700 calc(var(--sheet-type) * 1.12) var(--font-serif-kr);
 }
 
 .articles h3 b {
-  font: 600 0.68cqw var(--font-sans);
+  font: 600 calc(var(--sheet-type) * 0.86) var(--font-sans);
   font-variant-numeric: tabular-nums;
   color: #9b7a63;
 }
 
+/* 기사 한 건(출처 · 제목 · 원문)은 촘촘히 묶고, 기사와 기사 사이만 넓게 띄운다. */
 .articles ul {
   display: grid;
-  gap: 0.65cqw;
+  gap: calc(var(--sheet-type) * 1.33);
   align-content: start;
   min-height: 0;
-  margin: 0.55cqw 0 0;
+  margin: 0;
   /* 막대가 글 위에 겹치지 않게 오른쪽만 비워 둔다. */
   padding: 0 0.6cqw 0 0;
   overflow-y: auto;
@@ -667,21 +677,21 @@
 
 .articles small {
   display: block;
-  font: 0.62cqw var(--font-sans);
+  font: 400 max(11px, calc(var(--sheet-type) * 0.78)) var(--font-sans);
   color: #9b8672;
 }
 
 .articles p {
-  margin: 0.15cqw 0 0;
-  font: 0.8cqw/1.45 var(--font-serif-kr);
+  margin: calc(var(--sheet-type) * 0.28) 0 0;
+  font: 500 calc(var(--sheet-type) * 0.96) / 1.55 var(--font-serif-kr);
   color: #3b3128;
   word-break: keep-all;
 }
 
 .articles a {
   display: inline-block;
-  margin-top: 0.2cqw;
-  font: 600 0.66cqw var(--font-sans);
+  margin-top: calc(var(--sheet-type) * 0.39);
+  font: 600 max(11px, calc(var(--sheet-type) * 0.8)) var(--font-sans);
   color: #2e415b;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -724,13 +734,13 @@
     max-height: 72vh;
     /* 액자 폭이 좁아지므로(손가락 화면) 여백도 같이 줄인다. */
     --sheet-frame: 26px;
-    padding: 36px 36px 24px;
+    --sheet-type: 13px;
+    padding: 36px 40px 24px;
     overflow-y: auto;
     border-radius: 0;
     box-shadow: none;
     /* 모서리가 깎여 있어 사각 그림자는 어긋난다 — 알파를 따라가는 그림자를 쓴다. */
     filter: drop-shadow(0 -6px 16px rgb(50 30 14 / 0.3));
-    gap: 10px;
   }
 
   /* 아래 변은 화면 밖이라 그리지 않는다. */
@@ -802,48 +812,7 @@
     font-size: 20px;
   }
   .sheetHead {
-    gap: 6px;
     padding-right: 30px;
-  }
-  .sheetKind {
-    font-size: 11px;
-  }
-  .sheet h2 {
-    font-size: 19px;
-  }
-  .sheetReason {
-    font-size: 12px;
-    padding: 8px 10px;
-  }
-  .sheetReason b {
-    font-size: 10px;
-  }
-  .summary {
-    font-size: 14px;
-  }
-  .sheetNote {
-    font-size: 13px;
-  }
-  .articles h3 {
-    font-size: 14px;
-    margin-top: 6px;
-    padding-top: 10px;
-  }
-  .articles h3 b {
-    font-size: 12px;
-  }
-  .articles ul {
-    gap: 10px;
-    margin-top: 8px;
-  }
-  .articles small {
-    font-size: 11px;
-  }
-  .articles p {
-    font-size: 13px;
-  }
-  .articles a {
-    font-size: 12px;
   }
 }
 
