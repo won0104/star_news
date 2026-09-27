@@ -1,0 +1,22 @@
+{
+  "checkpoint_sha256": "6441484865c2c020e0a808b056eb9d991e0195d30c8342d6ff4789c01453c36f",
+  "d2_threshold_selection_sha256": "97eb565e3856e00d0f806bd03fb86c47a7dc216e7145b28675776c9d6e5e1608",
+  "latency_contract": {
+    "device": "cpu",
+    "entrypoint": "V3ServingWorker.analyze_public",
+    "p95_definition": "nearest_rank_ceil_0.95_n",
+    "split": "dev49",
+    "timing_scope": "perf_counter around analyze_public only",
+    "warmup_requests_excluded": 1
+  },
+  "note": "User requested fixed E1 caps. Inherited from v3.0; not revalidated on Gold100 mini P6. Candidate diagnostic only.",
+  "schema_version": "v3.1-gold100-mini-p6-fixed-e1-v1",
+  "selection_status": "V31_FIXED_E1",
+  "service_ready": false,
+  "v23_operational_caps": {
+    "entity_expensive": 20480,
+    "event_accepted": 96,
+    "time_accepted": 128,
+    "time_expensive": 24576
+  }
+}

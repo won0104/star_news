@@ -1,0 +1,63 @@
+{
+  "checkpoint_sha256": "6441484865c2c020e0a808b056eb9d991e0195d30c8342d6ff4789c01453c36f",
+  "downstream_thresholds": {
+    "ABOUT": 0.5,
+    "ASSERTOR_ENTITY": 0.25,
+    "ASSERTOR_SOURCE": 0.25,
+    "CAUSES": -0.25,
+    "ENTITY_COREFERENCE": -1.112733006477356,
+    "EVENT_COREFERENCE": -0.5,
+    "EVENT_TIME": 0.5,
+    "PRIMARY": 0.25
+  },
+  "entity_coreference_margin": {
+    "calibration_split": "dev15",
+    "calibration_verified": false,
+    "cluster_merge_error_validated": false,
+    "decision_policy": "MARGIN_GTE",
+    "ignored_pairs": 36640,
+    "margin_selection_file_sha256": "9bdad271e65f03724908d87736ef6018223cab78b24f70504445bd1a5914856a",
+    "negative_support": 9,
+    "positive_support": 81,
+    "producer": "MERGE_logit_minus_KEEP_logit",
+    "provisional_predicted_pair_threshold_selected": true,
+    "status": "PREDICTED_PAIR_DEV15_PROVISIONAL_LOW_NEGATIVE_SUPPORT"
+  },
+  "note": "Gold100 mini P6 diagnostic PUBLIC candidate only. P6 dev15 source fine gates are selected; Entity margin has 9 explicit KEEP pairs and no complete-link validation. Other downstream D2 thresholds and E1 caps are inherited engineering values. Not service-ready or 1K main parent.",
+  "participant_fine_threshold": {
+    "calibration_split": "dev15",
+    "local_training_coverage_verified": true,
+    "producer": "participant.span_score",
+    "score_space": "raw_binary_logit",
+    "status": "P6_SELECTED_DEV15_RAW_EXACT_SCORE"
+  },
+  "schema_version": "v3.1-gold100-mini-p6-d2-v1",
+  "selection_status": "V31_GOLD100_DEV15_PROVISIONAL",
+  "service_ready": false,
+  "source_profile": "V23_BASELINE",
+  "source_reference": {
+    "source_acceptance_file_sha256": "9e37248eaf57c744b33a764713a23eed305963886912c1e1a7cdd208cff64501",
+    "source_policy_file_sha256": "e361b3aba06e9c7d7b8f917c806e82b63e368bda1f74aa661a6bf21ff0a8de7a",
+    "source_report_file_sha256": "a80260bc1943b3aeb4b4631cdf7f1fde831671254da87903ed78a40ab46297ec",
+    "status": "P6_SELECTED_DEV15_SOURCE_CALIBRATION_PROVISIONAL"
+  },
+  "source_thresholds": {
+    "ENTITY_NATIVE": 0.06662248820066452,
+    "EVENT": 0.04040812700986862,
+    "EVENT_BOUNDARY": 2.1429073810577393,
+    "PARTICIPANT_ENDPOINT": 0.40940752625465393,
+    "PARTICIPANT_FINE": 0.08715391291381847,
+    "STATEMENT": 0.3260810375213623,
+    "STATEMENT_BOUNDARY": 1.2509658336639404,
+    "TIME": 1.012447476387024,
+    "TRIGGER_ENDPOINT": 0.43642887473106384,
+    "TRIGGER_FINE": 1.403719425201416
+  },
+  "trigger_fine_threshold": {
+    "calibration_split": "dev15",
+    "local_training_coverage_verified": true,
+    "producer": "trigger.span_score",
+    "score_space": "raw_binary_logit",
+    "status": "P6_SELECTED_DEV15_RAW_EXACT_SCORE"
+  }
+}

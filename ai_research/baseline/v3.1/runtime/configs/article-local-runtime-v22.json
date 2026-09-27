@@ -1,0 +1,30 @@
+{
+  "backbone": {
+    "cache_root_env": "ARTICLELOCAL_HF_CACHE",
+    "eval": true,
+    "feature_cache_root": null,
+    "feature_mode": "ONLINE_FROZEN_BACKBONE_ONLY",
+    "files_sha256": {
+      "config.json": "4cba21a6fb53b5d75e2b7af83756eeb6d5e8a471164130999be395e1b8ff0848",
+      "pytorch_model.bin": "3cd6cd7811b3c9190e97cae7eb41571c2bc0076431baae7d41d449a8c1c18c6c",
+      "special_tokens_map.json": "311de3f4eed9d76a43bf0d71f10e62e086ca65ccce9f15d5da0d2098bf519ecc",
+      "tokenizer.json": "915388090e2d63e3869c54b5334d6005e453a51de12088d908175dd765fd8372",
+      "tokenizer_config.json": "d9273237da0f2143974a8eccdc50a733fcda064528299f7295e6434226cdbda1",
+      "vocab.txt": "f0b8ae70418060f22ec301511a6337ad49a7fb0f60a8bf9091b373aba9c0c3e0"
+    },
+    "license": "MIT",
+    "license_source": "https://huggingface.co/kakaobank/kf-deberta-base/tree/363b171d71443b0874b0bf9cea053eb5b1650633",
+    "local_files_only": false,
+    "model_id": "kakaobank/kf-deberta-base",
+    "online_dtype": "float32",
+    "packaging": "EXTERNAL_HF_DEPENDENCY",
+    "required_layers": [
+      8,
+      10,
+      12
+    ],
+    "revision": "363b171d71443b0874b0bf9cea053eb5b1650633",
+    "trainable": false,
+    "weight_sha256": "3cd6cd7811b3c9190e97cae7eb41571c2bc0076431baae7d41d449a8c1c18c6c"
+  }
+}
