@@ -44,27 +44,26 @@ const PREVIEW_STAR = {
   STATEMENT: trendFigmaAssets.statementSticker,
 }
 
-const PREVIEW_LIMITS = {
-  EVENT: 2,
-  ENTITY: 2,
-  STATEMENT: 1,
-}
+const PREVIEW_RING_CAPACITIES = [6, 10, 14]
+const PREVIEW_RING_RADII = [8, 12, 16]
 
-const PREVIEW_POINTS = {
-  relatedLeft: [
-    [-15.5, -5.5],
-    [-14, 3],
-    [-10.5, 10],
-    [-3.5, 14.5],
-    [-16.5, 12],
-  ],
-  relatedRight: [
-    [15.5, -7],
-    [14, 2],
-    [10.5, 9],
-    [3.5, 13.5],
-    [16.5, 11],
-  ],
+/** 다음 Event들을 현재 별에서 바깥쪽으로 펼친 세 겹의 반원에 놓는다. */
+function previewPoint(index, total, visual) {
+  let ring = 0
+  let offset = index
+  while (ring < PREVIEW_RING_CAPACITIES.length - 1 && offset >= PREVIEW_RING_CAPACITIES[ring]) {
+    offset -= PREVIEW_RING_CAPACITIES[ring]
+    ring += 1
+  }
+
+  const usedBefore = PREVIEW_RING_CAPACITIES.slice(0, ring).reduce((sum, count) => sum + count, 0)
+  const count = Math.min(PREVIEW_RING_CAPACITIES[ring], total - usedBefore)
+  const centreAngle = visual === 'relatedLeft' ? Math.PI : visual === 'relatedBottom' ? Math.PI / 2 : 0
+  const span = Math.PI * 0.86
+  const angle = count <= 1 ? centreAngle : centreAngle - span / 2 + (span * offset) / (count - 1)
+  const radius = PREVIEW_RING_RADII[ring]
+
+  return [Math.cos(angle) * radius, Math.sin(angle) * radius]
 }
 
 /** 목업 별자리 한 벌을 슬롯별 후보로 정리한다. */
@@ -84,10 +83,10 @@ function bySlotFromMock(centreId) {
 /**
  * `GET /graphs/nodes/{type}/{key}/neighbors` 응답 하나를 같은 후보 목록으로 옮긴다.
  *
- * The composition has one centre, two related-event slots, two entity slots and one
- * statement slot, so a response is sorted into those four buckets and each takes as many
- * as it has room for. The response is already neighborScore descending, so what survives
- * the trim is the strongest of each kind rather than whatever came first.
+ * The desktop composition has one centre and eight neighbor slots; the compact layout
+ * keeps two related Events and one Statement around the centre. A response is sorted into
+ * type buckets and each takes as many nodes as its slots allow. The response is already
+ * neighborScore descending, so what survives the trim is the strongest of each kind.
  *
  * TIME nodes have no slot in this composition and are dropped. `meta` is the relation's
  * own name, which is the one thing the mock carried that the graph does not.
@@ -142,32 +141,13 @@ function nodesFor(bySlot, narrow, layoutSlots) {
  * 다음 중심 화면에 실제로 배치될 후보만 고른 뒤, 현재 화면에서 이미 보이는 Node는
  * 중복으로 그리지 않는다. 보이는 Node도 슬롯 수에는 포함해야 전환 뒤 구성과 어긋나지 않는다.
  */
-function previewNodesFor(graph, visibleNodeKeys) {
-  const taken = { EVENT: 0, ENTITY: 0, STATEMENT: 0 }
-
-  return (graph?.nodes ?? []).reduce((preview, node) => {
-    const limit = PREVIEW_LIMITS[node.nodeType]
-    if (!limit || taken[node.nodeType] >= limit) return preview
-    taken[node.nodeType] += 1
-    if (visibleNodeKeys.has(node.nodeKey)) return preview
-    preview.push(node)
-    return preview
-  }, [])
+function previewNodesFor(graph) {
+  return (graph?.nodes ?? []).filter((node) => node.nodeType === 'EVENT')
 }
 
-function previewSummary(nodes) {
-  const count = { EVENT: 0, ENTITY: 0, STATEMENT: 0 }
-  nodes.forEach((node) => {
-    count[node.nodeType] += 1
-  })
-
-  return [
-    count.EVENT ? `사건 ${count.EVENT}` : '',
-    count.ENTITY ? `개체 ${count.ENTITY}` : '',
-    count.STATEMENT ? `발언 ${count.STATEMENT}` : '',
-  ]
-    .filter(Boolean)
-    .join(', ')
+function previewSummary(nodes, graph) {
+  if (nodes.length === 0) return ''
+  return `다음 사건 ${nodes.length}개${graph?.hasNext ? ' 이상' : ''}`
 }
 
 function scrollTrailHorizontally(event) {
@@ -205,6 +185,7 @@ function StarArt({ role, nodeType, visited = false }) {
 export function TrendConstellation({
   graph,
   previewGraphs,
+  journey,
   articlePanelOpen,
   onArticlePanelOpenChange,
   onBack,
@@ -216,6 +197,7 @@ export function TrendConstellation({
 }) {
   const [centreId, setCentreId] = useState(constellationStart)
   const [localPanelOpen, setLocalPanelOpen] = useState(false)
+  const [candidatePanelOpen, setCandidatePanelOpen] = useState(false)
   const [full, setFull] = useState(false)
   const articlePageRequestRef = useRef(null)
   const trailRef = useRef(null)
@@ -236,6 +218,7 @@ export function TrendConstellation({
   const centre = nodes[0]
   const centreType = graph ? graph.centerNode.nodeType : 'EVENT'
   const visibleNodeKeys = new Set(nodes.map((node) => node.id))
+  const candidates = graph?.nodes ?? []
   // trail 의 마지막은 지금 중심이다. 그 앞의 것들이 이미 지나온 별이다.
   const visitedKeys = new Set((trail ?? []).slice(0, -1).map((item) => item.nodeKey))
   const at = (node) => (narrow ? node.slot.atNarrow : node.slot.at)
@@ -267,12 +250,26 @@ export function TrendConstellation({
   }
 
   const togglePanel = () => {
+    setCandidatePanelOpen(false)
     setOpen(!open)
+  }
+
+  const toggleCandidatePanel = () => {
+    setOpen(false)
+    setCandidatePanelOpen((current) => !current)
   }
 
   const walkTo = (node) => {
     if (onWalk) {
-      onWalk(node)
+      onWalk(
+        node,
+        node.slot
+          ? {
+              x: at(node)[0],
+              y: at(node)[1],
+            }
+          : null,
+      )
       return
     }
     setCentreId(node.event)
@@ -377,10 +374,18 @@ export function TrendConstellation({
 
   const board = (
     <div
-      className={`${styles.field} ${full ? styles.fieldFull : ''}`}
+      className={`${styles.field} ${full ? styles.fieldFull : ''} ${journey?.phase === 'departing' ? styles.fieldDeparting : ''} ${journey?.phase === 'arriving' ? styles.fieldArriving : ''}`}
       data-layout={layoutKey}
       role="group"
       aria-label={panelCopy.fieldLabel}
+      style={{
+        '--journey-x': `${journey?.x ?? 50}%`,
+        '--journey-y': `${journey?.y ?? 50}%`,
+        '--journey-shift-x': `${(50 - (journey?.x ?? 50)) * 0.34}%`,
+        '--journey-shift-y': `${(50 - (journey?.y ?? 50)) * 0.34}%`,
+        '--journey-arrive-x': `${((journey?.x ?? 50) - 50) * 0.1}%`,
+        '--journey-arrive-y': `${((journey?.y ?? 50) - 50) * 0.1}%`,
+      }}
     >
       <div className={styles.fieldActions}>
         {onBack && !full && (
@@ -399,6 +404,19 @@ export function TrendConstellation({
           <span aria-hidden>{full ? '↙' : '↗'}</span>
           {full ? '전체화면 나가기' : '전체보기'}
         </button>
+
+        {graph && candidates.length > 0 && (
+          <button
+            type="button"
+            className={styles.fieldAction}
+            aria-expanded={candidatePanelOpen}
+            aria-controls="trend-candidates"
+            onClick={toggleCandidatePanel}
+          >
+            <span aria-hidden>✦</span>
+            후보 {candidates.length}
+          </button>
+        )}
       </div>
 
       {trail?.length > 0 && (
@@ -456,14 +474,14 @@ export function TrendConstellation({
               visited={!isCentre && visitedKeys.has(node.id)}
             />
           )
-          const previewNodes =
-            role === 'related' ? previewNodesFor(previewGraphs?.[node.id], visibleNodeKeys) : []
-          const previewText = previewSummary(previewNodes)
+          const previewGraph = role === 'related' ? previewGraphs?.[node.id] : null
+          const previewNodes = previewNodesFor(previewGraph)
+          const previewText = previewSummary(previewNodes, previewGraph)
 
           return (
             <div
               key={node.id}
-              className={`${styles.node} ${ROLE_CLASS[role]} ${styles[`${visual}Node`]}`}
+              className={`${styles.node} ${ROLE_CLASS[role]} ${styles[`${visual}Node`]} ${isCentre && journey?.phase === 'arriving' ? styles.centreArrival : ''}`}
               style={{
                 left: `${at(node)[0]}%`,
                 top: `${at(node)[1]}%`,
@@ -476,7 +494,7 @@ export function TrendConstellation({
                   aria-hidden
                 >
                   {previewNodes.map((preview, previewIndex) => {
-                    const [x, y] = PREVIEW_POINTS[visual][previewIndex]
+                    const [x, y] = previewPoint(previewIndex, previewNodes.length, visual)
                     const lineLength = Math.hypot(x, y)
                     const lineAngle = Math.atan2(-y, -x)
 
@@ -497,7 +515,7 @@ export function TrendConstellation({
                           style={{
                             '--preview-x': `${x}cqw`,
                             '--preview-y': `${y}cqw`,
-                            '--preview-delay': `${previewIndex * 55}ms`,
+                            '--preview-delay': `${Math.min(previewIndex, 10) * 24}ms`,
                             '--preview-rotate': `${previewIndex % 2 === 0 ? -6 : 7}deg`,
                           }}
                         >
@@ -506,6 +524,7 @@ export function TrendConstellation({
                       </Fragment>
                     )
                   })}
+                  <span className={styles.previewCount}>{previewText}</span>
                 </div>
               )}
 
@@ -517,7 +536,7 @@ export function TrendConstellation({
                 aria-label={
                   isCentre
                     ? `${node.label} — ${panelCopy.open(articles?.totalCount ?? 0)}`
-                    : `${node.label} — ${panelCopy.recentre}${previewText ? `; 다음 구성 ${previewText}` : ''}`
+                    : `${node.label} — ${panelCopy.recentre}${previewText ? `; ${previewText}` : ''}`
                 }
                 onClick={isCentre ? togglePanel : () => walkTo(node)}
               >
@@ -532,6 +551,56 @@ export function TrendConstellation({
           )
         })}
       </div>
+
+      {candidatePanelOpen && (
+        <aside id="trend-candidates" className={styles.candidatePanel} aria-label="주변 노드 후보">
+          <div className={styles.candidateHeader}>
+            <div>
+              <p>주변 후보</p>
+              <span>별자리에 없는 후보도 선택해 중심으로 이동할 수 있습니다.</span>
+            </div>
+            <button type="button" onClick={() => setCandidatePanelOpen(false)} aria-label="후보 목록 닫기">
+              ×
+            </button>
+          </div>
+
+          <ol className={styles.candidateList}>
+            {candidates.map((candidate, index) => {
+              const visible = visibleNodeKeys.has(candidate.nodeKey)
+              const navigable = candidate.nodeType !== 'TIME'
+              return (
+                <li key={`${candidate.nodeType}:${candidate.nodeKey}`}>
+                  <button
+                    type="button"
+                    disabled={!navigable}
+                    onClick={() => {
+                      if (!navigable) return
+                      setCandidatePanelOpen(false)
+                      walkTo({
+                        id: candidate.nodeKey,
+                        event: candidate.nodeKey,
+                        label: candidate.label,
+                        nodeType: candidate.nodeType,
+                      })
+                    }}
+                  >
+                    <span className={styles.candidateRank}>{String(index + 1).padStart(2, '0')}</span>
+                    <span className={styles.candidateCopy}>
+                      <b>{candidate.label || '이름 없는 노드'}</b>
+                      <small>
+                        {nodeTypeLabels[candidate.nodeType] ?? candidate.nodeType}
+                        {visible ? ' · 별자리에 표시 중' : ''}
+                        {!navigable ? ' · 시간 정보' : ''}
+                      </small>
+                    </span>
+                    {navigable && <span className={styles.candidateArrow} aria-hidden>→</span>}
+                  </button>
+                </li>
+              )
+            })}
+          </ol>
+        </aside>
+      )}
 
       {(full || !overlayRoot) && overlays}
     </div>

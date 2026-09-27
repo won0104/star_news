@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.starlightnews.backend.domain.user.cache.ExploredNodeCountCache;
+import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNodeId;
 import com.starlightnews.backend.domain.user.repository.NodeSnapshot;
 import com.starlightnews.backend.domain.user.repository.NodeSnapshotRepository;
@@ -44,7 +45,8 @@ public class GraphNodeClickService {
 		NodeSnapshot snapshot = findSnapshotOrThrow(nodeType, nodeKey);
 		// 확인과 삽입 사이에 다른 요청이 먼저 만들었어도 Upsert 한 문장이 클릭 수 증가로 흡수한다.
 		userKnowledgeNodeRepository.upsertClick(
-				userId, nodeType.name(), nodeKey, snapshot.label(), snapshot.topicCode(), now);
+				userId, nodeType.name(), nodeKey,
+				UserKnowledgeNode.truncateLabel(snapshot.label()), snapshot.topicCode(), now);
 		// 클릭 수가 바뀌었으니(0→1 첫 클릭 포함) 캐시된 참여도 집계를 지운다. 다음 조회가 다시 계산한다.
 		exploredNodeCountCache.evict(userId);
 	}
