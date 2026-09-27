@@ -329,14 +329,47 @@
   color: #9b7a63;
 }
 
+/*
+ * 사건 제목은 문장이라 길다(절반이 40자 초과). 크게 세 줄에서 자르면 종이 아래 절반이
+ * 비므로, 한 단계 작게 쓰고 종이가 담을 수 있는 만큼(다섯 줄) 보여준다. 추천 이유가 함께
+ * 있는 종이는 그 자리를 남기려고 세 줄로 줄인다.
+ *
+ * keep-all 은 어절 단위로만 줄을 바꿔서, "농축식품해양수산위원회"처럼 종이 폭보다 긴 어절은
+ * 종이 밖으로 삐져나왔다. overflow-wrap: anywhere 는 그런 어절만 폭에 맞춰 끊는다.
+ */
 .label {
   display: -webkit-box;
   overflow: hidden;
-  font: 700 clamp(13px, 10.2cqw, 19px)/1.3 var(--font-serif-kr);
+  font: 700 clamp(12px, 7.6cqw, 16px)/1.4 var(--font-serif-kr);
   color: #3b3128;
   word-break: keep-all;
+  overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+}
+
+.cardCopy:has(.reason) .label {
   -webkit-line-clamp: 3;
+}
+
+/* 큰 화면에서는 보드가 커져 종이가 넓어져도 글자는 14.5px 에서 멈춘다. 16px 상한은 한 줄에
+   한 장씩 서는 폰(900px 이하)에만 남긴다. */
+@media (min-width: 901px) {
+  .label {
+    font-size: clamp(12px, 7.6cqw, 14.5px);
+  }
+}
+
+/* 한 줄에 한 장씩 서는 좁은 화면에서는 종이가 넓어져(≈250px) 일곱 줄까지 들어간다. 기준은
+   종이(.slot) 폭이다 — 글자 크기가 16px 에서 멈추므로 폭이 넓을수록 줄이 남는다. */
+@container (min-width: 220px) {
+  .label {
+    -webkit-line-clamp: 7;
+  }
+
+  .cardCopy:has(.reason) .label {
+    -webkit-line-clamp: 4;
+  }
 }
 
 .reason {
@@ -346,6 +379,7 @@
   font: clamp(10px, 7cqw, 13px)/1.45 var(--font-serif-kr);
   color: #7a6a5a;
   word-break: keep-all;
+  overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
