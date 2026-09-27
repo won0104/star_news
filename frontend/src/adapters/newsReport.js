@@ -9,12 +9,7 @@ export function reportFromApi(payload) {
   return {
     title: '최근 3개월의 뉴스 리포트',
     eyebrow: generatedLabel(payload?.generatedAt),
-    summary: summaryText(payload, sourceRows.length),
-    totals: [
-      { id: 'articles', label: '읽은 기사', value: payload?.totalReadArticleCount ?? 0 },
-      { id: 'topics', label: '주제 지형 노드', value: terrainNodes.length },
-      { id: 'sources', label: '접한 출처', value: payload?.sourceReads?.length ?? 0 },
-    ],
+    summary: summaryParts(payload, sourceRows.length),
     sources: {
       label: '출처별 읽기 비중',
       rows: sourceRows,
@@ -163,6 +158,7 @@ function weeklyTrend(weeks) {
   return {
     label: '최근 12주의 분야별 읽기 변화',
     hint: '주별 최초 열람 기사 수와 분야 구성을 보여줘요.',
+    insights: weeklyInsights(weeks, labels),
     // 출처 블록의 각주와 같은 역할 — 비어 있는 이유를 빈칸 대신 말로 적는다.
     empty: series.length === 0 ? '아직 주별로 쌓인 기록이 없어요.' : null,
     series,
@@ -172,6 +168,66 @@ function weeklyTrend(weeks) {
   }
 }
 
+/*
+ * 차트 아래 해석 한두 줄. 숫자에서 바로 나오는 것만 말한다 — 추측이나 평가는 붙이지 않는다.
+ *
+ * ① 12주 동안 가장 많이 읽은 분야와 그 비중.
+ * ② 최근 4주가 그 앞 4주보다 가장 많이 늘어난 분야. 늘어난 분야가 없으면 이 줄은 없다.
+ *    4주는 "지난달"에 가까운 잠정 구간이다.
+ */
+const RECENT_WEEKS = 4
+
+function weeklyInsights(weeks, labels) {
+  const sumBy = (range) => {
+    const sums = new Map()
+    range.forEach((week) =>
+      (week.topics ?? []).forEach((topic) =>
+        sums.set(topic.topicCode, (sums.get(topic.topicCode) ?? 0) + topic.readArticleCount),
+      ),
+    )
+    return sums
+  }
+
+  const all = sumBy(weeks)
+  const total = [...all.values()].reduce((sum, value) => sum + value, 0)
+  if (total === 0) return []
+
+  const [topCode, topCount] = [...all.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]
+  const topName = labels.get(topCode) ?? topCode
+  // 줄마다 조각 목록이다. 데이터에서 나온 수만 `strong` 으로 표시해 화면이 굵게 그린다.
+  const lines = [
+    [
+      { text: `이번 기간엔 ${withObject(topName)} 가장 많이 읽었어요. 전체의 ` },
+      { text: `${Math.round((topCount / total) * 100)}%`, strong: true },
+      { text: '예요.' },
+    ],
+  ]
+
+  const recent = sumBy(weeks.slice(-RECENT_WEEKS))
+  const before = sumBy(weeks.slice(-RECENT_WEEKS * 2, -RECENT_WEEKS))
+  const grown = [...recent.entries()]
+    .map(([code, count]) => [code, count - (before.get(code) ?? 0)])
+    .filter(([, diff]) => diff > 0)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]
+  if (grown) {
+    lines.push([
+      {
+        text: `최근 ${RECENT_WEEKS}주에는 ${labels.get(grown[0]) ?? grown[0]} 읽기가 그 전 ${RECENT_WEEKS}주보다 `,
+      },
+      { text: String(grown[1]), strong: true },
+      { text: '건 늘었어요.' },
+    ])
+  }
+  return lines
+}
+
+/** 받침에 따라 을/를. 한글로 끝나지 않으면 둘 다 적는다. */
+function withObject(word) {
+  const code = word.charCodeAt(word.length - 1) - 0xac00
+  if (code < 0 || code > 11171) return `${word}을(를)`
+  return `${word}${code % 28 === 0 ? '를' : '을'}`
+}
+
 function monthLabel(current, previous) {
   const month = /^\d{4}-(\d{2})/.exec(current ?? '')?.[1]
   const previousMonth = /^\d{4}-(\d{2})/.exec(previous ?? '')?.[1]
@@ -179,14 +235,31 @@ function monthLabel(current, previous) {
   return `${Number(month)}월`
 }
 
-function summaryText(payload, displayedSourceCount) {
+/*
+ * 쪽 머리의 요약 한 문장. 예전에는 같은 수를 아래 요약 밴드(읽은 기사 28 · 접한 출처 16)에서
+ * 한 번 더 세웠는데, 한 쪽에서 같은 말을 두 번 했다. 문장만 남기고 숫자만 강조한다 — 강조할
+ * 조각은 `strong: true` 로 표시해 화면이 굵게 그린다.
+ */
+function summaryParts(payload, displayedSourceCount) {
   const count = payload?.totalReadArticleCount ?? 0
   const sourceCount = payload?.sourceReads?.length ?? displayedSourceCount
   const period = payload?.period
+  // 기간의 두 날짜도 데이터에서 온 값이라 숫자와 같이 강조한다.
   const range = period?.from && period?.to
-    ? `${formatDate(period.from)}부터 ${formatDate(period.to)}까지`
-    : '최근 3개월 동안'
-  return `${range} ${count}개의 기사에서 ${sourceCount}개 출처를 접했어요.`
+    ? [
+      { text: formatDate(period.from), strong: true },
+      { text: '부터 ' },
+      { text: formatDate(period.to), strong: true },
+      { text: '까지 ' },
+    ]
+    : [{ text: '최근 3개월 동안 ' }]
+  return [
+    ...range,
+    { text: String(count), strong: true },
+    { text: '개의 기사에서 ' },
+    { text: String(sourceCount), strong: true },
+    { text: '개 출처를 접했어요.' },
+  ]
 }
 
 function generatedLabel(value) {
