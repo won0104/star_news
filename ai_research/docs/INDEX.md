@@ -5,10 +5,15 @@ article-local Knowledge Graph로 구성하는 모델의 연구·설계·실험 �
 `project-free` 레포지토리의 연구 문서 중, 현재 구조의 설계 근거와 판단 과정을
 추적하는 데 필요한 문서만 선별해 옮겼습니다.
 
-- 원본 연구 문서: 267건
-- 선별 문서: 47건
-- 현재 릴리스: v2.3
+- 초기 이관 당시 원본 연구 문서: 267건
+- 연구 기록: 초기 선별 47건 + v3.1 베이스라인 실험 요약 1건
+- 게시된 릴리스: v2.3
 - Hugging Face: [kf-deberta-base-kg-extractor](https://huggingface.co/sysy9292/kf-deberta-base-kg-extractor)
+
+코드 열람용 동결 베이스라인은 [v3.0](../baseline/v3/README.md)과
+[v3.1](../baseline/v3.1/README.md)에 있다. v3.1의 Gold100 P6 실험 판정과
+검증 범위는 [베이스라인 동결 기록](10-baseline/v31-gold100-p6-baseline-v1/report.md)에
+따로 정리했다. 베이스라인 동결은 게시된 릴리스나 서비스 검증을 뜻하지 않는다.
 
 이 문서들은 최종 구조만 정리한 명세서가 아니라, 어떤 가설을 검토했고 무엇을
 기각·채택했는지까지 포함한 연구 기록입니다. 반복 실험, 단순 재검수본, 중간 산출물은
@@ -37,6 +42,8 @@ Backbone 후보 비교
 → article-local KG runtime
 → public output contract
 → v2.1 → v2.2 → v2.3 release
+→ v3.0 동결 코드 베이스라인
+→ v3.1 Gold100 P1–P6 리허설·코드 베이스라인
 ```
 
 대표적인 정량 결과는 #40 Gold Scaling Study입니다.
@@ -55,6 +62,7 @@ exact match 기준입니다. 부분 정답은 0으로 취급합니다.
 3. [#40 Gold 스케일링](70-gold-scaling/v3-frozen-gold-scaling-study-v1/fixed-dev39-final-unblock/report.md) — 데이터 증가가 실제 성능 향상으로 이어졌는가
 4. [HF Public Output Contract V2](80-release-v2/hf-public-output-contract-v2/report.md) — 서비스가 실제로 소비하는 출력 구조
 5. [#41 Socket Replay](30-semantic/v3-jointspanproposer-v3-socket-replay-v1/report.md) — v2.3 이후에도 남아 있는 핵심 문제
+6. [v3.1 Gold100 P6 베이스라인](10-baseline/v31-gold100-p6-baseline-v1/report.md) — 새 head 결정 경로, 리허설·보정·PUBLIC 실행의 근거와 한계
 
 ## 전체 목록
 
@@ -72,6 +80,7 @@ exact match 기준입니다. 부분 정답은 0으로 취급합니다.
 | 문서 | 내용 |
 |---|---|
 | [Full Multitask Baseline v1](10-baseline/08-Full-Multitask-Baseline-v1/08-Full-Multitask-Baseline-v1.md) | 이후 모든 비교의 기준선 |
+| [v3.1 Gold100 P6 베이스라인 동결 기록](10-baseline/v31-gold100-p6-baseline-v1/report.md) | P1–P6 리허설, dev15 threshold·Entity margin, PUBLIC smoke 및 검증 범위 |
 | [Synthetic Augmentation Utility v1](15-augmentation/10-Synthetic-Augmentation-Utility-v1/10-Synthetic-Augmentation-Utility-v1.md) | 합성 증강 유용성 판정 (종결) |
 
 ### 20-argument-relation — 구조에서 데이터로

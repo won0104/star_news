@@ -2,6 +2,22 @@
 
 기준 문서: `V3_Pretraining_Codex_Master.md` (`ARTICLELOCAL_V3_PRETRAINING_CODEX_PLAN_V1`). 지시서가 검토한 시작 기준 HEAD는 `d756efb1953619a4a1a9b0e1d01c2f98e23eebbf`다. 상태의 기계 판독 원본은 `execution-state.json`이다.
 
+## 보완 B — GROUNDED_CANONICAL_R2_VERIFIED
+
+16번 이후 표시 계층 보완으로 `v3-grounded-canonical-r2`를 구현했다. exact source evidence와 표시문을 분리하고, 안전한 연결/관형 어미 정리, request-local clause 확장, final EventCluster의 호환 member/role을 이용한 작은 frame 보완을 PUBLIC projection r2에 연결했다. `canonical_provenance`가 grounding과 edit rule을 schema/viewer/Neo4j dry-run까지 전달한다. canonicalizer mode를 바꿔도 identity, relation, Primary, 선택 및 persistence 상태는 유지된다. 본학습 준비/데이터 gate 판정은 바꾸지 않았다. 범위와 검증은 `followup-b-canonical-text.md`에 있다.
+
+## 단계 16 / 16 — V3_CODE_READY_FOR_MAIN_TRAINING, MAIN_TRAINING_DATA_GATE_BLOCKED
+
+15번 완료 HEAD `f320f50e`의 산출물 13개를 byte 비교하고, pinned producer·guideline·schema·source·split·현재 Gold 500개 hash를 확인했다. 15번 실행을 반복하지 않고 `step16-readiness-bundle.json`에 13개 영역별 READY/PROVISIONAL/BLOCKED/OUT_OF_SCOPE matrix, 19 task/20 loss·281 parameter manifest, checkpoint 형식, cross-window optimizer moment 4개, 50기사 runtime·isolated memory·tiny-fit·accumulation 기록을 연결했다. 지시서 상태 lane은 `training-readiness.json`에 구분했다. 격리된 `UNTRAINED_NOT_FOR_PRODUCTION` 진단 package는 새 프로세스에서 158개 project module의 staging 내부 import와 raw 기사→PUBLIC 직렬화를 확인했다. `step16-readiness-report.md`에 최초 7항목/추가 task 추적표, 최종 preflight 순서와 본학습 후 dev 선택→dev calibration→최종 test를 고정했다.
+
+학습 핵심 모듈은 준비되었지만 현재 Gold는 500/1000, 유효 499이고 dev `136.json` quarantine이 남는다. seed-41 split은 최종 승인되지 않았다. `main-train` CLI는 optimizer 생성 전에 차단하며 본학습 config도 동결되지 않았다. 따라서 현재 본학습 실행은 불가하고 Stage13/15 checkpoint의 warm-start·production 사용도 불가하다. PUBLIC persistence, backend UUID/EntityType 매핑, zero-event 저장, service threshold는 별도 gate다. 16번에서 optimizer step·serving 재실행·dev/test tuning·원격 게시·DB write는 없었다.
+
+## 단계 15 / 16 — ENGINEERING_VERIFIED, 전체 Gold gate는 BLOCKED
+
+14.5 이후 Gold-free serving을 engineering50의 train 소속 processed 원문 50기사에 기본 budget으로 실행했다. 모두 backbone/DCE 각 1회, L8/L10/L12·direct gather, generic endpoint request 공유, PUBLIC endpoint 연결성 및 요청 후 tensor weakref 회수를 확인했다. 전체 latency p50/p95/max는 2,627.722/7,921.082/14,236.945ms, source extraction은 1,371.637/4,061.417/5,688.525ms였다. 최장 7,604자/223-window 기사가 가장 느렸고 pair-heavy 기사는 별도 1,038자/18-window 기사였다. 대표 네 기사를 각각 새 프로세스에서 메모리 측정했다. 모든 기사가 provisional 기본 budget에서 partial이라 diagnostic smoke 결과를 품질로 해석하지 않는다.
+
+fit40 후보 4기사로 seed 1008 fresh-init tiny-fit 4 optimizer step을 실행했다. cross-window Gold span이 있는 fit 기사도 넣어 20/20 활성 loss·24/24 gradient owner·281/281 optimizer state를 확인했다. 시작/종료 평균 loss는 모두 finite이고 낮아졌으며 frozen backbone SHA는 불변이다. 같은 fresh 초기화와 고정 8기사에서 physical micro-batch 1, accumulation 1/2/4/8을 기사별 backward로 비교했다. 각 설정이 OOM 없이 통과했고 4~8을 **본학습 후보 범위**로만 제안한다. 상세 수치·isolated memory·checkpoint 정책은 `step15-engineering-report.md`, 기계 판독 결과는 `step15-engineering-summary.json`에 있다. Stage14/14.5 baseline은 변경하지 않았다. dev/test 사용·본학습·production calibration·HF publish·DB write는 없고 dev `136.json` blocker는 유지된다. 16번은 시작하지 않았다.
+
 ## 단계 14 / 16 — IMPLEMENTED_DIAGNOSTIC_VERIFIED, 전체 Gold gate는 BLOCKED
 
 Gold-free `V3ServingWorker`와 raw article JSON CLI를 연결했다. pinned KF-DeBERTa selective L8/L10/L12 1회, shared DCE 1회, candidate-local direct gather를 사용해 extraction → Entity/Time → final EventCluster → Assertor/ASSERTED_BY/ABOUT/CAUSES → Primary → canonical text → PUBLIC v3를 한 요청에서 실행한다. Stage 13 smoke checkpoint는 엄격한 startup 검사로만 로드하고 `UNTRAINED_FRESH_WEIGHT_DIAGNOSTIC`/`PERSISTENCE_NOT_READY`를 유지한다. Gold ID, teacher forcing, Gold membership, optimizer, DB writer는 serving request에 없다. 학습된 semantic boundary/validity 및 Trigger/Entity/Time 전용 extraction 점수를 predicted decoder에 연결했다.

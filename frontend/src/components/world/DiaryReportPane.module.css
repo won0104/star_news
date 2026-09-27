@@ -211,16 +211,20 @@
   text-decoration-color: #8b7355;
 }
 
-/* Measured off the photograph: cream runs 9.8%–49.6% on the left leaf and 50.1%–90.1%
-   on the right, with the stitched seam between them and paper from 3% to 94.4% down.
-   The content sits well inside both the leather edge and the stitched gutter, so charts
-   read as marks on the page instead of touching the book's frame. */
+/*
+ * 쪽의 자리는 책 그림(diary-spread-v2.webp, 3:2)에서 잰 종이 영역에 맞춘다 — 왼쪽 종이
+ * 12.7%–48.8%, 오른쪽 50.4%–87.0%, 세로 3.6%–94%. 예전 값(9.8–49.6 / 50.1–90.1)은 이전
+ * 그림 기준이라, 왼쪽 쪽은 책등에 붙고 오른쪽 쪽은 바깥 끝을 넘었다.
+ *
+ * 네 방향 여백을 같은 폭으로 둔다: 가로는 그림 폭의 3.2%, 세로는 그 같은 길이를 높이 비율로
+ * 옮긴 4.8%(3:2 이므로 ×1.5). 좁은 화면이 종이 안쪽에 고른 여백을 두는 것과 같은 규칙이다.
+ */
 .leftPage,
 .rightPage {
   position: absolute;
   z-index: 3;
-  top: 9%;
-  bottom: 9%;
+  top: 8.4%;
+  bottom: 10.8%;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -229,13 +233,13 @@
 }
 
 .leftPage {
-  left: 14.4%;
-  width: 31.5%;
+  left: 15.9%;
+  width: 29.7%;
 }
 
 .rightPage {
-  left: 54.2%;
-  width: 31.5%;
+  left: 53.6%;
+  width: 30.2%;
 }
 
 /* ---- 왼쪽 페이지 머리 ------------------------------------------------------- */
@@ -248,7 +252,7 @@
 
 .pageHead h1 {
   margin: 4px 0 0;
-  font: 700 clamp(17px, 1.75vw, 29px)/1.24 var(--font-serif-kr);
+  font: 700 clamp(16px, 1.55vw, 26px)/1.24 var(--font-serif-kr);
   color: #2f2620;
 }
 
@@ -259,34 +263,20 @@
   word-break: keep-all;
 }
 
-/* Three figures the summary sentence states, set as numbers because they are the first
-   thing a report should answer. Rules above and below rather than a card: the page is
-   already paper, so a second sheet on top of it would be one too many. */
-.totals {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0;
-  padding: 3.4% 0;
-  border-top: 1px solid rgba(94, 74, 51, 0.24);
+/* 문장 속의 숫자와 날짜. 문장의 흐름을 깨지 않을 만큼만 — 굵기와, 본문보다 짙은 같은 계열의
+   갈색 잉크로. 남색은 종이 위 문장 안에서 차트 색처럼 따로 떠 보였다. 쪽 머리 요약과 차트
+   해석 줄이 같은 표시를 쓴다. */
+.pageHead p b,
+.insights b {
+  font-weight: 700;
+  color: #3f2d1e;
+}
+
+/* 쪽 머리와 본문 사이의 한 줄. 요약 밴드를 걷어내며 그 위아래 선도 함께 없어져, 머리 아래에만
+   같은 선을 남긴다. */
+.pageHead {
+  padding-bottom: 12px;
   border-bottom: 1px solid rgba(94, 74, 51, 0.24);
-}
-
-.totals div {
-  display: grid;
-  gap: 2px;
-  justify-items: center;
-}
-
-.totals dd {
-  margin: 0;
-  font: 700 clamp(19px, 2.05vw, 34px)/1 var(--font-serif-kr);
-  font-variant-numeric: tabular-nums;
-  color: #182b43;
-}
-
-.totals dt {
-  font: clamp(7px, 0.62vw, 10px) var(--font-sans);
-  color: #8b7355;
 }
 
 /* ---- 블록 공통 -------------------------------------------------------------- */
@@ -306,7 +296,7 @@
 
 .block h2 {
   margin: 0;
-  font: 700 clamp(10px, 0.95vw, 15px) var(--font-serif-kr);
+  font: 700 clamp(9px, 0.85vw, 14px) var(--font-serif-kr);
   color: #3a2f26;
 }
 
@@ -344,7 +334,7 @@
 .shareBar {
   display: flex;
   height: clamp(9px, 0.95vw, 15px);
-  margin-top: 6%;
+  margin-top: 4%;
   overflow: hidden;
   border-radius: 3px;
 }
@@ -356,8 +346,8 @@
 .shareLegend {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4% 6%;
-  margin: 6% 0 0;
+  gap: 7px 22px;
+  margin: 12px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -378,10 +368,14 @@
   color: #44392f;
 }
 
+/* 숫자를 문장으로 읽어 주는 줄이라 각주보다 본문에 가깝게 — 한 단계 크고 짙게. 왼쪽 차트의
+   해석 줄(.insights)과 같은 별 머리표를 단다. */
 .footnote {
-  margin: 5% 0 0;
-  font: clamp(7px, 0.58vw, 10px)/1.5 var(--font-serif-kr);
-  color: #8b7355;
+  position: relative;
+  padding-left: 1.4em;
+  margin: 12px 0 0;
+  font: clamp(8px, 0.68vw, 11px)/1.55 var(--font-serif-kr);
+  color: #6b5a4a;
   word-break: keep-all;
 }
 
@@ -409,10 +403,43 @@
 
 .plot {
   position: relative;
-  flex: 1;
-  min-height: 0;
+  /* 남은 높이를 다 받으면 빈 판이 페이지 절반을 차지했다. 높이를 정해 두고 그 아래에
+     해석 줄을 둔다. 값은 1440 폭에서 예전 높이의 약 60% 인 잠정값이다. */
+  flex: none;
+  height: clamp(140px, 15.5vw, 250px);
   margin-top: 7%;
   padding-left: 7%;
+}
+
+.insights {
+  display: grid;
+  gap: 4px;
+  /* 위 여백에는 기준선 아래로 내려간 월 이름(약 15px)의 자리가 들어 있다. */
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+  font: clamp(8px, 0.7vw, 12px)/1.6 var(--font-serif-kr);
+  color: #5d4b38;
+  word-break: keep-all;
+}
+
+/* 해석 줄은 작은 별을 머리표로 단 목록이다. 별 자리만큼 들여 써서 줄이 넘어가도 글이 맞는다. */
+.insights li,
+.axisNote li {
+  position: relative;
+  padding-left: 1.4em;
+}
+
+.insights li::before,
+.axisNote li::before,
+.footnote::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 0.85em;
+  line-height: 1.9;
+  color: #b0843a;
+  content: '✦';
 }
 
 /* 12주 판이 비었을 때 그 안에 놓이는 한 줄. 출처 블록의 각주와 같은 서체·색이라
@@ -458,6 +485,7 @@
 }
 
 .column {
+  position: relative;
   display: flex;
   min-width: 0;
   flex: 1;
@@ -466,12 +494,18 @@
   height: 100%;
 }
 
+/* 주마다 옅은 자리(track)를 깔아, 읽지 않은 주도 한 칸으로 보이게 한다 — 그러지 않으면
+   기둥이 하나뿐일 때 12주가 아니라 월별 차트처럼 읽혔다. 기둥은 칸보다 가늘게 세운다. */
 .stack {
   position: relative;
   display: flex;
+  width: 62%;
   height: 100%;
+  margin: 0 auto;
   flex-direction: column;
   justify-content: flex-end;
+  border-radius: 2px 2px 0 0;
+  background: rgba(94, 74, 51, 0.055);
 }
 
 .segment {
@@ -533,8 +567,13 @@
   transform: none;
 }
 
+/* 기준선(.columns 의 아래 테두리) 밖, 그 아래에 단다. 기둥 칸 안에 두면 선이 글자 아래로
+   지나가 월 이름이 차트 안의 값처럼 읽혔다. */
 .monthLabel {
-  margin-top: 4px;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
   font: clamp(6px, 0.52vw, 9px) var(--font-sans);
   color: #9b8567;
   text-align: center;
@@ -547,38 +586,53 @@
   position: relative;
   flex: 1;
   min-height: 0;
-  margin-top: 7%;
+  /* 위아래 여백은 판 바깥에 선 사분면 이름의 자리다. */
+  margin: 30px 0 26px;
+  /* 판 둘레는 배경 없는 둥근 선 하나 — 나의 기록의 기록 카드와 같은 선이다. 칠은 하지 않는다. */
+  border: 1px solid rgba(120, 96, 70, 0.22);
+  border-radius: 10px;
   /* Two dividers drawn rather than bordered, so they stop at the box's edges instead of
      boxing each cell in — the quadrants are regions of one field, not four cells. */
   background-image:
-    linear-gradient(rgba(94, 74, 51, 0.22), rgba(94, 74, 51, 0.22)),
-    linear-gradient(rgba(94, 74, 51, 0.22), rgba(94, 74, 51, 0.22));
+    linear-gradient(rgba(94, 74, 51, 0.3), rgba(94, 74, 51, 0.3)),
+    linear-gradient(rgba(94, 74, 51, 0.3), rgba(94, 74, 51, 0.3));
   background-size: 100% 1px, 1px 100%;
   background-position: 0 50%, 50% 0;
   background-repeat: no-repeat;
 }
 
-/* Only the quadrant worth acting on is tinted — 새로 살펴볼 흐름, as in the frame. */
+/*
+ * 뜻이 있는 사분면 하나만 아주 옅게 — 오른쪽 위, 전체에서도 주목받고 나도 자주 읽은 흐름.
+ * 예전에는 왼쪽 위에 짙은 사각형이 있어 선택 영역인지 배경 오류인지 알기 어려웠다.
+ */
 .quadrantFill {
   position: absolute;
-  left: 0;
+  right: 0;
   top: 0;
   width: 50%;
   height: 50%;
-  background: rgba(238, 195, 118, 0.16);
+  /* 판의 둥근 모서리를 따라 깎는다(테두리 두께만큼 안쪽 반지름). */
+  border-top-right-radius: 9px;
+  background: rgba(238, 195, 118, 0.09);
 }
 
 .quadrantLabel {
   position: absolute;
-  font: clamp(6px, 0.52vw, 9px) var(--font-sans);
+  font: clamp(7px, 0.58vw, 10px) var(--font-sans);
   color: #a08b6d;
   white-space: nowrap;
 }
 
-.qTopLeft { left: 3%; top: 3%; }
-.qTopRight { right: 3%; top: 3%; }
-.qBottomLeft { left: 3%; bottom: 3%; }
-.qBottomRight { right: 3%; bottom: 3%; }
+.qTopRight {
+  color: #8b6a3a;
+}
+
+/* 사분면 이름은 판 바깥 위·아래, 각 칸의 가장자리에 단다. 판 안 모서리에 두면 가장자리에 선
+   점의 이름과 겹치는데, 점의 자리는 데이터라 옮길 수 없다. */
+.qTopLeft { left: 4px; bottom: calc(100% + 6px); }
+.qTopRight { right: 4px; bottom: calc(100% + 6px); }
+.qBottomLeft { left: 4px; top: calc(100% + 6px); }
+.qBottomRight { right: 4px; top: calc(100% + 6px); }
 
 .topic {
   position: absolute;
@@ -589,6 +643,17 @@
   font: clamp(6px, 0.58vw, 10px) var(--font-serif-kr);
   color: #6f5c47;
   white-space: nowrap;
+}
+
+/* 왼쪽 끝 가까이: 점이 좌표에 서고 이름은 오른쪽으로. 오른쪽 끝 가까이: 순서를 뒤집어 이름이
+   왼쪽으로. 가운데 점은 지금처럼 묶음 전체의 가운데가 좌표다. */
+.topicAtLeft {
+  transform: translate(-2.5px, -50%);
+}
+
+.topicAtRight {
+  flex-direction: row-reverse;
+  transform: translate(calc(-100% + 2.5px), -50%);
 }
 
 .topicDot {
@@ -666,7 +731,9 @@
 }
 
 .axisNote {
-  margin: 5% 0 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   font: clamp(6px, 0.52vw, 9px)/1.5 var(--font-sans);
   color: #a08b6d;
 }

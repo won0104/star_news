@@ -242,37 +242,6 @@ export const trendNodeArticles = Object.values(trendNodeDetails).reduce((all, no
   return all
 }, {})
 
-/** 세부 유형을 화면 말로 옮긴다. 모르는 값은 원문 그대로 보여준다. */
-export const subtypeLabels = {
-  PERSON: '인물',
-  ORGANIZATION: '기관·기업',
-  LOCATION: '장소',
-  PRODUCT: '제품',
-  POLICY: '정책·제도',
-  INDICATOR: '지표',
-  PLAN: '계획·발표',
-  ASSESSMENT: '평가·전망',
-  FACT: '사실',
-}
-
-/** 화면에 쓰는 관계 이름. 없는 타입은 원문 그대로 보여준다. */
-export const edgeLabels = {
-  ACTOR: '주체',
-  TARGET: '대상',
-  CAUSES: '원인·결과',
-  SUBEVENT_OF: '상위 사건',
-  CONTAINS_STATEMENT: '발언',
-  OCCURRED_AT: '시점',
-  BELONGS_TO_TOPIC: '분야',
-}
-
-export const nodeTypeLabels = {
-  EVENT: '사건',
-  ENTITY: '인물·기관',
-  STATEMENT: '발언',
-  TIME: '시점',
-}
-
 export const trendSkyExpandCopy = {
   back: '← 오늘의 트렌드',
   centre: '선택한 사건',

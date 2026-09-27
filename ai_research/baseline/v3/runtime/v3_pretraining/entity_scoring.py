@@ -1,163 +1,364 @@
-"""Gold 없는 Entity union의 request-local typing·identity·role 점수화.
+"""Selected-pair Entity identity and post-closure ASSERTOR attribution.
 
-하나의 live backbone/DCE lease를 소비하고 scalar closure만 반환한다. 이 단계의
-argmax는 engineering decision이며 서비스 threshold·checkpoint 정책이 아니다.
+Native and ROLE source mentions keep their source types and exact coordinates.
+Only endpoints selected by the Gold-free coreference router receive expensive
+pair representations. Participant identity is decided by this one closure;
+ASSERTOR attribution remains a separate, later fine decision.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from itertools import combinations
+import math
+from time import perf_counter
 from typing import Mapping
 
 import torch
 
 from models.contracts import ArticleBatch, BackboneOutput
 from models.v3_pretraining.architecture import SharedForwardLease, V3Core
-from models.v3_pretraining.extraction_heads import ENTITY_TYPES
-from runtime.v3_pretraining.entity_identity import EntityClosure, close_entity_identity
+from runtime.v3_pretraining.attribution_features import (
+    assertor_relation_left, build_assertor_entity_option_index,
+    build_assertor_entity_options,
+    assertor_option_routing_trace,
+)
+from runtime.v3_pretraining.entity_identity import (
+    EntityClosure, RoleEndpoint, close_entity_identity,
+)
+from runtime.v3_pretraining.entity_pair_blocking import EntityPairPolicy
 from runtime.v3_pretraining.entity_union import EntityCandidateUniverse
+from runtime.v3_pretraining.exact_feature_cache import (RequestExactFeatureCache,
+                                                        exact_source_features)
+from runtime.v3_pretraining.pair_routing import (
+    RoutedPairs, inventory_lineage, route_entity_coreference,
+)
+from runtime.candidate_routing.integrated import IntegratedBoundedPolicies
 from runtime.v3_pretraining.source_layout import SourceLayout
+
+
+ENTITY_COREFERENCE_POLICIES = frozenset(("ARGMAX_CLASS_1", "MARGIN_GTE"))
+
+
+@dataclass(frozen=True, slots=True)
+class EntityResolutionDiagnostic:
+    evidence_id: str
+    role: str
+    accepted: bool
+    reason: str
+    best_score: float | None = None
+    selected_candidate_id: str | None = None
+    option_count: int = 0
+    threshold_passed_options: int = 0
+    option_status: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class EntityScoreResult:
     closure: EntityClosure
-    typed_universe: EntityCandidateUniverse
+    mention_universe: EntityCandidateUniverse
     scored_coreference_pairs: int
-    scored_role_entity_pairs: int
-    policy_status: str = "PROVISIONAL_ARGMAX_NO_SERVICE_THRESHOLD"
+    resolution_diagnostics: tuple[EntityResolutionDiagnostic, ...] = ()
+    policy_status: str = "UNIFIED_MENTION_COREF_V1"
+    accepted_coreference_pairs: int = 0
+    rejected_coreference_pairs: int = 0
+    scored_assertor_entity_pairs: int = 0
+    entity_pair_route: RoutedPairs | None = None
+    assertor_option_routes: tuple[dict[str, object], ...] = ()
+    preliminary_closure: EntityClosure | None = None
+    # Assertor evidence ID -> 선택된 Entity의 assertor_entity pair logit (PUBLIC confidence 원천).
+    assertor_entity_logits: tuple[tuple[str, float], ...] = ()
+
+
+def _prepare_entity_pair_chunk(*, pair_chunk: torch.Tensor,
+                               state_rows: torch.Tensor,
+                               selected_position_index: torch.Tensor,
+                               candidate_starts: torch.Tensor,
+                               candidate_types: torch.Tensor,
+                               role_origins: torch.Tensor,
+                               content_length: int,
+                               device: torch.device
+                               ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Pack exact selected endpoints and four unchanged policy features."""
+    local_ids, inverse = torch.unique(pair_chunk.reshape(-1), sorted=True,
+                                      return_inverse=True)
+    states = state_rows.index_select(
+        0, selected_position_index.index_select(0, local_ids)).to(device)
+    pair_indices = inverse.view(-1, 2).to(device)
+    left, right = pair_chunk.unbind(dim=1)
+    left_types = candidate_types.index_select(0, left)
+    right_types = candidate_types.index_select(0, right)
+    left_role = role_origins.index_select(0, left)
+    right_role = role_origins.index_select(0, right)
+    distance = (candidate_starts.index_select(0, left) -
+                candidate_starts.index_select(0, right)).abs()
+    policy = torch.stack((
+        (left_types.ge(0) & left_types.eq(right_types)).to(torch.float64),
+        (left_role & right_role).to(torch.float64),
+        (left_role != right_role).to(torch.float64),
+        (distance.to(torch.float64) / float(max(content_length, 1))).clamp(max=1.0)),
+        dim=1).to(dtype=states.dtype, device=device)
+    return states, pair_indices, policy
 
 
 @torch.no_grad()
 def score_and_close_entity(*, universe: EntityCandidateUniverse, layout: SourceLayout,
                            batch: ArticleBatch, backbone: BackboneOutput,
                            shared: SharedForwardLease, core: V3Core,
-                           accepted_role_evidence: frozenset[str] = frozenset(),
                            statement_states: Mapping[str, torch.Tensor] | None = None,
+                           assertor_states: Mapping[str, torch.Tensor] | None = None,
                            assertor_resolution_threshold: float = 0.0,
+                           entity_coreference_margin: float = 0.0,
+                           entity_coreference_policy: str = "MARGIN_GTE",
                            pair_chunk_size: int = 128,
-                           max_candidates: int = 128) -> EntityScoreResult:
-    """role span을 유지한 bounded pair 점수와 최종 article-local remap을 생성한다."""
-    if (universe.source_mode != "PREDICTED" or universe.content_sha256 != layout.article.content_sha256
-            or universe.article_version_id != layout.article.article_version_id):
-        raise ValueError("runtime Entity scoring needs matching predicted source")
-    if (shared.closed or shared.token_states is None or shared.sentence_states is None
-            or shared.document_state is None):
-        raise RuntimeError("Entity scoring needs a live shared representation")
-    if pair_chunk_size <= 0 or max_candidates <= 0 or len(universe.candidates) > max_candidates:
-        raise ValueError("Entity pair scoring must stay within explicit candidate/chunk bounds")
-    if any(name not in core.task_modules for name in ("entity_mention", "entity_coreference",
-                                                       "role_entity", "entity_priority")):
-        raise ValueError("Entity score heads must be registered")
-    if any(row.role == "ASSERTOR" for row in universe.bindings) and (
-            "assertor_entity" not in core.task_modules or statement_states is None):
-        raise ValueError("Assertor resolution needs its fresh head and Statement representations")
-    bindings = {row.evidence_id: row for row in universe.bindings}
-    if not accepted_role_evidence <= bindings.keys():
-        raise ValueError("unknown accepted role evidence")
-    accepted_sources = accepted_role_evidence | frozenset(
-        row.evidence_id for row in universe.bindings
-        if row.role == "ASSERTOR" and row.status == "CANDIDATE")
+                           max_candidates: int | None = None,
+                           pair_policies: IntegratedBoundedPolicies | None = None,
+                           entity_pair_policy: EntityPairPolicy | None = None,
+                           entity_all_pair_shadow_reference: bool = False,
+                           identity_only: bool = False,
+                           include_diagnostics: bool = True,
+                           exact_feature_cache: RequestExactFeatureCache | None = None,
+                           profile_sink: dict[str, float] | None = None
+                           ) -> EntityScoreResult:
+    """Score routed mention pairs, close identity once, then resolve Assertors.
+
+    Pair routing is source-only. Missing pairs never enter the fine decision map;
+    complete-link therefore cannot infer a merge from an unassessed pair.
+    ``pair_chunk_size`` bounds execution memory and never deletes a candidate.
+    """
+    if (universe.identity_contract != "UNIFIED_MENTION_COREF_V1" or
+            universe.source_mode != "PREDICTED" or
+            universe.content_sha256 != layout.article.content_sha256 or
+            universe.article_version_id != layout.article.article_version_id):
+        raise ValueError("Entity scorer requires matching unified predicted mentions")
+    if (shared.closed or shared.token_states is None or
+            shared.sentence_states is None or shared.document_state is None):
+        raise RuntimeError("Entity scorer needs one live shared representation")
+    if (pair_chunk_size <= 0 or (max_candidates is not None and
+                                 len(universe.candidates) > max_candidates)):
+        raise ValueError("Entity scorer candidate/chunk contract differs")
+    if (entity_coreference_policy not in ENTITY_COREFERENCE_POLICIES or
+            not math.isfinite(entity_coreference_margin) or
+            not math.isfinite(assertor_resolution_threshold)):
+        raise ValueError("Entity decision policy or margin differs")
+    if "entity_coreference" not in core.task_modules:
+        raise ValueError("Entity coreference fine head is absent")
+    assertors = tuple(binding for binding in universe.bindings
+                      if binding.role == "ASSERTOR")
+    if assertors and not identity_only and (
+            "assertor_entity" not in core.task_modules or
+            statement_states is None or assertor_states is None):
+        raise ValueError("Assertor fine decision needs source and Statement states")
+
+    profile_start = perf_counter() if profile_sink is not None else 0.0
     candidates = universe.candidates
-    if not candidates:
-        closure = close_entity_identity(universe, merge_decisions={}, resolution_decisions={})
-        return EntityScoreResult(closure, universe, 0, 0)
-    aligned = [layout.align({"start": row.start, "end": row.end, "text": row.text})
-               for row in candidates]
-    features = core.exact_source_span(
-        layout=layout, batch=batch, backbone=backbone,
-        token_states=shared.token_states, sentence_states=shared.sentence_states,
-        document_state=shared.document_state, candidate_encoder=core.candidate_span,
-        rows=[(row, "ENTITY") for row in aligned])
-    states = features.states
-    device = states.device
-    geometry = torch.stack([
-        torch.stack((features.residuals[index, 0], features.residuals[index, 1],
-                     states.new_tensor(min(row.end - row.start, 512) / 512),
-                     states.new_tensor(float(row.cross_window))))
-        for index, row in enumerate(aligned)]).unsqueeze(0)
-    type_logits = core.task_modules["entity_mention"].typing(
-        states.unsqueeze(0), geometry,
-        torch.ones((1, len(candidates)), dtype=torch.bool, device=device))[0]
-    type_log_probabilities = type_logits.log_softmax(dim=-1)
-    typed = tuple(replace(candidate, entity_type=ENTITY_TYPES[int(type_logits[index].argmax())],
-                          type_evidence=tuple(float(value) for value in type_log_probabilities[index]))
-                  for index, candidate in enumerate(candidates))
-    typed_universe = replace(universe, candidates=typed)
-    origins = torch.tensor([[float(origin in row.origins) for origin in ("NER", "ROLE", "ASSERTOR")]
-                            for row in typed], dtype=states.dtype, device=device)
-    # Priority is scored for diagnostics; mandatory role reservation already happened before this head.
-    priority = core.task_modules["entity_priority"](states, origins)
-    if not torch.isfinite(priority).all():
-        raise ValueError("non-finite Entity priority")
-    pair_rows = tuple(combinations(range(len(typed)), 2))
-    merge = {}
+    route = None
+    if pair_policies is not None:
+        source_lineage = inventory_lineage(
+            layout.article,
+            tuple((row.candidate_id, row.start, row.end) for row in candidates))
+        route = route_entity_coreference(
+            article=layout.article, candidates=candidates,
+            source_lineage=source_lineage, policies=pair_policies,
+            sentence_spans=layout.sentence_spans,
+            entity_policy=entity_pair_policy,
+            shadow_all_pairs=entity_all_pair_shadow_reference,
+            materialize_records=include_diagnostics)
+        pair_rows = route.pairs
+    else:
+        pair_rows = tuple(combinations(range(len(candidates)), 2))
+    if profile_sink is not None:
+        profile_sink["entity_pair_routing_ms"] = round(
+            (perf_counter() - profile_start) * 1000, 3)
+        profile_start = perf_counter()
+
+    # Encode unique endpoints of selected pairs once in bounded chunks. CPU
+    # storage avoids holding the full article candidate matrix on MPS; each
+    # fine chunk moves only its needed rows back to the model device.
+    needed = bytearray(len(candidates))
+    for left, right in pair_rows:
+        needed[left] = needed[right] = 1
+    selected_indices = [index for index, present in enumerate(needed) if present]
+    hidden = shared.document_state.shape[-1]
+    state_rows = torch.empty((len(selected_indices), hidden),
+                             dtype=shared.token_states.dtype, device="cpu")
+    selected_positions = {index: pos for pos, index in enumerate(selected_indices)}
+    selected_position_index = torch.full((len(candidates),), -1, dtype=torch.long)
+    if selected_indices:
+        selected_position_index[torch.tensor(selected_indices, dtype=torch.long)] = (
+            torch.arange(len(selected_indices), dtype=torch.long))
+    extra_states: dict[int, torch.Tensor] = {}
+
+    def encode(indices: list[int]) -> torch.Tensor:
+        aligned = [layout.align({"start": candidates[index].start,
+                                 "end": candidates[index].end,
+                                 "text": candidates[index].text})
+                   for index in indices]
+        features = exact_source_features(
+            layout=layout, batch=batch, backbone=backbone, shared=shared, core=core,
+            rows=[(row, "ENTITY") for row in aligned], cache=exact_feature_cache)
+        return features.states.detach().to("cpu")
+
+    for offset in range(0, len(selected_indices), pair_chunk_size):
+        indices = selected_indices[offset:offset + pair_chunk_size]
+        state_rows[offset:offset + len(indices)].copy_(encode(indices))
+    if profile_sink is not None:
+        profile_sink["entity_unique_endpoint_encoding_ms"] = round(
+            (perf_counter() - profile_start) * 1000, 3)
+        profile_start = perf_counter()
+
+    def state_cpu(index: int) -> torch.Tensor:
+        position = selected_positions.get(index)
+        if position is not None:
+            return state_rows[position]
+        if index not in extra_states:
+            extra_states[index] = encode([index])[0]
+        return extra_states[index]
+
+    device = shared.document_state.device
     document_state = shared.document_state[0]
-    for start in range(0, len(pair_rows), pair_chunk_size):
-        chunk = pair_rows[start:start + pair_chunk_size]
-        indices = torch.tensor(chunk, dtype=torch.long, device=device)
-        policy = torch.tensor([
-            (float(typed[a].entity_type == typed[b].entity_type),
-             float("ROLE" in typed[a].origins and "ROLE" in typed[b].origins),
-             float(("ROLE" in typed[a].origins) != ("ROLE" in typed[b].origins)),
-             min(abs(typed[a].start - typed[b].start) / max(len(layout.article.content), 1), 1.0))
-            for a, b in chunk], dtype=states.dtype, device=device)
-        logits = core.task_modules["entity_coreference"](states, indices, document_state, policy)
+    accepted_merge: dict[tuple[str, str], bool] = {}
+    pair_indices_cpu = torch.tensor(pair_rows, dtype=torch.long).reshape(-1, 2)
+    candidate_starts = torch.tensor([row.start for row in candidates], dtype=torch.long)
+    type_ids = {name: index for index, name in enumerate(
+        sorted({row.entity_type for row in candidates if row.entity_type is not None}))}
+    candidate_types = torch.tensor([type_ids.get(row.entity_type, -1)
+                                    for row in candidates], dtype=torch.long)
+    role_origins = torch.tensor(["ROLE" in row.origins for row in candidates],
+                                dtype=torch.bool)
+    for offset in range(0, len(pair_rows), pair_chunk_size):
+        chunk = pair_rows[offset:offset + pair_chunk_size]
+        pair_chunk = pair_indices_cpu[offset:offset + pair_chunk_size]
+        states, pair_indices, policy = _prepare_entity_pair_chunk(
+            pair_chunk=pair_chunk, state_rows=state_rows,
+            selected_position_index=selected_position_index,
+            candidate_starts=candidate_starts, candidate_types=candidate_types,
+            role_origins=role_origins, content_length=len(layout.article.content),
+            device=device)
+        logits = core.task_modules["entity_coreference"](
+            states, pair_indices, document_state, policy)
         if not torch.isfinite(logits).all():
             raise ValueError("non-finite Entity coreference score")
-        merge.update({(typed[a].candidate_id, typed[b].candidate_id): bool(logits[index].argmax() == 1)
-                      for index, (a, b) in enumerate(chunk)})
-    preliminary = close_entity_identity(typed_universe, merge_decisions=merge,
-                                        resolution_decisions={},
-                                        accepted_evidence_ids=accepted_sources)
-    id_to_index = {candidate.candidate_id: index for index, candidate in enumerate(typed)}
-    entities = preliminary.entities
-    entity_states = (torch.stack([states[[id_to_index[cid] for cid in row.candidate_ids]].mean(dim=0)
-                                  for row in entities]) if entities else states.new_empty((0, states.shape[-1])))
-    decisions: dict[str, str | None] = {}
-    scored_role_pairs = 0
-    for binding in universe.bindings:
-        if (binding.status != "CANDIDATE" or
-                (binding.evidence_id not in accepted_role_evidence and
-                 binding.referential_state != "CONFIRMED" and binding.role != "ASSERTOR")):
-            decisions[binding.evidence_id] = None
-            continue
-        # role의 exact source에서 생성된 후보만 endpoint가 될 수 있다. 이후 동일성으로
-        # 확장된 alias는 같은 local Entity ID를 공유한다.
-        candidate_ids = binding.candidate_ids
-        entity_options = tuple(sorted({preliminary.candidate_to_entity[cid] for cid in candidate_ids}))
-        entity_lookup = {row.local_id: index for index, row in enumerate(entities)}
-        role_index = id_to_index[candidate_ids[0]]
-        indices = torch.tensor([(0, entity_lookup[eid]) for eid in entity_options],
-                               dtype=torch.long, device=device)
-        if binding.role == "ASSERTOR":
-            owner = statement_states.get(binding.owner_id)
-            if owner is None:
-                raise ValueError("Assertor owner Statement representation missing")
-            source = states[role_index] + owner
-            right = entity_states[indices[:, 1]]
+        decisions = (logits.argmax(dim=-1) == 1 if
+                     entity_coreference_policy == "ARGMAX_CLASS_1" else
+                     logits[:, 1] - logits[:, 0] >= entity_coreference_margin)
+        for (left, right), keep in zip(chunk, decisions.tolist()):
+            if keep:
+                accepted_merge[(candidates[left].candidate_id,
+                                candidates[right].candidate_id)] = True
+    if profile_sink is not None:
+        profile_sink["entity_coreference_fine_scoring_ms"] = round(
+            (perf_counter() - profile_start) * 1000, 3)
+        profile_start = perf_counter()
+
+    preliminary = close_entity_identity(
+        universe, merge_decisions=accepted_merge, resolution_decisions={})
+    if profile_sink is not None:
+        profile_sink["entity_complete_link_closure_ms"] = round(
+            (perf_counter() - profile_start) * 1000, 3)
+        profile_start = perf_counter()
+    accepted_count = len(accepted_merge)
+    if identity_only or not assertors:
+        if profile_sink is not None:
+            profile_sink["entity_assertor_resolution_ms"] = 0.0
+        return EntityScoreResult(
+            preliminary, universe, len(pair_rows),
+            accepted_coreference_pairs=accepted_count,
+            rejected_coreference_pairs=len(pair_rows) - accepted_count,
+            entity_pair_route=route, preliminary_closure=preliminary)
+
+    id_to_index = {row.candidate_id: index for index, row in enumerate(candidates)}
+    entity_by_id = {row.local_id: row for row in preliminary.entities}
+    entity_states: dict[str, torch.Tensor] = {}
+
+    def entity_state(entity_id: str) -> torch.Tensor:
+        if entity_id not in entity_states:
+            entity = entity_by_id[entity_id]
+            member_ids = sorted(entity.candidate_ids, key=lambda candidate_id: (
+                candidates[id_to_index[candidate_id]].start,
+                candidates[id_to_index[candidate_id]].end, candidate_id))
+            total = torch.zeros(hidden, dtype=torch.float32)
+            for candidate_id in member_ids:
+                total += state_cpu(id_to_index[candidate_id]).float()
+            entity_states[entity_id] = (total / len(member_ids)).to(device)
+        return entity_states[entity_id]
+
+    endpoint_by_evidence = {row.evidence_id: row for row in preliminary.endpoints}
+    evidence_to_entity = dict(preliminary.evidence_to_entity)
+    diagnostics: list[EntityResolutionDiagnostic] = []
+    option_routes: list[dict[str, object]] = []
+    chosen_logits: list[tuple[str, float]] = []
+    scored_assertor = 0
+    option_index = build_assertor_entity_option_index(
+        layout=layout, universe=universe, preliminary=preliminary)
+    for binding in assertors:
+        owner = statement_states.get(binding.owner_id)
+        source_exact = assertor_states.get(binding.owner_id)
+        if owner is None or source_exact is None:
+            raise ValueError("Assertor Statement/source representation missing")
+        options = build_assertor_entity_options(
+            layout=layout, universe=universe, preliminary=preliminary,
+            binding=binding, index=option_index)
+        trace = None
+        if include_diagnostics:
+            trace = assertor_option_routing_trace(
+                layout=layout, universe=universe, preliminary=preliminary,
+                binding=binding, options=options)
+            option_routes.append(trace)
+        entity_ids = options.entity_ids
+        chosen = None
+        best_score = None
+        passed_count = 0
+        if entity_ids:
+            source = assertor_relation_left(owner, source_exact)
+            right = torch.stack([entity_state(entity_id) for entity_id in entity_ids])
             logits = core.task_modules["assertor_entity"](
                 source.unsqueeze(0).expand_as(right), right, document_state)
-        else:
-            policy = torch.tensor([(float(binding.role == "ACTOR"), float(binding.role == "TARGET"),
-                                    float(binding.role == "PLACE"), 1.0)
-                                   for _ in entity_options], dtype=states.dtype, device=device)
-            logits = core.task_modules["role_entity"](
-                states[role_index].unsqueeze(0), entity_states, indices, document_state, policy)
-        if not torch.isfinite(logits).all():
-            raise ValueError("non-finite role Entity score")
-        scored_role_pairs += len(entity_options)
-        if binding.role == "ASSERTOR" and float(logits.max()) < assertor_resolution_threshold:
-            decisions[binding.evidence_id] = None
-            continue
-        selected_entity = entity_options[int(logits.argmax())]
-        decisions[binding.evidence_id] = next(cid for cid in candidate_ids
-                                              if preliminary.candidate_to_entity[cid] == selected_entity)
-    accepted_final = accepted_role_evidence | frozenset(
-        evidence_id for evidence_id, choice in decisions.items()
-        if choice is not None and bindings[evidence_id].role == "ASSERTOR")
-    closure = close_entity_identity(typed_universe, merge_decisions=merge,
-                                    resolution_decisions=decisions,
-                                    accepted_evidence_ids=accepted_final)
-    return EntityScoreResult(closure, typed_universe, len(pair_rows), scored_role_pairs)
+            if not torch.isfinite(logits).all():
+                raise ValueError("non-finite Assertor Entity score")
+            scored_assertor += len(entity_ids)
+            if include_diagnostics:
+                best_score = float(logits.max())
+            passing = logits >= assertor_resolution_threshold
+            passed_count = int(passing.sum())
+            if passed_count:
+                masked = logits.masked_fill(~passing, torch.finfo(logits.dtype).min)
+                chosen_index = int(masked.argmax())
+                chosen = entity_ids[chosen_index]
+                chosen_logits.append((binding.evidence_id, float(logits[chosen_index])))
+            if trace is not None:
+                for record in trace["records"]:
+                    record["fine_status"] = (
+                        "FINE_ACCEPTED" if chosen is not None and
+                        record["candidate_entity_local_id"] == chosen else "FINE_REJECTED")
+        previous = endpoint_by_evidence[binding.evidence_id]
+        endpoint_by_evidence[binding.evidence_id] = replace(
+            previous, local_entity_id=chosen,
+            status="RESOLVED" if chosen is not None else "SPAN_ONLY")
+        if chosen is not None:
+            evidence_to_entity[binding.evidence_id] = chosen
+        if include_diagnostics:
+            diagnostics.append(EntityResolutionDiagnostic(
+                binding.evidence_id, "ASSERTOR", chosen is not None,
+                "ASSERTOR_ENTITY_SELECTED" if chosen is not None else
+                "NO_ENTITY_OPTIONS" if not entity_ids else "ASSERTOR_ENTITY_BELOW_THRESHOLD",
+                best_score, (entity_by_id[chosen].representative_candidate_id
+                             if chosen is not None else None),
+                len(entity_ids), passed_count, options.status))
+    closure = replace(
+        preliminary, evidence_to_entity=evidence_to_entity,
+        endpoints=tuple(endpoint_by_evidence[row.evidence_id]
+                        for row in preliminary.endpoints),
+        status=("PARTIAL_ENDPOINT" if any(
+            row.local_entity_id is None for row in endpoint_by_evidence.values())
+                else preliminary.status))
+    if profile_sink is not None:
+        profile_sink["entity_assertor_resolution_ms"] = round(
+            (perf_counter() - profile_start) * 1000, 3)
+    return EntityScoreResult(
+        closure, universe, len(pair_rows), tuple(diagnostics),
+        accepted_coreference_pairs=accepted_count,
+        rejected_coreference_pairs=len(pair_rows) - accepted_count,
+        scored_assertor_entity_pairs=scored_assertor,
+        entity_pair_route=route, assertor_option_routes=tuple(option_routes),
+        preliminary_closure=preliminary, assertor_entity_logits=tuple(chosen_logits))

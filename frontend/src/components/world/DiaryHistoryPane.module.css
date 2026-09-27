@@ -188,20 +188,26 @@
   pointer-events: none;
 }
 
+/*
+ * 넓은 화면의 쪽 자리. 책 그림(diary-spread-v2.webp, 3:2)에서 잰 종이 영역 — 왼쪽
+ * 12.7%–48.8%, 오른쪽 50.4%–87.0%, 세로 3.6%–94% — 안에 네 방향 같은 여백을 둔다. 가로는
+ * 그림 폭의 3.2%, 세로는 같은 길이를 높이 비율로 옮긴 4.8%. 나의 리포트(DiaryReportPane)와
+ * 같은 책이라 같은 값을 쓴다.
+ *
+ *   왼쪽 쪽: 15.9% – 45.6%    오른쪽 쪽: 53.6% – 83.8%    위아래: 8.4% – 89.2%
+ */
 .diaryTitle {
   position: absolute;
   z-index: 4;
-  top: 7.4%;
-  left: 14.5%;
-  width: 34%;
+  top: 8.4%;
+  left: 15.9%;
+  width: 29.7%;
   padding-bottom: 12px;
   color: #2d2721;
   pointer-events: none;
 }
 
-.diaryTitle span,
-.recordHeader span,
-.eventIntro > span {
+.diaryTitle span {
   font: 700 clamp(9px, 0.72vw, 12px) var(--font-sans);
   letter-spacing: 0.13em;
   color: #866b52;
@@ -221,10 +227,12 @@
 .planetPortal {
   position: absolute;
   z-index: 3;
-  top: calc(18.6% + 12px);
-  left: 13.75%;
-  width: 34.45%;
-  height: calc(59.4% - 12px);
+  /* 제목이 내려간 만큼 위를 내리고, 아래 끝(78%)은 그대로 둔다. 제목은 글자 크기(px 하한)로
+     높이가 정해져 작은 화면에서 비율보다 덜 줄어들므로, 1280 폭에서도 겹치지 않을 만큼 띄웠다. */
+  top: calc(22% + 12px);
+  left: 15.9%;
+  width: 29.7%;
+  height: calc(56% - 12px);
   overflow: hidden;
   border-radius: 12px;
   background: #071524;
@@ -694,9 +702,9 @@
   position: absolute;
   z-index: 4;
   bottom: 17.6%;
-  left: 16.95%;
+  left: 15.9%;
   display: flex;
-  width: 27.85%;
+  width: 29.7%;
   justify-content: center;
   gap: 5px;
   transform: translateY(12px);
@@ -706,8 +714,8 @@
   position: absolute;
   z-index: 4;
   bottom: 13.7%;
-  left: 16.95%;
-  width: 27.85%;
+  left: 15.9%;
+  width: 29.7%;
   margin: 0;
   color: #725d49;
   font: clamp(9px, 0.78vw, 13px)/1.5 var(--font-serif-kr);
@@ -719,10 +727,10 @@
 .recordPage {
   position: absolute;
   z-index: 4;
-  top: 7.2%;
-  right: 14.2%;
-  bottom: 8.2%;
-  left: 52.8%;
+  top: 8.4%;
+  right: 16.2%;
+  bottom: 10.8%;
+  left: 53.6%;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -744,18 +752,13 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: flex-start;
-  gap: 4px 10px;
+  gap: 4px 8px;
 }
 
 .periodField {
   display: inline-flex;
   align-items: baseline;
   gap: 5px;
-}
-
-.periodField > span {
-  font: clamp(9px, 0.72vw, 12px) var(--font-serif-kr);
-  color: #8b7259;
 }
 
 .periodField input {
@@ -783,6 +786,20 @@
 
 .periodField input::-webkit-calendar-picker-indicator:hover {
   opacity: 0.8;
+}
+
+.periodDash {
+  font: clamp(9px, 0.74vw, 12px) var(--font-sans);
+  color: #8b7259;
+}
+
+/* 기간 줄 오른쪽 끝의 합계. 날짜 칸과 같은 줄에 서되 입력이 아니라 적힌 글자로 둔다. */
+.periodTotal {
+  margin-left: auto;
+  font: clamp(9px, 0.74vw, 12px) var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #806a56;
+  white-space: nowrap;
 }
 
 .periodClear {
@@ -813,7 +830,7 @@
 }
 
 .recordHeader h2 {
-  margin: 4px 0 0;
+  margin: 0;
   font: 700 clamp(19px, 1.75vw, 29px)/1.25 var(--font-serif-kr);
 }
 
@@ -823,8 +840,7 @@
 }
 
 .pageActions button,
-.planetActions button,
-.eventIntro button {
+.planetActions button {
   border: 1px solid rgba(100, 74, 53, 0.32);
   border-radius: 5px;
   background: rgba(255, 250, 238, 0.48);
@@ -857,7 +873,6 @@
 .categoryBookmarks button:focus-visible,
 .pageActions button:focus-visible,
 .planetActions button:focus-visible,
-.eventIntro button:focus-visible,
 .openEvent:focus-visible {
   outline: 2px solid rgb(var(--tone));
   outline-offset: 2px;
@@ -869,32 +884,6 @@
   flex: 1;
   flex-direction: column;
   padding-top: 14px;
-}
-
-.eventIntro {
-  position: relative;
-  padding-right: 30px;
-}
-
-.eventIntro h3 {
-  margin: 5px 0 0;
-  font: 700 clamp(17px, 1.58vw, 26px)/1.38 var(--font-serif-kr);
-  word-break: keep-all;
-}
-
-.eventIntro p {
-  margin: 6px 0 0;
-  font: clamp(9px, 0.8vw, 13px) var(--font-sans);
-  color: #806a56;
-}
-
-.eventIntro button {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 25px;
-  height: 25px;
-  font-size: 15px;
 }
 
 .articleList {
@@ -967,6 +956,9 @@
  */
 .eventList {
   display: grid;
+  /* 남은 높이를 다 받아도 줄은 제 내용 높이로 위에서부터 쌓는다. 기본값(stretch)이면 사건이
+     적은 쪽에서 줄마다 빈 칸이 늘어났다. */
+  align-content: start;
   gap: 0;
   min-height: 0;
   flex: 1;
@@ -1009,18 +1001,17 @@
  * 자기 규칙(0,1,0)을 이겨, 아이콘에 사건 줄의 아래 테두리와 26px 오른쪽 패딩이 얹혔다.
  */
 .eventList > li > button {
-  position: relative;
-  /* 제목과 기사 수를 한 줄에 나란히 둔다. 전에는 기사 수가 제목 위에 제 줄을 차지해 행마다
-     12px 을 더 먹었다. baseline 정렬이라 제목이 두 줄로 넘어가도 수는 첫 줄에 남는다.
-     오른쪽 패딩은 절대 배치된 펼침 표시의 자리다. */
+  /* 왼쪽 열에 번호, 오른쪽 열에 제목과 그 아래 정보 줄. 기사 수가 제목과 한 줄을 나누면 제목
+     폭이 애매하게 줄어 긴 제목이 세 줄로 꺾였다. 번호를 제 줄에 두면 네 사건이 한 쪽에 다
+     들어가지 않아 열로 뺀다. */
   display: grid;
-  grid-template-columns: 1fr max-content;
+  grid-template-columns: max-content minmax(0, 1fr);
   align-items: baseline;
+  column-gap: clamp(8px, 0.75vw, 12px);
+  row-gap: clamp(2px, 0.25vw, 4px);
   width: 100%;
-  column-gap: 10px;
-  padding: clamp(6px, 0.55vw, 9px) 26px clamp(6px, 0.55vw, 9px) 4px;
+  padding: clamp(8px, 0.72vw, 11px) 4px;
   border: 0;
-  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
   background: transparent;
   color: #372f27;
   text-align: left;
@@ -1030,12 +1021,20 @@
     transform 140ms ease;
 }
 
-/* 예전의 '›' 꼬리표는 떼어냈다. 이 행은 다른 화면으로 넘어가는 링크가 아니라 제자리에서
-   펼쳐지는 토글이고, 방향을 가리키는 표시는 행 안의 ▸/▾ 가 맡는다. */
-
 .eventList > li > button:hover {
   color: #193248;
   transform: translateX(2px);
+}
+
+/* 사건 사이의 괘선은 줄(li) 이 긋는다 — 펼친 카드까지 한 사건 안에 묶이고, 그 아래에서
+   다음 사건과 갈린다. */
+.eventList > li {
+  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
+}
+
+/* 펼친 사건은 제목 줄도 조금 짙게 — 화살표와 카드에 더해 세 번째 신호다. */
+.eventList > li > button[aria-expanded='true'] {
+  color: #1f1a15;
 }
 
 .eventList > li > button:focus-visible {
@@ -1043,8 +1042,25 @@
   outline-offset: 2px;
 }
 
-/* 사건 줄의 기사 수. 같은 이유로 좁힌다 — 펼친 안의 날짜(.articleWhen)와
-   출처(.articleSource)도 <small> 이라 이 규칙에 함께 걸려 있었다. */
+.eventOrder {
+  grid-row: span 2;
+  font: 600 clamp(8px, 0.62vw, 10px) var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: #a08a73;
+}
+
+/* 제목 아래 딸린 줄. 기사 수는 왼쪽, 펼침 표시는 오른쪽 끝. */
+.eventMeta {
+  grid-column: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* 사건 줄의 기사 수. `> li > button` 으로 좁힌다 — 펼친 안의 날짜(.articleWhen)와
+   출처(.articleSource)도 <small> 이다. */
 .eventList > li > button small {
   font: clamp(8px, 0.66vw, 11px) var(--font-sans);
   font-variant-numeric: tabular-nums;
@@ -1052,11 +1068,9 @@
   white-space: nowrap;
 }
 
-/* 줄간을 1.4 에서 1.28 로 조인다. 한 줄짜리 제목이 대부분이라 줄간은 읽기보다 행 높이에
-   더 기여했고, 두 줄이 되는 긴 제목에서도 1.28 이면 붙어 보이지 않는다. */
 .eventList > li > button strong {
   min-width: 0;
-  font: 700 clamp(12px, 1.03vw, 16px)/1.28 var(--font-serif-kr);
+  font: 700 clamp(12px, 1.03vw, 16px)/1.36 var(--font-serif-kr);
   word-break: keep-all;
 }
 
@@ -1489,13 +1503,7 @@
     box-shadow: none;
   }
 
-  .recordHeader span,
-  .eventIntro > span {
-    font-size: 9px;
-  }
-
-  .recordHeader h2,
-  .eventIntro h3 {
+  .recordHeader h2 {
     font-size: 22px;
   }
 
@@ -1521,24 +1529,46 @@
  * 줄을 차지하지 않게 되면서 행 높이가 16px 줄어, 사건끼리 붙어 목록으로 읽힌다.
  */
 .eventChevron {
-  position: absolute;
-  top: 50%;
-  right: 5px;
-  font-size: clamp(12px, 1vw, 16px);
+  display: inline-block;
+  font-size: clamp(11px, 0.9vw, 14px);
   line-height: 1;
   color: #8a7862;
-  transform: translateY(-50%);
+  transition: transform 180ms ease;
 }
 
-/* 펼쳐진 내용. 종이 위에 살짝 눌러 넣은 자리처럼, 왼쪽 괘선 하나로만 구분한다 —
-   카드로 띄우면 목록 안에 또 다른 목록이 얹힌 것처럼 읽힌다. */
+/* 같은 글자를 뒤집는다 — 두 글자를 바꿔 끼우면 열고 닫는 것이 한 동작으로 보이지 않는다. */
+button[aria-expanded='true'] .eventChevron {
+  color: #4a3a2c;
+  transform: rotate(180deg);
+}
+
+/*
+ * 펼쳐진 내용 — 종이 위에 붙인 얇은 기록 카드. 펼친 상태가 한눈에 보이고 발언과 기사가 한
+ * 덩어리로 읽히게 경계를 둔다. 다만 UI 부품처럼 튀지 않도록 색은 종이보다 한 톤 짙은
+ * 크림, 테두리는 연한 회갈색 1px 에 그친다. 분야 색은 쓰지 않는다 — 분홍 세로선을 두었을
+ * 때 종이 위에서 혼자 떴다.
+ */
 .statementBox {
   display: grid;
-  gap: clamp(10px, 1vw, 15px);
-  padding: clamp(10px, 1vw, 14px) 4px clamp(13px, 1.2vw, 18px) clamp(10px, 1vw, 14px);
-  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
-  border-left: 2px solid rgba(var(--tone), 0.45);
-  background: rgba(255, 252, 244, 0.34);
+  gap: clamp(12px, 1.1vw, 17px);
+  margin: 2px 0 clamp(12px, 1.1vw, 16px);
+  padding: clamp(14px, 1.25vw, 20px) clamp(14px, 1.25vw, 20px) clamp(14px, 1.3vw, 20px);
+  border: 1px solid rgba(120, 96, 70, 0.2);
+  border-radius: 8px;
+  background: rgba(232, 218, 190, 0.32);
+}
+
+/* 카드 안의 두 절(관련 발언 · 내가 읽은 기사)은 성격이 달라 가는 선으로 가른다. 선 위아래
+   간격은 카드의 gap 과 같게 두어 선이 가운데에 선다. */
+.statementBox > section + section {
+  padding-top: clamp(12px, 1.1vw, 17px);
+  border-top: 1px solid rgba(69, 57, 45, 0.16);
+}
+
+/* 더 보기는 인용 목록 아래 오른쪽 끝에 — 왼쪽에 두면 인용의 첫머리처럼 읽혔다. */
+.statementBox .statementMore {
+  display: block;
+  margin-left: auto;
 }
 
 /* 자식이 라벨 하나뿐이라 그냥 제목이다. 전에는 flex + space-between 으로 오른쪽 끝에 수를
@@ -1589,7 +1619,7 @@
 }
 
 /* 여는 따옴표만 세운다. 닫는 쪽은 문장 길이에 따라 어디에 놓든 어색해진다.
-   분야 색은 바로 왼쪽 .statementBox 테두리가 이미 쓰고 있어 중성 잉크로 둔다. */
+   색은 중성 잉크 — 종이 위 활자만으로 인용임을 드러낸다. */
 .statementList li::before {
   content: '\201C';
   position: absolute;
