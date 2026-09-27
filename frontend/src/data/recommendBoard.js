@@ -1,5 +1,5 @@
 /**
- * 나를 위한 추천 — 빈 코르크 보드 위에 에셋 카드를 거는 자리표와 로그인 전 표본.
+ * 나를 위한 추천 — 빈 코르크 보드 위에 에셋 카드를 거는 자리표.
  *
  * 배경에는 빈 보드만 있다. 제목 띠, 추천 종이, 압정은 각각 투명 에셋이며 아래 좌표에
  * 독립적으로 놓인다. 이 구조 덕분에 종이 전체가 버튼이 되고, 추천 수가 줄면 빈 종이가
@@ -9,9 +9,6 @@
  * 자리가 남거나 모자라는 일은 정상 범위에서 생기지 않는다. 적게 오면 사용하지 않는 슬롯에는
  * 아무 에셋도 그리지 않는다.
  */
-
-import { events } from './events'
-import { recommend } from './recommend'
 
 /**
  * 제목 띠, 추천 종이, 압정. 압정은 tone 마다 실제로 그려진 색이 따로 있다 — 예전에는 붉은
@@ -112,7 +109,6 @@ export const boardCopy = {
   signedOut: '로그인하면 나만의 추천이 걸려요',
   signedOutHint: '읽은 기사와 관심 분야로 하루 두 번 골라 드립니다.',
   failed: '추천을 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.',
-  sampleNote: '로그인 전이라 예시 카드를 보여드려요',
   reasonLabel: '추천 이유',
   open: (label) => `${label} — 요약과 기사 보기`,
   close: '닫기',
@@ -122,60 +118,4 @@ export const boardCopy = {
   articlesEmpty: '아직 연결된 기사가 없어요.',
   origin: '원문 보기',
   detailFailed: '상세를 불러오지 못했어요.',
-}
-
-/* ---- 표본 -------------------------------------------------------------------- */
-
-const EVENT_TOPIC = {
-  'chip-export': 'IT_SCIENCE',
-  'bok-rate': 'ECONOMY',
-  'hbm4-race': 'IT_SCIENCE',
-  'nk-defence': 'POLITICS',
-  'won-rate': 'ECONOMY',
-  'house-debt': 'ECONOMY',
-  'semi-equip': 'INTERNATIONAL',
-  'ev-battery': 'IT_SCIENCE',
-  'ai-rule': 'IT_SCIENCE',
-  shipbuilding: 'ECONOMY',
-}
-
-/**
- * RecommendationBoardResponse 모양의 표본. 비로그인일 때 판을 비워두지
- * 않기 위한 것이고, 화면은 표본임을 밝힌다. 제목·요약은 data/events.js 의 것을 그대로 써서
- * 카드 문구가 추천 상세와 다른 말을 하지 않게 한다.
- */
-export const sampleBoard = {
-  cycle: 'AM',
-  generatedAt: '2026-09-17T05:30:00+09:00',
-  availableAt: '2026-09-17T06:00:00+09:00',
-  items: recommend.cards.map((card, index) => ({
-    userRecommendationId: 501 + index,
-    eventId: card.eventId,
-    label: events[card.eventId]?.title ?? '새로운 추천 Event',
-    topicCode: EVENT_TOPIC[card.eventId] ?? 'SOCIETY',
-    score: Number((0.95 - index * 0.04).toFixed(6)),
-    rank: index + 1,
-    recommendationType: 'INTEREST_BASED',
-    reason: card.reason,
-  })),
-}
-
-/** RecommendationDetailResponse 모양의 표본. `originalUrl` 은 표본에 없으므로 null — 링크가 뜨지 않는다. */
-export const sampleDetail = (item) => {
-  const event = events[item.eventId]
-  return {
-    userRecommendationId: item.userRecommendationId,
-    eventId: item.eventId,
-    label: item.label,
-    topicCode: item.topicCode,
-    contextSummary: event?.summary ?? null,
-    articles: (event?.articles ?? []).map((article, index) => ({
-      articleId: index + 1,
-      title: article.headline,
-      organizationName: article.source,
-      publishedAt: article.at,
-      topicCode: item.topicCode,
-      originalUrl: null,
-    })),
-  }
 }

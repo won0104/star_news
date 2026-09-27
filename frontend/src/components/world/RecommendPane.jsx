@@ -8,8 +8,6 @@ import {
   SLOTS,
   boardCopy,
   corkPlacement,
-  sampleBoard,
-  sampleDetail,
 } from '../../data/recommendBoard'
 import { topicName } from '../../data/topics'
 import { useResizableCard } from '../../hooks/useResizableCard'
@@ -33,10 +31,9 @@ import styles from './RecommendPane.module.css'
  * 보드 위로 올라온다 — 다른 화면으로 가지 않는다. 열 장을 훑는 게 이 화면의 일이라,
  * 하나를 보고 돌아올 때마다 판이 다시 그려지면 안 된다.
  *
- * 로그인이 필요하다. 비로그인(401)일 때만 표본 카드를 걸고 표본임을 밝힌다.
+ * 로그인이 필요하다. 비로그인(401)이면 카드 없이 로그인 안내만 띄운다.
  * 로그인 후 추천 목록이 비어 있으면 정해진 업데이트 시각만 안내한다.
  */
-const SAMPLE_WHEN_EMPTY = true
 const RECOMMENDATION_COLUMN_COUNT = 5
 const SHEET_ANCHOR_GAP = 14
 /*
@@ -83,9 +80,7 @@ export function RecommendPane({ settled = true }) {
     return () => controller.abort()
   }, [])
 
-  const sample = SAMPLE_WHEN_EMPTY && !account && state === 'signedOut'
-  const source = sample ? sampleBoard : board
-  const items = source?.items ?? []
+  const items = board?.items ?? []
   const openIndex = items.findIndex((item) => item.userRecommendationId === openId)
   const open = openIndex >= 0 ? items[openIndex] : null
   // 다섯 열 중 오른쪽 두 열만 상세 종이를 왼쪽에 띄운다. 가운데 열은 사용자가
@@ -99,14 +94,14 @@ export function RecommendPane({ settled = true }) {
    * 아니므로 보내지 않고, 이미 눌러 본 Event 를 다시 눌렀을 때는 서버가 클릭 수를 올린다.
    *
    * 키는 `item.eventId` 다 — 스펙이 말하는 Neo4j Event 의 nodeId 이고, 상세 조회에 쓰는
-   * userRecommendationId 가 아니다. 표본 카드의 키는 Neo4j 에 없어 404 로만 돌아오고,
-   * 비로그인은 401 이므로 둘 다 부르지 않는다. 실패해도 화면이 할 일은 없어 조용히 삼킨다.
+   * userRecommendationId 가 아니다. 비로그인은 401 이므로 부르지 않는다. 실패해도 화면이
+   * 할 일은 없어 조용히 삼킨다.
    */
   const handleCardToggle = (item) => {
     const isOpen = openId === item.userRecommendationId
     setOpenId(isOpen ? null : item.userRecommendationId)
     if (isOpen) return
-    if (!sample && account && item.eventId) {
+    if (account && item.eventId) {
       recordNodeClick('EVENT', item.eventId).catch(() => {})
     }
   }
@@ -115,9 +110,8 @@ export function RecommendPane({ settled = true }) {
     setOpenId(null)
   }
 
-  // 인증된 사용자의 요청 실패를 표본으로 가리지 않는다.
   const notice =
-    !sample && state !== 'ready'
+    state !== 'ready'
       ? {
           loading: boardCopy.loading,
           signedOut: account ? boardCopy.failed : boardCopy.signedOut,
@@ -202,13 +196,10 @@ export function RecommendPane({ settled = true }) {
         </div>
       )}
 
-      {sample && <p className={styles.sampleNote}>{boardCopy.sampleNote}</p>}
-
       {open && (
         <DetailSheet
           key={open.userRecommendationId}
           item={open}
-          sample={sample}
           side={detailSide}
           anchorIndex={openIndex}
           onClose={handleSheetClose}
@@ -222,21 +213,20 @@ export function RecommendPane({ settled = true }) {
  * 종이 한 장 위의 요약과 기사.
  *
  * userRecommendationId 로 키가 걸려 있어 다른 카드를 열면 새로 마운트된다 — 늦게 도착한
- * 이전 카드의 응답이 이 카드 위에 앉는 일이 없다. 표본 모드에서는 요청을 보내지 않는다.
+ * 이전 카드의 응답이 이 카드 위에 앉는 일이 없다.
  *
  * `contextSummary` 가 null 인 것은 정상이다. 공개 시각까지 요약이 안 만들어지는 회차가
  * 있어서, 그때는 "준비 중"이라고 말하고 기사만 보여준다.
  */
-function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
-  const [detail, setDetail] = useState(sample ? sampleDetail(item) : null)
-  const [state, setState] = useState(sample ? 'ready' : 'loading')
+function DetailSheet({ item, side, anchorIndex, onClose }) {
+  const [detail, setDetail] = useState(null)
+  const [state, setState] = useState('loading')
   const { cardRef, cardStyle, dragging, resizing, positioned, handleProps, resizeHandleProps } =
     useResizableCard({ minWidth: 260, minHeight: 240 })
   const { peekStyle, peeking, peekHandleProps } = useBottomSheetPeek(cardRef)
   const anchorStyle = useDetailSheetAnchor(cardRef, anchorIndex, side)
 
   useEffect(() => {
-    if (sample) return undefined
     const controller = new AbortController()
     fetchRecommendationDetail(item.userRecommendationId, { signal: controller.signal })
       .then((payload) => {
@@ -248,7 +238,7 @@ function DetailSheet({ item, sample, side, anchorIndex, onClose }) {
         setState('failed')
       })
     return () => controller.abort()
-  }, [item.userRecommendationId, sample])
+  }, [item.userRecommendationId])
 
   useEffect(() => {
     const onKey = (event) => {

@@ -9,7 +9,7 @@
  * 들어가므로 종이 전체가 클릭 영역이다. 카드가 없는 슬롯에는 아무것도 남지 않는다.
  *
  * 글자 크기는 cqw — .photoBox(사진 너비)의 백분율. 사진이 커지고 작아져도 글자가 종이 안에
- * 같은 비율로 남는다. 종이 밖의 것(요약 종이·상태 문구·표본 표시)은 .stage(뷰포트)를 기준으로
+ * 같은 비율로 남는다. 종이 밖의 것(요약 종이·상태 문구)은 .stage(뷰포트)를 기준으로
  * 잡아 화면 밖으로 밀리지 않게 한다.
  *
  * 색은 사진의 온기를 따른다: 잉크 #3b3128, 흐린 잉크 #7a6a5a, 종이 #fbf6ea.
@@ -344,7 +344,7 @@
   pointer-events: none;
 }
 
-/* ---- 상태 문구 · 표본 표시 (뷰포트 기준) ------------------------------------- */
+/* ---- 상태 문구 (뷰포트 기준) ------------------------------------------------ */
 
 /* 보드 한가운데. 종이 한 장 크기의 종이. */
 .notice {
@@ -372,19 +372,6 @@
 .noticeHint {
   font: 400 clamp(11px, 0.75cqw, 14px)/1.5 var(--font-sans) !important;
   color: #8a6f5c !important;
-}
-
-.sampleNote {
-  position: absolute;
-  z-index: 4;
-  right: 20px;
-  bottom: 18px;
-  margin: 0;
-  padding: 5px 11px;
-  border-radius: 999px;
-  background: rgb(59 49 40 / 0.72);
-  font: 600 11px var(--font-sans);
-  color: #fbf6ea;
 }
 
 /* ---- 요약 · 기사 종이 (뷰포트 기준) ------------------------------------------- */
@@ -705,12 +692,6 @@
     margin: 12px 0;
     padding: 20px;
     transform: none;
-  }
-
-  .sampleNote {
-    position: static;
-    display: inline-block;
-    margin-top: 12px;
   }
 }
 
