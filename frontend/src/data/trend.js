@@ -399,12 +399,11 @@ export const constellationStart = 'increase'
  * lines are not": the centre's links all leave sideways and downward, so its text goes
  * above; the two entity slots have their link leaving inward, so their text goes outward.
  *
- * `hideNarrow` drops a slot on a narrow field, and the two entity slots carry it. Six
- * nodes with sentences under them do not fit in 375px of width: measured, every
- * arrangement that kept all six put the centre's downward fan through a related event's
- * label, because the two are on nearly the same ray whatever the spacing. What the narrow
- * field keeps is what can be walked — the centre and the two events beside it — plus the
- * statement. The entities are the descriptors, so they are the ones to lose.
+ * `hideNarrow` drops the expanded desktop slots on a narrow field. Nine labeled nodes do
+ * not fit in 375px of width: measured, keeping them all makes the centre's downward fan
+ * cross neighboring labels. The narrow field keeps what can be walked — the centre and
+ * two Events beside it — plus the Statement. The complete response remains available in
+ * the candidate panel.
  */
 export const constellationSlots = [
   { role: 'centre', visual: 'centre', at: [43.68, 55.89], atNarrow: [50, 28] },
@@ -413,6 +412,9 @@ export const constellationSlots = [
   { role: 'entity', visual: 'entityLeft', at: [22.4, 61.56], hideNarrow: true },
   { role: 'entity', visual: 'entityTop', at: [65.38, 20.28], hideNarrow: true },
   { role: 'statement', visual: 'statement', at: [50, 78.11], atNarrow: [50, 76] },
+  { role: 'related', visual: 'relatedBottom', at: [76, 74], hideNarrow: true },
+  { role: 'entity', visual: 'entityBottom', at: [27, 86], hideNarrow: true },
+  { role: 'entity', visual: 'entityRight', at: [87, 57], hideNarrow: true },
 ]
 
 /** Decorative-star coordinates for each event composition. Keeping these near the
