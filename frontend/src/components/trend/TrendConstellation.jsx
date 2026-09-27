@@ -10,7 +10,8 @@ import {
   trendFigmaAssets,
 } from '../../data/trend'
 import { fetchNodeArticles } from '../../api/trend'
-import { edgeLabels, formatTrendGraphLabel, nodeTypeLabels } from '../../data/trendNeighbors'
+import { edgeLabels, nodeTypeLabels } from '../../data/graphLabels'
+import { formatTrendGraphLabel } from '../../data/trendNeighbors'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { TrendPanel } from './TrendPanel'
 import styles from './TrendConstellation.module.css'
