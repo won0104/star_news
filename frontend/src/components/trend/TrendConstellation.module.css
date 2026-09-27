@@ -72,12 +72,48 @@
   backdrop-filter: blur(10px);
 }
 
-.trailStart {
-  flex: none;
-  margin: 0 5px;
-  font: 700 9px var(--font-sans);
-  letter-spacing: 0.12em;
-  color: rgba(238, 207, 132, 0.84);
+/*
+ * 경로 양 끝의 화살표. 더 갈 곳이 있는 쪽에만 서서 "옆으로 더 있다"를 알린다. 경로 위에
+ * 겹쳐 뜨므로 그 아래 글자가 비치지 않게, 막대 배경색으로 바깥쪽을 덮는 그라디언트를 깐다.
+ */
+.trailEdge {
+  position: absolute;
+  z-index: 1;
+  top: 1px;
+  bottom: 1px;
+  display: grid;
+  width: 34px;
+  padding: 0;
+  border: 0;
+  place-items: center;
+  font: 18px/1 var(--font-serif-kr);
+  color: rgba(238, 207, 132, 0.9);
+  cursor: pointer;
+}
+
+.trailEdgeStart {
+  left: 1px;
+  justify-items: start;
+  padding-left: 8px;
+  border-radius: 12px 0 0 12px;
+  background: linear-gradient(90deg, rgba(17, 18, 23, 0.96) 55%, rgba(17, 18, 23, 0));
+}
+
+.trailEdgeEnd {
+  right: 1px;
+  justify-items: end;
+  padding-right: 8px;
+  border-radius: 0 12px 12px 0;
+  background: linear-gradient(270deg, rgba(17, 18, 23, 0.96) 55%, rgba(17, 18, 23, 0));
+}
+
+.trailEdge:hover {
+  color: rgba(255, 236, 190, 1);
+}
+
+.trailEdge:focus-visible {
+  outline: 2px solid #e4c679;
+  outline-offset: -3px;
 }
 
 .trail ol {
@@ -90,22 +126,13 @@
   overscroll-behavior-inline: contain;
   scroll-snap-type: x proximity;
   touch-action: pan-x;
-  scrollbar-color: rgba(238, 207, 132, 0.46) rgba(255, 255, 255, 0.04);
   list-style: none;
-  scrollbar-width: thin;
+  /* 막대는 숨긴다. 옆으로 더 있다는 것은 양 끝의 화살표가 알리고, 휠·끌기로 움직인다. */
+  scrollbar-width: none;
 }
 
 .trail ol::-webkit-scrollbar {
-  height: 5px;
-}
-
-.trail ol::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.trail ol::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(238, 207, 132, 0.46);
+  display: none;
 }
 
 .trail li {
