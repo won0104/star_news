@@ -31,11 +31,15 @@ public interface UserKnowledgeNodeRepository
 
 	/**
 	 * 이미 있는 Row 의 node_click_count 를 1 늘리고 last_seen_at 을 갱신한다.
+	 *
+	 * <p>last_seen_at 은 뒤로 가지 않는다. 같은 Node 로 동시에 들어온 두 요청 중 now 가 더 이른 쪽이
+	 * 나중에 커밋되면 first_seen_at 보다 앞선 값이 들어가 ck_user_knowledge_nodes_time_order 에 걸린다.
 	 * 존재를 확인한 뒤에만 호출한다. (없는 행에 치면 갭 락이 걸린다)
 	 */
 	@Modifying
 	@Query("UPDATE UserKnowledgeNode u "
-			+ "SET u.nodeClickCount = u.nodeClickCount + 1, u.lastSeenAt = :now "
+			+ "SET u.nodeClickCount = u.nodeClickCount + 1, "
+			+ "    u.lastSeenAt = CASE WHEN :now > u.lastSeenAt THEN :now ELSE u.lastSeenAt END "
 			+ "WHERE u.id = :id")
 	int incrementClick(@Param("id") UserKnowledgeNodeId id, @Param("now") LocalDateTime now);
 
@@ -52,7 +56,8 @@ public interface UserKnowledgeNodeRepository
 			+ " read_article_count, node_click_count, first_seen_at, last_seen_at) "
 			+ "VALUES (:userId, :nodeType, :nodeId, :nodeLabel, :topicCode, 0, 1, :now, :now) "
 			+ "ON DUPLICATE KEY UPDATE "
-			+ " node_click_count = node_click_count + 1, last_seen_at = :now",
+			+ " node_click_count = node_click_count + 1, "
+			+ " last_seen_at = GREATEST(last_seen_at, :now)",
 			nativeQuery = true)
 	int upsertClick(@Param("userId") Long userId, @Param("nodeType") String nodeType,
 			@Param("nodeId") String nodeId, @Param("nodeLabel") String nodeLabel,
@@ -80,7 +85,8 @@ public interface UserKnowledgeNodeRepository
 			+ " :now, :now) "
 			+ "ON DUPLICATE KEY UPDATE "
 			+ " read_article_count = read_article_count + :readIncrement, "
-			+ " primary_read_count = primary_read_count + :primaryIncrement, last_seen_at = :now",
+			+ " primary_read_count = primary_read_count + :primaryIncrement, "
+			+ " last_seen_at = GREATEST(last_seen_at, :now)",
 			nativeQuery = true)
 	int upsertRead(@Param("userId") Long userId, @Param("nodeType") String nodeType,
 			@Param("nodeId") String nodeId, @Param("nodeLabel") String nodeLabel,

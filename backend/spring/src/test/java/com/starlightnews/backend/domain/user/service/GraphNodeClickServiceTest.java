@@ -7,6 +7,7 @@ import com.starlightnews.backend.domain.user.cache.ExploredNodeCountCache;
 import com.starlightnews.backend.domain.user.domain.UserKnowledgeNodeId;
 import com.starlightnews.backend.domain.user.repository.NodeSnapshot;
 import com.starlightnews.backend.domain.user.repository.NodeSnapshotRepository;
+import com.starlightnews.backend.domain.user.domain.UserKnowledgeNode;
 import com.starlightnews.backend.domain.user.repository.UserKnowledgeNodeRepository;
 import com.starlightnews.backend.global.enums.NodeType;
 import com.starlightnews.backend.global.error.BusinessException;
@@ -62,6 +63,22 @@ class GraphNodeClickServiceTest {
 				.upsertClick(any(), any(), any(), any(), any(), any());
 		verifyNoInteractions(nodeSnapshotRepository);
 		verify(exploredNodeCountCache).evict(USER_ID);
+	}
+
+	@Test
+	void 사건_제목이_컬럼_길이를_넘으면_잘라서_저장한다() {
+		// 사건 제목이 개체명이 아니라 기사 본문 한 문장으로 들어와 400자를 넘는 경우가 있다.
+		// 그대로 넣으면 Data truncation 으로 그 Node 는 영영 클릭할 수 없다.
+		String tooLong = "가".repeat(UserKnowledgeNode.NODE_LABEL_MAX_LENGTH + 100);
+		given(userKnowledgeNodeRepository.existsById(any())).willReturn(false);
+		given(nodeSnapshotRepository.findSnapshot(NodeType.EVENT, NODE_KEY))
+				.willReturn(Optional.of(new NodeSnapshot(tooLong, "SOCIETY")));
+
+		graphNodeClickService.recordClick(USER_ID, NodeType.EVENT, NODE_KEY);
+
+		verify(userKnowledgeNodeRepository).upsertClick(eq(USER_ID), eq("EVENT"), eq(NODE_KEY),
+				eq("가".repeat(UserKnowledgeNode.NODE_LABEL_MAX_LENGTH)), eq("SOCIETY"),
+				any(LocalDateTime.class));
 	}
 
 	@Test
