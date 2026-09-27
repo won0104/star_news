@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import ConstellationCanvas from './ConstellationCanvas';
+import { edgeLabels } from '../../data/graphLabels';
 import styles from './HistoryPane.module.css';
 
 /**
@@ -68,17 +69,6 @@ const EVENT_SIZE_STEPS = [
 const NODE_STYLE = {
   TOPIC_CLUSTER: { label: '분야', sizeMultiplier: 1 },
   EVENT: { label: '사건', sizeMultiplier: 1 },
-};
-
-const RELATION_LABEL = {
-  BELONGS_TO_TOPIC: '분야에 속함',
-  CAUSES: '원인·결과',
-  SUBEVENT_OF: '상위 사건',
-  ACTOR: '주체',
-  TARGET: '대상',
-  CONTAINS_STATEMENT: '발언 포함',
-  PART_OF: '상위 사건',
-  OCCURRED_AT: '발생 시점',
 };
 
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
@@ -1033,7 +1023,7 @@ export default function HistoryPlanet({
               <ul className={styles.nodeRelations} aria-label="직접 연결된 노드">
                 {selectedRelations.slice(0, 3).map((relation) => (
                   <li key={`${relation.direction}:${relation.relationship}:${relation.node.id}`}>
-                    <b>{relation.direction} {RELATION_LABEL[relation.relationship] ?? relation.relationship}</b>
+                    <b>{relation.direction} {edgeLabels[relation.relationship] ?? relation.relationship}</b>
                     {relation.node.title}
                   </li>
                 ))}

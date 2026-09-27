@@ -10,7 +10,8 @@ import {
   trendFigmaAssets,
 } from '../../data/trend'
 import { fetchNodeArticles } from '../../api/trend'
-import { edgeLabels, formatTrendGraphLabel, nodeTypeLabels } from '../../data/trendNeighbors'
+import { edgeLabels, nodeTypeLabels } from '../../data/graphLabels'
+import { formatTrendGraphLabel } from '../../data/trendNeighbors'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { TrendPanel } from './TrendPanel'
 import styles from './TrendConstellation.module.css'
@@ -201,7 +202,6 @@ export function TrendConstellation({
   journey,
   articlePanelOpen,
   onArticlePanelOpenChange,
-  onBack,
   onWalk,
   articleSamples,
   overlayRoot,
@@ -214,6 +214,8 @@ export function TrendConstellation({
   const [full, setFull] = useState(false)
   const articlePageRequestRef = useRef(null)
   const trailRef = useRef(null)
+  // 경로가 칸을 넘칠 때 어느 쪽으로 더 갈 수 있는지. 그쪽 끝에만 화살표를 세운다.
+  const [trailEdges, setTrailEdges] = useState({ start: false, end: false })
   const [articles, setArticles] = useState(null)
   const [articlesState, setArticlesState] = useState('idle')
   const [articlesKey, setArticlesKey] = useState(null)
@@ -343,11 +345,32 @@ export function TrendConstellation({
     if (!list) return
 
     const onWheel = (event) => scrollTrailHorizontally(event)
+    // 1px 여유는 소수점 폭에서 끝에 닿아도 scrollLeft 가 끝값에 조금 못 미치는 경우를 받는다.
+    const updateEdges = () =>
+      setTrailEdges({
+        start: list.scrollLeft > 1,
+        end: list.scrollLeft + list.clientWidth < list.scrollWidth - 1,
+      })
+    const observer = new ResizeObserver(updateEdges)
     list.addEventListener('wheel', onWheel, { passive: false })
+    list.addEventListener('scroll', updateEdges, { passive: true })
+    observer.observe(list)
     list.scrollTo({ left: list.scrollWidth })
+    updateEdges()
 
-    return () => list.removeEventListener('wheel', onWheel)
+    return () => {
+      list.removeEventListener('wheel', onWheel)
+      list.removeEventListener('scroll', updateEdges)
+      observer.disconnect()
+    }
   }, [full, trail])
+
+  /** 화살표는 한 칸씩이 아니라 그 방향 끝까지 보낸다 — 경로의 처음과 지금 자리로. */
+  const scrollTrailTo = (edge) => {
+    const list = trailRef.current
+    if (!list) return
+    list.scrollTo({ left: edge === 'start' ? 0 : list.scrollWidth, behavior: 'smooth' })
+  }
 
   useEffect(() => {
     const onFullscreenChange = () => {
@@ -400,14 +423,8 @@ export function TrendConstellation({
         '--journey-arrive-y': `${((journey?.y ?? 50) - 50) * 0.1}%`,
       }}
     >
+      {/* 순위로 돌아가는 단추는 두지 않는다 — Esc 와 레일의 "오늘의 트렌드"가 그 길이다. */}
       <div className={styles.fieldActions}>
-        {onBack && !full && (
-          <button type="button" className={styles.fieldAction} onClick={onBack}>
-            <span aria-hidden>←</span>
-            오늘의 트렌드
-          </button>
-        )}
-
         <button
           type="button"
           className={styles.fieldAction}
@@ -427,14 +444,34 @@ export function TrendConstellation({
             onClick={toggleCandidatePanel}
           >
             <span aria-hidden>✦</span>
-            후보 {candidates.length}
+            더보기 {candidates.length}
           </button>
         )}
       </div>
 
       {trail?.length > 0 && (
         <nav className={styles.trail} aria-label="그래프 탐색 경로">
-          <span className={styles.trailStart}>시작</span>
+          {/* 넘친 쪽에만 선다. 경로 위에 겹쳐 띄워, 나타나고 사라져도 경로의 폭이 바뀌지 않는다. */}
+          {trailEdges.start && (
+            <button
+              type="button"
+              className={`${styles.trailEdge} ${styles.trailEdgeStart}`}
+              aria-label="경로 처음으로"
+              onClick={() => scrollTrailTo('start')}
+            >
+              ‹
+            </button>
+          )}
+          {trailEdges.end && (
+            <button
+              type="button"
+              className={`${styles.trailEdge} ${styles.trailEdgeEnd}`}
+              aria-label="경로 끝으로"
+              onClick={() => scrollTrailTo('end')}
+            >
+              ›
+            </button>
+          )}
           <ol ref={trailRef}>
             {trail.map((item, index) => {
               const current = index === trail.length - 1

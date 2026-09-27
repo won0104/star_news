@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchArticleDetail, generateArticleSummary } from '../../api/articles'
 import { fetchArticleBookmarks, fetchNodeBookmarks, setArticleBookmark } from '../../api/bookmarks'
 import { fetchNodeArticles, fetchNodeDetail } from '../../api/trend'
-import { nodeTypeLabels, subtypeLabels } from '../../data/trendNeighbors'
+import { nodeTypeLabels, subtypeLabels } from '../../data/graphLabels'
 import { savedCopy } from '../../data/world'
 import styles from './SavedPane.module.css'
 
