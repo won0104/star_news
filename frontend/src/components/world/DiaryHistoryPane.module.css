@@ -1548,6 +1548,19 @@ button[aria-expanded='true'] .eventChevron {
   background: rgba(232, 218, 190, 0.32);
 }
 
+/* 카드 안의 두 절(관련 발언 · 내가 읽은 기사)은 성격이 달라 가는 선으로 가른다. 선 위아래
+   간격은 카드의 gap 과 같게 두어 선이 가운데에 선다. */
+.statementBox > section + section {
+  padding-top: clamp(12px, 1.1vw, 17px);
+  border-top: 1px solid rgba(69, 57, 45, 0.16);
+}
+
+/* 더 보기는 인용 목록 아래 오른쪽 끝에 — 왼쪽에 두면 인용의 첫머리처럼 읽혔다. */
+.statementBox .statementMore {
+  display: block;
+  margin-left: auto;
+}
+
 /* 자식이 라벨 하나뿐이라 그냥 제목이다. 전에는 flex + space-between 으로 오른쪽 끝에 수를
    붙였는데, 라벨에서 258px 떨어져 홀로 떠서 무엇의 수인지 읽히지 않았다. */
 .statementBox h4 {
