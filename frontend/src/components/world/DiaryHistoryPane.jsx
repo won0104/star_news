@@ -718,7 +718,7 @@ export function DiaryHistoryPane() {
                         <span className={styles.eventMeta}>
                           <small>관련 기사 {event.articleCount}개</small>
                           <span className={styles.eventChevron} aria-hidden>
-                            {open ? '⌃' : '⌄'}
+                            ⌄
                           </span>
                         </span>
                       </button>
@@ -820,7 +820,7 @@ function EventBody({
   return (
     <div className={className}>
       <section>
-        <h4>발언</h4>
+        <h4>관련 발언</h4>
         {event.statements.length > 0 ? (
           <>
             <ul className={styles.statementList}>

@@ -999,7 +999,6 @@
   width: 100%;
   padding: clamp(8px, 0.72vw, 11px) 4px;
   border: 0;
-  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
   background: transparent;
   color: #372f27;
   text-align: left;
@@ -1012,6 +1011,17 @@
 .eventList > li > button:hover {
   color: #193248;
   transform: translateX(2px);
+}
+
+/* 사건 사이의 괘선은 줄(li) 이 긋는다 — 펼친 카드까지 한 사건 안에 묶이고, 그 아래에서
+   다음 사건과 갈린다. */
+.eventList > li {
+  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
+}
+
+/* 펼친 사건은 제목 줄도 조금 짙게 — 화살표와 카드에 더해 세 번째 신호다. */
+.eventList > li > button[aria-expanded='true'] {
+  color: #1f1a15;
 }
 
 .eventList > li > button:focus-visible {
@@ -1506,19 +1516,33 @@
  * 줄을 차지하지 않게 되면서 행 높이가 16px 줄어, 사건끼리 붙어 목록으로 읽힌다.
  */
 .eventChevron {
+  display: inline-block;
   font-size: clamp(11px, 0.9vw, 14px);
   line-height: 1;
   color: #8a7862;
+  transition: transform 180ms ease;
 }
 
-/* 펼쳐진 내용. 상자도 색 괘선도 두르지 않는다 — 사건 제목 아래 가는 선(버튼의 아래 테두리)과
-   여백만으로 이어서, 제목과 속이 한 덩어리의 기록으로 읽히게 한다. 분야 색 세로선을 두었을
-   때는 종이 위에 웹 UI 한 조각이 얹힌 것처럼 떴다. */
+/* 같은 글자를 뒤집는다 — 두 글자를 바꿔 끼우면 열고 닫는 것이 한 동작으로 보이지 않는다. */
+button[aria-expanded='true'] .eventChevron {
+  color: #4a3a2c;
+  transform: rotate(180deg);
+}
+
+/*
+ * 펼쳐진 내용 — 종이 위에 붙인 얇은 기록 카드. 펼친 상태가 한눈에 보이고 발언과 기사가 한
+ * 덩어리로 읽히게 경계를 둔다. 다만 UI 부품처럼 튀지 않도록 색은 종이보다 한 톤 짙은
+ * 크림, 테두리는 연한 회갈색 1px 에 그친다. 분야 색은 쓰지 않는다 — 분홍 세로선을 두었을
+ * 때 종이 위에서 혼자 떴다.
+ */
 .statementBox {
   display: grid;
   gap: clamp(12px, 1.1vw, 17px);
-  padding: clamp(12px, 1.1vw, 16px) 4px clamp(14px, 1.3vw, 20px);
-  border-bottom: 1px solid rgba(69, 57, 45, 0.2);
+  margin: 2px 0 clamp(12px, 1.1vw, 16px);
+  padding: clamp(14px, 1.25vw, 20px) clamp(14px, 1.25vw, 20px) clamp(14px, 1.3vw, 20px);
+  border: 1px solid rgba(120, 96, 70, 0.2);
+  border-radius: 8px;
+  background: rgba(232, 218, 190, 0.32);
 }
 
 /* 자식이 라벨 하나뿐이라 그냥 제목이다. 전에는 flex + space-between 으로 오른쪽 끝에 수를
