@@ -21,15 +21,21 @@ PARTICIPANT_ROLES = ("ACTOR", "TARGET", "PLACE")
 
 
 class ExactSemanticBoundaryHead(nn.Module):
-    """기존 canonical boundary에 signed character residual 보정을 더한다."""
+    """좌표 residual과 N1 exact-boundary fitness를 서로 다른 출력으로 만든다."""
 
     def __init__(self, hidden: int = 256) -> None:
         super().__init__()
         self.delta = nn.Sequential(nn.LayerNorm(hidden + 2), nn.Linear(hidden + 2, hidden),
                                    nn.GELU(), nn.Linear(hidden, 2))
+        self.fitness = nn.Sequential(nn.LayerNorm(hidden), nn.Linear(hidden, hidden),
+                                     nn.GELU(), nn.Linear(hidden, 1))
 
     def forward(self, states: torch.Tensor, bridge_residuals: torch.Tensor) -> torch.Tensor:
         return bridge_residuals + self.delta(torch.cat((states, bridge_residuals), dim=-1))
+
+    def fitness_score(self, states: torch.Tensor) -> torch.Tensor:
+        """Score whether each exact candidate has the reviewed Gold boundary (N1)."""
+        return self.fitness(states).squeeze(-1)
 
 
 class ExactSemanticValidityHead(nn.Module):
@@ -62,6 +68,8 @@ class EntityExtractionHead(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.boundary = TriggerBoundaryHead(768, 256, 0.1)
+        # ENTITY type confidence와 독립된 exact mention existence decision.
+        self.existence = EntitySpanNativeHead(256, 128, 1, 0.1)
         self.typing = EntitySpanNativeHead(256, 128, len(ENTITY_TYPES), 0.1)
 
 

@@ -12,6 +12,7 @@ import torch
 from torch import nn
 
 from models.v3_pretraining.architecture import V3Core
+from models.v3_pretraining.pair_context import PAIR_CONTEXT_DIM
 
 
 class AssertorSourceHead(nn.Module):
@@ -59,11 +60,28 @@ class DirectedRelationHead(nn.Module):
                                      dim=-1)).squeeze(-1)
 
 
+class PairContextDirectedRelationHead(nn.Module):
+    """ABOUT/CAUSES 전용 2,057차원 PairContextV1 scorer."""
+
+    def __init__(self, hidden: int = 256) -> None:
+        super().__init__()
+        if hidden != 256:
+            raise ValueError("PairContextV1 is pinned to hidden size 256")
+        self.scorer = nn.Sequential(nn.LayerNorm(PAIR_CONTEXT_DIM),
+                                    nn.Linear(PAIR_CONTEXT_DIM, hidden), nn.GELU(),
+                                    nn.Linear(hidden, 1))
+
+    def forward(self, pair_context: torch.Tensor) -> torch.Tensor:
+        if pair_context.ndim != 2 or pair_context.shape[1] != PAIR_CONTEXT_DIM:
+            raise ValueError("ABOUT/CAUSES head requires PairContextV1")
+        return self.scorer(pair_context).squeeze(-1)
+
+
 def register_attribution_heads(core: V3Core) -> None:
     for name, factory in (("assertor_source", AssertorSourceHead),
                           ("assertor_entity", DirectedRelationHead),
-                          ("about", DirectedRelationHead),
-                          ("causes", DirectedRelationHead)):
+                          ("about", PairContextDirectedRelationHead),
+                          ("causes", PairContextDirectedRelationHead)):
         seed_offset = int(sha256(name.encode()).hexdigest()[:8], 16)
         with torch.random.fork_rng(devices=[]):
             torch.manual_seed(core.config.seed + seed_offset)

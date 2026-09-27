@@ -7,7 +7,7 @@ Layout은 한 요청에서만 소유한다. Gold가 없어도 같은 window를 �
 from __future__ import annotations
 
 from bisect import bisect_left, bisect_right
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from hashlib import sha256
 import math
 from typing import Any
@@ -16,6 +16,8 @@ from runtime.eventframe.preprocessing import split_sentence_spans
 
 
 LAYOUT_POLICY = "v3-source-window-sentence-and-bridge-v1"
+SENTENCE_SPLIT_CONTRACT = "runtime-eventframe-split-sentence-spans-v1"
+SOURCE_PREPROCESSING_CONTRACT = "v3-pinned-fast-tokenizer-source-offsets-v1"
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,6 +127,13 @@ class SourceLayout:
     bridge_token_ends: tuple[int, ...]
     bridge_windows_by_token: tuple[tuple[str, ...], ...]
     window_lookup: dict[str, SourceWindow]
+    sentence_windows_by_index: tuple[tuple[tuple[int, SourceWindow], ...], ...]
+    _runtime_source_tokens: dict[tuple[str, int], WindowToken] = field(
+        default_factory=dict, compare=False, repr=False)
+    _runtime_sentence_starts: tuple[int, ...] = field(default=(), compare=False, repr=False)
+    _runtime_sentence_max_ends: tuple[int, ...] = field(default=(), compare=False, repr=False)
+    _runtime_alignments: dict[tuple[int, int], SpanAlignment] = field(
+        default_factory=dict, compare=False, repr=False)
 
     def align(self, span: dict[str, Any]) -> SpanAlignment:
         start, end, text = int(span["start"]), int(span["end"]), str(span["text"])
@@ -158,6 +167,70 @@ class SourceLayout:
         if self.reconstruct(aligned) != (start, end, text):
             raise AssertionError("source span alignment lost exact character coordinates")
         return aligned
+
+    def align_runtime(self, start: int, end: int) -> SpanAlignment:
+        """Align an exact source coordinate through request-owned token indexes.
+
+        Window choice is the same source-only rule as ``align``. Retrieval
+        provenance never participates in the choice. The bounded cache retains
+        only recently reused coordinates and is cleared with the request.
+        """
+        if not 0 <= start < end <= len(self.article.content):
+            raise ValueError("Gold span does not round-trip to source content")
+        key = start, end
+        cached = self._runtime_alignments.get(key)
+        if cached is not None:
+            return cached
+        if not self.bridge_tokens:
+            raise ValueError("article has no source tokens")
+        if not self._runtime_source_tokens:
+            self._runtime_source_tokens.update(
+                ((window.window_id, token.source_index), token)
+                for window in self.windows for token in window.tokens)
+            sentence_ranges = sorted(self.sentence_spans)
+            max_end = -1
+            prefix_max_ends = []
+            for _first, last in sentence_ranges:
+                max_end = max(max_end, last)
+                prefix_max_ends.append(max_end)
+            object.__setattr__(self, "_runtime_sentence_starts",
+                               tuple(first for first, _last in sentence_ranges))
+            object.__setattr__(self, "_runtime_sentence_max_ends",
+                               tuple(prefix_max_ends))
+        start_token = self.bridge_tokens[min(
+            bisect_right(self.bridge_token_ends, start), len(self.bridge_tokens) - 1)]
+        end_token = self.bridge_tokens[max(
+            bisect_left(self.bridge_token_starts, end) - 1, 0)]
+        if start_token.source_index > end_token.source_index:
+            end_token = start_token
+        start_ids = self.bridge_windows_by_token[start_token.source_index]
+        end_ids = self.bridge_windows_by_token[end_token.source_index]
+        canonical = next((window_id for window_id in start_ids if window_id in end_ids), None)
+        start_window_id = canonical or start_ids[0]
+        end_window_id = canonical or end_ids[0]
+        first = self._runtime_source_tokens[start_window_id, start_token.source_index]
+        last = self._runtime_source_tokens[end_window_id, end_token.source_index]
+        sentence_index = bisect_right(self._runtime_sentence_starts, start) - 1
+        same_sentence = (sentence_index >= 0 and
+                         end <= self._runtime_sentence_max_ends[sentence_index])
+        aligned = SpanAlignment(
+            start, end, self.article.content[start:end],
+            BoundaryRef(start_window_id, first.position, start - first.start, start),
+            BoundaryRef(end_window_id, last.position, end - last.end, end),
+            canonical, not same_sentence, canonical is None,
+            start != start_token.start or end != end_token.end,
+        )
+        if len(self._runtime_alignments) >= 4096:
+            self._runtime_alignments.pop(next(iter(self._runtime_alignments)))
+        self._runtime_alignments[key] = aligned
+        return aligned
+
+    def clear_runtime_indexes(self) -> None:
+        """Release request-local alignment indexes after the final consumer."""
+        self._runtime_source_tokens.clear()
+        self._runtime_alignments.clear()
+        object.__setattr__(self, "_runtime_sentence_starts", ())
+        object.__setattr__(self, "_runtime_sentence_max_ends", ())
 
     def reconstruct(self, aligned: SpanAlignment) -> tuple[int, int, str]:
         start_token = next(t for t in self.window_lookup[aligned.start_ref.window_id].tokens if t.position == aligned.start_ref.token_position)
@@ -214,11 +287,17 @@ class LayoutBuilder:
         starts, ends = tuple(token.start for token in ordered), tuple(token.end for token in ordered)
         if starts != tuple(sorted(starts)) or ends != tuple(sorted(ends)):
             raise ValueError("tokenizer offsets are not monotonic")
+        sentence_windows: list[list[tuple[int, SourceWindow]]] = [
+            [] for _ in sentences]
+        for index, window in enumerate(windows):
+            if window.view == "sentence":
+                sentence_windows[window.sentence_index].append((index, window))
         return SourceLayout(article, self.tokenizer_sha256, tuple(windows),
                             tuple((s.start, s.end) for s in sentences),
                             ordered, starts, ends,
                             tuple(tuple(ids) for ids in by_token),
-                            {window.window_id: window for window in windows})
+                            {window.window_id: window for window in windows},
+                            tuple(tuple(rows) for rows in sentence_windows))
 
     def _tokens(self, text: str, offset: int) -> tuple[list[int], list[tuple[int, int]]]:
         encoded = self.tokenizer(text, add_special_tokens=False, truncation=False,

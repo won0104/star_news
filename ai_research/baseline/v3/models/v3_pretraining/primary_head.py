@@ -34,21 +34,27 @@ class PrimaryScorer(nn.Module):
 
     def event_embeddings(self, view: FinalClusterFeatureView) -> torch.Tensor:
         """final membership별 stable segmented attention과 unique role summary."""
-        if (view.member_states is None or view.member_cluster_indices is None
+        if (view.member_cluster_indices is None
                 or view.role_unique_means is None or view.role_unique_mask is None):
             raise ValueError("Primary needs final member and unique-role feature lease")
         count = len(view.cluster_ids)
         hidden = view.document_state.shape[-1]
-        if (view.member_states.shape[1:] != (hidden,)
-                or len(view.member_states) != len(view.member_ids)
-                or len(set(view.member_ids)) != len(view.member_ids)
+        if (len(set(view.member_ids)) != len(view.member_ids)
                 or len(view.member_cluster_indices) != len(view.member_ids)
                 or view.role_unique_means.shape != (count, 3, hidden)
                 or view.role_unique_mask.shape != (count, 3)):
             raise ValueError("Primary final cluster member/role shape mismatch")
         if count == 0:
+            if view.member_ids:
+                raise ValueError("Primary final cluster member/role shape mismatch")
             return view.document_state.new_empty((0, hidden))
-        adapted = self.member_adapter(view.member_states)
+        if view.member_event_features is None:
+            raise ValueError("Primary needs precomputed P5 Event features")
+        if (view.member_event_features.shape != (len(view.member_ids), hidden)
+                or view.member_event_features.device != view.document_state.device
+                or view.member_event_features.dtype != view.document_state.dtype):
+            raise ValueError("Primary precomputed Event feature shape mismatch")
+        adapted = self.member_adapter(view.member_event_features)
         document_gate = self.document_gate(view.document_state)
         logits = self.gate_scalar(torch.tanh(self.member_gate(adapted) + document_gate)).squeeze(-1)
         if (len(view.member_cluster_indices) and

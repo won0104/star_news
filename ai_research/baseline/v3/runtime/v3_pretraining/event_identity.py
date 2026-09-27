@@ -26,6 +26,8 @@ class MemberRoleFact:
     text: str
     entity_id: str | None
     endpoint_status: str
+    source_score: float | None = None
+    source_windows: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,9 +36,9 @@ class EventMember:
     start: int
     end: int
     text: str
-    trigger_start: int
-    trigger_end: int
-    trigger_text: str
+    trigger_start: int | None
+    trigger_end: int | None
+    trigger_text: str | None
     roles: tuple[MemberRoleFact, ...]
     time_ids: tuple[str, ...]
     aligned: bool = True
@@ -52,12 +54,23 @@ class LocalRoleFact:
     endpoint_status: str
     evidence_ids: tuple[str, ...]
     member_ids: tuple[str, ...]
+    source_provenance: tuple[tuple[str, float | None, tuple[tuple[str, str], ...]], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class LocalTimeFact:
     time_id: str
     member_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class EventMemberGrounding:
+    """Canonical display용 최소 member source view; feature/tensor는 포함하지 않는다."""
+
+    member_id: str
+    start: int
+    end: int
+    text: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,6 +88,7 @@ class LocalEventState:
     times: tuple[LocalTimeFact, ...]
     conflict_flags: tuple[str, ...]
     status: str
+    member_groundings: tuple[EventMemberGrounding, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,7 +122,12 @@ def close_event_identity(article: RawArticle, members: Sequence[EventMember], *,
     for row in members:
         if not 0 <= row.start < row.end <= len(article.content) or article.content[row.start:row.end] != row.text:
             raise ValueError("Event member lost exact semantic span")
-        if not 0 <= row.trigger_start < row.trigger_end <= len(article.content) or article.content[row.trigger_start:row.trigger_end] != row.trigger_text:
+        trigger = (row.trigger_start, row.trigger_end, row.trigger_text)
+        if any(value is None for value in trigger):
+            if any(value is not None for value in trigger) or source_mode == "GOLD_ORACLE":
+                raise ValueError("Event member has incomplete exact trigger")
+        elif not (0 <= row.trigger_start < row.trigger_end <= len(article.content) and
+                  article.content[row.trigger_start:row.trigger_end] == row.trigger_text):
             raise ValueError("Event member lost exact trigger")
         if len(set(row.time_ids)) != len(row.time_ids):
             raise ValueError("duplicate member Time attachment")
@@ -153,17 +172,24 @@ def close_event_identity(article: RawArticle, members: Sequence[EventMember], *,
         representative = ordered[0]
         member_ids = tuple(sorted(group))
         local_id = "EVCL:" + sha256(f"{article.article_version_id}:{article.content_sha256}:{','.join(member_ids)}".encode()).hexdigest()[:16]
-        role_groups: dict[tuple[str, str | None, int, int, str, str], list[tuple[str, str]]] = {}
+        role_groups: dict[tuple[str, str | None, int, int, str, str],
+                          list[tuple[str, str, float | None,
+                                     tuple[tuple[str, str], ...]]]] = {}
         time_groups: dict[str, set[str]] = {}
         for row in ordered:
             for role in row.roles:
                 key = (role.role, role.entity_id, role.start, role.end, role.text, role.endpoint_status)
-                role_groups.setdefault(key, []).append((row.member_id, role.evidence_id))
+                role_groups.setdefault(key, []).append((
+                    row.member_id, role.evidence_id, role.source_score,
+                    role.source_windows))
             for time_id in row.time_ids:
                 time_groups.setdefault(time_id, set()).add(row.member_id)
         roles = tuple(LocalRoleFact(key[0], key[1], key[2], key[3], key[4], key[5],
-                                    tuple(sorted(eid for _, eid in sources)),
-                                    tuple(sorted({mid for mid, _ in sources})))
+                                    tuple(sorted(eid for _, eid, _, _ in sources)),
+                                    tuple(sorted({mid for mid, _, _, _ in sources})),
+                                    tuple(sorted(((eid, score, windows)
+                                                  for _, eid, score, windows in sources),
+                                                 key=lambda row: row[0])))
                       for key, sources in sorted(role_groups.items(), key=lambda item: str(item[0])))
         times = tuple(LocalTimeFact(tid, tuple(sorted(member_ids)))
                       for tid, member_ids in sorted(time_groups.items()))
@@ -173,10 +199,14 @@ def close_event_identity(article: RawArticle, members: Sequence[EventMember], *,
                 endpoints_by_grounding.setdefault((role.role, role.start, role.end), set()).add(role.entity_id)
         conflict = ("ROLE_ENDPOINT_CONFLICT",) if any(len(values) > 1 for values in endpoints_by_grounding.values()) else ()
         status = "PARTIAL_ALIGNMENT" if any(not row.aligned for row in ordered) else "CONFLICT" if conflict else "READY"
-        event = LocalEventState(local_id, member_ids, representative.member_id,
-                                representative.start, representative.end, representative.text,
-                                tuple((row.trigger_start, row.trigger_end, row.trigger_text, row.member_id)
-                                      for row in ordered), roles, times, conflict, status)
+        event = LocalEventState(
+            local_id, member_ids, representative.member_id,
+            representative.start, representative.end, representative.text,
+            tuple((row.trigger_start, row.trigger_end, row.trigger_text, row.member_id)
+                  for row in ordered if row.trigger_start is not None),
+            roles, times, conflict, status,
+            tuple(EventMemberGrounding(row.member_id, row.start, row.end, row.text)
+                  for row in ordered))
         events.append(event)
         remap.update({mid: local_id for mid in member_ids})
     events.sort(key=lambda row: (row.start, row.end, row.local_id))

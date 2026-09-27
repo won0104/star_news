@@ -157,20 +157,16 @@ class TemporalBoundedSession:
             ("global:finite-time-score-top64",),
         )
         start, end = int(event["char_start"]), int(event["char_end"])
-        decision = self.router.route(
-            keys,
-            lambda row, _keys: (
-                2.0 * float(row.char_start >= start and row.char_end <= end)
-                + 0.6 * float(
-                    dict(row.cheap_features)["sentence_index"] == sentence
-                )
-                + 0.2 * float(abs(
-                    dict(row.cheap_features)["sentence_index"] - sentence
-                ) <= 2)
-                + 0.4 * float(dict(row.cheap_features)["time_score"])
-                - min(1.0, abs(row.char_start - start) / 10000.0)
-            ),
-        )
+        def cheap_score(row, _keys):
+            features = dict(row.cheap_features)
+            time_sentence = features["sentence_index"]
+            return (2.0 * float(row.char_start >= start and row.char_end <= end)
+                    + 0.6 * float(time_sentence == sentence)
+                    + 0.2 * float(abs(time_sentence - sentence) <= 2)
+                    + 0.4 * float(features["time_score"])
+                    - min(1.0, abs(row.char_start - start) / 10000.0))
+
+        decision = self.router.route(keys, cheap_score)
         self._events_seen.add(query_id)
         self._remaining -= 1
         return decision

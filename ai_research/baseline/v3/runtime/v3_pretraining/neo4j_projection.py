@@ -21,12 +21,14 @@ def project_neo4j_dry_run(public: Mapping[str, Any]) -> dict[str, Any]:
         kind = row["kind"]
         properties = dict(row["properties"])
         if kind == "EVENT":
-            properties = {"title": properties["canonical_text"]}
+            properties = {"title": properties["canonical_text"],
+                          "canonicalProvenance": properties["canonical_provenance"]}
             unmapped.append({"local_id": row["node_id"], "field": "primary_score",
                              "reason": "BACKEND_PROPERTY_NOT_CONFIRMED"})
         elif kind == "STATEMENT":
             properties = {"text": properties["canonical_text"],
-                          "statementType": properties["statement_type"]}
+                          "statementType": properties["statement_type"],
+                          "canonicalProvenance": properties["canonical_provenance"]}
             unmapped.append({"local_id": row["node_id"], "field": "primary_score",
                              "reason": "BACKEND_PROPERTY_NOT_CONFIRMED"})
         elif kind == "ENTITY":
@@ -35,6 +37,8 @@ def project_neo4j_dry_run(public: Mapping[str, Any]) -> dict[str, Any]:
                           "entityType": None}
             unmapped.append({"local_id": row["node_id"], "field": "entityType",
                              "reason": "BACKEND_ENTITY_TYPE_MAPPING_UNCONFIRMED"})
+            unmapped.append({"local_id": row["node_id"], "field": "merged_mentions",
+                             "reason": "BACKEND_PROPERTY_NOT_CONFIRMED"})
         elif kind == "TIME":
             value = properties["normalized_value"]
             parsed = parse_canonical_time(value)
@@ -57,7 +61,8 @@ def project_neo4j_dry_run(public: Mapping[str, Any]) -> dict[str, Any]:
     edges = [{"local_edge_id": row["edge_id"], "type": row["edge_type"],
               "source_local_id": row["source_id"], "target_local_id": row["target_id"],
               "source_backend_uuid": None, "target_backend_uuid": None,
-              "proposed_properties": row["properties"], "evidence": row["evidence"]}
+              "proposed_properties": {**row["properties"], "confidence": row["confidence"]},
+              "evidence": row["evidence"]}
              for row in public["edges"]]
     return {"mode": "PURE_DRY_RUN", "source_schema_version": public["schema_version"],
             "public_persistence_ready": public["persistence_ready"],

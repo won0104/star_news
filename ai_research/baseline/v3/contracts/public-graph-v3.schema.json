@@ -1,0 +1,686 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "articlelocal-kg-public-v3",
+  "title": "Article-local KG PUBLIC v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "projection_version",
+    "article",
+    "status",
+    "persistence_ready",
+    "nodes",
+    "edges",
+    "diagnostics"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "articlelocal-kg-public-v3"
+    },
+    "projection_version": {
+      "const": "v3-public-projection-r6-edge-confidence"
+    },
+    "article": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_id",
+        "article_version_id",
+        "title",
+        "published_at",
+        "content_sha256"
+      ],
+      "properties": {
+        "article_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "article_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "PERSISTENCE_READY",
+        "PERSISTENCE_NOT_READY"
+      ]
+    },
+    "persistence_ready": {
+      "type": "boolean"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "omitted",
+        "selected_event_count",
+        "selected_statement_count",
+        "unavailable_score_count",
+        "untrained_score_count",
+        "time_projection_policy_version",
+        "time_projection_rejection_reasons"
+      ],
+      "properties": {
+        "omitted": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "unresolved_role",
+            "unresolved_assertor",
+            "noncalendar_time_attachment",
+            "unsafe_time_attachment",
+            "filtered_relation"
+          ],
+          "properties": {
+            "unresolved_role": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unresolved_assertor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "noncalendar_time_attachment": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unsafe_time_attachment": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "filtered_relation": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "selected_event_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "selected_statement_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unavailable_score_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "untrained_score_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_projection_policy_version": {
+          "const": "r06-time-public-projection-v1"
+        },
+        "time_projection_rejection_reasons": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_id",
+        "start",
+        "end",
+        "text",
+        "evidence_ids"
+      ],
+      "properties": {
+        "article_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node_id",
+        "kind",
+        "properties",
+        "evidence"
+      ],
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "ARTICLE",
+            "EVENT",
+            "STATEMENT",
+            "ENTITY",
+            "TIME"
+          ]
+        },
+        "properties": {
+          "type": "object"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "EVENT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "properties": {
+                "$ref": "#/$defs/proposition"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "STATEMENT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "properties": {
+                "$ref": "#/$defs/statement"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "ENTITY"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "properties": {
+                "$ref": "#/$defs/entity"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "TIME"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "properties": {
+                "$ref": "#/$defs/time"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "ARTICLE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "properties": {
+                "$ref": "#/$defs/article_properties"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "proposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "local_id",
+        "canonical_text",
+        "canonical_status",
+        "canonical_rule_version",
+        "canonical_provenance",
+        "primary_score",
+        "primary_score_status",
+        "primary_score_producer"
+      ],
+      "properties": {
+        "local_id": {
+          "type": "string"
+        },
+        "canonical_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_status": {
+          "type": "string"
+        },
+        "canonical_rule_version": {
+          "type": "string"
+        },
+        "primary_score": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "primary_score_status": {
+          "type": "string"
+        },
+        "primary_score_producer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "canonical_provenance": {
+          "$ref": "#/$defs/canonical_provenance"
+        }
+      }
+    },
+    "statement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "local_id",
+        "canonical_text",
+        "canonical_status",
+        "canonical_rule_version",
+        "canonical_provenance",
+        "primary_score",
+        "primary_score_status",
+        "primary_score_producer",
+        "statement_type"
+      ],
+      "properties": {
+        "local_id": {
+          "type": "string"
+        },
+        "canonical_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_status": {
+          "type": "string"
+        },
+        "canonical_rule_version": {
+          "type": "string"
+        },
+        "primary_score": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "primary_score_status": {
+          "type": "string"
+        },
+        "primary_score_producer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "statement_type": {
+          "enum": [
+            "FORECAST",
+            "CLAIM",
+            "EVALUATION"
+          ]
+        },
+        "canonical_provenance": {
+          "$ref": "#/$defs/canonical_provenance"
+        }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "local_id",
+        "canonical_name",
+        "entity_type",
+        "merged_mentions"
+      ],
+      "properties": {
+        "local_id": {
+          "type": "string"
+        },
+        "canonical_name": {
+          "type": "string"
+        },
+        "entity_type": {
+          "enum": [
+            "PERSON",
+            "ORGANIZATION",
+            "LOCATION",
+            "PRODUCT",
+            "GENERIC"
+          ]
+        },
+        "merged_mentions": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "start", "end"],
+            "properties": {
+              "text": {"type": "string", "minLength": 1},
+              "start": {"type": "integer", "minimum": 0},
+              "end": {"type": "integer", "minimum": 1}
+            }
+          }
+        }
+      }
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "local_id",
+        "normalized_value",
+        "granularity"
+      ],
+      "properties": {
+        "local_id": {
+          "type": "string"
+        },
+        "normalized_value": {
+          "type": "string",
+          "pattern": "^[0-9]{4}(-[0-9]{2})?(-[0-9]{2})?$"
+        },
+        "granularity": {
+          "enum": [
+            "YEAR",
+            "MONTH",
+            "DAY"
+          ]
+        }
+      }
+    },
+    "article_properties": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_id",
+        "article_version_id",
+        "title",
+        "published_at"
+      ],
+      "properties": {
+        "article_id": {
+          "type": "string"
+        },
+        "article_version_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge_id",
+        "edge_type",
+        "source_id",
+        "target_id",
+        "confidence",
+        "properties",
+        "evidence"
+      ],
+      "properties": {
+        "edge_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "edge_type": {
+          "enum": [
+            "COVERS",
+            "CONTAINS_STATEMENT",
+            "MENTIONS",
+            "ACTOR",
+            "TARGET",
+            "PLACE",
+            "ASSERTED_BY",
+            "OCCURRED_ON",
+            "ABOUT",
+            "CAUSES"
+          ]
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "properties": {
+          "type": "object"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "canonical_source_grounding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "start",
+        "end",
+        "text"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "canonical_edit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "change_type",
+        "source_start",
+        "source_end",
+        "source_text",
+        "display_start",
+        "display_end",
+        "replacement"
+      ],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "change_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_text": {
+          "type": "string"
+        },
+        "display_start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "display_end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replacement": {
+          "type": "string"
+        }
+      }
+    },
+    "canonical_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_version_id",
+        "used_grounding_ids",
+        "source_groundings",
+        "edits",
+        "audit",
+        "fact_invariants"
+      ],
+      "properties": {
+        "article_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "used_grounding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_groundings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/canonical_source_grounding"
+          }
+        },
+        "edits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/canonical_edit"
+          }
+        },
+        "audit": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fact_invariants": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

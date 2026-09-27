@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Callable, Sequence
 
 import torch
 from torch import nn
@@ -72,20 +72,29 @@ class ExactSourceSpanBridge(nn.Module):
                 backbone: BackboneOutput, token_states: torch.Tensor,
                 sentence_states: torch.Tensor, document_state: torch.Tensor,
                 candidate_encoder: nn.Module,
-                rows: Sequence[tuple[SpanAlignment, str]]) -> ExactSpanFeatures:
+                rows: Sequence[tuple[SpanAlignment, str]],
+                runtime_sentence_cache=None,
+                native_state_lookup: Callable[[str, int, int, int, SpanAlignment],
+                                              torch.Tensor | None] | None = None
+                ) -> ExactSpanFeatures:
         if batch.input_ids.shape[0] != 1 or batch.input_ids.shape[1] != len(layout.windows):
             raise ValueError("exact bridge requires one article with all source windows")
         if batch.contents[0] != layout.article.content or token_states.shape[:3] != batch.input_ids.shape:
             raise ValueError("source layout and shared DCE input differ")
+        # Validation is integer-only. Copy once per chunk instead of forcing an
+        # MPS synchronization for every window and every candidate endpoint.
+        input_ids_cpu = batch.input_ids[0].detach().cpu()
+        offsets_cpu = batch.token_offsets[0].detach().cpu()
         for position, window in enumerate(layout.windows):
-            expected = batch.input_ids.new_tensor(window.input_ids)
-            if not torch.equal(batch.input_ids[0, position, :len(window.input_ids)], expected):
+            expected = torch.tensor(window.input_ids, dtype=input_ids_cpu.dtype)
+            if not torch.equal(input_ids_cpu[position, :len(window.input_ids)], expected):
                 raise ValueError("source layout window order or tokenizer input differs")
         device = token_states.device
         window_index = {window.window_id: index for index, window in enumerate(layout.windows)}
         local_rows: list[tuple[int, int, int]] = []
         local_kinds: list[int] = []
         local_positions: list[int] = []
+        reused: dict[int, torch.Tensor] = {}
         for index, (span, kind) in enumerate(rows):
             if kind not in KIND_LAYER or layout.reconstruct(span) != (span.start, span.end, span.text):
                 raise ValueError("unknown kind or non-exact source span")
@@ -93,22 +102,32 @@ class ExactSourceSpanBridge(nn.Module):
                 row = window_index[ref.window_id]
                 token = layout.window_lookup[ref.window_id].tokens
                 source = next(item for item in token if item.position == ref.token_position)
-                offsets = batch.token_offsets[0, row, ref.token_position]
+                offsets = offsets_cpu[row, ref.token_position]
                 if (int(offsets[0]), int(offsets[1])) != (source.start, source.end):
                     raise ValueError("source window token alignment differs")
             if span.canonical_window_id is not None:
                 row = window_index[span.canonical_window_id]
-                local_rows.append((row, span.start_ref.token_position,
-                                   span.end_ref.token_position + 1))
-                local_kinds.append(SPAN_KINDS.index(KIND_TO_SPAN[kind]))
-                local_positions.append(index)
+                first, last = span.start_ref.token_position, span.end_ref.token_position + 1
+                cached = (native_state_lookup(kind, row, first, last, span)
+                          if native_state_lookup is not None else None)
+                if cached is None:
+                    local_rows.append((row, first, last))
+                    local_kinds.append(SPAN_KINDS.index(KIND_TO_SPAN[kind]))
+                    local_positions.append(index)
+                else:
+                    if (cached.shape != (token_states.shape[-1],) or
+                            cached.device != device or cached.dtype != token_states.dtype):
+                        raise ValueError("native span cache representation differs")
+                    reused[index] = cached
         if local_rows:
             candidates = _candidate_batch(local_rows, local_kinds, device)
             local_features = candidate_encoder.forward_runtime_direct_states(
-                backbone, sentence_states, candidates, batch.source_token_mask)[0]
+                backbone, sentence_states, candidates, batch.source_token_mask,
+                sentence_cache=runtime_sentence_cache)[0]
         else:
             local_features = token_states.new_empty((0, token_states.shape[-1]))
         local_lookup = {position: local_features[offset] for offset, position in enumerate(local_positions)}
+        local_lookup.update(reused)
         feature_rows = []
         start_rows = []
         end_rows = []

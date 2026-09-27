@@ -9,7 +9,6 @@ https://aclanthology.org/2021.acl-short.107/
 from __future__ import annotations
 
 import math
-
 import torch
 from torch import nn
 
@@ -110,6 +109,104 @@ class DocumentContextEncoder(nn.Module):
             token_attention=weights,
             reinjection_gate=gate,
         )
+
+
+class RuntimeSentenceFeatureCache:
+    """One request's attention logits and pooling prefixes per layer/sentence.
+
+    This owns no candidate decision or persistent model state. The backbone rows
+    are retained by the caller; only candidate-independent features are cached,
+    and the request owner must close the cache before releasing DCE.
+    """
+
+    def __init__(self, encoder: CandidateSpanEncoder, backbone: BackboneOutput,
+                 sentence_states: torch.Tensor,
+                 source_token_mask: torch.BoolTensor) -> None:
+        if encoder.training:
+            raise ValueError("runtime sentence cache requires eval mode")
+        self._identity = (id(encoder), id(backbone), id(sentence_states),
+                          id(source_token_mask))
+        self._scores: dict[int, torch.Tensor] = {}
+        self._prefixes: dict[tuple[int, int, int], tuple[torch.Tensor, torch.Tensor]] = {}
+        self.closed = False
+
+    def scores_for(self, encoder: CandidateSpanEncoder, backbone: BackboneOutput,
+                   sentence_states: torch.Tensor, source_token_mask: torch.BoolTensor,
+                   candidates: CandidateBatch) -> torch.Tensor:
+        if self.closed or self._identity != (id(encoder), id(backbone),
+                                            id(sentence_states), id(source_token_mask)):
+            raise ValueError("runtime sentence cache belongs to another request")
+        indices = candidates.span_indices
+        batch_size, count = indices.shape[:2]
+        safe = encoder._safe_span_indices(candidates, source_token_mask.shape[1],
+                                          source_token_mask.shape[2])
+        kinds = candidates.span_kind_ids.clamp(0, len(SPAN_KINDS) - 1)
+        routed = encoder.kind_layer_indices[kinds].reshape(-1)
+        result = backbone.layer(encoder.layer_values[0]).new_empty(
+            (batch_size * count, source_token_mask.shape[2]))
+        sentence_rows = safe[..., 0].reshape(-1)
+        for layer_index, layer in enumerate(encoder.layer_values):
+            positions = torch.nonzero(routed == layer_index, as_tuple=False).flatten()
+            if positions.numel() == 0:
+                continue
+            scores = self._layer_scores(encoder, backbone, source_token_mask, layer)
+            batch_rows = torch.div(positions, count, rounding_mode="floor")
+            sentence_indices = sentence_rows.index_select(0, positions)
+            result.index_copy_(0, positions, scores[batch_rows, sentence_indices])
+        return result.view(batch_size, count, source_token_mask.shape[2])
+
+    def score_row(self, encoder: CandidateSpanEncoder, backbone: BackboneOutput,
+                  sentence_states: torch.Tensor, source_token_mask: torch.BoolTensor,
+                  *, layer: int, batch_index: int, sentence_index: int) -> torch.Tensor:
+        if self.closed or self._identity != (id(encoder), id(backbone),
+                                            id(sentence_states), id(source_token_mask)):
+            raise ValueError("runtime sentence cache belongs to another request")
+        return self._layer_scores(encoder, backbone, source_token_mask, layer)[
+            batch_index, sentence_index]
+
+    def _layer_scores(self, encoder: CandidateSpanEncoder,
+                      backbone: BackboneOutput, source_token_mask: torch.BoolTensor,
+                      layer: int) -> torch.Tensor:
+        scores = self._scores.get(layer)
+        if scores is None:
+            scores = encoder.span_attention(backbone.layer(layer)).squeeze(-1)
+            if scores.shape != source_token_mask.shape:
+                raise ValueError("cached attention rows differ from source tokens")
+            self._scores[layer] = scores
+        return scores
+
+    def prefix_row(self, encoder: CandidateSpanEncoder, backbone: BackboneOutput,
+                   sentence_states: torch.Tensor, source_token_mask: torch.BoolTensor,
+                   *, layer: int, batch_index: int, sentence_index: int
+                   ) -> tuple[torch.Tensor, torch.Tensor]:
+        if self.closed or self._identity != (id(encoder), id(backbone),
+                                            id(sentence_states), id(source_token_mask)):
+            raise ValueError("runtime sentence cache belongs to another request")
+        key = layer, batch_index, sentence_index
+        cached = self._prefixes.get(key)
+        if cached is None:
+            tokens = backbone.layer(layer)[batch_index, sentence_index]
+            scores = self._layer_scores(encoder, backbone, source_token_mask, layer)[
+                batch_index, sentence_index]
+            valid = source_token_mask[batch_index, sentence_index]
+            # MPS has no float64; CPU/CUDA use it to limit prefix subtraction error.
+            dtype = torch.float32 if tokens.device.type == "mps" else torch.float64
+            scores = scores.to(dtype)
+            stable = torch.where(valid.any(),
+                                 scores.masked_fill(~valid, -torch.inf).max(),
+                                 scores.new_zeros(()))
+            weights = torch.where(valid, torch.exp(scores - stable), torch.zeros_like(scores))
+            denominator = torch.cat((weights.new_zeros(1), weights.cumsum(0)))
+            numerator = torch.cat((tokens.new_zeros((1, tokens.shape[-1]), dtype=dtype),
+                                   (weights.unsqueeze(-1) * tokens.to(dtype)).cumsum(0)))
+            cached = denominator, numerator
+            self._prefixes[key] = cached
+        return cached
+
+    def close(self) -> None:
+        self._scores.clear()
+        self._prefixes.clear()
+        self.closed = True
 
 
 class CandidateSpanEncoder(nn.Module):
@@ -231,14 +328,105 @@ class CandidateSpanEncoder(nn.Module):
         sentence_states: torch.Tensor,
         candidates: CandidateBatch,
         source_token_mask: torch.BoolTensor,
+        sentence_cache: RuntimeSentenceFeatureCache | None = None,
     ) -> torch.Tensor:
         """공유 DCE lease의 최소 sentence state로 rc2 direct gather를 재사용한다."""
         batch_size, candidate_count = candidates.span_indices.shape[:2]
         if candidate_count == 0:
             return sentence_states.new_zeros(batch_size, 0, self.config.hidden_size)
+        if batch_size == 1 and not self.training:
+            owned_cache = (sentence_cache if sentence_cache is not None else
+                           self.new_runtime_sentence_cache(backbone, sentence_states,
+                                                           source_token_mask))
+            try:
+                return self._forward_runtime_grouped_features(
+                    backbone, sentence_states, candidates, source_token_mask,
+                    owned_cache)
+            finally:
+                if sentence_cache is None:
+                    owned_cache.close()
         selected = self.select_runtime_backbone_sentences(backbone, candidates)
         return self._forward_selected_sentences(selected, sentence_states, candidates,
-                                                source_token_mask)
+                                                source_token_mask,
+                                                attention_scores=(sentence_cache.scores_for(
+                                                    self, backbone, sentence_states,
+                                                    source_token_mask, candidates)
+                                                if sentence_cache is not None else None))
+
+    def _forward_runtime_grouped_features(self, backbone: BackboneOutput,
+                                          sentence_states: torch.Tensor,
+                                          candidates: CandidateBatch,
+                                          source_token_mask: torch.BoolTensor,
+                                          sentence_cache: RuntimeSentenceFeatureCache
+                                          ) -> torch.Tensor:
+        """Share sentence views, then project all candidates in original order."""
+        count = candidates.span_indices.shape[1]
+        first = backbone.layer(self.layer_values[0])
+        if first.ndim != 4 or first.shape[0] != 1:
+            raise ValueError("backbone layer must have shape [1,S,T,H]")
+        safe = self._safe_span_indices(candidates, first.shape[1], first.shape[2])
+        kinds = candidates.span_kind_ids.clamp(0, len(SPAN_KINDS) - 1)
+        routed = self.kind_layer_indices[kinds][0]
+        group_keys = routed * first.shape[1] + safe[0, :, 0]
+        positions_by_group = []
+        features_by_group = []
+        for group_key in torch.unique(group_keys, sorted=True).tolist():
+            positions = torch.nonzero(group_keys == group_key, as_tuple=False).flatten()
+            layer_index, sentence_index = divmod(group_key, first.shape[1])
+            layer = self.layer_values[layer_index]
+            source = backbone.layer(layer)
+            if source.shape != first.shape:
+                raise ValueError("routed backbone layers must share [B,S,T,H]")
+            safe_group = safe[0].index_select(0, positions)
+            starts, ends = safe_group[:, 1], safe_group[:, 2]
+            tokens = source[0, sentence_index]
+            denominator, numerator = sentence_cache.prefix_row(
+                self, backbone, sentence_states, source_token_mask,
+                layer=layer, batch_index=0, sentence_index=sentence_index)
+            span_den = denominator.index_select(0, ends) - denominator.index_select(0, starts)
+            span_num = numerator.index_select(0, ends) - numerator.index_select(0, starts)
+            active = candidates.span_mask[0].index_select(0, positions)
+            pooled = span_num / span_den.clamp_min(1e-30).unsqueeze(-1)
+            pooled = torch.where((active & (span_den > 0)).unsqueeze(-1), pooled,
+                                 torch.zeros_like(pooled)).to(tokens.dtype)
+            # A tiny suffix after a much larger prefix can lose precision on MPS.
+            # Only those exceptional rows use the original local softmax.
+            unstable = active & (
+                span_den <= denominator[-1] *
+                (1e-4 if tokens.device.type == "mps" else 1e-12))
+            for position in torch.nonzero(unstable, as_tuple=False).flatten().tolist():
+                start, end = int(starts[position]), int(ends[position])
+                valid = source_token_mask[0, sentence_index, start:end]
+                local_scores = sentence_cache.score_row(
+                    self, backbone, sentence_states, source_token_mask,
+                    layer=layer, batch_index=0, sentence_index=sentence_index)[start:end]
+                weights = torch.softmax(local_scores.masked_fill(~valid, -1e4), 0)
+                weights = weights * valid.to(weights.dtype)
+                weights = weights / weights.sum().clamp_min(1e-8)
+                pooled[position] = (weights.unsqueeze(-1) * tokens[start:end]).sum(0)
+            start_states = tokens.index_select(0, starts)
+            end_states = tokens.index_select(0, ends - 1)
+            widths = (ends - starts).clamp(0, self.config.max_span_width)
+            group_features = torch.cat((
+                start_states, end_states, pooled,
+                sentence_states[0, sentence_index].expand(len(positions), -1),
+                self.width_embedding(widths),
+                self.kind_embedding(kinds[0].index_select(0, positions)),
+            ), dim=-1).unsqueeze(0)
+            positions_by_group.append(positions)
+            features_by_group.append(group_features)
+        grouped_positions = torch.cat(positions_by_group)
+        features = torch.cat(features_by_group, dim=1).index_select(
+            1, torch.argsort(grouped_positions))
+        return self.output(features) * candidates.span_mask.unsqueeze(-1)
+
+    def new_runtime_sentence_cache(self, backbone: BackboneOutput,
+                                   sentence_states: torch.Tensor,
+                                   source_token_mask: torch.BoolTensor
+                                   ) -> RuntimeSentenceFeatureCache:
+        """Create an eval-only, request-owned cache for candidate-independent logits."""
+        return RuntimeSentenceFeatureCache(self, backbone, sentence_states,
+                                           source_token_mask)
 
     def select_prepared_backbone_sentences(
         self,
@@ -394,8 +582,24 @@ class CandidateSpanEncoder(nn.Module):
         sentence_states: torch.Tensor,
         candidates: CandidateBatch,
         source_token_mask: torch.BoolTensor,
+        attention_scores: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """Apply the shared frozen span feature computation to selected rows."""
+
+        features = self._selected_sentence_features(
+            sentence_tokens, sentence_states, candidates, source_token_mask,
+            attention_scores=attention_scores)
+        return self.output(features) * candidates.span_mask.unsqueeze(-1)
+
+    def _selected_sentence_features(
+        self,
+        sentence_tokens: torch.Tensor,
+        sentence_states: torch.Tensor,
+        candidates: CandidateBatch,
+        source_token_mask: torch.BoolTensor,
+        attention_scores: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        """Compute candidate-specific span features before the shared projection."""
 
         indices = candidates.span_indices
         mask = candidates.span_mask
@@ -425,7 +629,8 @@ class CandidateSpanEncoder(nn.Module):
             & sentence_source_mask
             & mask.unsqueeze(-1)
         )
-        scores = self.span_attention(sentence_tokens).squeeze(-1).masked_fill(~inside, -1e4)
+        scores = (self.span_attention(sentence_tokens).squeeze(-1)
+                  if attention_scores is None else attention_scores).masked_fill(~inside, -1e4)
         weights = torch.softmax(scores, dim=-1) * inside.to(scores.dtype)
         weights = weights / weights.sum(dim=-1, keepdim=True).clamp_min(1e-8)
         pooled = torch.einsum("bnt,bnth->bnh", weights, sentence_tokens)
@@ -442,7 +647,7 @@ class CandidateSpanEncoder(nn.Module):
             ),
             dim=-1,
         )
-        return self.output(features) * mask.unsqueeze(-1)
+        return features
 
 
 def _sinusoidal(

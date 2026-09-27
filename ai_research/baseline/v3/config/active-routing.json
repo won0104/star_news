@@ -1,0 +1,15 @@
+{
+  "entity_pair_policy": {
+    "gram_keys_per_query": 4,
+    "per_query_budget": 32,
+    "posting_visit_budget": 64,
+    "query_visit_budget": 256
+  },
+  "entity_pair_policy_sha256": "87fcc6f9a115ce02d22b6f683c3018fb36d202700e09174d14b26cf790a91cf3",
+  "integrated_bounded_policy_sha256": "2c212672a204a2e083683bdea44fc69b4d40aa796a31de4301c3dbd21d07d14a",
+  "participant_salience_mode": "SOURCE_SCORE",
+  "relation_routing_artifact": null,
+  "relation_routing_mode": "CURRENT_RUNTIME_DEFAULT_WITHOUT_PREDICTED_ARTIFACT",
+  "schema_version": "v3-project-active-routing-d2-e1-v1",
+  "source_profile": "V23_BASELINE"
+}

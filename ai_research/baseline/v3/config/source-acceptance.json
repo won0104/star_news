@@ -1,0 +1,46 @@
+{
+  "boundary_thresholds": {
+    "EVENT": 2.7749862670898438,
+    "STATEMENT": 4.601265907287598
+  },
+  "calibration_executed_after_checkpoint_selection": true,
+  "checkpoint_selection_used_calibrated_thresholds": false,
+  "checkpoint_sha256": "87bc8b000490ebfff71287cbbe5c05605c02243178dc6411ac22a088eccb2acf",
+  "dev49_ids_sha256": "f95bc45637e373ba4ad7cf99302add8a5eda3879f2fb3d0f4c3c0d8dcdbd2bca",
+  "gold_sha256": "bb444c36eac340e1cb46684eed8112deb553414260296a6bdf7f73dcea2e3b57",
+  "mode": "CALIBRATION_CANDIDATE",
+  "schema_version": "v23-phase1-selected-source-calibration-v1",
+  "scope": "SOURCE_ACCEPTANCE_ONLY_NO_FULL_CASCADE",
+  "score_contract_version": "v3-unified-entity-identity-r4",
+  "selection_policy_sha256": "5689ce824fba07f28fea96dd26daf061429399a0dc49d1c44ef005808ca97b95",
+  "service_ready": false,
+  "status": "PROVISIONAL_ENGINEERING_ONLY",
+  "test_access": 0,
+  "threshold_status": {
+    "ENTITY": "SELECTED",
+    "EVENT": "SELECTED",
+    "PARTICIPANT": "INACTIVE_V23_ENDPOINT_ONLY",
+    "STATEMENT": "SELECTED",
+    "TIME": "SELECTED",
+    "TRIGGER": "INACTIVE_V23_ENDPOINT_ONLY"
+  },
+  "thresholds": {
+    "ENTITY": -1.7391293048858643,
+    "EVENT": 0.8997429609298706,
+    "PARTICIPANT": null,
+    "STATEMENT": 0.9296085834503174,
+    "TIME": -0.8553852438926697,
+    "TRIGGER": null
+  },
+  "v23_calibration_provenance": {
+    "authority_sha256": "afdfe814545fa95576048655b08a91f561650f0602d5d93b32bdb3e92541cfe6",
+    "legacy_release_thresholds_reused": false,
+    "new_gold_dev_calibrated": true,
+    "selected_epoch": 3,
+    "source_profile": "V23_BASELINE"
+  },
+  "v23_endpoint_thresholds": {
+    "PARTICIPANT": 0.5715683102607727,
+    "TRIGGER": 0.9991880059242249
+  }
+}

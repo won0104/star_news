@@ -17,6 +17,7 @@ from models.context import CandidateSpanEncoder, DocumentContextEncoder
 from models.contracts import ArticleBatch, BackboneConfig, BackboneOutput, ContextConfig, TaskLayerPolicy
 from models.spans.canonical_v3 import CanonicalSpanRepresentationV3, JointSpanProposalHead
 from models.v3_pretraining.exact_span import ExactSourceSpanBridge
+from models.v3_pretraining.pair_context import PAIR_CONTEXT_VERSION
 from models.v3_pretraining.task_contract import HEAD_TASKS, TASK_DEFINITIONS, TRAINING_PHASES
 from runtime.v3_pretraining.source_layout import LAYOUT_POLICY
 
@@ -33,11 +34,13 @@ class V3ArchitectureConfig:
     layers: TaskLayerPolicy = field(default_factory=TaskLayerPolicy)
     tokenizer_sha256: str = PINNED_TOKENIZER_SHA256
     layout_policy: str = LAYOUT_POLICY
+    relation_pair_contract: str = PAIR_CONTEXT_VERSION
     dtype: str = "float32"
 
     def __post_init__(self) -> None:
         if (not self.run_id or self.tokenizer_sha256 != PINNED_TOKENIZER_SHA256
-                or self.layout_policy != LAYOUT_POLICY):
+                or self.layout_policy != LAYOUT_POLICY
+                or self.relation_pair_contract != PAIR_CONTEXT_VERSION):
             raise ValueError("fresh run, pinned tokenizer and v3 source layout are required")
         pinned = BackboneConfig()
         if (self.backbone.trainable or not self.backbone.local_files_only
