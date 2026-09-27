@@ -26,10 +26,10 @@ const BOOKMARK_ASSET = '/assets/history/bookmarks'
 /*
  * 한 쪽에 세우는 사건 수.
  *
- * 셋이던 것을 넷으로 늘린다. 줄 높이를 70px 에서 32px 로 줄이고 목록에 스크롤을 준 뒤로는
- * 셋이 종이의 위쪽만 쓰고 아래가 비어, 쪽을 넘길 이유가 실제 분량보다 자주 생겼다.
+ * 셋에서 넷, 다시 다섯으로 늘렸다. 머리글의 기준 날짜 줄과 "읽은 사건" 절 제목을 걷어내
+ * 목록 자리가 넓어졌고, 줄이 제 내용 높이로 위에서부터 쌓이면서 넷은 종이 아래를 비워 뒀다.
  */
-const EVENTS_PER_PAGE = 4
+const EVENTS_PER_PAGE = 5
 const ARTICLES_PER_EVENT = 5
 /*
  * 펼친 사건이 처음에 보여 주는 발언 수.
