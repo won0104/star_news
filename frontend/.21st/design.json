@@ -56,6 +56,26 @@
       "scope": "graph-node-navigation",
       "decision": "Every visible EVENT, ENTITY, and STATEMENT neighbor recenters the graph immediately when its star is selected.",
       "rationale": "A single direct interaction keeps graph traversal consistent across Node types and removes the extra detail-card confirmation step."
+    },
+    {
+      "scope": "graph-candidate-access",
+      "decision": "Keep the constellation focused while exposing every returned neighbor in a scrollable candidate panel; add three desktop-only star slots and preserve the compact mobile constellation.",
+      "rationale": "The API returns up to 15 ranked neighbors, but rendering all of them as labeled stars would create line and label collisions. The panel prevents data loss while the expanded desktop composition improves immediate graph exploration."
+    },
+    {
+      "scope": "graph-camera-journey",
+      "decision": "Transition between graph centers by moving and zooming the whole constellation toward the selected star, then reveal the next scene with a center pulse.",
+      "rationale": "Moving the camera rather than individual stars preserves the authored composition while making traversal legible without adding another persistent title element."
+    },
+    {
+      "scope": "graph-frame-safe-layout",
+      "decision": "Contain the authored constellation canvas inside the window glass with explicit breathing room and wrap long graph labels within their text boxes.",
+      "rationale": "A cover-sized canvas cropped edge labels at non-8:5 pane ratios; containment keeps every Event, Entity, and Statement label inside the visible frame."
+    },
+    {
+      "scope": "graph-next-event-preview",
+      "decision": "Preview each visible related Event's two-hop Event neighbors as one miniature star per returned Event, arranged in outward concentric half-rings with an explicit count on hover.",
+      "rationale": "A literal star count lets readers estimate how much Event exploration lies beyond a node before committing to recentering the graph."
     }
   ],
   "evidence": [
