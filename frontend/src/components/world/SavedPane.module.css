@@ -13,8 +13,10 @@
 .rightPage {
   position: absolute;
   z-index: 3;
-  top: 9%;
-  bottom: 9%;
+  /* 나의 리포트·나의 기록과 같은 책이라 같은 종이 기준을 쓴다(DiaryReportPane.module.css 의
+     쪽 자리 주석): 종이 안 네 방향 같은 여백. */
+  top: 8.4%;
+  bottom: 10.8%;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -22,13 +24,13 @@
 }
 
 .leftPage {
-  left: 14.4%;
-  width: 31.5%;
+  left: 15.9%;
+  width: 29.7%;
 }
 
 .rightPage {
-  left: 54.2%;
-  width: 31.5%;
+  left: 53.6%;
+  width: 30.2%;
   gap: 2%;
 }
 

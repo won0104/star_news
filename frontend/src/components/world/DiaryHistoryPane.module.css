@@ -188,12 +188,20 @@
   pointer-events: none;
 }
 
+/*
+ * 넓은 화면의 쪽 자리. 책 그림(diary-spread-v2.webp, 3:2)에서 잰 종이 영역 — 왼쪽
+ * 12.7%–48.8%, 오른쪽 50.4%–87.0%, 세로 3.6%–94% — 안에 네 방향 같은 여백을 둔다. 가로는
+ * 그림 폭의 3.2%, 세로는 같은 길이를 높이 비율로 옮긴 4.8%. 나의 리포트(DiaryReportPane)와
+ * 같은 책이라 같은 값을 쓴다.
+ *
+ *   왼쪽 쪽: 15.9% – 45.6%    오른쪽 쪽: 53.6% – 83.8%    위아래: 8.4% – 89.2%
+ */
 .diaryTitle {
   position: absolute;
   z-index: 4;
-  top: 7.4%;
-  left: 14.5%;
-  width: 34%;
+  top: 8.4%;
+  left: 15.9%;
+  width: 29.7%;
   padding-bottom: 12px;
   color: #2d2721;
   pointer-events: none;
@@ -219,10 +227,12 @@
 .planetPortal {
   position: absolute;
   z-index: 3;
-  top: calc(18.6% + 12px);
-  left: 13.75%;
-  width: 34.45%;
-  height: calc(59.4% - 12px);
+  /* 제목이 내려간 만큼 위를 내리고, 아래 끝(78%)은 그대로 둔다. 제목은 글자 크기(px 하한)로
+     높이가 정해져 작은 화면에서 비율보다 덜 줄어들므로, 1280 폭에서도 겹치지 않을 만큼 띄웠다. */
+  top: calc(22% + 12px);
+  left: 15.9%;
+  width: 29.7%;
+  height: calc(56% - 12px);
   overflow: hidden;
   border-radius: 12px;
   background: #071524;
@@ -692,9 +702,9 @@
   position: absolute;
   z-index: 4;
   bottom: 17.6%;
-  left: 16.95%;
+  left: 15.9%;
   display: flex;
-  width: 27.85%;
+  width: 29.7%;
   justify-content: center;
   gap: 5px;
   transform: translateY(12px);
@@ -704,8 +714,8 @@
   position: absolute;
   z-index: 4;
   bottom: 13.7%;
-  left: 16.95%;
-  width: 27.85%;
+  left: 15.9%;
+  width: 29.7%;
   margin: 0;
   color: #725d49;
   font: clamp(9px, 0.78vw, 13px)/1.5 var(--font-serif-kr);
@@ -717,10 +727,10 @@
 .recordPage {
   position: absolute;
   z-index: 4;
-  top: 7.2%;
-  right: 14.2%;
-  bottom: 8.2%;
-  left: 52.8%;
+  top: 8.4%;
+  right: 16.2%;
+  bottom: 10.8%;
+  left: 53.6%;
   display: flex;
   min-width: 0;
   flex-direction: column;

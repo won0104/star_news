@@ -211,16 +211,20 @@
   text-decoration-color: #8b7355;
 }
 
-/* Measured off the photograph: cream runs 9.8%–49.6% on the left leaf and 50.1%–90.1%
-   on the right, with the stitched seam between them and paper from 3% to 94.4% down.
-   The content sits well inside both the leather edge and the stitched gutter, so charts
-   read as marks on the page instead of touching the book's frame. */
+/*
+ * 쪽의 자리는 책 그림(diary-spread-v2.webp, 3:2)에서 잰 종이 영역에 맞춘다 — 왼쪽 종이
+ * 12.7%–48.8%, 오른쪽 50.4%–87.0%, 세로 3.6%–94%. 예전 값(9.8–49.6 / 50.1–90.1)은 이전
+ * 그림 기준이라, 왼쪽 쪽은 책등에 붙고 오른쪽 쪽은 바깥 끝을 넘었다.
+ *
+ * 네 방향 여백을 같은 폭으로 둔다: 가로는 그림 폭의 3.2%, 세로는 그 같은 길이를 높이 비율로
+ * 옮긴 4.8%(3:2 이므로 ×1.5). 좁은 화면이 종이 안쪽에 고른 여백을 두는 것과 같은 규칙이다.
+ */
 .leftPage,
 .rightPage {
   position: absolute;
   z-index: 3;
-  top: 9%;
-  bottom: 9%;
+  top: 8.4%;
+  bottom: 10.8%;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -229,13 +233,13 @@
 }
 
 .leftPage {
-  left: 14.4%;
-  width: 31.5%;
+  left: 15.9%;
+  width: 29.7%;
 }
 
 .rightPage {
-  left: 54.2%;
-  width: 31.5%;
+  left: 53.6%;
+  width: 30.2%;
 }
 
 /* ---- 왼쪽 페이지 머리 ------------------------------------------------------- */
