@@ -61,7 +61,7 @@
   left: 24px;
   display: flex;
   align-items: center;
-  width: min(720px, calc(100% - 330px));
+  width: min(720px, calc(100% - 430px));
   min-height: 38px;
   padding: 5px 8px;
   border: 1px solid rgba(238, 207, 132, 0.24);
@@ -160,16 +160,181 @@
   opacity: 1;
 }
 
-/* The source frame is 1440 × 900. A cover-sized canvas keeps the Figma background,
-   relation SVG, node coordinates and type scale in one coordinate system. */
+.candidatePanel {
+  position: absolute;
+  z-index: 8;
+  top: 72px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  width: min(390px, calc(100% - 48px));
+  max-height: calc(100% - 96px);
+  overflow: hidden;
+  border: 1px solid rgba(238, 207, 132, 0.3);
+  border-radius: 18px;
+  background: rgba(12, 15, 24, 0.92);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.46);
+  color: rgba(248, 240, 224, 0.94);
+  backdrop-filter: blur(16px);
+}
+
+.candidateHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid rgba(238, 207, 132, 0.16);
+}
+
+.candidateHeader p,
+.candidateHeader span {
+  margin: 0;
+}
+
+.candidateHeader p {
+  font: 700 15px var(--font-serif-kr);
+  color: #f0d590;
+}
+
+.candidateHeader span {
+  display: block;
+  margin-top: 5px;
+  font: 11px/1.5 var(--font-sans);
+  color: rgba(238, 228, 209, 0.62);
+}
+
+.candidateHeader button {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(238, 207, 132, 0.24);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(248, 240, 224, 0.86);
+  font: 300 24px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.candidateHeader button:hover {
+  background: rgba(238, 207, 132, 0.12);
+}
+
+.candidateHeader button:focus-visible,
+.candidateList button:focus-visible {
+  outline: 2px solid #e4c679;
+  outline-offset: -2px;
+}
+
+.candidateList {
+  margin: 0;
+  padding: 6px 8px 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  scrollbar-color: rgba(238, 207, 132, 0.4) transparent;
+  scrollbar-width: thin;
+}
+
+.candidateList li + li {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.candidateList button {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.candidateList button:hover {
+  background: rgba(238, 207, 132, 0.08);
+}
+
+.candidateList button:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
+.candidateRank {
+  font: 700 10px var(--font-sans);
+  letter-spacing: 0.08em;
+  color: rgba(238, 207, 132, 0.58);
+}
+
+.candidateCopy {
+  min-width: 0;
+}
+
+.candidateCopy b,
+.candidateCopy small {
+  display: block;
+}
+
+.candidateCopy b {
+  overflow: hidden;
+  font: 600 13px/1.45 var(--font-sans);
+  color: rgba(255, 247, 231, 0.94);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidateCopy small {
+  margin-top: 3px;
+  font: 10px/1.4 var(--font-sans);
+  color: rgba(176, 188, 253, 0.72);
+}
+
+.candidateArrow {
+  color: rgba(238, 207, 132, 0.72);
+}
+
+/* Keep the authored 8:5 coordinate system fully inside the glass. `max()` used to make
+   this a cover canvas, which cropped edge labels whenever the pane was taller or wider
+   than 8:5. The inset contain canvas leaves enough room for wrapped Event labels too. */
 .canvas {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: max(100cqw, 160cqh);
+  width: min(calc(100cqw - 48px), calc(160cqh - 122px));
+  max-width: 100%;
   aspect-ratio: 8 / 5;
   transform: translate(-50%, -50%);
+  transform-origin: var(--journey-x) var(--journey-y);
+  translate: 0 0;
+  scale: 1;
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    scale 300ms ease-in,
+    translate 300ms ease-in,
+    opacity 300ms ease-in,
+    filter 300ms ease-in;
   container-type: inline-size;
+}
+
+.fieldDeparting .canvas {
+  translate: var(--journey-shift-x) var(--journey-shift-y);
+  scale: 1.26;
+  opacity: 0.08;
+  filter: blur(5px);
+}
+
+.fieldArriving .canvas {
+  animation: constellation-arrive 700ms cubic-bezier(0.2, 0.72, 0.28, 1) both;
+}
+
+.centreArrival .starButton {
+  animation: centre-arrive 760ms ease-out both;
 }
 
 .relations {
@@ -223,6 +388,38 @@
   transition: opacity 240ms ease;
 }
 
+.previewCount {
+  position: absolute;
+  z-index: 3;
+  width: 11cqw;
+  padding: 0.35cqw 0.7cqw;
+  border: 1px solid rgba(238, 207, 132, 0.28);
+  border-radius: 999px;
+  background: rgba(10, 14, 24, 0.82);
+  color: rgba(248, 226, 181, 0.92);
+  font: 700 0.72cqw var(--font-sans);
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  backdrop-filter: blur(6px);
+}
+
+.relatedLeftPreview .previewCount {
+  left: -19cqw;
+  top: -19cqw;
+}
+
+.relatedRightPreview .previewCount {
+  left: 8cqw;
+  top: -19cqw;
+}
+
+.relatedBottomPreview .previewCount {
+  left: 5cqw;
+  top: 17cqw;
+}
+
 .previewStar img {
   display: block;
   width: 100%;
@@ -258,6 +455,11 @@
 .relatedNode:hover .previewLink,
 .relatedNode:focus-within .previewLink {
   opacity: 0.72;
+}
+
+.relatedNode:hover .previewCount,
+.relatedNode:focus-within .previewCount {
+  opacity: 1;
 }
 
 .mobileLinks {
@@ -405,6 +607,7 @@
   font-family: var(--font-sans);
   color: rgba(229, 209, 171, 0.86);
   word-break: keep-all;
+  overflow-wrap: anywhere;
   pointer-events: none;
   isolation: isolate;
 }
@@ -436,6 +639,7 @@
   color: rgba(245, 219, 168, 0.98);
   text-align: center;
   text-shadow: 0 0 8px rgba(255, 199, 87, 0.12);
+  hyphens: auto;
 }
 
 .meta {
@@ -471,6 +675,13 @@
   transform: translateX(-50%);
 }
 
+.relatedBottomText {
+  left: -8cqw;
+  top: 4.4cqw;
+  width: 18cqw;
+  transform: translateX(-50%);
+}
+
 .entityLeftText {
   right: 2.4cqw;
   top: -1.1cqw;
@@ -482,6 +693,19 @@
   right: auto;
   top: -3.25cqw;
   width: 8.06cqw;
+}
+
+.entityBottomText {
+  left: -1cqw;
+  top: 3cqw;
+  width: 10cqw;
+  transform: translateX(-50%);
+}
+
+.entityRightText {
+  right: 2.8cqw;
+  top: -1.1cqw;
+  width: 9cqw;
 }
 
 .entityNode .label {
@@ -536,6 +760,32 @@
   }
 }
 
+@keyframes constellation-arrive {
+  from {
+    translate: var(--journey-arrive-x) var(--journey-arrive-y);
+    scale: 0.92;
+    opacity: 0;
+    filter: blur(6px);
+  }
+
+  to {
+    translate: 0 0;
+    scale: 1;
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes centre-arrive {
+  0% {
+    filter: brightness(1.8) drop-shadow(0 0 28px rgba(255, 211, 112, 0.82));
+  }
+
+  100% {
+    filter: none;
+  }
+}
+
 /* 세로가 긴 데스크톱에서는 cover canvas의 좌우가 잘린다. 후보 군집을 Event 쪽으로
    모아 1024px 폭에서도 유형별 미리보기가 창 안에 남도록 한다. */
 @media (min-width: 901px) and (max-width: 1279px) {
@@ -575,13 +825,20 @@
   .trail {
     top: 14px;
     left: 14px;
-    width: calc(100% - 238px);
+    width: calc(100% - 348px);
     min-height: 36px;
   }
 
   .trailNode {
     max-width: 160px;
     font-size: 10.5px;
+  }
+
+  .candidatePanel {
+    top: 62px;
+    right: 14px;
+    width: min(390px, calc(100% - 28px));
+    max-height: calc(100% - 76px);
   }
 
   .relations {
@@ -686,14 +943,54 @@
     top: 58px;
     width: calc(100% - 28px);
   }
+
+}
+
+@media (max-width: 900px) and (max-height: 560px) {
+  .statementNode {
+    top: 67% !important;
+  }
+
+  .centreText {
+    top: -92px;
+  }
+
+  .label,
+  .centreText .label {
+    font-size: 13px;
+  }
+
+  .centreText .label {
+    font-size: 16px;
+  }
+
+  .statementNode .label {
+    font-size: 11px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .node,
   .relations,
-  .previewCluster {
+  .previewCluster,
+  .fieldArriving .canvas,
+  .centreArrival .starButton {
     opacity: 1;
     animation: none;
+  }
+
+  .canvas {
+    translate: 0 0;
+    scale: 1;
+    filter: none;
+    transition: none;
+  }
+
+  .fieldDeparting .canvas {
+    translate: 0 0;
+    scale: 1;
+    opacity: 1;
+    filter: none;
   }
 
   .previewStar {
