@@ -194,6 +194,7 @@
   top: 7.4%;
   left: 14.5%;
   width: 34%;
+  padding-bottom: 12px;
   color: #2d2721;
   pointer-events: none;
 }
@@ -220,10 +221,10 @@
 .planetPortal {
   position: absolute;
   z-index: 3;
-  top: 18.6%;
+  top: calc(18.6% + 12px);
   left: 13.75%;
   width: 34.45%;
-  height: 59.4%;
+  height: calc(59.4% - 12px);
   overflow: hidden;
   border-radius: 12px;
   background: #071524;
@@ -276,7 +277,11 @@
 }
 
 .planetPortal[data-split='on'] .planetStage {
-  right: 50%;
+  right: var(--fs-detail-width, 32%);
+}
+
+.planetPortal[data-resizing='on'] .planetStage {
+  transition: none;
 }
 
 /* 아래 가로 띠 — 고른 분야의 사건 전부. 옆으로 흐르므로 쪽을 나누지 않는다(오른쪽 종이가
@@ -447,11 +452,43 @@
   right: 0;
   bottom: 0;
   display: flex;
-  width: 50%;
+  width: var(--fs-detail-width, 32%);
   flex-direction: column;
-  border-left: 1px solid rgba(233, 214, 178, 0.18);
   background: rgba(6, 15, 26, 0.9);
   backdrop-filter: blur(6px);
+}
+
+.fsDetailResize {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  bottom: 0;
+  left: -7px;
+  width: 14px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.fsDetailResize::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 6px;
+  width: 2px;
+  background: rgba(233, 214, 178, 0.42);
+  content: '';
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.fsDetailResize:hover::after,
+.fsDetailResize:focus-visible::after,
+.fsDetail[data-resizing='on'] .fsDetailResize::after {
+  opacity: 1;
+}
+
+.fsDetailResize:focus-visible {
+  outline: none;
 }
 
 .planetPortal[data-strip='on'] .fsDetail {
@@ -461,7 +498,7 @@
 .fsDetail > header {
   position: relative;
   flex: none;
-  padding: 22px 52px 16px 26px;
+  padding: 28px 60px 22px 34px;
   border-bottom: 1px solid rgba(233, 214, 178, 0.16);
 }
 
@@ -473,7 +510,7 @@
 
 .fsDetail > header h3 {
   margin: 6px 0 0;
-  font: 700 clamp(17px, 1.5vw, 24px)/1.35 var(--font-serif-kr);
+  font: 700 clamp(17px, 1.5vw, 24px)/1.5 var(--font-serif-kr);
   color: #f4efe5;
   word-break: keep-all;
 }
@@ -508,7 +545,7 @@
   min-height: 0;
   flex: 1;
   gap: 22px;
-  padding: 20px 26px 26px;
+  padding: 26px 34px 32px;
   overflow-y: auto;
   align-content: start;
   color: #dfe7ee;
@@ -570,6 +607,7 @@
 
 .fsDetailBody .statementList li {
   font-size: 15px;
+  color: #e4ebf1;
 }
 
 .fsDetailBody .statementList li::before {
@@ -661,6 +699,7 @@
   width: 27.85%;
   justify-content: center;
   gap: 5px;
+  transform: translateY(12px);
 }
 
 .planetCaption {
@@ -674,6 +713,7 @@
   font: clamp(9px, 0.78vw, 13px)/1.5 var(--font-serif-kr);
   text-align: center;
   pointer-events: none;
+  transform: translateY(12px);
 }
 
 .recordPage {
@@ -689,33 +729,22 @@
   color: #3f3024;
 }
 
-/* 날짜 칸이 제목과 한 줄에 다 들어가지 않으면 통째로 아랫줄로 내려간다. 줄바꿈을 막지 않으면
-   "정치 기록"이 두 줄로 쪼개져, 분야 이름보다 필터가 먼저 눈에 든다. */
+/* 분야 기록 제목을 먼저 읽고 기간을 고를 수 있도록 날짜 필터는 제목 아래에 둔다. */
 .recordHeader {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 6px 12px;
+  display: grid;
+  gap: 8px;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(91, 67, 48, 0.28);
-}
-
-.recordHeader > div:first-child {
-  flex: 1 0 auto;
 }
 
 /* 종이 위에 적은 칸이라 상자가 아니라 밑줄로 그린다. 테두리를 두르면 이 페이지에 없던
    입력 상자가 둘 생긴 것처럼 보여, 다이어리보다 양식지에 가까워진다. */
 .periodRow {
   display: flex;
-  flex-shrink: 0;
   flex-wrap: wrap;
   align-items: baseline;
-  justify-content: flex-end;
-  margin-left: auto;
+  justify-content: flex-start;
   gap: 4px 10px;
-  padding-top: 3px;
 }
 
 .periodField {
@@ -1031,13 +1060,20 @@
   word-break: keep-all;
 }
 
+.eventTitlePreview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 .eventPager {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   margin-top: auto;
-  padding-top: 12px;
+  padding: 12px 0;
 }
 
 .eventPager button {
@@ -1414,11 +1450,13 @@
 
   .planetActions {
     justify-content: center;
+    padding-top: 12px;
+    transform: none;
   }
 
   /* 좌우 여백은 .pageScroll 의 padding 이 준다 — 여기서 또 주면 제목만 더 들어간다. */
   .diaryTitle {
-    padding: 0;
+    padding: 0 0 12px;
   }
 
   .diaryTitle span {
@@ -1542,10 +1580,18 @@
   word-break: keep-all;
 }
 
+.statementOnDark {
+  color: #eef3f7 !important;
+}
+
+.articleListOnDark p {
+  color: #eef3f7 !important;
+}
+
 /* 여는 따옴표만 세운다. 닫는 쪽은 문장 길이에 따라 어디에 놓든 어색해진다.
    분야 색은 바로 왼쪽 .statementBox 테두리가 이미 쓰고 있어 중성 잉크로 둔다. */
 .statementList li::before {
-  content: 'C';
+  content: '\201C';
   position: absolute;
   left: 0;
   top: clamp(-2px, -0.2vw, 0px);

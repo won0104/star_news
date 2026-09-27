@@ -256,6 +256,15 @@ function DetailSheet({ item, side, anchorIndex, onClose }) {
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  useEffect(() => {
+    const closeFromOutside = (event) => {
+      if (!cardRef.current?.contains(event.target)) onClose()
+    }
+
+    document.addEventListener('pointerdown', closeFromOutside, true)
+    return () => document.removeEventListener('pointerdown', closeFromOutside, true)
+  }, [cardRef, onClose])
+
   const articles = detail?.articles ?? []
 
   return (
