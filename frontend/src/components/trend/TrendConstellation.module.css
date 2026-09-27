@@ -126,21 +126,26 @@
   gap: 6px;
   max-width: 210px;
   padding: 6px 8px;
-  overflow: hidden;
   border: 0;
   border-radius: 8px;
   background: transparent;
   font: 500 11px var(--font-sans);
   color: rgba(238, 228, 209, 0.76);
-  text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
 }
 
-.trailNode span {
+.trailType {
   flex: none;
   font-size: 9px;
   color: rgba(238, 207, 132, 0.72);
+}
+
+.trailLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trailNode:hover {

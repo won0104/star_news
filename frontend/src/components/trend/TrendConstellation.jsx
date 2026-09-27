@@ -449,8 +449,10 @@ export function TrendConstellation({
                     title={item.label}
                     onClick={() => onTrailSelect?.(item, index)}
                   >
-                    <span>{nodeTypeLabels[item.nodeType] ?? item.nodeType}</span>
-                    {item.label}
+                    <span className={styles.trailType}>
+                      {nodeTypeLabels[item.nodeType] ?? item.nodeType}
+                    </span>
+                    <span className={styles.trailLabel}>{item.label}</span>
                   </button>
                 </li>
               )
