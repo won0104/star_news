@@ -1,0 +1,22 @@
+{
+  "checkpoint_sha256": "87bc8b000490ebfff71287cbbe5c05605c02243178dc6411ac22a088eccb2acf",
+  "d2_threshold_selection_sha256": "54ee1cc69b77dc74e42740e14e95dae095f5e1f8241100ab5888ef6e0e0eeae9",
+  "latency_contract": {
+    "device": "cpu",
+    "entrypoint": "V3ServingWorker.analyze_public",
+    "p95_definition": "nearest_rank_ceil_0.95_n",
+    "split": "dev49",
+    "timing_scope": "perf_counter around analyze_public only",
+    "warmup_requests_excluded": 1
+  },
+  "note": "Values are user selected; selected P6 source policy lineage remains provisional pending production validation.",
+  "schema_version": "v3-gold400-runtime-d2-e1-selection-v1",
+  "selection_status": "USER_SELECTED_D2_E1",
+  "service_ready": false,
+  "v23_operational_caps": {
+    "entity_expensive": 20480,
+    "event_accepted": 96,
+    "time_accepted": 128,
+    "time_expensive": 24576
+  }
+}

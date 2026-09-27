@@ -1,0 +1,49 @@
+{
+  "boundary_thresholds": {
+    "EVENT": 2.1429073810577393,
+    "STATEMENT": 1.2509658336639404
+  },
+  "calibration_executed_after_checkpoint_selection": true,
+  "checkpoint_selection_used_calibrated_thresholds": false,
+  "checkpoint_sha256": "6441484865c2c020e0a808b056eb9d991e0195d30c8342d6ff4789c01453c36f",
+  "dev15_ids_sha256": "c35f71758f43cf66f05bf1aac8b45393ca79d4dc4a587b04c040691843dad24f",
+  "gold_sha256": "bd2db2b39a9a8d9d601d204688dd515b38ea5683353944fd18643e9cab2d95ac",
+  "mode": "CALIBRATION_CANDIDATE",
+  "schema_version": "v23-phase1-selected-source-calibration-v2-trigger-fine",
+  "scope": "SOURCE_ACCEPTANCE_ONLY_NO_FULL_CASCADE",
+  "score_contract_version": "v3-unified-entity-identity-r4",
+  "selection_policy_sha256": "cc6602a3238f7e34434ec077f63b15ecf0c338015a7715994e17fefc634d695d",
+  "selection_record_sha256": "2a0f6a79a9ffcf87dbc60d2c67fa04e4dc73e4fd83d1f5dea4aa00fc2021d245",
+  "service_ready": false,
+  "status": "PROVISIONAL_ENGINEERING_ONLY",
+  "test_access": 0,
+  "threshold_status": {
+    "ENTITY": "SELECTED",
+    "EVENT": "SELECTED",
+    "PARTICIPANT": "INACTIVE_V23_ENDPOINT_ONLY",
+    "STATEMENT": "SELECTED",
+    "TIME": "SELECTED",
+    "TRIGGER": "SELECTED"
+  },
+  "thresholds": {
+    "ENTITY": 0.06662248820066452,
+    "EVENT": 0.04040812700986862,
+    "PARTICIPANT": null,
+    "STATEMENT": 0.3260810375213623,
+    "TIME": 1.012447476387024,
+    "TRIGGER": 1.403719425201416
+  },
+  "trigger_endpoint_score_producer": "trigger.boundary.start_logits/end_logits:sigmoid_min",
+  "trigger_final_score_producer": "trigger.span_score",
+  "v23_calibration_provenance": {
+    "authority_sha256": "e5e609d702406b92dc2730f224763e15ebb8112124ecc22ed61ad34667b5de1a",
+    "legacy_release_thresholds_reused": false,
+    "new_gold_dev_calibrated": true,
+    "selected_epoch": 1,
+    "source_profile": "V23_BASELINE"
+  },
+  "v23_proposal_endpoint_thresholds": {
+    "PARTICIPANT": 0.40940752625465393,
+    "TRIGGER": 0.43642887473106384
+  }
+}

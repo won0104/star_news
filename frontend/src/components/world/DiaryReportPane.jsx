@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { fetchNewsReport } from '../../api/report'
 import { reportFromApi } from '../../adapters/newsReport'
 import { reportCopy, reportTabs } from '../../data/world'
@@ -25,7 +25,7 @@ const HOVER_OPEN_MS = 400
  * no page turn: a report is scanned as a whole, and paging away half of it would hide the
  * comparison it exists to make. 나의 기록 pages because it is a list that keeps going.
  *
- * Left page is how much and how it moved — the totals, then twelve weeks of composition.
+ * Left page is how much and how it moved — one summary sentence, then twelve weeks of composition.
  * Right page is where it came from and where the topics landed.
  *
  * The split by field is gone: it was the twelve-week chart's own totals drawn again, so
@@ -64,7 +64,7 @@ export function DiaryReportPane() {
   }[state]
   const offerSignIn = state === 'signedOut'
   // 차트는 ready 일 때만 그리므로 이 넷은 그 안에서 항상 채워져 있다.
-  const { totals, sources, weeks, terrain } = report ?? {}
+  const { sources, weeks, terrain } = report ?? {}
 
   return (
     <section className={styles.page} aria-label={reportCopy.title}>
@@ -127,17 +127,10 @@ export function DiaryReportPane() {
                 <header className={styles.pageHead}>
                   <span>{report.eyebrow}</span>
                   <h1>{report.title}</h1>
-                  <p>{report.summary}</p>
+                  <p>
+                    <Parts parts={report.summary} />
+                  </p>
                 </header>
-
-                <dl className={styles.totals}>
-                  {totals.map((total) => (
-                    <div key={total.id}>
-                      <dd>{total.value}</dd>
-                      <dt>{total.label}</dt>
-                    </div>
-                  ))}
-                </dl>
 
                 <section className={styles.block}>
                   <div className={styles.blockHead}>
@@ -209,6 +202,17 @@ export function DiaryReportPane() {
                       })}
                     </div>
                   </div>
+
+                  {/* 차트를 줄인 자리에 숫자가 말하는 것을 한두 줄로 적는다. */}
+                  {weeks.insights.length > 0 && (
+                    <ul className={styles.insights}>
+                      {weeks.insights.map((line) => (
+                        <li key={line.map((part) => part.text).join('')}>
+                          <Parts parts={line} />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </section>
               </div>
 
@@ -249,6 +253,7 @@ export function DiaryReportPane() {
                       {terrain.quadrants.topLeft}
                     </span>
                     <span className={`${styles.quadrantLabel} ${styles.qTopRight}`}>
+                      <span aria-hidden>✦ </span>
                       {terrain.quadrants.topRight}
                     </span>
                     <span className={`${styles.quadrantLabel} ${styles.qBottomLeft}`}>
@@ -263,11 +268,10 @@ export function DiaryReportPane() {
                     ))}
                   </div>
 
-                  <p className={styles.axisNote}>
-                    {terrain.axisX}
-                    <br />
-                    {terrain.axisY}
-                  </p>
+                  <ul className={styles.axisNote}>
+                    <li>{terrain.axisX}</li>
+                    <li>{terrain.axisY}</li>
+                  </ul>
                 </section>
               </div>
             </>
@@ -275,6 +279,13 @@ export function DiaryReportPane() {
         </div>
       </DiaryShell>
     </section>
+  )
+}
+
+/** 문장 조각을 잇는다. `strong` 조각(데이터에서 나온 숫자)만 굵게. */
+function Parts({ parts }) {
+  return parts.map((part, index) =>
+    part.strong ? <b key={index}>{part.text}</b> : <Fragment key={index}>{part.text}</Fragment>,
   )
 }
 
@@ -343,12 +354,21 @@ function OtherHotspot({ column, value, below, axisMax }) {
  * 묶인 점만 버튼이다. 혼자 선 점은 이름이 이미 옆에 있어 누를 일이 없고, 지형 열두 자리가
  * 전부 누를 수 있는 것처럼 보이면 눌러 볼 것이 없는 점까지 눌러 보게 된다.
  */
+/* 이름을 안쪽으로 붙이기 시작하는 가로 위치(%). 잠정값이다. */
+const EDGE_LEFT = 30
+const EDGE_RIGHT = 70
+
 function TerrainPoint({ cluster }) {
   const [open, setOpen] = useState(false)
   const [first, ...rest] = cluster.members
 
   const position = { left: `${cluster.x}%`, top: `${cluster.y}%` }
-  const className = `${styles.topic} ${cluster.strong ? styles.topicStrong : ''}`
+  /*
+   * 가장자리 가까운 점은 이름을 안쪽으로 붙인다. 가운데 맞춤 그대로 두면 긴 이름이 판과 쪽
+   * 밖으로 나갔다("아이치 인터내셔널 아레나에서"). 점은 어느 경우든 좌표 위에 남는다.
+   */
+  const edge = cluster.x > EDGE_RIGHT ? styles.topicAtRight : cluster.x < EDGE_LEFT ? styles.topicAtLeft : ''
+  const className = `${styles.topic} ${cluster.strong ? styles.topicStrong : ''} ${edge}`
 
   if (rest.length === 0) {
     return (

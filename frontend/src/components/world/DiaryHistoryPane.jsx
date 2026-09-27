@@ -26,10 +26,10 @@ const BOOKMARK_ASSET = '/assets/history/bookmarks'
 /*
  * 한 쪽에 세우는 사건 수.
  *
- * 셋이던 것을 넷으로 늘린다. 줄 높이를 70px 에서 32px 로 줄이고 목록에 스크롤을 준 뒤로는
- * 셋이 종이의 위쪽만 쓰고 아래가 비어, 쪽을 넘길 이유가 실제 분량보다 자주 생겼다.
+ * 셋에서 넷, 다시 다섯으로 늘렸다. 머리글의 기준 날짜 줄과 "읽은 사건" 절 제목을 걷어내
+ * 목록 자리가 넓어졌고, 줄이 제 내용 높이로 위에서부터 쌓이면서 넷은 종이 아래를 비워 뒀다.
  */
-const EVENTS_PER_PAGE = 4
+const EVENTS_PER_PAGE = 5
 const ARTICLES_PER_EVENT = 5
 /*
  * 펼친 사건이 처음에 보여 주는 발언 수.
@@ -595,24 +595,28 @@ export function DiaryHistoryPane() {
 
         <article className={styles.recordPage} aria-live="polite">
           <header className={styles.recordHeader}>
-            <div>
-              <span>{formatSnapshot(graph.generatedAt)}</span>
-              <h2>{topic.topicName} 기록</h2>
-            </div>
+            {/* 기준 날짜 줄은 두지 않는다. 응답의 generatedAt 은 요청한 순간의 시각이라 늘 오늘이고,
+                기간 칸 바로 위에 서면 그 기간의 기준일처럼 읽혔다. */}
+            <h2>{topic.topicName} 기록</h2>
+            {/* 기간은 "부터 / 까지" 라벨 없이 한 줄의 날짜 범위로 적는다 — 라벨이 붙으면 종이
+                위의 기록이 아니라 입력 양식처럼 읽힌다. 뜻은 aria-label 이 전한다. */}
             <div className={styles.periodRow} role="group" aria-label="기간">
               <label className={styles.periodField}>
-                <span>부터</span>
                 <input
                   type="date"
+                  aria-label="시작일"
                   value={draft.from}
                   max={draft.to || kstToday()}
                   onChange={(event) => changeRange({ ...draft, from: event.target.value })}
                 />
               </label>
+              <span className={styles.periodDash} aria-hidden="true">
+                —
+              </span>
               <label className={styles.periodField}>
-                <span>까지</span>
                 <input
                   type="date"
+                  aria-label="종료일"
                   value={draft.to}
                   min={draft.from || undefined}
                   max={kstToday()}
@@ -623,6 +627,13 @@ export function DiaryHistoryPane() {
                 <button type="button" className={styles.periodClear} onClick={() => changeRange(NO_RANGE)}>
                   전체 보기
                 </button>
+              )}
+              {/* 이 기간의 합계. 목록의 절 제목을 따로 두지 않고 기간 줄 오른쪽 끝에 붙인다 —
+                  분야 이름은 페이지 제목과 책갈피가 이미 말하고, 무엇의 수인지는 기간이 말한다. */}
+              {state === 'ready' && events.length > 0 && (
+                <span className={styles.periodTotal}>
+                  {events.length}개의 사건 · {topicArticleCount}개의 기사
+                </span>
               )}
             </div>
           </header>
@@ -666,14 +677,6 @@ export function DiaryHistoryPane() {
 
           {state === 'ready' && events.length > 0 && (
             <div className={styles.eventPage}>
-              <div className={styles.eventIntro}>
-                <span>{topic.topicName} EVENTS</span>
-                <h3>{topic.topicName} 분야에서 읽은 사건</h3>
-                <p>
-                  Event {events.length}개 · 읽은 기사 {topicArticleCount}개
-                </p>
-              </div>
-
               {/*
                 사건을 누르면 그 자리에서 펼쳐진다. 모달로 띄우던 것을 접은 이유는, 여기서
                 보려는 것이 사건 하나의 전부가 아니라 "이 사건에서 내가 접한 발언"이라는
@@ -682,8 +685,9 @@ export function DiaryHistoryPane() {
                 한 번에 하나만 열린다. 페이지가 짧아 여러 개를 펼치면 목록이 화면을 넘긴다.
               */}
               <ul className={styles.eventList}>
-                {visibleEvents.map((event) => {
+                {visibleEvents.map((event, index) => {
                   const open = openEventId === event.id
+                  const order = safeEventPageIndex * EVENTS_PER_PAGE + index + 1
                   const titleCanExpand = event.title.length > 72
                   const articles = articlesByEvent[event.nodeKey]
                   const allStatements = allStatementsFor === event.id
@@ -694,11 +698,16 @@ export function DiaryHistoryPane() {
 
                   return (
                     <li key={event.id} ref={open ? openEventRef : null}>
+                      {/* 사건 하나가 한 덩어리다: 번호 · 제목 · 딸린 정보 줄. 기사 수를 제목 옆에서
+                          떼어 제목이 폭을 다 쓰게 하고, 펼침 표시는 그 정보 줄 끝에 둔다. */}
                       <button
                         type="button"
                         aria-expanded={open}
                         onClick={() => toggleEvent(event)}
                       >
+                        <span className={styles.eventOrder}>
+                          {String(order).padStart(2, '0')}
+                        </span>
                         <strong
                           className={
                             titleCanExpand && !open ? styles.eventTitlePreview : undefined
@@ -706,9 +715,11 @@ export function DiaryHistoryPane() {
                         >
                           {event.title}
                         </strong>
-                        <small>기사 {event.articleCount}개</small>
-                        <span className={styles.eventChevron} aria-hidden>
-                          {open ? '▾' : '▸'}
+                        <span className={styles.eventMeta}>
+                          <small>관련 기사 {event.articleCount}개</small>
+                          <span className={styles.eventChevron} aria-hidden>
+                            ⌄
+                          </span>
                         </span>
                       </button>
 
@@ -809,7 +820,7 @@ function EventBody({
   return (
     <div className={className}>
       <section>
-        <h4>발언</h4>
+        <h4>관련 발언</h4>
         {event.statements.length > 0 ? (
           <>
             <ul className={styles.statementList}>
@@ -1013,12 +1024,6 @@ function summaryNote(state) {
   if (state === 'unavailable') return panelCopy.summaryUnavailable
   if (state === 'failed') return panelCopy.summaryFailed
   return panelCopy.summaryNone
-}
-
-/** `2026-09-16T18:00:00+09:00` → `2026.09.16 기준`. 없으면 머리글 줄을 비운다. */
-function formatSnapshot(value) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value ?? '')
-  return match ? `${match[1]}.${match[2]}.${match[3]} 기준` : ''
 }
 
 /** 서버가 준 오프셋을 이 컴퓨터의 시간대로 옮기지 않으려고 문자열에서 바로 읽는다. */

@@ -428,8 +428,8 @@
   }
 
   /*
-   * 들여쓰기가 계층을 말한다. 왼쪽 선은 그 들여쓴 자리를 눈으로 잇는다 — 레일에서는 잎이
-   * 갈래에서 멀어지므로 선이 없으면 다음 갈래의 머리처럼 읽힌다.
+   * 들여쓰기가 계층을 말한다. 예전에는 왼쪽 세로선으로 그 자리를 이었는데 트리 연결선처럼
+   * 보여 걷어냈다 — 들여쓰기와, 켜진 잎의 별만으로 갈래 아래에 딸린 것이 읽힌다.
    *
    * 상단바에서 쓰던 띠 차림(고정 위치·배경·그림자)을 여기서 모두 되돌린다.
    */
@@ -440,26 +440,36 @@
     gap: 0;
     margin: 2px 0 2px 14px;
     /* 상단바의 책갈피는 위쪽을 바에 물리려고 여백을 이고 있다. 레일에는 물릴 바가 없다. */
-    padding: 0 0 0 10px;
+    padding: 0;
     border: 0;
-    border-left: 1px solid var(--topbar-border);
     border-radius: 0;
     background: none;
     backdrop-filter: none;
     box-shadow: none;
   }
 
+  /* 잎은 별 자리만큼 들여 쓴다. 켜진 잎만 그 자리에 별이 선다. */
   .navSubItem {
     width: 100%;
-    padding: 9px 12px;
+    padding: 9px 12px 9px 28px;
     text-align: left;
   }
 
+  /* 레일에서 켜진 잎의 표시는 밑줄이 아니라 작은 별 하나다 — 레일은 잎이 레일 폭을 다 써서
+     상자에 긋는 밑줄이 글자와 길이가 맞지 않았다. 상단바의 책갈피는 밑줄 그대로다. */
   .navSubItemActive::after {
-    right: auto;
-    bottom: 6px;
+    content: none;
+  }
+
+  .navSubItemActive::before {
+    position: absolute;
+    top: 50%;
     left: 12px;
-    width: 14px;
+    font-size: 11px;
+    line-height: 1;
+    color: currentcolor;
+    content: '✦';
+    transform: translateY(-50%);
   }
 
   .spacer {

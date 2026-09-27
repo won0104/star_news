@@ -314,7 +314,6 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
         journey={journey}
         articlePanelOpen={articlePanelOpen}
         onArticlePanelOpenChange={setArticlePanelOpen}
-        onBack={close}
         onWalk={(node, navigation) =>
           open(
             {
