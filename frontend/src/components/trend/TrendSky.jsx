@@ -384,7 +384,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
                 type="button"
                 className={styles.star}
                 onClick={() => open(trend, { trailMode: 'reset' })}
-                aria-label={`${trendSkyCopy.rank(trend.rank)} ${trend.label} — ${trendSkyCopy.articles(trend.articleCount)}`}
+                aria-label={`${trendSkyCopy.rank(trend.rank)} ${trend.label}`}
               >
                 <img src={stars.event} alt="" aria-hidden />
               </button>
@@ -393,7 +393,6 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
                 <p className={styles.label}>{trend.label}</p>
                 <p className={styles.meta}>
                   <span className={styles.rank}>{trendSkyCopy.rank(trend.rank)}</span>
-                  {trendSkyCopy.articles(trend.articleCount)}
                 </p>
               </div>
             </div>
