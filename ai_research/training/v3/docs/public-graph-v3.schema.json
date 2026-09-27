@@ -19,7 +19,7 @@
       "const": "articlelocal-kg-public-v3"
     },
     "projection_version": {
-      "const": "v3-public-projection-r1"
+      "const": "v3-public-projection-r6-edge-confidence"
     },
     "article": {
       "type": "object",
@@ -84,7 +84,9 @@
         "selected_event_count",
         "selected_statement_count",
         "unavailable_score_count",
-        "untrained_score_count"
+        "untrained_score_count",
+        "time_projection_policy_version",
+        "time_projection_rejection_reasons"
       ],
       "properties": {
         "omitted": {
@@ -94,6 +96,7 @@
             "unresolved_role",
             "unresolved_assertor",
             "noncalendar_time_attachment",
+            "unsafe_time_attachment",
             "filtered_relation"
           ],
           "properties": {
@@ -106,6 +109,10 @@
               "minimum": 0
             },
             "noncalendar_time_attachment": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unsafe_time_attachment": {
               "type": "integer",
               "minimum": 0
             },
@@ -130,6 +137,20 @@
         "untrained_score_count": {
           "type": "integer",
           "minimum": 0
+        },
+        "time_projection_policy_version": {
+          "const": "r06-time-public-projection-v1"
+        },
+        "time_projection_rejection_reasons": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
         }
       }
     }
@@ -294,6 +315,7 @@
         "canonical_text",
         "canonical_status",
         "canonical_rule_version",
+        "canonical_provenance",
         "primary_score",
         "primary_score_status",
         "primary_score_producer"
@@ -303,7 +325,8 @@
           "type": "string"
         },
         "canonical_text": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "canonical_status": {
           "type": "string"
@@ -325,6 +348,9 @@
             "string",
             "null"
           ]
+        },
+        "canonical_provenance": {
+          "$ref": "#/$defs/canonical_provenance"
         }
       }
     },
@@ -336,6 +362,7 @@
         "canonical_text",
         "canonical_status",
         "canonical_rule_version",
+        "canonical_provenance",
         "primary_score",
         "primary_score_status",
         "primary_score_producer",
@@ -346,7 +373,8 @@
           "type": "string"
         },
         "canonical_text": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "canonical_status": {
           "type": "string"
@@ -375,6 +403,9 @@
             "CLAIM",
             "EVALUATION"
           ]
+        },
+        "canonical_provenance": {
+          "$ref": "#/$defs/canonical_provenance"
         }
       }
     },
@@ -384,7 +415,8 @@
       "required": [
         "local_id",
         "canonical_name",
-        "entity_type"
+        "entity_type",
+        "merged_mentions"
       ],
       "properties": {
         "local_id": {
@@ -401,6 +433,20 @@
             "PRODUCT",
             "GENERIC"
           ]
+        },
+        "merged_mentions": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "start", "end"],
+            "properties": {
+              "text": {"type": "string", "minLength": 1},
+              "start": {"type": "integer", "minimum": 0},
+              "end": {"type": "integer", "minimum": 1}
+            }
+          }
         }
       }
     },
@@ -464,6 +510,7 @@
         "edge_type",
         "source_id",
         "target_id",
+        "confidence",
         "properties",
         "evidence"
       ],
@@ -494,6 +541,11 @@
           "type": "string",
           "minLength": 1
         },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
         "properties": {
           "type": "object"
         },
@@ -501,6 +553,131 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "canonical_source_grounding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "start",
+        "end",
+        "text"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "canonical_edit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "change_type",
+        "source_start",
+        "source_end",
+        "source_text",
+        "display_start",
+        "display_end",
+        "replacement"
+      ],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "change_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_text": {
+          "type": "string"
+        },
+        "display_start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "display_end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replacement": {
+          "type": "string"
+        }
+      }
+    },
+    "canonical_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_version_id",
+        "used_grounding_ids",
+        "source_groundings",
+        "edits",
+        "audit",
+        "fact_invariants"
+      ],
+      "properties": {
+        "article_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "used_grounding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_groundings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/canonical_source_grounding"
+          }
+        },
+        "edits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/canonical_edit"
+          }
+        },
+        "audit": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fact_invariants": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "type": "string"
           }
         }
       }

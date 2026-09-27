@@ -18,6 +18,7 @@ from runtime.v3_pretraining.source_layout import SpanAlignment
 from runtime.v3_pretraining.temporal import TimeMentionEvidence, close_time_occurrences, parse_canonical_time
 from runtime.v3_pretraining.temporal_scoring import (EventTimeFeatureLease,
                                                      encode_event_time_features, event_time_geometry)
+from training.v3_pretraining.relation_evaluation import score_full_universe
 from training.v3_pretraining.targets import ArticleTargets
 
 
@@ -125,3 +126,28 @@ class TimeGoldAdapter:
                               len(pair_universe.positive_pairs),
                               len(sample) - len(pair_universe.positive_pairs),
                               sum(tid in null_ids for _, tid in pair_universe.positive_pairs))
+
+    @torch.no_grad()
+    def evaluate_full_universe(self, target: ArticleTargets,
+                               lease: EventTimeFeatureLease,
+                               *, article_id: str) -> dict[str, object]:
+        """Use raw attachment logits for every eligible Event-Time pair."""
+        if self.core.training or lease.closed or lease.event_states is None \
+                or lease.time_states is None or lease.document_state is None:
+            raise ValueError("Event-Time selection evaluation needs a live eval lease")
+        event_index = {eid: index for index, eid in enumerate(lease.event_ids)}
+        time_index = {tid: index for index, tid in enumerate(lease.time_ids)}
+
+        def scorer(chunk):
+            coordinates = [(event_index[row.left_id], time_index[row.right_id])
+                           for row in chunk]
+            indices = torch.tensor(coordinates, dtype=torch.long,
+                                   device=lease.document_state.device)
+            return self.core.task_modules["event_time"](
+                lease.event_states, lease.time_states, indices, lease.document_state,
+                event_time_geometry(lease, coordinates,
+                                    content_length=len(target.layout.article.content)))
+
+        return score_full_universe(
+            article_id=article_id, universe=target.pairs["event_time"],
+            chunk_size=self.chunk_size, score_chunk=scorer)

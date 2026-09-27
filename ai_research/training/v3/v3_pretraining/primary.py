@@ -15,6 +15,7 @@ from runtime.v3_pretraining.event_features import FinalClusterFeatureLease
 from training.v3_pretraining.attribution import gold_cluster_local_ids
 from training.v3_pretraining.event import EventGoldFeatures
 from training.v3_pretraining.targets import ArticleTargets, RankTarget, ValidatedGoldArticle
+from training.v3_pretraining.selection_contract import primary_strict_ordering_metric
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,7 +65,7 @@ class PrimaryGoldAdapter:
 
     def loss(self, article: ValidatedGoldArticle, target: ArticleTargets,
              features: EventGoldFeatures, final: FinalClusterFeatureLease) -> PrimaryLossResult:
-        if (article.split != "train" or target.article_version_id != final.article_version_id
+        if (article.split not in ("train", "dev", "test") or target.article_version_id != final.article_version_id
                 or target.content_sha256 != final.content_sha256
                 or features.time.closed or features.time.extra_states is None
                 or features.closure.source_mode != "GOLD_ORACLE"
@@ -102,6 +103,43 @@ class PrimaryGoldAdapter:
         return PrimaryLossResult(loss, counts["positive"], len(sampled),
                                  sum(row.left_id[0] != row.right_id[0] for row in sampled),
                                  counts["ignored"], len(view.cluster_ids), len(statements))
+
+    @torch.no_grad()
+    def evaluate_full_universe(self, article: ValidatedGoldArticle,
+                               target: ArticleTargets,
+                               features: EventGoldFeatures,
+                               final: FinalClusterFeatureLease) -> dict[str, object]:
+        """Score every proposition once and evaluate all strict non-tie Gold pairs."""
+        if self.core.training or article.split not in ("dev", "test"):
+            raise ValueError("Primary selection evaluation requires eval-mode dev/test Gold")
+        view = final.view_for("PRIMARY")
+        extras = features.time.extra_states
+        if extras is None:
+            raise RuntimeError("Primary selection evaluation lost exact Statement states")
+        statements = {row.owner_id: extras["STATEMENT:" + row.owner_id]
+                      for row in target.spans["semantic_proposer"]
+                      if row.label == "STATEMENT"}
+        assertors = {row.statement_id: extras["ASSERTOR:" + row.statement_id]
+                     for row in target.assertors if row.alignment is not None}
+        raw_scores = self.core.task_modules["primary"](
+            view, statements, assertors, self.core.primary_adapter)
+        cluster_map = gold_cluster_local_ids(article, features)
+        mapped = {"E:" + gold_id: "E:" + local_id
+                  for gold_id, local_id in cluster_map.items()}
+        mapped.update({"S:" + sid: "S:" + sid for sid in statements})
+        scores = {gold_id: float(raw_scores[local_id])
+                  for gold_id, local_id in mapped.items()}
+        pairs = tuple((row.left_id, row.right_id, row.left_preferred)
+                      for row in target.primary)
+        metric = primary_strict_ordering_metric(pairs, scores)
+        return {
+            "metric": metric,
+            "score_inventory": scores,
+            "strict_pair_count": target.primary.counts()["positive"],
+            "ties_ignored": target.primary.counts()["ignored"],
+            "sampling_applied": False,
+            "serving_pair_cap_applied": False,
+        }
 
 
 def mean_article_primary_loss(results: Sequence[PrimaryLossResult]) -> torch.Tensor:

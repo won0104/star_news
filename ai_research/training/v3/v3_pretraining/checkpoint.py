@@ -1,6 +1,6 @@
 """v3 smoke checkpoint의 완전성·provenance·strict resume 경계.
 
-Pinned backbone bytes는 저장하지 않는다. torch.load는 weights-only로 읽고 19-task
+Pinned backbone bytes는 저장하지 않는다. torch.load는 weights-only로 읽고 active-task
 registry, optimizer name/shape ownership, run/config/data snapshot을 비교 후 복원한다.
 """
 
@@ -26,10 +26,31 @@ from training.v3_pretraining.corpus import DOCS, GOLD_DIR, TrainGoldReader
 from training.v3_pretraining.harness import (HarnessConfig, V3Trainer, audit_optimizer,
                                              build_optimizer, fresh_full_core,
                                              parameter_manifest)
+from training.v3_pretraining.relation_sampling import (
+    RelationSamplingPolicy, validate_relation_training_metadata)
+from training.v3_pretraining.selection_contract import (
+    validate_checkpoint_selection_contract)
 
 
-FORMAT_VERSION = "v3-fresh-train-checkpoint-v1"
+FORMAT_VERSION = "v3-fresh-train-checkpoint-v6-no-entity-priority"
 PROJECT = Path(__file__).resolve().parents[2]
+ENGINEERING_CHECKPOINT_REQUIRED_FIELDS = frozenset({
+    "format_version", "mode", "run_id", "seed", "harness_config",
+    "harness_config_sha256", "architecture_config", "architecture_config_sha256",
+    "backbone", "tokenizer", "task_registry", "label_mappings", "producer_hashes",
+    "parameter_manifest", "parameter_ownership_audit", "relation_training_metadata",
+    "selection_contract", "source_snapshot", "model_state", "optimizer_state", "scheduler_state",
+    "scaler_state", "rng_state", "sampler_state", "training_state", "eval_reference",
+})
+
+
+def relation_policy_from_config(config: HarnessConfig) -> RelationSamplingPolicy:
+    """Reconstruct the strict D7 policy without creating a model or loading weights."""
+    return RelationSamplingPolicy(
+        version=config.relation_sampling_policy_version,
+        seed=config.relation_sampling_seed,
+        negative_limit=config.relation_negative_limit,
+        about_lexical_policy=config.relation_about_lexical_policy)
 
 
 def label_mappings() -> dict:
@@ -42,6 +63,12 @@ def producer_hashes() -> dict:
     paths = ("models/backbone.py", "models/v3_pretraining/architecture.py",
              "runtime/v3_pretraining/source_layout.py",
              "training/v3_pretraining/targets.py",
+             "training/v3_pretraining/relation_sampling.py",
+             "training/v3_pretraining/relation_evaluation.py",
+             "training/v3_pretraining/selection_contract.py",
+             "training/v3_pretraining/selection_evaluation.py",
+             "training/v3_pretraining/optimization_contract.py",
+             "training/v3_pretraining/attribution.py",
              "training/v3_pretraining/harness.py",
              "training/v3_pretraining/checkpoint.py")
     return {name: _file_digest(PROJECT / name) for name in paths}
@@ -117,16 +144,26 @@ def source_cache_key(*, article_sha256: str, backbone: BackboneConfig,
                          "window_digest": window_digest})
 
 
-def save_checkpoint(path: str | Path, trainer: V3Trainer,
-                    optimizer: torch.optim.Optimizer, *,
-                    reader: TrainGoldReader, exposed_ids: tuple[str, ...],
-                    eval_reference: Mapping[str, Any]) -> dict:
-    """한 fresh run의 완전한 resume 상태만 원자적으로 저장한다."""
+def build_checkpoint_payload(
+        trainer: V3Trainer, optimizer: torch.optim.Optimizer, *,
+        reader: TrainGoldReader, exposed_ids: tuple[str, ...],
+        eval_reference: Mapping[str, Any],
+        selection_contract: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build the strict writer payload in memory for validation before I/O."""
     core = trainer.core
     config = trainer.config.to_dict()
     ownership = audit_optimizer(core, trainer.backbone, optimizer)
     source = source_snapshot(reader, exposed_ids)
     architecture = asdict(core.config)
+    if selection_contract is None:
+        raise ValueError("D8 checkpoint requires frozen selection contract metadata")
+    selection = validate_checkpoint_selection_contract(selection_contract)
+    clip_summary = selection["gradient_clipping_summary"]
+    if (clip_summary["cumulative_clipped_count"]
+            != trainer.cumulative_clipped_count
+            or (trainer.optimizer_steps > 0 and clip_summary["groups"] <= 0)):
+        raise ValueError("D8 checkpoint clipping summary differs from trainer state")
     payload = {"format_version": FORMAT_VERSION, "mode": "ENGINEERING_SMOKE_ONLY",
                "run_id": trainer.config.run_id, "seed": trainer.config.seed,
                "harness_config": config, "harness_config_sha256": _json_digest(config),
@@ -143,6 +180,8 @@ def save_checkpoint(path: str | Path, trainer: V3Trainer,
                "producer_hashes": producer_hashes(),
                "parameter_manifest": list(parameter_manifest(core)),
                "parameter_ownership_audit": ownership,
+               "relation_training_metadata": trainer.relation_training_metadata(),
+               "selection_contract": selection,
                "source_snapshot": source,
                "model_state": core.state_dict(),
                "optimizer_state": optimizer.state_dict(),
@@ -154,6 +193,24 @@ def save_checkpoint(path: str | Path, trainer: V3Trainer,
                "training_state": {"optimizer_steps": trainer.optimizer_steps,
                                   "articles_seen": trainer.articles_seen},
                "eval_reference": dict(eval_reference)}
+    if set(payload) != ENGINEERING_CHECKPOINT_REQUIRED_FIELDS:
+        raise AssertionError("checkpoint writer schema differs from strict loader")
+    validate_relation_training_metadata(
+        payload["relation_training_metadata"],
+        expected_policy=relation_policy_from_config(trainer.config))
+    return payload
+
+
+def save_checkpoint(path: str | Path, trainer: V3Trainer,
+                    optimizer: torch.optim.Optimizer, *,
+                    reader: TrainGoldReader, exposed_ids: tuple[str, ...],
+                    eval_reference: Mapping[str, Any],
+                    selection_contract: Mapping[str, Any] | None = None) -> dict:
+    """한 fresh run의 완전한 resume 상태만 원자적으로 저장한다."""
+    payload = build_checkpoint_payload(
+        trainer, optimizer, reader=reader, exposed_ids=exposed_ids,
+        eval_reference=eval_reference, selection_contract=selection_contract)
+    source = payload["source_snapshot"]
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = target.with_name(target.name + ".tmp")
@@ -171,16 +228,15 @@ def save_checkpoint(path: str | Path, trainer: V3Trainer,
 def load_checkpoint(path: str | Path, backbone: torch.nn.Module, *,
                     expected_run_id: str, expected_config_sha256: str,
                     reader: TrainGoldReader, tokenizer=None,
-                    restore_rng_state: bool = True) -> tuple[V3Trainer, torch.optim.Optimizer, dict]:
+                    restore_rng_state: bool = True,
+                    expected_selection_support_manifest_sha256: str | None = None
+                    ) -> tuple[V3Trainer, torch.optim.Optimizer, dict]:
     """구버전/부분/다른 run·config·Gold snapshot을 거부하며 strict load한다."""
     payload = torch.load(path, map_location="cpu", weights_only=True)
-    required = {"format_version", "mode", "run_id", "seed", "harness_config", "harness_config_sha256",
-                "architecture_config", "architecture_config_sha256", "backbone", "tokenizer",
-                "task_registry", "label_mappings", "producer_hashes",
-                "parameter_manifest", "parameter_ownership_audit",
-                "source_snapshot", "model_state", "optimizer_state", "scheduler_state",
-                "scaler_state", "rng_state", "sampler_state", "training_state", "eval_reference"}
-    if not isinstance(payload, dict) or set(payload) != required or payload["format_version"] != FORMAT_VERSION or payload["mode"] != "ENGINEERING_SMOKE_ONLY":
+    if (not isinstance(payload, dict)
+            or set(payload) != ENGINEERING_CHECKPOINT_REQUIRED_FIELDS
+            or payload["format_version"] != FORMAT_VERSION
+            or payload["mode"] != "ENGINEERING_SMOKE_ONLY"):
         raise ValueError("incomplete or old v3 checkpoint")
     if payload["run_id"] != expected_run_id or payload["harness_config_sha256"] != expected_config_sha256:
         raise ValueError("checkpoint run/config identity differs")
@@ -189,6 +245,14 @@ def load_checkpoint(path: str | Path, backbone: torch.nn.Module, *,
         raise ValueError("checkpoint harness config digest/shape differs")
     config = HarnessConfig(**config_data)
     config.validate()
+    relation_articles = validate_relation_training_metadata(
+        payload["relation_training_metadata"],
+        expected_policy=relation_policy_from_config(config))
+    validate_checkpoint_selection_contract(
+        payload["selection_contract"],
+        expected_manifest_sha256=expected_selection_support_manifest_sha256)
+    if expected_selection_support_manifest_sha256 is None:
+        raise ValueError("D8 resume requires the current frozen support manifest SHA")
     if config.run_id != expected_run_id or config.seed != payload["seed"]:
         raise ValueError("checkpoint run/seed differs")
     a = payload["architecture_config"]
@@ -232,11 +296,14 @@ def load_checkpoint(path: str | Path, backbone: torch.nn.Module, *,
     if payload["scheduler_state"] != {"kind": "NONE", "state": None} or payload["scaler_state"] != {"kind": "NONE_FP32", "state": None}:
         raise ValueError("checkpoint scheduler/scaler contract differs")
     trainer = V3Trainer(core, backbone, config, tokenizer=tokenizer)
+    trainer.relation_sampling_manifest = relation_articles
     state = payload["training_state"]
     if state["optimizer_steps"] < 0 or state["articles_seen"] < 0 or payload["sampler_state"]["cursor"] != state["articles_seen"]:
         raise ValueError("checkpoint run/sampler state differs")
     trainer.optimizer_steps = state["optimizer_steps"]
     trainer.articles_seen = state["articles_seen"]
+    trainer.cumulative_clipped_count = payload["selection_contract"][
+        "gradient_clipping_summary"]["cumulative_clipped_count"]
     if restore_rng_state:
         restore_rng(payload["rng_state"])
     return trainer, optimizer, payload
