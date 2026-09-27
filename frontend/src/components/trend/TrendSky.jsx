@@ -85,11 +85,15 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
   const [previewGraphs, setPreviewGraphs] = useState({})
   const [articlePanelOpen, setArticlePanelOpen] = useState(false)
   const [trail, setTrail] = useState([])
+  const [journey, setJourney] = useState(null)
   // Neighbours do not change while the screen is open, so a key already opened is served
   // from here rather than fetched again.
   const cache = useRef(new Map())
   const activeKeyRef = useRef(null)
   const handledSelectionRef = useRef(null)
+  const journeyTimerRef = useRef(null)
+
+  useEffect(() => () => window.clearTimeout(journeyTimerRef.current), [])
 
   useEffect(() => {
     if (given) return
@@ -110,12 +114,14 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
   }, [given, topic])
 
   const close = useCallback(() => {
+    window.clearTimeout(journeyTimerRef.current)
     activeKeyRef.current = null
     setOpenKey(null)
     setGraph(null)
     setGraphState('idle')
     setArticlePanelOpen(false)
     setTrail([])
+    setJourney(null)
   }, [])
 
   /*
@@ -152,12 +158,16 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
 
   const open = useCallback((
     trend,
-    { preserveGraph = false, trailMode = 'append', trailIndex = -1 } = {},
+    { preserveGraph = false, trailMode = 'append', trailIndex = -1, navigation = null } = {},
   ) => {
     const nodeType = trend.nodeType ?? 'EVENT'
     const nextTrailNode = trailNode(trend)
+    const journeyStartedAt = performance.now()
+    const departureDuration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 300
+    window.clearTimeout(journeyTimerRef.current)
     activeKeyRef.current = trend.nodeKey
     setOpenKey(trend.nodeKey)
+    setJourney(navigation ? { ...navigation, phase: 'departing' } : null)
     setTrail((current) => {
       if (trailMode === 'reset') return [nextTrailNode]
       if (trailMode === 'truncate') return current.slice(0, trailIndex + 1)
@@ -174,30 +184,49 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
       recordNodeClick(nodeType, trend.nodeKey).catch(() => {})
     }
 
+    const commitGraph = (payload) => {
+      if (activeKeyRef.current !== trend.nodeKey) return
+      const apply = () => {
+        if (activeKeyRef.current !== trend.nodeKey) return
+        setGraph(payload)
+        setGraphState('ready')
+        if (!navigation) return
+        setJourney({ ...navigation, phase: 'arriving' })
+        journeyTimerRef.current = window.setTimeout(() => setJourney(null), 850)
+      }
+
+      // Keep even cached responses from replacing the scene before the departure reads.
+      const delay = navigation
+        ? Math.max(0, departureDuration - (performance.now() - journeyStartedAt))
+        : 0
+      journeyTimerRef.current = window.setTimeout(apply, delay)
+    }
+
     // A sampled sky's keys are not in Neo4j, so asking for them would only 404.
     const ready = sample
       ? trendNeighbors[trend.nodeKey]
       : (givenNeighbors?.[trend.nodeKey] ?? cache.current.get(trend.nodeKey))
 
     if (ready) {
-      setGraph(ready)
-      setGraphState('ready')
+      commitGraph(ready)
       return
     }
 
     if (!preserveGraph) setGraph(null)
     setGraphState('loading')
-    fetchNeighbors(nodeType, trend.nodeKey)
+    // Event-to-event links usually pass through a shared Entity, so the main graph
+    // needs two hops. A one-hop response contains only the Event's direct parts.
+    fetchNeighbors(nodeType, trend.nodeKey, { depth: 2 })
       .then((payload) => {
         cache.current.set(trend.nodeKey, payload)
-        // A different star may have been pressed while this was in flight.
-        if (activeKeyRef.current !== trend.nodeKey) return
-        setGraph(payload)
-        setGraphState('ready')
+        commitGraph(payload)
       })
       .catch((error) => {
         if (error?.name === 'AbortError') return
         if (activeKeyRef.current !== trend.nodeKey) return
+        window.clearTimeout(journeyTimerRef.current)
+        setJourney(null)
+        setGraph(null)
         setGraphState('failed')
       })
   }, [account, givenNeighbors, sample])
@@ -210,16 +239,16 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
   }, [open, selectedNode])
 
   /**
-   * 화면에 보이는 관련 Event가 다음 중심이 되었을 때의 1-Hop 구성을 미리 가져온다.
-   * 작은 별은 별도 장식이 아니라 이 응답을 유형별로 요약한 것이며, 이미 받아 둔 응답은
-   * 실제 Event 이동에도 같은 cache를 사용한다.
+   * 화면에 보이는 관련 Event가 다음 중심이 되었을 때의 2-Hop 구성을 최대 30개까지
+   * 미리 가져온다. 작은 별 하나가 다음 Event 하나를 뜻하며, 넓은 미리보기 응답은
+   * 실제 중심 그래프의 15개 cache와 섞지 않는다.
    */
   useEffect(() => {
     if (graphState !== 'ready' || !graph || sample) return undefined
 
     const relatedEvents = (graph.nodes ?? [])
       .filter((node) => node.nodeType === 'EVENT')
-      .slice(0, 2)
+      .slice(0, 3)
     const missing = relatedEvents.filter(
       (node) => !givenNeighbors?.[node.nodeKey] && !previewGraphs[node.nodeKey],
     )
@@ -231,10 +260,12 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
         const payload =
           cache.current.get(node.nodeKey) ??
           (await fetchNeighbors(node.nodeType, node.nodeKey, {
-            depth: 1,
+            depth: 2,
+            limit: 30,
             signal: controller.signal,
           }))
-        cache.current.set(node.nodeKey, payload)
+        // Preview responses use a wider page than the main graph, so keep them out of
+        // the main cache and preserve the main view's stable 15-candidate composition.
         return [node.nodeKey, payload]
       }),
     ).then((results) => {
@@ -265,7 +296,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
     const previews = Object.fromEntries(
       (graph.nodes ?? [])
         .filter((node) => node.nodeType === 'EVENT')
-        .slice(0, 2)
+        .slice(0, 3)
         .map((node) => [
           node.nodeKey,
           sample
@@ -279,17 +310,18 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
       <TrendConstellation
         graph={graph}
         previewGraphs={previews}
+        journey={journey}
         articlePanelOpen={articlePanelOpen}
         onArticlePanelOpenChange={setArticlePanelOpen}
         onBack={close}
-        onWalk={(node) =>
+        onWalk={(node, navigation) =>
           open(
             {
               nodeType: node.nodeType ?? 'EVENT',
               nodeKey: node.id,
               label: node.label,
             },
-            { preserveGraph: true },
+            { preserveGraph: true, navigation },
           )
         }
         trail={trail}

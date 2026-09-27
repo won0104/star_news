@@ -200,9 +200,20 @@ def merge_news_organization_entity(
     return result["nodeId"]
 
 
+# Entity 보조 라벨 설정 - entityType 값에 따라 세부 라벨(Person/Location/...)을 추가로 붙임
+_ENTITY_SECONDARY_LABEL_CYPHER = """
+        FOREACH (_ IN CASE WHEN e.entityType = 'PERSON' THEN [1] ELSE [] END | SET e:Person)
+        FOREACH (_ IN CASE WHEN e.entityType = 'LOCATION' THEN [1] ELSE [] END | SET e:Location)
+        FOREACH (_ IN CASE WHEN e.entityType = 'ORGANIZATION' THEN [1] ELSE [] END | SET e:Organization)
+        FOREACH (_ IN CASE WHEN e.entityType = 'PRODUCT' THEN [1] ELSE [] END | SET e:Product)
+        FOREACH (_ IN CASE WHEN e.entityType = 'GENERIC' THEN [1] ELSE [] END | SET e:Generic)
+"""
+
+
 # 기사 본문에서 뽑은 Entity를 생성하거나 이미 있으면 재사용
 def merge_extracted_entity(
-    session: Neo4jRunner, canonical_name: str, entity_type: str, created_at: datetime
+    session: Neo4jRunner, canonical_name: str, entity_type: str, created_at: datetime,
+    aliases: list[str] | None = None,
 ) -> str | None:
 
     # 노이즈면 None
@@ -210,20 +221,59 @@ def merge_extracted_entity(
     if is_noise_entity_name(normalized_name):
         return None
 
+    # 매칭 후보 순서: 자기 canonicalName 먼저, 그다음 aliases(정규화해서 비교)
+    candidate_names = [
+        n for n in dict.fromkeys([normalized_name] + [normalize_entity_name(a) for a in (aliases or [])]) if n
+    ]
+
+    # 후보 이름 중 하나라도 canonicalName이 겹치는 기존 Entity를 찾는다
+    existing = session.run(
+        """
+        UNWIND range(0, size($candidateNames) - 1) AS idx
+        WITH $candidateNames[idx] AS name, idx
+        MATCH (e:Entity {canonicalName: name})
+        WHERE e.entityType = $entityType OR e.entityType IS NULL
+        RETURN e.nodeId AS nodeId, name AS matchedName, idx
+        ORDER BY idx
+        LIMIT 1
+        """,
+        candidateNames=candidate_names,
+        entityType=entity_type,
+    ).single()
+
+    # 매칭되는 기존 Entity를 찾음 - 새로 안 만들고 이 노드를 그대로 재사용
+    if existing:
+        node_id = existing["nodeId"]
+        new_alias = canonical_name if existing["matchedName"] != normalized_name else None
+
+        session.run(
+            """
+            MATCH (e:Entity {nodeId: $nodeId})
+            SET e.entityType = coalesce(e.entityType, $entityType), e.updatedAt = $createdAt,
+                // newAlias가 없거나 이미 있는 표현이면 그대로, 새 표현이면 이어붙임
+                e.aliases = CASE
+                    WHEN $newAlias IS NULL OR $newAlias IN coalesce(e.aliases, []) THEN coalesce(e.aliases, [])
+                    ELSE coalesce(e.aliases, []) + $newAlias
+                END
+            """
+            + _ENTITY_SECONDARY_LABEL_CYPHER,
+            nodeId=node_id,
+            entityType=entity_type,
+            createdAt=created_at,
+            newAlias=new_alias,
+        )
+        return node_id
+
+    # 후보 중 아무것도 안 겹침 - 완전히 새로운 Entity라 새 노드 생성
     result = session.run(
         """
-        // canonicalName(정규화된 이름)으로 MERGE - 다른 기사에서 같은 이름이면 재사용, 다르면 새로 생성
-        MERGE (e:Entity {canonicalName: $canonicalName})
-        ON CREATE SET e.nodeId = randomUUID(), e.createdAt = $createdAt
-        // entityType은 처음 값으로 고정(coalesce)
-        SET e.entityType = coalesce(e.entityType, $entityType), e.updatedAt = $createdAt
-        FOREACH (_ IN CASE WHEN e.entityType = 'PERSON' THEN [1] ELSE [] END | SET e:Person)
-        FOREACH (_ IN CASE WHEN e.entityType = 'LOCATION' THEN [1] ELSE [] END | SET e:Location)
-        FOREACH (_ IN CASE WHEN e.entityType = 'ORGANIZATION' THEN [1] ELSE [] END | SET e:Organization)
-        FOREACH (_ IN CASE WHEN e.entityType = 'PRODUCT' THEN [1] ELSE [] END | SET e:Product)
-        FOREACH (_ IN CASE WHEN e.entityType = 'GENERIC' THEN [1] ELSE [] END | SET e:Generic)
-        RETURN e.nodeId AS nodeId
-        """,
+        CREATE (e:Entity {
+            nodeId: randomUUID(), canonicalName: $canonicalName, entityType: $entityType,
+            createdAt: $createdAt, updatedAt: $createdAt, aliases: []
+        })
+        """
+        + _ENTITY_SECONDARY_LABEL_CYPHER
+        + "        RETURN e.nodeId AS nodeId",
         canonicalName=normalized_name,
         entityType=entity_type,
         createdAt=created_at,

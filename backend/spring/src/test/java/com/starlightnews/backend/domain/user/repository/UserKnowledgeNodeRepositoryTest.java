@@ -208,6 +208,54 @@ class UserKnowledgeNodeRepositoryTest {
 	}
 
 	@Test
+	void upsertClick은_now가_기존_lastSeenAt보다_이르면_lastSeenAt을_되돌리지_않는다() {
+		// 같은 Node 로 동시에 들어온 두 클릭 중 now 가 더 이른 쪽이 나중에 커밋되는 상황이다.
+		// 되돌리면 first_seen_at 보다 앞서게 되어 ck_user_knowledge_nodes_time_order 에 걸린다.
+		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
+		LocalDateTime earlier = later.minusSeconds(1);
+		UserKnowledgeNodeId id = id(1L, NodeType.ENTITY, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstClick(id, "한국은행", "ECONOMY", later));
+		entityManager.flush();
+
+		userKnowledgeNodeRepository.upsertClick(1L, "ENTITY", NODE_ID, "한국은행", "ECONOMY", earlier);
+		entityManager.clear();
+
+		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
+		assertThat(reloaded.getNodeClickCount()).isEqualTo(2);
+		assertThat(reloaded.getLastSeenAt()).isEqualTo(later);
+		assertThat(reloaded.getFirstSeenAt()).isBeforeOrEqualTo(reloaded.getLastSeenAt());
+	}
+
+	@Test
+	void incrementClick도_lastSeenAt을_되돌리지_않는다() {
+		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
+		UserKnowledgeNodeId id = id(1L, NodeType.ENTITY, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstClick(id, "한국은행", "ECONOMY", later));
+		entityManager.flush();
+
+		userKnowledgeNodeRepository.incrementClick(id, later.minusSeconds(1));
+		entityManager.clear();
+
+		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
+		assertThat(reloaded.getLastSeenAt()).isEqualTo(later);
+	}
+
+	@Test
+	void upsertRead도_lastSeenAt을_되돌리지_않는다() {
+		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
+		UserKnowledgeNodeId id = id(1L, NodeType.EVENT, NODE_ID);
+		entityManager.persist(UserKnowledgeNode.forFirstRead(id, "기준금리 동결", "ECONOMY", later));
+		entityManager.flush();
+
+		userKnowledgeNodeRepository.upsertRead(1L, "EVENT", NODE_ID, "기준금리 동결", "ECONOMY",
+				1, 0, later.minusMinutes(5));
+		entityManager.clear();
+
+		UserKnowledgeNode reloaded = userKnowledgeNodeRepository.findById(id).orElseThrow();
+		assertThat(reloaded.getLastSeenAt()).isEqualTo(later);
+	}
+
+	@Test
 	void upsertClick은_열람으로_만들어진_Row의_read_article_count를_보존한다() {
 		LocalDateTime first = LocalDateTime.of(2024, 5, 25, 5, 20);
 		LocalDateTime later = LocalDateTime.of(2024, 5, 26, 10, 0);
