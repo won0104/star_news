@@ -94,8 +94,8 @@
     },
     {
       "scope": "top-trend-spacing",
-      "decision": "Spread the initial ten Event anchors farther across the measured window opening and clamp only their visible recommendation labels to two lines.",
-      "rationale": "Wider spacing and bounded label height prevent long recommendation text from covering neighboring stars while accessible labels retain the full Event text."
+      "decision": "Spread the initial ten Event anchors farther across the measured window opening and clamp only their visible recommendation labels to three lines.",
+      "rationale": "Wider spacing and bounded label height prevent long recommendation text from covering neighboring stars while accessible labels retain the full Event text; the measured glass layer renders above foreground plants so labels and stars remain legible."
     }
   ],
   "evidence": [

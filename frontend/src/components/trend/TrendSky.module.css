@@ -171,7 +171,7 @@
   text-shadow: 0 1px 6px rgba(8, 10, 18, 0.72);
   word-break: keep-all;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
 }
 
 .meta {
