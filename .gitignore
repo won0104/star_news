@@ -95,3 +95,9 @@ ai/outputs/
 
 # 개인 학습 메모 — 저장소에 올리지 않는다
 프로젝트_아키텍처_학습_현황.md
+
+
+# 포팅 매뉴얼용 환경변수 예시
+!/exec/
+!/exec/env/
+!/exec/env/*.env.example
