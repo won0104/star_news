@@ -8,7 +8,7 @@ import {
   trendSkyExpandCopy,
   formatTrendGraphLabel,
 } from '../../data/trendNeighbors'
-import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlots } from '../../data/trendTop'
+import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlotPatterns } from '../../data/trendTop'
 import { useSession } from '../../store/session'
 import { TrendConstellation } from './TrendConstellation'
 import styles from './TrendSky.module.css'
@@ -165,7 +165,7 @@ export function TrendSky({
   const sample = SAMPLE_WHEN_EMPTY && !topic && homeState !== 'loading' && live.length === 0
   const source = sample ? homeTrends : home
   const trends = source?.trends ?? []
-  const ranked = [...trends].sort((a, b) => a.rank - b.rank).slice(0, trendSlots.length)
+  const ranked = [...trends].sort((a, b) => a.rank - b.rank).slice(0, trendSlotPatterns[0].length)
   const topCount = Math.max(1, ...ranked.map((trend) => trend.articleCount))
 
   const open = useCallback((
@@ -367,11 +367,13 @@ export function TrendSky({
     )
   }
 
+  const slots = pickSlotPattern(source?.snapshotAt, ranked)
+
   return (
     <div className={styles.field} role="group" aria-label={trendSkyCopy.fieldLabel}>
       <div className={styles.canvas}>
         {ranked.map((trend, index) => {
-          const slot = trendSlots[index]
+          const slot = slots[index]
           const [x, y] = slot.at
           const [narrowX, narrowY] = slot.atNarrow || slot.at
           // Area, not diameter, carries the count — a star twice as wide should not read
@@ -382,7 +384,7 @@ export function TrendSky({
           return (
             <div
               key={trend.nodeKey}
-              className={styles.node}
+              className={`${styles.node} ${index === 0 ? styles.nodeLead : ''}`}
               style={{
                 '--x': `${x}%`,
                 '--y': `${y}%`,
@@ -418,6 +420,34 @@ export function TrendSky({
       )}
     </div>
   )
+}
+
+/**
+ * 집계 회차마다 배치 한 벌을 고른다.
+ *
+ * 자리는 고정이지만 제목 길이는 회차마다 달라서, 같은 벌이라도 긴 제목이 한쪽에 몰리면 화면이
+ * 그쪽으로 기운다(1440×900 에서 무게중심이 38~54% 까지 흔들렸다). 그래서 제목 글자 수를 무게로
+ * 벌마다 좌우 무게중심을 셈하고, 가운데에 가장 가까운 벌과 1% 안쪽으로 비슷한 벌 가운데에서
+ * 기준 시각으로 하나를 고른다. 같은 회차는 새로 고쳐도 같은 벌이고, 회차가 바뀌면 달라질 수 있다.
+ * 기준 시각이 없는 대역 샘플은 무게만으로 고른다.
+ */
+const BALANCE_TOLERANCE = 1
+
+function pickSlotPattern(snapshotAt, ranked) {
+  const lengths = ranked.map((trend) => formatTrendGraphLabel(trend).length || 1)
+  const offCentre = trendSlotPatterns.map((pattern) => {
+    const total = lengths.reduce((sum, length) => sum + length, 0)
+    const centre = lengths.reduce((sum, length, index) => sum + length * pattern[index].at[0], 0) / total
+    return Math.abs(centre - 50)
+  })
+  const best = Math.min(...offCentre)
+  const candidates = trendSlotPatterns.filter(
+    (_, index) => offCentre[index] <= best + BALANCE_TOLERANCE,
+  )
+
+  let hash = 0
+  for (const char of snapshotAt ?? '') hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  return candidates[hash % candidates.length]
 }
 
 /** 로딩·실패·빈 결과를 같은 자리에 같은 모양으로 알린다. */
