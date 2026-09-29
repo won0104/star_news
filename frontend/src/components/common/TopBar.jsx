@@ -35,6 +35,10 @@ import styles from './TopBar.module.css';
  * `search` 를 켜면 검색창도 이 chrome 의 일부가 된다. 세로 레일에서는 이름과 첫 목적지
  * 사이에 늘 자리를 차지하고, 가로 상단바에서는 아이콘 하나로 줄어 눌렀을 때만 예전 그
  * 자리에 떠오른다 — 상단바는 폭이 좁아 검색창까지 늘 펼쳐 둘 자리가 없다.
+ *
+ * `leafOptions` 는 켜진 잎 하나에 딸린 고르개다(오늘의 트렌드의 분야). 그 잎에 서 있을 때만
+ * 뜨고, 레일에서는 잎 아래로 한 단 더 들여, 상단바에서는 책갈피 안 잎의 오른쪽으로 잇는다.
+ * 고른 값은 여기 담지 않는다 — 받아서 보여 주고 새 값을 알릴 뿐이다.
  */
 /*
  * 책갈피가 바 뒤로 물리는 깊이. 이만큼은 바에 가려 보이지 않고, 나머지만 아래로 나온다 —
@@ -51,6 +55,7 @@ export function TopBar({
   nightGlass = false,
   search = false,
   onSearchSelect,
+  leafOptions,
 }) {
   const account = useSession();
   const navRef = useRef(null);
@@ -68,6 +73,12 @@ export function TopBar({
   const [tab, setTab] = useState({ left: 0, top: 0 });
   // 레일에서는 늘 펼쳐져 있으므로 이 값은 상단바일 때만 읽는다.
   const [searchOpen, setSearchOpen] = useState(false);
+  /*
+   * 상단바 책갈피가 옆으로 넘칠 때 어느 쪽에 더 있는가. 넘친 쪽 끝을 흐리게 해 "더 있다"를
+   * 알린다 — 스크롤바를 숨겨 두어서 그 표시 없이는 잘린 것이 끝처럼 보인다.
+   */
+  const subRef = useRef(null);
+  const [subMore, setSubMore] = useState({ left: false, right: false });
 
   useLayoutEffect(() => {
     if (rail) return undefined;
@@ -93,6 +104,55 @@ export function TopBar({
     };
   }, [rail, activeId]);
 
+  const readSubMore = () => {
+    const strip = subRef.current;
+    if (!strip) return;
+    const left = strip.scrollLeft > 1;
+    const right = strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 1;
+    setSubMore((current) =>
+      current.left === left && current.right === right ? current : { left, right },
+    );
+  };
+
+  useLayoutEffect(() => {
+    if (rail) return undefined;
+    readSubMore();
+    const strip = subRef.current;
+    if (!strip) return undefined;
+    const observer = new ResizeObserver(readSubMore);
+    observer.observe(strip);
+    return () => observer.disconnect();
+  }, [rail, activeId, leafOptions?.leafId]);
+
+  /*
+   * 넘친 책갈피는 포인터가 올라오면 끝까지 밀어 보이고, 떠나면 되돌린다. 되돌릴 때는 처음까지가
+   * 아니라 고른 것이 보이는 데까지만 — 끝쪽 분야를 골랐는데 처음으로 돌아가면 무엇이 켜졌는지
+   * 다시 보이지 않는다. 스크롤을 흉내만 내는 것이 아니라 실제로 민다.
+   *
+   * 마우스일 때만 한다. 터치도 pointerenter/leave 를 보내는데, 손가락이 닿자마자 끝으로 밀어
+   * 버리면 잡고 끄는 스크롤과 싸운다 — 터치는 띠의 제 스크롤(overflow-x)로 넘긴다.
+   */
+  const slideSub = (event, toEnd) => {
+    if (event.pointerType !== 'mouse') return;
+    const strip = subRef.current;
+    if (!strip || strip.scrollWidth <= strip.clientWidth) return;
+    let left = toEnd ? strip.scrollWidth : 0;
+    const chosen = toEnd ? null : strip.querySelector('[aria-pressed="true"]');
+    if (chosen) {
+      const overflow = chosen.offsetLeft + chosen.offsetWidth - strip.clientWidth + 16;
+      left = Math.max(0, overflow);
+    }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    strip.scrollTo({ left, behavior: reduce ? 'auto' : 'smooth' });
+  };
+
+  // 세로 휠은 옆으로 돌린다. 이 띠는 옆으로만 움직이므로 위아래 휠이 곧 옆 이동이다.
+  const wheelSub = (event) => {
+    const strip = subRef.current;
+    if (!strip || strip.scrollWidth <= strip.clientWidth || event.deltaX) return;
+    strip.scrollLeft += event.deltaY;
+  };
+
   useLayoutEffect(() => {
     // A direct link or narrower window can hide the selected tab beyond the scroll edge.
     const showActive = () => {
@@ -112,20 +172,53 @@ export function TopBar({
    * 바의 자식으로 서서 말풍선이 된다 — <nav> 가 옆으로 스크롤되느라 그 안의 것을 잘라내서다.
    * 만드는 것은 한 번뿐이고 놓는 자리만 다르다.
    */
+  const options =
+    leafOptions && leafOptions.leafId === activeId ? (
+      <span className={styles.navOptions} role="group" aria-label={leafOptions.label}>
+        {leafOptions.items.map((item) => {
+          const selected = item.id === leafOptions.selectedId;
+          return (
+            <button
+              key={item.id ?? 'all'}
+              type="button"
+              className={`${styles.navOption} ${selected ? styles.navOptionActive : ''}`}
+              aria-pressed={selected}
+              onClick={() => leafOptions.onSelect(item.id)}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </span>
+    ) : null;
+
   const leaves = section?.children?.length ? (
-    <span className={styles.navSub} style={rail ? undefined : tab}>
+    <span
+      ref={rail ? undefined : subRef}
+      className={`${styles.navSub} ${!rail && subMore.left ? styles.navSubMoreLeft : ''} ${
+        !rail && subMore.right ? styles.navSubMoreRight : ''
+      }`}
+      // 상단바의 책갈피는 분야까지 이으면 화면보다 길어질 수 있다 — 넘치면 옆으로 민다.
+      style={rail ? undefined : { ...tab, maxWidth: `calc(100vw - ${tab.left}px - 12px)` }}
+      onScroll={rail ? undefined : readSubMore}
+      onPointerEnter={rail ? undefined : (event) => slideSub(event, true)}
+      onPointerLeave={rail ? undefined : (event) => slideSub(event, false)}
+      onWheel={rail ? undefined : wheelSub}
+    >
       {section.children.map((child) => (
-        <button
-          key={child.id}
-          type="button"
-          className={`${styles.navSubItem} ${child.id === activeId ? styles.navSubItemActive : ''}`}
-          aria-current={child.id === activeId ? 'page' : undefined}
-          onPointerEnter={() => onIntent?.(child.id)}
-          onFocus={() => onIntent?.(child.id)}
-          onClick={() => onSelect(child.id)}
-        >
-          {child.label}
-        </button>
+        <Fragment key={child.id}>
+          <button
+            type="button"
+            className={`${styles.navSubItem} ${child.id === activeId ? styles.navSubItemActive : ''}`}
+            aria-current={child.id === activeId ? 'page' : undefined}
+            onPointerEnter={() => onIntent?.(child.id)}
+            onFocus={() => onIntent?.(child.id)}
+            onClick={() => onSelect(child.id)}
+          >
+            {child.label}
+          </button>
+          {child.id === activeId && options}
+        </Fragment>
       ))}
     </span>
   ) : null;

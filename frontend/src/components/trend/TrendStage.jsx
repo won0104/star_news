@@ -5,7 +5,6 @@ import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { useSettingsValues } from '../../store/settings'
 import { SCREEN_TRANSITIONS } from '../../utils/motion'
 import { BackgroundVideo } from '../common/BackgroundVideo'
-import { TopicNote } from './TopicNote'
 import { TrendSky } from './TrendSky'
 import styles from './TrendStage.module.css'
 
@@ -24,13 +23,10 @@ import styles from './TrendStage.module.css'
 const glassInset = ({ top, right, bottom, left }) =>
   [top, right, bottom, left].map((edge) => `${edge}%`).join(' ')
 
-export function TrendStage({ playTransition = false, selectedNode, topic = null, onTopicChange }) {
+export function TrendStage({ playTransition = false, selectedNode, topic = null, topicPick = 0 }) {
   const [ready, setReady] = useState(false)
   const [ended, setEnded] = useState(false)
   const [overlayRoot, setOverlayRoot] = useState(null)
-  // 쪽지를 누를 때마다 센다. 같은 분야를 다시 골라도 URL 은 그대로라, 이 수가 있어야 하늘이
-  // 펼쳐 둔 별자리를 접고 분야의 첫 화면으로 돌아간다.
-  const [topicPick, setTopicPick] = useState(0)
   const { reduceMotion } = useSettingsValues()
   const prefersReducedMotion = usePrefersReducedMotion()
   const sceneRef = useRef(null)
@@ -48,11 +44,6 @@ export function TrendStage({ playTransition = false, selectedNode, topic = null,
   )
   const settled = !canPlayTransition || ended
   const backdrop = nightBackdrop(nightWindow).src
-
-  const pickTopic = (topicCode) => {
-    setTopicPick((count) => count + 1)
-    onTopicChange(topicCode)
-  }
 
   return (
     <div className={styles.stage}>
@@ -87,15 +78,7 @@ export function TrendStage({ playTransition = false, selectedNode, topic = null,
           <img className={styles.frame} src={sceneWindow.src} alt="" aria-hidden />
         </div>
 
-        {/*
-          쪽지는 방의 물건이지 창밖이 아니다. 이 층이 나무틀 위에 뜨면서 별은 유리 안에 갇히는
-          자리라, 쪽지가 창틀에 붙은 것으로 읽힌다.
-        */}
-        <div ref={setOverlayRoot} className={styles.sceneOverlay}>
-          {onTopicChange && (
-            <TopicNote topic={topic} onSelect={pickTopic} pillar={sceneWindow.opening.left} />
-          )}
-        </div>
+        <div ref={setOverlayRoot} className={styles.sceneOverlay} />
       </div>
     </div>
   )
