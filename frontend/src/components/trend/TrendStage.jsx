@@ -5,7 +5,6 @@ import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { useSettingsValues } from '../../store/settings'
 import { SCREEN_TRANSITIONS } from '../../utils/motion'
 import { BackgroundVideo } from '../common/BackgroundVideo'
-import { TopicNote } from './TopicNote'
 import { TrendSky } from './TrendSky'
 import styles from './TrendStage.module.css'
 
@@ -24,7 +23,7 @@ import styles from './TrendStage.module.css'
 const glassInset = ({ top, right, bottom, left }) =>
   [top, right, bottom, left].map((edge) => `${edge}%`).join(' ')
 
-export function TrendStage({ playTransition = false, selectedNode, topic = null, onTopicChange }) {
+export function TrendStage({ playTransition = false, selectedNode, topic = null, topicPick = 0 }) {
   const [ready, setReady] = useState(false)
   const [ended, setEnded] = useState(false)
   const [overlayRoot, setOverlayRoot] = useState(null)
@@ -72,22 +71,14 @@ export function TrendStage({ playTransition = false, selectedNode, topic = null,
         <div className={styles.windowLayer}>
           {settled && (
             <div className={styles.windowGlass} style={{ inset: glassInset(sceneWindow.opening) }}>
-              <TrendSky overlayRoot={overlayRoot} selectedNode={selectedNode} topic={topic} />
+              <TrendSky overlayRoot={overlayRoot} selectedNode={selectedNode} topic={topic} topicPick={topicPick} />
             </div>
           )}
 
           <img className={styles.frame} src={sceneWindow.src} alt="" aria-hidden />
         </div>
 
-        {/*
-          쪽지는 방의 물건이지 창밖이 아니다. 이 층이 나무틀 위에 뜨면서 별은 유리 안에 갇히는
-          자리라, 쪽지가 창틀에 붙은 것으로 읽힌다.
-        */}
-        <div ref={setOverlayRoot} className={styles.sceneOverlay}>
-          {onTopicChange && (
-            <TopicNote topic={topic} onSelect={onTopicChange} pillar={sceneWindow.opening.left} />
-          )}
-        </div>
+        <div ref={setOverlayRoot} className={styles.sceneOverlay} />
       </div>
     </div>
   )

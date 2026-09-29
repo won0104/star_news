@@ -23,7 +23,7 @@ export function ViewPane({
   view,
   visit = 0,
   topic = null,
-  onTopicChange,
+  topicPick = 0,
   settled = true,
   playTrendTransition = false,
   selectedNode,
@@ -40,7 +40,7 @@ export function ViewPane({
           playTransition={playTrendTransition}
           selectedNode={selectedNode}
           topic={topic}
-          onTopicChange={onTopicChange}
+          topicPick={topicPick}
         />
       )}
       {view === 'foryou' && <RecommendPane settled={settled} />}

@@ -149,13 +149,15 @@
  * 열 장이 다 들어가지 않으면 여기서 스크롤된다 — 자리를 좌표로 박아두던 때에는 목록이
  * 보드보다 길어지면 종이가 나무틀을 넘어 책상 위로 흘러내렸다.
  *
- * `container-type` 을 여기 두어 종이 안 글자가 화면이 아니라 코르크에 비례하게 한다.
+ * `container-type` 을 여기 두어 종이 안 글자가 화면이 아니라 코르크에 비례하게 한다. 높이까지
+ * 재는 size 인 것은 가로로 긴 보드에서 종이를 높이에 맞춰 줄이기 위해서다(.slots 아래). 크기는
+ * corkPlacement 가 인라인으로 정하므로 내용에 기대지 않아 size 로 두어도 된다.
  */
 .corkArea {
   position: absolute;
   z-index: 2;
   overflow-y: auto;
-  container-type: inline-size;
+  container-type: size;
   padding: 2.4cqw;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -176,6 +178,54 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/*
+ * 가로로 긴 보드(브라우저 창이 2:1 에 가까울 때)에서는 폭에 맞춘 종이 두 줄이 코르크 높이를
+ * 넘겨, 아랫줄이 스크롤 뒤로 숨었다. 종이를 줄이기 전에 빈자리부터 걷는다 — 코르크 위아래 여백,
+ * 띠 아래, 두 줄 사이를 좁힌다. 그러고도 모자랄 때만 다섯 열로 고정한 채 종이 폭 c 에 높이로
+ * 상한을 건다:
+ *
+ *   100cqh = 띠(48cqw × 444/1923 ≈ 11.1cqw) + 띠 아래 1.2cqw + 종이 두 장(2 × c × 858/779)
+ *            + 줄 사이 1.6cqw   →   c = (100cqh − 13.9cqw) / 2.24 (반올림에 1px 넘치지 않게)
+ *
+ * 다 들어가는 보드에서는 min(100%, …) 이 100% 라 종이가 줄지 않는다. 종이가 125px 아래로
+ * 줄어야 할 만큼 낮으면 줄이지 않고 예전처럼 스크롤로 넘긴다.
+ */
+@container (min-aspect-ratio: 7 / 5) {
+  .banner {
+    margin-bottom: 1.2cqw;
+  }
+
+  .slots {
+    grid-template-columns: repeat(5, 1fr);
+    row-gap: 1.6cqw;
+    width: min(100%, max(calc(625px + 8.8cqw), calc(5 * (100cqh - 13.9cqw) / 2.24 + 8.8cqw)));
+    margin-inline: auto;
+  }
+}
+
+/*
+ * 더 납작한 보드(코르크 17:10 넘게)는 띠도 조금 줄인다 — 띠가 한 줄에 115px 남짓을 써서, 그만큼
+ * 종이가 작아지던 몫을 띠가 대신 진다. 위 식의 띠 몫이 11.1cqw 에서 9.2cqw(40cqw × 444/1923)로
+ * 바뀌므로 식도 함께 고친다.
+ */
+@container (min-aspect-ratio: 17 / 10) {
+  .banner {
+    width: min(100%, 40cqw);
+  }
+
+  .slots {
+    width: min(100%, max(calc(625px + 8.8cqw), calc(5 * (100cqh - 12cqw) / 2.24 + 8.8cqw)));
+  }
+}
+
+/* 창이 이만큼 납작하면 코르크 위아래 여백도 반으로 줄인다. 자기 크기로는 스스로를 물을 수 없어
+   (컨테이너 질의는 자손에만 닿는다) 뷰포트 비율로 가른다. */
+@media (min-aspect-ratio: 17 / 9) {
+  .corkArea {
+    padding-block: 1.2cqw;
+  }
 }
 
 /*
