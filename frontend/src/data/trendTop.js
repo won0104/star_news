@@ -33,30 +33,54 @@ export const homeTrends = {
 }
 
 /**
- * 순위별 별자리.
+ * 순위별 별자리 — 고정 배치 세 벌.
  *
  * `/home` returns a ranked list and nothing else — no edges, no coordinates — so the sky
- * has to be authored rather than derived. Fixed slots, filled in rank order: rank 1 takes
- * the first, rank 2 the second, and so on. Deriving positions from `nodeKey` instead would
- * scatter differently every session and let two stars land on top of each other; a fixed
- * set is the one arrangement that is always readable.
+ * has to be authored rather than derived. Rank 1 takes the first slot, rank 2 the second,
+ * and so on. 한 벌만 두면 매일 같은 모양이라, 줄 구성을 달리한 세 벌(4-3-3, 3-4-3, 3-3-4)을
+ * 두고 집계 회차마다 하나를 고른다(TrendSky 의 pickSlotPattern — 그 회차 제목 길이로 좌우가
+ * 가장 고른 벌 쪽에서 고른다). 같은 회차는 늘 같은 벌이다. 세 벌 모두 x 의 평균은 50% 근처다.
  *
- * `at` is a percentage of the field, matching how the rest of this screen is authored, and
- * `atNarrow` is the second set for a field taller than it is wide. Slots avoid the top
- * strip the toolbar sits in and leave room under each star for its label.
+ * 좌표는 유리에 대한 %, 별의 가운데다. 제목은 그 아래로 자라고 가로 유리에서는 끝까지 보이므로,
+ * 자리는 가장 긴 제목을 견디게 잡았다 — 1440×900(유리 950×637)에서 90자 남짓한 제목이 다섯 줄,
+ * 별부터 순위까지 높이의 27% 다. 이보다 낮은 유리는 줄을 자른다(TrendSky.module.css). 그래서:
+ *
+ * - 좌우로 겹치는 두 별(가운데 사이가 제목 폭 23cqw + 여유 1.1% 보다 가까운 쌍)은 위아래로 28%
+ *   넘게 떨어뜨린다(27% 에 딱 맞추니 조금 더 긴 제목에서 7px 겹쳤다). 네 별이 선 줄은 x 를
+ *   24.1% 간격으로 두어 양쪽 끝에 2.3% 씩 남기고, 세 별이 선 줄은 끝에서 3% 넘게 띄운다.
+ * - 세 줄을 유리 높이에 고르게 편다 — 별이 9~13%, 38~42%, 68~71% 에 선다. 흩어진 느낌은
+ *   줄마다 높이를 1~4% 엇갈리고, 세 별이 선 줄의 x 를 비켜서 낸다.
+ * - 가장 긴 제목(다섯 줄)이 맨 아래 칸에 와도 유리 높이의 95% 안에서 끝난다.
+ *
+ * `atNarrow` 는 세로로 긴 유리다(세 벌 모두 같다). 두 제목이 폭을 거의 다 쓰는 2열이라 x 는
+ * 2~3% 만 흔들고, 제목은 세 줄(낮은 유리는 두 줄)에서 자른다. 왼쪽 위에 "오늘의 트렌드" 알약이,
+ * 오른쪽 위에 기준 시각이 있어 첫 줄을 조금 내려 둔다.
  */
-export const trendSlots = [
-  { at: [46, 47], atNarrow: [50, 29] },
-  { at: [19, 27], atNarrow: [20, 14] },
-  { at: [73, 29], atNarrow: [80, 14] },
-  { at: [65, 63], atNarrow: [75, 42] },
-  { at: [35, 71], atNarrow: [25, 43] },
-  { at: [13, 48], atNarrow: [50, 58] },
-  { at: [87, 52], atNarrow: [18, 69] },
-  { at: [51, 16], atNarrow: [82, 69] },
-  { at: [80, 80], atNarrow: [25, 86] },
-  { at: [17, 80], atNarrow: [75, 86] },
+const NARROW_SLOTS = [
+  [25, 12.5],
+  [76, 10.5],
+  [28, 29.5],
+  [72, 27.5],
+  [22, 46.5],
+  [78, 44.5],
+  [27, 63.5],
+  [73, 61.5],
+  [23, 80.5],
+  [77, 78.5],
 ]
+
+const WIDE_PATTERNS = [
+  // 4-3-3
+  [[38, 10], [13.8, 13], [62.1, 12], [86.2, 9], [22, 42], [52, 41], [81, 40], [16, 71], [46, 70], [76, 69]],
+  // 3-4-3
+  [[50, 9], [20, 12], [80, 10], [13.8, 41], [38, 40], [62.1, 38], [86.2, 40], [25, 69], [55, 68], [83, 70]],
+  // 3-3-4
+  [[44, 10], [16, 13], [76, 11], [83, 40], [25, 42], [54, 39], [13.8, 71], [38, 70], [62.1, 68], [86.2, 69]],
+]
+
+export const trendSlotPatterns = WIDE_PATTERNS.map((wide) =>
+  wide.map((at, index) => ({ at, atNarrow: NARROW_SLOTS[index] })),
+)
 
 /** 별 크기는 기사 수가 정한다. 가장 많은 Event가 1.0, 가장 적은 Event가 이 값. */
 export const TREND_MIN_SCALE = 0.52
