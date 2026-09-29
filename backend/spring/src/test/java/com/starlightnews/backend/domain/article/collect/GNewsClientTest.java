@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.article.collect;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import com.starlightnews.backend.domain.article.dto.CollectedArticle;
@@ -139,5 +140,37 @@ class GNewsClientTest {
 		Throwable thrown = catchThrowable(() -> client.fetchTopHeadlines("business"));
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(ArticleCollectErrorCode.NEWS_SOURCE_UNAVAILABLE);
+	}
+
+	@Test
+	void 구간을_주면_from_to_page를_UTC_초단위로_붙인다() {
+		// KST 로 준 구간이 UTC 로 바뀌어 나가야 한다. 밀리초가 붙으면 GNews 가 형식 오류로 돌려준다.
+		server.expect(requestTo(org.hamcrest.Matchers.startsWith(BASE_URL + "/top-headlines")))
+				.andExpect(queryParam("from", "2026-09-26T00:00:00Z"))
+				.andExpect(queryParam("to", "2026-09-26T06:00:00Z"))
+				.andExpect(queryParam("page", "2"))
+				.andRespond(withSuccess(body(article("기준금리 동결", "본문")), MediaType.APPLICATION_JSON));
+
+		client.fetchTopHeadlines("business", new GNewsClient.Window(
+				OffsetDateTime.parse("2026-09-26T09:00:00+09:00"),
+				OffsetDateTime.parse("2026-09-26T15:00:00.123+09:00"),
+				2));
+
+		server.verify();
+	}
+
+	@Test
+	void 구간이_없으면_from_to_page를_붙이지_않는다() {
+		// 정시 수집은 호출 시점 기준이다. 구간 파라미터가 섞이면 매시 같은 구간만 다시 긁는다.
+		server.expect(requestTo(org.hamcrest.Matchers.allOf(
+						org.hamcrest.Matchers.startsWith(BASE_URL + "/top-headlines"),
+						org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("from=")),
+						org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("to=")),
+						org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("page=")))))
+				.andRespond(withSuccess(body(article("기준금리 동결", "본문")), MediaType.APPLICATION_JSON));
+
+		client.fetchTopHeadlines("business");
+
+		server.verify();
 	}
 }
