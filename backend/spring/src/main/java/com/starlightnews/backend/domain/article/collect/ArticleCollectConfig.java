@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @Configuration
 @EnableScheduling
-@EnableConfigurationProperties(GNewsProperties.class)
+@EnableConfigurationProperties({GNewsProperties.class, GNewsBackfillProperties.class})
 public class ArticleCollectConfig {
 
 	@Bean
