@@ -5,7 +5,7 @@
  * percentage of it — same authoring as <TrendConstellation>, so the two screens sit in
  * the same coordinate space and a star does not jump when one hands over to the other.
  *
- * `container-type: size` on the field keeps the type scale tied to the measured glass
+ * `container: sky / size` on the field keeps the type scale tied to the measured glass
  * opening rather than to the viewport.
  */
 
@@ -17,7 +17,7 @@
   width: min(100%, 1680px);
   overflow: hidden;
   transform: translateX(-50%);
-  container-type: size;
+  container: sky / size;
 }
 
 /* <TrendStage> already clips this field to the measured transparent opening of the chosen
@@ -32,31 +32,42 @@
 
 /* ---- 별 ---------------------------------------------------------------------- */
 
+/*
+ * 슬롯 좌표는 별의 가운데다. 상자 가운데를 걸면 제목 줄 수와 별 크기에 따라 별이 오르내려,
+ * 같은 줄의 별들이 들쭉날쭉해진다. 그래서 별 높이의 절반만큼만 끌어올리고 제목은 아래로
+ * 자라게 둔다.
+ */
 .node {
+  --star: calc(min(5.6cqw, 9cqh, 64px) * var(--scale));
   position: absolute;
   left: var(--x);
   top: var(--y);
   display: flex;
-  width: min(26cqw, 360px);
+  /* 가로로 넓게 써서 줄 수를 줄인다 — 유리는 위아래보다 좌우에 여유가 있다. 네 별이 한 줄에
+     서도 양쪽 끝에 여백이 남는 폭이다(data/trendTop 참고). */
+  width: min(23cqw, 360px);
   flex-direction: column;
   align-items: center;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, calc(var(--star) / -2));
 }
 
 /* The viewport can still be wide while the window opening is narrow (for example beside
    the desktop rail). Choose the compact slots from the space the stars actually receive,
-   so edge labels never depend on the browser width or get clipped by the wooden frame. */
-@container (max-width: 1100px) {
+   so edge labels never depend on the browser width or get clipped by the wooden frame.
+   폭이 아니라 비율로 가른다 — 가로 배치는 좌우가 남는 유리의 것이라, 폭이 좁아도 가로로 긴
+   유리는 가로 배치가 맞고 세로로 긴 유리는 폭이 넓어도 2열이 맞다. */
+@container sky (max-aspect-ratio: 1 / 1) {
   .node {
+    --star: calc(min(7.4cqw, 12cqh, 76px) * var(--scale));
     left: var(--narrow-x);
     top: var(--narrow-y);
-    width: min(38cqw, 360px);
+    width: min(44cqw, 300px);
   }
 }
 
 .star {
   display: block;
-  width: calc(min(7.4cqw, 12cqh, 76px) * var(--scale));
+  width: var(--star);
   padding: 0;
   border: 0;
   background: none;
@@ -156,8 +167,9 @@
 
 /* ---- 라벨 -------------------------------------------------------------------- */
 
+/* 별 → 12px → 제목 → 6px → 순위. 어느 별에서나 같은 거리여야 별과 제목이 한 묶음으로 읽힌다. */
 .text {
-  margin-top: 0.7cqw;
+  margin-top: 12px;
   text-align: center;
   pointer-events: none;
 }
@@ -166,17 +178,16 @@
   display: -webkit-box;
   overflow: hidden;
   margin: 0;
-  font: 700 clamp(11px, 1.18cqw, 19px)/1.34 var(--font-serif-kr);
+  font: 600 clamp(12.5px, 1.1cqw, 16px)/1.45 var(--font-serif-kr);
   color: rgba(252, 244, 228, 0.95);
   text-shadow: 0 1px 6px rgba(8, 10, 18, 0.72);
   word-break: keep-all;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
 }
 
 .meta {
   display: flex;
-  margin: 0.32cqw 0 0;
+  margin: 6px 0 0;
   align-items: center;
   justify-content: center;
   gap: 0.62cqw;
@@ -196,6 +207,80 @@
 
 .nodeOn .label {
   color: #fff8ea;
+}
+
+/* 1위만 제목으로 한 단 올린다. 별 크기는 기사 수의 몫이라 여기서 건드리지 않는다. */
+.nodeLead .label {
+  font-size: calc(clamp(12.5px, 1.1cqw, 16px) * 1.07);
+  font-weight: 700;
+}
+
+/*
+ * 세로로 긴 유리는 2열이라 한 열에 다섯 별이 쌓인다. 제목을 끝까지 두면 들지 않아 여기서만
+ * 세 줄로 자른다. 낮은 유리도 마찬가지로 두 줄이다(아래).
+ */
+@container sky (max-aspect-ratio: 1 / 1) {
+  .label {
+    font-size: clamp(11px, 2.8cqw, 14px);
+    -webkit-line-clamp: 3;
+  }
+
+  .nodeLead .label {
+    font-size: calc(clamp(11px, 2.8cqw, 14px) * 1.07);
+  }
+
+  /* 다섯 줄이 쌓이는 자리라 간격을 줄인다. 모든 별에 같은 값인 것은 그대로다. */
+  .text {
+    margin-top: 8px;
+  }
+
+  .meta {
+    margin-top: 4px;
+  }
+}
+
+/*
+ * 낮은 유리에는 긴 제목 열 개가 끝까지 들지 않는다. 슬롯(data/trendTop)은 높이 637px 유리에서
+ * 다섯 줄을 견디게 잡혀 있어, 그보다 낮으면 글자를 더 줄이는 대신 줄을 자른다 — 620px 아래도
+ * 다섯 줄까지는 둔다(1536×864 의 612px 유리에서 네 줄은 너무 일찍 잘렸다). 560px 아래는 세 줄,
+ * 한 열에 다섯 별이 쌓이는 세로 유리는 두 줄이다.
+ */
+@container sky (max-height: 620px) {
+  .label {
+    -webkit-line-clamp: 5;
+  }
+}
+
+/* 낮은 가로 유리에서 다섯 줄을 두려면 한 묶음을 조금 줄여야 슬롯 간격(높이의 28%) 안에 든다.
+   줄 간격·별 크기·묶음 안 간격을 함께 줄여 한 묶음에 20px 남짓을 번다. 모든 별에 같은 값이다. */
+@container sky (max-height: 620px) and (min-aspect-ratio: 1 / 1) {
+  .node {
+    --star: calc(min(5.6cqw, 8cqh, 64px) * var(--scale));
+  }
+
+  .label {
+    line-height: 1.35;
+  }
+
+  .text {
+    margin-top: 8px;
+  }
+
+  .meta {
+    margin-top: 4px;
+  }
+}
+
+@container sky (max-height: 560px) {
+  .label {
+    -webkit-line-clamp: 3;
+  }
+}
+
+@container sky (max-height: 560px) and (max-aspect-ratio: 1 / 1) {
+  .label {
+    -webkit-line-clamp: 2;
+  }
 }
 
 /* ---- 화면 설명 ---------------------------------------------------------------- */
@@ -272,7 +357,7 @@
   }
 
   .node {
-    width: min(38cqw, 360px);
+    width: min(44cqw, 300px);
   }
 
   .aroundNode {
@@ -287,12 +372,8 @@
     font-size: 12px;
   }
 
-  .star {
-    width: calc(min(11cqw, 8cqh, 64px) * var(--scale));
-  }
-
-  .label {
-    font-size: clamp(10px, 2.1cqw, 15px);
+  .node {
+    --star: calc(min(11cqw, 8cqh, 64px) * var(--scale));
   }
 
   .meta {

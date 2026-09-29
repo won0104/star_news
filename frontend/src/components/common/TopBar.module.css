@@ -176,6 +176,52 @@
   content: '';
 }
 
+/*
+ * 켜진 잎에 딸린 고르개(오늘의 트렌드의 분야). 잎보다 한 단 더 작고 조용하다 — 잎과 같은 결로
+ * 두면 목적지가 여덟 개 늘어난 것처럼 읽힌다. 상단바에서는 잎 오른쪽에 가는 세로선 하나를 두고
+ * 옆으로 잇고, 레일에서는 아래(@media)에서 한 단 더 들여 세로로 세운다.
+ */
+.navOptions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: 4px;
+  padding-left: 6px;
+  border-left: 1px solid var(--topbar-border);
+}
+
+.navOption {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--nav-ink);
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0.82;
+  transition: background 140ms ease, color 140ms ease, opacity 140ms ease;
+}
+
+.navOption:hover {
+  background: rgba(120, 102, 82, 0.1);
+  opacity: 1;
+}
+
+/* 고른 분야는 굵기와 글자색으로 말한다. 잎의 밑줄·별과 겹치지 않게 표시를 따로 두지 않는다. */
+.navOptionActive,
+.navOptionActive:hover {
+  color: var(--nav-ink-active);
+  font-weight: 700;
+  opacity: 1;
+}
+
+.navOption:focus-visible {
+  outline: 2px solid var(--nav-ink-active);
+  outline-offset: 1px;
+}
+
 .navItem {
   padding: 8px 16px;
   border: 0;
@@ -294,6 +340,35 @@
   .nightGlass .navSub {
     background: linear-gradient(180deg, rgba(14, 21, 35, 0.92), rgba(28, 22, 21, 0.9));
     backdrop-filter: blur(14px) saturate(0.82);
+  }
+
+  /* 분야까지 이으면 책갈피가 화면보다 길어질 수 있다. 최대 폭은 <TopBar> 가 인라인으로 준다. */
+  .navSub {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .navSub::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 넘친 쪽 끝을 흐린다. 스크롤바를 숨겼으니 이것이 "옆에 더 있다"는 유일한 표시다. */
+  .navSubMoreRight {
+    mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
+  }
+
+  .navSubMoreLeft {
+    mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent);
+  }
+
+  .navSubMoreLeft.navSubMoreRight {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 44px,
+      #000 calc(100% - 44px),
+      transparent
+    );
   }
 
   /*
@@ -470,6 +545,21 @@
     color: currentcolor;
     content: '✦';
     transform: translateY(-50%);
+  }
+
+  /* 켜진 잎 아래로 한 단 더 들여 세운다. 상단바에서 쓰던 세로선은 들여쓰기가 대신한다. */
+  .navOptions {
+    flex-direction: column;
+    align-items: stretch;
+    margin: 0 0 4px 28px;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .navOption {
+    width: 100%;
+    padding: 6px 12px;
+    text-align: left;
   }
 
   .spacer {
