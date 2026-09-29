@@ -65,6 +65,13 @@ services:
       GNEWS_MAX: ${GNEWS_MAX:-12}
       GNEWS_COLLECT_CRON: "${GNEWS_COLLECT_CRON:-0 10 * * * *}"
       GNEWS_RETRY_DELAY: ${GNEWS_RETRY_DELAY:-1s}
+      # 지난 구간 기사 백필. 일회성이라 켜고 재시작했다가 끝나면 다시 끈다.
+      # 구간은 오프셋까지 적는다(예: 2026-09-26T00:00:00Z).
+      GNEWS_BACKFILL_ENABLED: ${GNEWS_BACKFILL_ENABLED:-false}
+      GNEWS_BACKFILL_FROM: ${GNEWS_BACKFILL_FROM:-}
+      GNEWS_BACKFILL_TO: ${GNEWS_BACKFILL_TO:-}
+      GNEWS_BACKFILL_SLICE: ${GNEWS_BACKFILL_SLICE:-6h}
+      GNEWS_BACKFILL_MAX_PAGES: ${GNEWS_BACKFILL_MAX_PAGES:-3}
       # 배치 주기와 한도. 기본값은 application.properties 와 같다.
       # 서버에서 잠깐 당겨 돌려 보거나 처리량을 조절할 때 .env 로 덮어쓴다(재배포 없이 재시작만 하면 된다).
       ARTICLE_ANALYSIS_CRON: "${ARTICLE_ANALYSIS_CRON:-0 20 * * * *}"
