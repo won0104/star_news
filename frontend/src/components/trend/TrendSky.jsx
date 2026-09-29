@@ -67,7 +67,14 @@ function trailNode(node) {
   }
 }
 
-export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, selectedNode, topic = null }) {
+export function TrendSky({
+  data: given,
+  neighbors: givenNeighbors,
+  overlayRoot,
+  selectedNode,
+  topic = null,
+  topicPick = 0,
+}) {
   const account = useSession()
   /*
    * 받아 둔 회차와, 그것이 어느 분야의 것인지.
@@ -129,15 +136,19 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
    * 분야를 갈아타면 펼쳐 둔 별자리를 접는다. 그 별은 앞 회차의 것이고, 접지 않으면 쪽지에는
    * 정치라고 쓰인 채 경제 사건의 이웃 그래프가 남는다.
    *
+   * 같은 분야를 쪽지에서 다시 골라도 접는다. 그때는 URL 이 그대로라 `topic` 이 바뀌지 않으므로,
+   * 쪽지를 누른 횟수인 `topicPick` 을 함께 본다.
+   *
    * 첫 렌더는 건너뛴다 — 현관에서 검색으로 실려 온 사건이 그때 펼쳐지는데, 여기서 같이
    * 접으면 그 사건이 곧바로 닫힌다.
    */
-  const shownTopic = useRef(topic)
+  const shownTopic = useRef({ topic, topicPick })
   useEffect(() => {
-    if (shownTopic.current === topic) return
-    shownTopic.current = topic
+    const shown = shownTopic.current
+    if (shown.topic === topic && shown.topicPick === topicPick) return
+    shownTopic.current = { topic, topicPick }
     close()
-  }, [topic, close])
+  }, [topic, topicPick, close])
 
   useEffect(() => {
     if (!openKey) return

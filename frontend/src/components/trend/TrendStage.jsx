@@ -28,6 +28,9 @@ export function TrendStage({ playTransition = false, selectedNode, topic = null,
   const [ready, setReady] = useState(false)
   const [ended, setEnded] = useState(false)
   const [overlayRoot, setOverlayRoot] = useState(null)
+  // 쪽지를 누를 때마다 센다. 같은 분야를 다시 골라도 URL 은 그대로라, 이 수가 있어야 하늘이
+  // 펼쳐 둔 별자리를 접고 분야의 첫 화면으로 돌아간다.
+  const [topicPick, setTopicPick] = useState(0)
   const { reduceMotion } = useSettingsValues()
   const prefersReducedMotion = usePrefersReducedMotion()
   const sceneRef = useRef(null)
@@ -45,6 +48,11 @@ export function TrendStage({ playTransition = false, selectedNode, topic = null,
   )
   const settled = !canPlayTransition || ended
   const backdrop = nightBackdrop(nightWindow).src
+
+  const pickTopic = (topicCode) => {
+    setTopicPick((count) => count + 1)
+    onTopicChange(topicCode)
+  }
 
   return (
     <div className={styles.stage}>
@@ -72,7 +80,7 @@ export function TrendStage({ playTransition = false, selectedNode, topic = null,
         <div className={styles.windowLayer}>
           {settled && (
             <div className={styles.windowGlass} style={{ inset: glassInset(sceneWindow.opening) }}>
-              <TrendSky overlayRoot={overlayRoot} selectedNode={selectedNode} topic={topic} />
+              <TrendSky overlayRoot={overlayRoot} selectedNode={selectedNode} topic={topic} topicPick={topicPick} />
             </div>
           )}
 
@@ -85,7 +93,7 @@ export function TrendStage({ playTransition = false, selectedNode, topic = null,
         */}
         <div ref={setOverlayRoot} className={styles.sceneOverlay}>
           {onTopicChange && (
-            <TopicNote topic={topic} onSelect={onTopicChange} pillar={sceneWindow.opening.left} />
+            <TopicNote topic={topic} onSelect={pickTopic} pillar={sceneWindow.opening.left} />
           )}
         </div>
       </div>
