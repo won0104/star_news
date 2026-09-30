@@ -1033,7 +1033,11 @@
     min-height: 590px;
   }
 
-  .planetLegend {
+  /*
+   * 단독 지도만 겨냥한다. 책 속 범례(.diaryLegend)는 왼쪽 아래에 bottom 으로 붙는데, 여기의
+   * top 까지 걸리면 상자가 위젯 높이 전체로 늘어나 항목이 행성 한가운데 떴다.
+   */
+  .planetLegend:not(.diaryLegend) {
     top: 12px;
     right: 12px;
     left: 12px;
@@ -1050,7 +1054,7 @@
     justify-content: center;
   }
 
-  .legendItem {
+  .planetLegend:not(.diaryLegend) .legendItem {
     flex: 1 1 38%;
     font-size: 9px;
   }
