@@ -6,8 +6,9 @@ import {
   trendNeighbors,
   trendNodeArticles,
   trendSkyExpandCopy,
+  formatTrendGraphLabel,
 } from '../../data/trendNeighbors'
-import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlots } from '../../data/trendTop'
+import { homeTrends, TREND_MIN_SCALE, trendSkyCopy, trendSlotPatterns } from '../../data/trendTop'
 import { useSession } from '../../store/session'
 import { TrendConstellation } from './TrendConstellation'
 import styles from './TrendSky.module.css'
@@ -51,7 +52,7 @@ const TRACKED_NODE_TYPES = new Set(['EVENT', 'ENTITY', 'STATEMENT'])
  * `entryNodeId` 는 옮기지 않는다. 짝인 `trendItemId` 도 화면이 읽는 곳이 없고(별의 key 는
  * nodeKey 다), 쓰지 않는 값을 옮겨 두면 나중에 읽는 사람이 쓰이는 줄 안다.
  *
- * `centerTopic` 도 버린다 — 고른 분야는 창틀의 쪽지가 이미 쓰고 있어서, 화면 가운데에 한 번
+ * `centerTopic` 도 버린다 — 고른 분야는 바의 분야 고르개가 이미 쓰고 있어서, 화면 가운데에 한 번
  * 더 세우면 같은 말이 두 번 선다.
  */
 function asRound(payload) {
@@ -66,7 +67,14 @@ function trailNode(node) {
   }
 }
 
-export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, selectedNode, topic = null }) {
+export function TrendSky({
+  data: given,
+  neighbors: givenNeighbors,
+  overlayRoot,
+  selectedNode,
+  topic = null,
+  topicPick = 0,
+}) {
   const account = useSession()
   /*
    * 받아 둔 회차와, 그것이 어느 분야의 것인지.
@@ -125,18 +133,22 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
   }, [])
 
   /*
-   * 분야를 갈아타면 펼쳐 둔 별자리를 접는다. 그 별은 앞 회차의 것이고, 접지 않으면 쪽지에는
-   * 정치라고 쓰인 채 경제 사건의 이웃 그래프가 남는다.
+   * 분야를 갈아타면 펼쳐 둔 별자리를 접는다. 그 별은 앞 회차의 것이고, 접지 않으면 바에는
+   * 정치가 켜진 채 경제 사건의 이웃 그래프가 남는다.
+   *
+   * 같은 분야를 바에서 다시 골라도 접는다. 그때는 URL 이 그대로라 `topic` 이 바뀌지 않으므로,
+   * 분야를 고른 횟수인 `topicPick` 을 함께 본다.
    *
    * 첫 렌더는 건너뛴다 — 현관에서 검색으로 실려 온 사건이 그때 펼쳐지는데, 여기서 같이
    * 접으면 그 사건이 곧바로 닫힌다.
    */
-  const shownTopic = useRef(topic)
+  const shownTopic = useRef({ topic, topicPick })
   useEffect(() => {
-    if (shownTopic.current === topic) return
-    shownTopic.current = topic
+    const shown = shownTopic.current
+    if (shown.topic === topic && shown.topicPick === topicPick) return
+    shownTopic.current = { topic, topicPick }
     close()
-  }, [topic, close])
+  }, [topic, topicPick, close])
 
   useEffect(() => {
     if (!openKey) return
@@ -153,7 +165,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
   const sample = SAMPLE_WHEN_EMPTY && !topic && homeState !== 'loading' && live.length === 0
   const source = sample ? homeTrends : home
   const trends = source?.trends ?? []
-  const ranked = [...trends].sort((a, b) => a.rank - b.rank).slice(0, trendSlots.length)
+  const ranked = [...trends].sort((a, b) => a.rank - b.rank).slice(0, trendSlotPatterns[0].length)
   const topCount = Math.max(1, ...ranked.map((trend) => trend.articleCount))
 
   const open = useCallback((
@@ -216,7 +228,8 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
     setGraphState('loading')
     // Event-to-event links usually pass through a shared Entity, so the main graph
     // needs two hops. A one-hop response contains only the Event's direct parts.
-    fetchNeighbors(nodeType, trend.nodeKey, { depth: 2 })
+    // Share one graph between the main constellation and its hover previews.
+    fetchNeighbors(nodeType, trend.nodeKey, { depth: 2, limit: 30 })
       .then((payload) => {
         cache.current.set(trend.nodeKey, payload)
         commitGraph(payload)
@@ -240,8 +253,8 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
 
   /**
    * 화면에 보이는 관련 Event가 다음 중심이 되었을 때의 2-Hop 구성을 최대 30개까지
-   * 미리 가져온다. 작은 별 하나가 다음 Event 하나를 뜻하며, 넓은 미리보기 응답은
-   * 실제 중심 그래프의 15개 cache와 섞지 않는다.
+   * 미리 가져온다. 작은 별 하나가 다음 Event 하나를 뜻하며, 중심 이동도 같은 2-Hop·30개
+   * 응답을 쓰므로 이미 받은 결과는 공용 cache에 보관한다.
    */
   useEffect(() => {
     if (graphState !== 'ready' || !graph || sample) return undefined
@@ -264,8 +277,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
             limit: 30,
             signal: controller.signal,
           }))
-        // Preview responses use a wider page than the main graph, so keep them out of
-        // the main cache and preserve the main view's stable 15-candidate composition.
+        cache.current.set(node.nodeKey, payload)
         return [node.nodeKey, payload]
       }),
     ).then((results) => {
@@ -313,7 +325,6 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
         journey={journey}
         articlePanelOpen={articlePanelOpen}
         onArticlePanelOpenChange={setArticlePanelOpen}
-        onBack={close}
         onWalk={(node, navigation) =>
           open(
             {
@@ -356,11 +367,13 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
     )
   }
 
+  const slots = pickSlotPattern(source?.snapshotAt, ranked)
+
   return (
     <div className={styles.field} role="group" aria-label={trendSkyCopy.fieldLabel}>
       <div className={styles.canvas}>
         {ranked.map((trend, index) => {
-          const slot = trendSlots[index]
+          const slot = slots[index]
           const [x, y] = slot.at
           const [narrowX, narrowY] = slot.atNarrow || slot.at
           // Area, not diameter, carries the count — a star twice as wide should not read
@@ -371,7 +384,7 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
           return (
             <div
               key={trend.nodeKey}
-              className={styles.node}
+              className={`${styles.node} ${index === 0 ? styles.nodeLead : ''}`}
               style={{
                 '--x': `${x}%`,
                 '--y': `${y}%`,
@@ -384,16 +397,15 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
                 type="button"
                 className={styles.star}
                 onClick={() => open(trend, { trailMode: 'reset' })}
-                aria-label={`${trendSkyCopy.rank(trend.rank)} ${trend.label} — ${trendSkyCopy.articles(trend.articleCount)}`}
+                aria-label={`${trendSkyCopy.rank(trend.rank)} ${trend.label}`}
               >
                 <img src={stars.event} alt="" aria-hidden />
               </button>
 
               <div className={styles.text}>
-                <p className={styles.label}>{trend.label}</p>
+                <p className={styles.label}>{formatTrendGraphLabel(trend)}</p>
                 <p className={styles.meta}>
                   <span className={styles.rank}>{trendSkyCopy.rank(trend.rank)}</span>
-                  {trendSkyCopy.articles(trend.articleCount)}
                 </p>
               </div>
             </div>
@@ -408,6 +420,34 @@ export function TrendSky({ data: given, neighbors: givenNeighbors, overlayRoot, 
       )}
     </div>
   )
+}
+
+/**
+ * 집계 회차마다 배치 한 벌을 고른다.
+ *
+ * 자리는 고정이지만 제목 길이는 회차마다 달라서, 같은 벌이라도 긴 제목이 한쪽에 몰리면 화면이
+ * 그쪽으로 기운다(1440×900 에서 무게중심이 38~54% 까지 흔들렸다). 그래서 제목 글자 수를 무게로
+ * 벌마다 좌우 무게중심을 셈하고, 가운데에 가장 가까운 벌과 1% 안쪽으로 비슷한 벌 가운데에서
+ * 기준 시각으로 하나를 고른다. 같은 회차는 새로 고쳐도 같은 벌이고, 회차가 바뀌면 달라질 수 있다.
+ * 기준 시각이 없는 대역 샘플은 무게만으로 고른다.
+ */
+const BALANCE_TOLERANCE = 1
+
+function pickSlotPattern(snapshotAt, ranked) {
+  const lengths = ranked.map((trend) => formatTrendGraphLabel(trend).length || 1)
+  const offCentre = trendSlotPatterns.map((pattern) => {
+    const total = lengths.reduce((sum, length) => sum + length, 0)
+    const centre = lengths.reduce((sum, length, index) => sum + length * pattern[index].at[0], 0) / total
+    return Math.abs(centre - 50)
+  })
+  const best = Math.min(...offCentre)
+  const candidates = trendSlotPatterns.filter(
+    (_, index) => offCentre[index] <= best + BALANCE_TOLERANCE,
+  )
+
+  let hash = 0
+  for (const char of snapshotAt ?? '') hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  return candidates[hash % candidates.length]
 }
 
 /** 로딩·실패·빈 결과를 같은 자리에 같은 모양으로 알린다. */

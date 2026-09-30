@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import ConstellationCanvas from './ConstellationCanvas';
+import { edgeLabels } from '../../data/graphLabels';
 import styles from './HistoryPane.module.css';
 
 /**
@@ -16,9 +17,12 @@ const TOPIC_STAR_SCALE = 0.7;
  * 배율이 `defaultZ / maximum` 으로 정해진다 — 14.2 일 때 80%, 19 이면 60% 다.
  */
 const STANDARD_CAMERA = { minimum: 8.4, maximum: 19, defaultZ: 11.4 };
-const DIARY_CAMERA = { minimum: 19.5, maximum: 28.2, defaultZ: 23.4 };
+const DIARY_CAMERA = { minimum: 11.7, maximum: 28.2, defaultZ: 23.4 };
 const LABEL_LIMIT = 12;
 const MOBILE_LABEL_LIMIT = 8;
+const DIARY_TOPIC_FOCUS_ZOOM = 140;
+const DIARY_EVENT_FOCUS_ZOOM = 180;
+const FULLSCREEN_TOPIC_FOCUS_ZOOM = 100;
 const EVENT_CARD_STAR_SCALE = 0.3;
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const FRONT = new THREE.Vector3(0, 0, 1);
@@ -65,17 +69,6 @@ const EVENT_SIZE_STEPS = [
 const NODE_STYLE = {
   TOPIC_CLUSTER: { label: '분야', sizeMultiplier: 1 },
   EVENT: { label: '사건', sizeMultiplier: 1 },
-};
-
-const RELATION_LABEL = {
-  BELONGS_TO_TOPIC: '분야에 속함',
-  CAUSES: '원인·결과',
-  SUBEVENT_OF: '상위 사건',
-  ACTOR: '주체',
-  TARGET: '대상',
-  CONTAINS_STATEMENT: '발언 포함',
-  PART_OF: '상위 사건',
-  OCCURRED_AT: '발생 시점',
 };
 
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
@@ -209,6 +202,7 @@ export default function HistoryPlanet({
   onOpenEvent,
   variant = 'default',
   eventDisplay = 'star',
+  showInspector = true,
 }) {
   const isDiary = variant === 'diary';
   const useEventCards = eventDisplay === 'card';
@@ -218,6 +212,7 @@ export default function HistoryPlanet({
   const labelRefs = useRef(new Map());
   const onSelectRef = useRef(onSelectNode);
   const activeTopicRef = useRef(activeTopic);
+  const previousActiveTopicRef = useRef(activeTopic);
   const selectedNodeRef = useRef(selectedNode);
   const autoRotateRef = useRef(!reduceMotion);
   const groupRef = useRef(null);
@@ -231,6 +226,15 @@ export default function HistoryPlanet({
   const [zoomPercent, setZoomPercent] = useState(100);
   const [autoRotating, setAutoRotating] = useState(!reduceMotion);
   const [webglUnavailable, setWebglUnavailable] = useState(false);
+
+  const zoomToPercent = useCallback((percent) => {
+    targetCameraZRef.current = clamp(
+      cameraConfig.defaultZ / (percent / 100),
+      cameraConfig.minimum,
+      cameraConfig.maximum,
+    );
+    setZoomPercent(Math.round((cameraConfig.defaultZ / targetCameraZRef.current) * 100));
+  }, [cameraConfig]);
 
   useEffect(() => {
     onSelectRef.current = onSelectNode;
@@ -422,7 +426,14 @@ export default function HistoryPlanet({
 
     const queueFocus = (direction, immediate = false) => {
       if (!direction) return;
-      const target = new THREE.Quaternion().setFromUnitVectors(direction.clone().normalize(), FRONT);
+      // 저장된 좌표에서 새 회전을 만들면 사용자가 돌려 둔 행성의 기울기까지 초기화된다.
+      // 현재 화면에서 별이 향하는 방향만 정면으로 보정해, 주변 그래프의 방향은 유지한다.
+      const currentDirection = direction
+        .clone()
+        .normalize()
+        .applyQuaternion(globe.quaternion);
+      const correction = new THREE.Quaternion().setFromUnitVectors(currentDirection, FRONT);
+      const target = correction.multiply(globe.quaternion.clone()).normalize();
       if (immediate || reduceMotion) {
         globe.quaternion.copy(target);
         focusRef.current = null;
@@ -801,18 +812,28 @@ export default function HistoryPlanet({
   }, [cameraConfig, layout, reduceMotion, useEventCards]);
 
   useEffect(() => {
+    const topicChanged = previousActiveTopicRef.current !== activeTopic;
+    previousActiveTopicRef.current = activeTopic;
     focusTopicRef.current(activeTopic);
+    if (topicChanged) {
+      zoomToPercent(isDiary ? DIARY_TOPIC_FOCUS_ZOOM : FULLSCREEN_TOPIC_FOCUS_ZOOM);
+    }
     manualPauseUntilRef.current = performance.now() + 4200;
-  }, [activeTopic]);
+  }, [activeTopic, isDiary, zoomToPercent]);
 
   useEffect(() => {
     if (selectedNode?.id) {
       focusNodeRef.current(selectedNode.id);
+      if (selectedNode.kind === 'TOPIC_CLUSTER') {
+        zoomToPercent(isDiary ? DIARY_TOPIC_FOCUS_ZOOM : FULLSCREEN_TOPIC_FOCUS_ZOOM);
+      } else if (isDiary && nodeKind(selectedNode) === 'EVENT') {
+        zoomToPercent(DIARY_EVENT_FOCUS_ZOOM);
+      }
       manualPauseUntilRef.current = Number.POSITIVE_INFINITY;
     } else {
       manualPauseUntilRef.current = performance.now() + 2600;
     }
-  }, [selectedNode]);
+  }, [isDiary, selectedNode, zoomToPercent]);
 
   const changeZoom = (amount) => {
     if (!cameraRef.current) return;
@@ -919,11 +940,14 @@ export default function HistoryPlanet({
           </div>
         )}
 
-        {!isDiary && <div className={styles.planetControls} aria-label="지도 확대/축소">
+        <div
+          className={`${styles.planetControls} ${isDiary ? styles.diaryControls : ''}`}
+          aria-label="지도 확대/축소"
+        >
           <button type="button" onClick={() => changeZoom(0.65)} aria-label="축소">−</button>
           <span>{zoomPercent}%</span>
           <button type="button" onClick={() => changeZoom(-0.65)} aria-label="확대">＋</button>
-        </div>}
+        </div>
 
         {!isDiary && <p className={styles.planetHint}>
           구면을 잡아 돌리기 · 휠 확대 · 빈 곳을 누르면 선택 해제
@@ -932,7 +956,7 @@ export default function HistoryPlanet({
             : ` · SPACE ${autoRotating ? 'PAUSE' : 'PLAY'}`)}
         </p>}
 
-        {!isDiary && selectedNode && selectedEvent && (
+        {showInspector && !isDiary && selectedNode && selectedEvent && (
           <aside className={styles.eventArticlesPanel} aria-live="polite" aria-labelledby="selected-event-title">
             <div className={styles.eventArticlesHead}>
               <div>
@@ -973,7 +997,7 @@ export default function HistoryPlanet({
           </aside>
         )}
 
-        {!isDiary && selectedNode && !selectedEvent && (
+        {showInspector && !isDiary && selectedNode && !selectedEvent && (
           <aside className={styles.nodeInspector} aria-live="polite">
             <div className={styles.nodeInspectorHead}>
               <span>
@@ -999,7 +1023,7 @@ export default function HistoryPlanet({
               <ul className={styles.nodeRelations} aria-label="직접 연결된 노드">
                 {selectedRelations.slice(0, 3).map((relation) => (
                   <li key={`${relation.direction}:${relation.relationship}:${relation.node.id}`}>
-                    <b>{relation.direction} {RELATION_LABEL[relation.relationship] ?? relation.relationship}</b>
+                    <b>{relation.direction} {edgeLabels[relation.relationship] ?? relation.relationship}</b>
                     {relation.node.title}
                   </li>
                 ))}

@@ -632,6 +632,24 @@
   color: #aebac4;
 }
 
+.diaryControls {
+  right: 8px;
+  bottom: 8px;
+  grid-template-columns: 28px 44px 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(12, 21, 29, 0.82);
+  box-shadow: none;
+}
+
+.diaryControls button {
+  font-size: 14px;
+}
+
+.diaryControls span {
+  font-size: 9px;
+}
+
 .planetHint {
   position: absolute;
   z-index: 18;

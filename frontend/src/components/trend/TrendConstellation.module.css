@@ -24,20 +24,22 @@
   gap: 8px;
 }
 
+/* 옆의 경로 막대(.trail)와 같은 차림 — 같은 모서리·테두리·바탕·그림자라, 막대와 단추가 한 줄의
+   도구 띠로 읽힌다. 높이도 막대에 맞춘다. */
 .fieldAction {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 38px;
-  padding: 8px 14px;
-  border: 1px solid rgba(226, 197, 126, 0.42);
-  border-radius: 999px;
-  background: rgba(20, 18, 18, 0.7);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
-  color: rgba(248, 226, 181, 0.96);
+  min-height: 40px;
+  padding: 6px 15px;
+  border: 1px solid rgba(238, 207, 132, 0.24);
+  border-radius: 13px;
+  background: rgba(17, 18, 23, 0.62);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  color: rgba(248, 240, 224, 0.9);
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -45,8 +47,12 @@
 }
 
 .fieldAction:hover {
-  border-color: rgba(238, 207, 132, 0.72);
-  background: rgba(33, 29, 27, 0.82);
+  border-color: rgba(238, 207, 132, 0.5);
+  background: rgba(24, 25, 32, 0.78);
+}
+
+.fieldAction > span {
+  color: rgba(238, 207, 132, 0.84);
 }
 
 .fieldAction:focus-visible {
@@ -61,8 +67,10 @@
   left: 24px;
   display: flex;
   align-items: center;
-  width: min(720px, calc(100% - 430px));
-  min-height: 38px;
+  /* 오른쪽 단추 둘(전체보기·후보)의 자리를 비운다. */
+  width: min(720px, calc(100% - 270px));
+  /* 오른쪽 단추(.fieldAction)와 같은 높이. */
+  min-height: 40px;
   padding: 5px 8px;
   border: 1px solid rgba(238, 207, 132, 0.24);
   border-radius: 13px;
@@ -72,12 +80,48 @@
   backdrop-filter: blur(10px);
 }
 
-.trailStart {
-  flex: none;
-  margin: 0 5px;
-  font: 700 9px var(--font-sans);
-  letter-spacing: 0.12em;
-  color: rgba(238, 207, 132, 0.84);
+/*
+ * 경로 양 끝의 화살표. 더 갈 곳이 있는 쪽에만 서서 "옆으로 더 있다"를 알린다. 경로 위에
+ * 겹쳐 뜨므로 그 아래 글자가 비치지 않게, 막대 배경색으로 바깥쪽을 덮는 그라디언트를 깐다.
+ */
+.trailEdge {
+  position: absolute;
+  z-index: 1;
+  top: 1px;
+  bottom: 1px;
+  display: grid;
+  width: 34px;
+  padding: 0;
+  border: 0;
+  place-items: center;
+  font: 18px/1 var(--font-serif-kr);
+  color: rgba(238, 207, 132, 0.9);
+  cursor: pointer;
+}
+
+.trailEdgeStart {
+  left: 1px;
+  justify-items: start;
+  padding-left: 8px;
+  border-radius: 12px 0 0 12px;
+  background: linear-gradient(90deg, rgba(17, 18, 23, 0.96) 55%, rgba(17, 18, 23, 0));
+}
+
+.trailEdgeEnd {
+  right: 1px;
+  justify-items: end;
+  padding-right: 8px;
+  border-radius: 0 12px 12px 0;
+  background: linear-gradient(270deg, rgba(17, 18, 23, 0.96) 55%, rgba(17, 18, 23, 0));
+}
+
+.trailEdge:hover {
+  color: rgba(255, 236, 190, 1);
+}
+
+.trailEdge:focus-visible {
+  outline: 2px solid #e4c679;
+  outline-offset: -3px;
 }
 
 .trail ol {
@@ -90,22 +134,13 @@
   overscroll-behavior-inline: contain;
   scroll-snap-type: x proximity;
   touch-action: pan-x;
-  scrollbar-color: rgba(238, 207, 132, 0.46) rgba(255, 255, 255, 0.04);
   list-style: none;
-  scrollbar-width: thin;
+  /* 막대는 숨긴다. 옆으로 더 있다는 것은 양 끝의 화살표가 알리고, 휠·끌기로 움직인다. */
+  scrollbar-width: none;
 }
 
 .trail ol::-webkit-scrollbar {
-  height: 5px;
-}
-
-.trail ol::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.trail ol::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(238, 207, 132, 0.46);
+  display: none;
 }
 
 .trail li {
@@ -126,21 +161,26 @@
   gap: 6px;
   max-width: 210px;
   padding: 6px 8px;
-  overflow: hidden;
   border: 0;
   border-radius: 8px;
   background: transparent;
   font: 500 11px var(--font-sans);
   color: rgba(238, 228, 209, 0.76);
-  text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
 }
 
-.trailNode span {
+.trailType {
   flex: none;
   font-size: 9px;
   color: rgba(238, 207, 132, 0.72);
+}
+
+.trailLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trailNode:hover {
@@ -305,7 +345,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(calc(100cqw - 48px), calc(160cqh - 122px));
+  width: min(calc(100cqw - 24px), calc(160cqh - 64px));
   max-width: 100%;
   aspect-ratio: 8 / 5;
   transform: translate(-50%, -50%);
@@ -388,38 +428,6 @@
   transition: opacity 240ms ease;
 }
 
-.previewCount {
-  position: absolute;
-  z-index: 3;
-  width: 11cqw;
-  padding: 0.35cqw 0.7cqw;
-  border: 1px solid rgba(238, 207, 132, 0.28);
-  border-radius: 999px;
-  background: rgba(10, 14, 24, 0.82);
-  color: rgba(248, 226, 181, 0.92);
-  font: 700 0.72cqw var(--font-sans);
-  text-align: center;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 180ms ease;
-  backdrop-filter: blur(6px);
-}
-
-.relatedLeftPreview .previewCount {
-  left: -19cqw;
-  top: -19cqw;
-}
-
-.relatedRightPreview .previewCount {
-  left: 8cqw;
-  top: -19cqw;
-}
-
-.relatedBottomPreview .previewCount {
-  left: 5cqw;
-  top: 17cqw;
-}
-
 .previewStar img {
   display: block;
   width: 100%;
@@ -455,11 +463,6 @@
 .relatedNode:hover .previewLink,
 .relatedNode:focus-within .previewLink {
   opacity: 0.72;
-}
-
-.relatedNode:hover .previewCount,
-.relatedNode:focus-within .previewCount {
-  opacity: 1;
 }
 
 .mobileLinks {
@@ -816,16 +819,17 @@
     gap: 6px;
   }
 
+  /* 이 폭의 경로 막대는 안의 경로 단추 높이로 39px 이 된다. 단추를 그 높이에 맞춘다. */
   .fieldAction {
-    min-height: 36px;
-    padding: 7px 11px;
+    min-height: 39px;
+    padding: 6px 11px;
     font-size: 12px;
   }
 
   .trail {
     top: 14px;
     left: 14px;
-    width: calc(100% - 348px);
+    width: calc(100% - 240px);
     min-height: 36px;
   }
 

@@ -32,3 +32,36 @@ Pinned KF tokenizer revision `363b171d71443b0874b0bf9cea053eb5b1650633`와 token
 Exact matcher는 `GOLD_INJECTED`, `GOLD_SPAN`, `PREDICTED_SPAN` cohort를 결과에 필수로 붙인다. span/type·role·cluster pair·관계 방향쌍에는 exact key를 사용하고 Primary의 tie pair는 순서 정확도에서 제외한다. 이 단계는 모델 예측 품질이나 calibration을 측정하지 않았다.
 
 `target-coverage-report.json`은 검증 통과한 기존 train Gold 400기사에 한정한다. dev/test Gold는 구현·tiny-fit·모델 선택에 사용하지 않았다. `gold_verified/136.json`의 dev Time 구간 오류로 전체 Gold intake는 여전히 `BLOCKED`이며, 전체 Gold가 통과한 것처럼 최종 학습 준비를 선언하지 않는다.
+
+---
+
+## 부록 A: span 음성의 "미정" 해제 (extraction repair v1)
+
+위 본문은 단계 3 시점의 기록이며 span task의 음성을 **미정**으로 남겼다. 이 부록은 그 미정을 해제한 범위만 추가하고 본문 기록은 바꾸지 않는다. 상세 근거와 계측은 [extraction-repair-report.md](extraction-repair-report.md)에 있다.
+
+### 완결성 전제의 적용 범위
+
+r05.3 §1.4는 기사 전체 검토를 **전제로 선언**하지만, closed-world를 명시한 것은 `ABOUT`/`CAUSES`뿐이다. §5.1은 EntityMention을 "독립적으로 식별할 가치가 있는 referent"로 좁히고, §2.5는 반복 언급을 "각각 보존**할 수 있다**"는 허용형으로 둔다. `v3_gold_intake.validate_article`은 참조 무결성과 `content[start:end] == text`만 검사하며, `gold-validation.json`은 `semantic_relation_completeness = NOT_MECHANICALLY_CERTIFIED`, `status = BLOCKED`을 기록한다.
+
+따라서 **schema/hash 검증 PASS는 annotation completeness의 증거가 아니다.** 아래 규칙은 완결성 전제를 요구하지 않는 근거만으로 성립하며, EVENT/STATEMENT의 일반적인 "미기록 = negative"는 여전히 적용하지 않는다.
+
+### 승인된 음성 규칙과 책임
+
+| 규칙 | 생성 | 적용 책임 | 전파 금지 |
+|---|---|---|---|
+| `N1_BOUNDARY_MISMATCH` | Gold span 양끝을 이웃 source-token 경계로 ±2 이동 | `EXACT_SPAN_FITNESS` | semantic validity, span 존재 |
+| `N2_KIND_EXCLUSIVE` | 같은 좌표의 다른 proposition kind Gold (§2.1/§2.2) | 해당 kind `DETECTION` | span 존재 자체 |
+| `N3_REPORTING_WRAPPER` | Gold STATEMENT + 뒤따르는 §4.2.3 carrier | EVENT `DETECTION` + `SEMANTIC_VALIDITY` | 다른 유효 proposition |
+| `N4_TRIGGER_WITHOUT_EVENT` | Gold Event 없는 Statement 구간의 trigger 크기 span | TRIGGER `DETECTION` | EVENT/STATEMENT 존재 |
+
+`SpanNegative.__post_init__`이 규칙별 책임을 강제하며, 책임을 넓혀 생성하면 예외로 실패한다. 규칙별 count는 `규칙:책임` 키로 분리해 보고하고 합산하지 않는다.
+
+### IGNORE
+
+`I1_REPEAT_OCCURRENCE`(§2.5 반복 언급), `I2_OVERLAPS_GOLD`, `I3_OMISSION_SUSPECTED`는 음성이 아니라 손실에서 제외한다. 근거가 조금이라도 불확실하면 음성보다 IGNORE를 우선한다.
+
+### 적용 제외
+
+- ENTITY/TIME에는 위 규칙을 확장하지 않는다. §5.1/§6.1의 annotation 범위가 다르다.
+- `N4`는 기본 비활성(`TargetCompiler(enable_trigger_absence_negatives=False)`)이다. 승인 조건의 재진술 가드를 적용하면 비동사 파편만 남아 판별 가치가 없다는 것이 계측으로 확인됐다.
+- 생성 endpoint logit(`exact_source_span.endpoint_logits`)과 task별 boundary logit은 확정 음성이 없으므로 **양성 전용으로 유지**한다. 판별 신호는 in-window joint proposal cell과 span score가 맡는다.

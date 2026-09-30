@@ -131,6 +131,15 @@ export const trendNeighbors = {
   ]),
 }
 
+/** 원문은 보존하고, 화면에 그릴 때만 유형별 최대 길이 뒤를 말줄임한다. */
+export function formatTrendGraphLabel(node) {
+  const label = (node?.label ?? '').trim()
+  const characters = [...label]
+  const limit = node?.nodeType === 'ENTITY' ? 19 : node?.nodeType === 'EVENT' ? 199 : null
+  if (limit == null || characters.length <= limit) return label
+  return `${characters.slice(0, limit).join('')}…`
+}
+
 /**
  * Entity·Statement 의 세부 유형. 서버 응답의 `type` 자리에 들어가는 값이다.
  * 목업에 없는 키는 `null` — 실제 응답에서도 유형에 따라 비어 올 수 있는 필드다.
@@ -232,37 +241,6 @@ export const trendNodeArticles = Object.values(trendNodeDetails).reduce((all, no
   }
   return all
 }, {})
-
-/** 세부 유형을 화면 말로 옮긴다. 모르는 값은 원문 그대로 보여준다. */
-export const subtypeLabels = {
-  PERSON: '인물',
-  ORGANIZATION: '기관·기업',
-  LOCATION: '장소',
-  PRODUCT: '제품',
-  POLICY: '정책·제도',
-  INDICATOR: '지표',
-  PLAN: '계획·발표',
-  ASSESSMENT: '평가·전망',
-  FACT: '사실',
-}
-
-/** 화면에 쓰는 관계 이름. 없는 타입은 원문 그대로 보여준다. */
-export const edgeLabels = {
-  ACTOR: '주체',
-  TARGET: '대상',
-  CAUSES: '원인·결과',
-  SUBEVENT_OF: '상위 사건',
-  CONTAINS_STATEMENT: '발언',
-  OCCURRED_AT: '시점',
-  BELONGS_TO_TOPIC: '분야',
-}
-
-export const nodeTypeLabels = {
-  EVENT: '사건',
-  ENTITY: '인물·기관',
-  STATEMENT: '발언',
-  TIME: '시점',
-}
 
 export const trendSkyExpandCopy = {
   back: '← 오늘의 트렌드',

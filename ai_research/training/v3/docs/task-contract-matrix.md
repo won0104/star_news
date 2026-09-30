@@ -1,5 +1,9 @@
 # V3 task 계약 매트릭스 — 단계 3 compiler / 단계 4 architecture
 
+> Historical 19-task matrix. The active registry removes `role_entity` and
+> trains unified Native/ROLE identity in P3; see
+> [unified-entity-identity-v1.md](unified-entity-identity-v1.md).
+
 이 표는 **target이 컴파일되는 책임**과 **실제 head 연결 상태**를 구분한다. `models/v3_pretraining/task_contract.py`의 19개 task와 일치한다. 단계 5에서 추출·속성 8개, 단계 6에서 Entity 3개, 단계 7에서 Time 2개, 단계 8에서 Event coreference 1개가 fresh registry와 Gold loss에 연결됐다. 나머지 5개는 등록 전까지 `UnimplementedTaskError`로 남는다. 표의 "예정" 표기는 아직 연결하지 않은 task를 뜻한다. exact 문자 잔차·cross-window는 `extraction-head-migration.md`, Entity union은 `entity-union-closure-contract.md`, Time은 `temporal-contract.md`, final Event는 `cluster-representation-contract.md`에 검증 범위를 기록했다.
 
 공통 입력: 128-token sentence/bridge window, 고정 KF L8/L10/L12 FP32, 요청당 공유 L8 DCE 1회. 추가 backbone/DCE 호출 예산은 아래 전 task에서 **0회**다. `fresh`는 고정 pretrained backbone 외 learned weight가 v3 run에서 새로 만들어져야 함을 뜻한다. 5번 head의 Gold loss 연결은 완료했지만 실제 pretrained model 품질이나 본학습 결과는 아니다.

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { backdrop, viewIds } from '../data/home'
-import { topicByCode } from '../data/topics'
+import { TOPIC_ALL, TOPICS, topicByCode } from '../data/topics'
 import { arrivalScene } from '../data/recommend'
 import { BOARDS } from '../data/recommendBoard'
 import { desks } from '../data/history'
@@ -162,9 +162,24 @@ export function AppScene() {
     setParams(id === DEFAULT_VIEW ? {} : { view: id }, { replace: true })
   }
 
-  /* 분야는 오늘의 트렌드 안에서만 고른다. 전체(null)는 담지 않는 것으로 나타낸다. */
+  /*
+   * 분야는 오늘의 트렌드 안에서만 고른다. 전체(null)는 담지 않는 것으로 나타낸다.
+   *
+   * 고를 때마다 센다. 같은 분야를 다시 골라도 URL 은 그대로라, 이 수가 있어야 하늘이 펼쳐 둔
+   * 별자리를 접고 분야의 첫 화면으로 돌아간다(<TrendSky> 의 topicPick).
+   */
+  const [topicPick, setTopicPick] = useState(0)
   const chooseTopic = (topicCode) => {
+    setTopicPick((count) => count + 1)
     setParams(topicCode ? { topic: topicCode } : {}, { replace: true })
+  }
+  // 바의 오늘의 트렌드 아래(레일) 또는 옆(상단바)에 선다.
+  const topicOptions = {
+    leafId: 'trend',
+    label: '분야 고르기',
+    items: [TOPIC_ALL, ...TOPICS].map((item) => ({ id: item.topicCode, label: item.topicName })),
+    selectedId: topic,
+    onSelect: chooseTopic,
   }
 
   const arriving = !walked && enteredFromHome
@@ -213,13 +228,14 @@ export function AppScene() {
         onIntent={warmOnIntent}
         onBrand={() => navigate('/')}
         onAuth={(kind) => navigate(`/${kind}`)}
+        leafOptions={fromSearch ? undefined : topicOptions}
       />
       <ViewPane
         key={account?.user?.userId ?? (account ? 'signed-in' : 'guest')}
         view={view}
         visit={visit}
         topic={topic}
-        onTopicChange={chooseTopic}
+        topicPick={topicPick}
         settled={settled}
         playTrendTransition={arriving && view === 'trend'}
         selectedNode={selectedNode}

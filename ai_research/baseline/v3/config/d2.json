@@ -1,0 +1,35 @@
+{
+  "base_candidate_b_file_sha256": "1ab5a99d912cfa138fcd6a34a44ce5193e850c8cd429c339488bfcf5e549a258",
+  "checkpoint_sha256": "87bc8b000490ebfff71287cbbe5c05605c02243178dc6411ac22a088eccb2acf",
+  "downstream_thresholds": {
+    "ABOUT": 0.5,
+    "ASSERTOR_ENTITY": 0.25,
+    "ASSERTOR_SOURCE": 0.25,
+    "CAUSES": -0.25,
+    "ENTITY_COREFERENCE": 0.25,
+    "EVENT_COREFERENCE": -0.5,
+    "EVENT_TIME": 0.5,
+    "PRIMARY": 0.25
+  },
+  "note": "D2 thresholds were selected by the user for V23 runtime. Checkpoint-bound production policy publication remains separate.",
+  "schema_version": "v3-gold400-runtime-threshold-selection-v1",
+  "selection_status": "USER_SELECTED_D2",
+  "service_ready": false,
+  "source_profile": "V23_BASELINE",
+  "source_reference": {
+    "kind": "EXISTING_SELECTED_P6_DEV49_CALIBRATION_CANDIDATE",
+    "source_acceptance_file_sha256": "f6d28684a76908c451122114876690117fb641a1ca76aa0726cb11b368f1ed54",
+    "source_policy_file_sha256": "6e77d2351648c4eb64e94534f2cd3240f4d610507888551fef219ca7f2ecf7e3",
+    "status": "PROVISIONAL_ENGINEERING_ONLY"
+  },
+  "source_thresholds": {
+    "ENTITY_NATIVE": 0.75,
+    "EVENT": 1.25,
+    "EVENT_BOUNDARY": 2.7749862670898438,
+    "PARTICIPANT_ENDPOINT": 0.8,
+    "STATEMENT": 1.25,
+    "STATEMENT_BOUNDARY": 4.601265907287598,
+    "TIME": 0.5,
+    "TRIGGER_ENDPOINT": 0.9991880059242249
+  }
+}
