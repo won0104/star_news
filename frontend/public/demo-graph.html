@@ -122,6 +122,10 @@
   .status.err { color: var(--danger); }
   .status b { color: var(--text); }
   main { flex: 1; position: relative; min-width: 0; }
+  /* 전체화면은 main 하나만 켠다 — 양옆 패널 없이 그래프만 화면을 채운다. */
+  main:fullscreen {
+    background: #071225 url('/assets/demo/galaxy-v1.webp') center / cover no-repeat fixed;
+  }
 
   /* 양옆 패널의 너비를 끌어서 조절한다. */
   .resizer { width: 5px; flex: none; cursor: col-resize; background: var(--border); }
@@ -291,13 +295,23 @@
   <h1>기사 → 지식그래프</h1>
 
   <label for="title">제목</label>
-  <input id="title" type="text" placeholder="부산 북항 친수공원에 이틀째 상어 출몰">
+  <input id="title" type="text" placeholder="부산 북항 친수공원에 이틀째 상어 출몰" value="상어 '부캉이' 보러 사흘간 32만 명 찾았다">
 
   <label for="source">언론사 (선택)</label>
-  <input id="source" type="text" placeholder="연합뉴스">
+  <input id="source" type="text" placeholder="연합뉴스" value="연합뉴스">
 
   <label for="content">본문 (100자 이상)</label>
-  <textarea id="content" placeholder="기사 본문을 붙여넣으세요."></textarea>
+  <textarea id="content" placeholder="기사 본문을 붙여넣으세요.">추석 연휴 사흘 동안 상어 '부캉이'를 보기 위해 부산시 북항 친수공원을 찾은 방문객이 누적 32만 명에 달한 것으로 나타났습니다.
+
+26일 부산시설공단에 따르면 어제 오후 6시 기준으로 친수공원 하루 누적 방문객은 8만 3천여 명으로 집계됐습니다.
+
+추석 연휴 첫날엔 10만 1천여 명, 둘째 날에는 13만 6천여 명 등 총 32만 명이 방문했습니다.
+
+공단 측이 집계를 시작한 지난 19일부터 누적 방문객을 보면 모두 40만 6천 명 정도 됩니다.
+
+방문객이 증가하자 부산시는 안전사고 예방을 위해 매일 오후 6시부터 다음날 오전 6시까지 친수공원 수로주변의 출입 통제를 하고 있습니다.
+
+부산시는 연휴 이후에도 부캉이가 수로를 빠져나가지 않을 경우 국립수산과학원 등과 협조해 구조하거나 바다로 유도하는 등의 방안을 진행할 계획입니다</textarea>
 
   <div class="row">
     <input id="primaryOnly" type="checkbox" checked>
@@ -321,7 +335,7 @@
 
 <div class="resizer" id="resizeLeft"></div>
 
-<main>
+<main id="stage">
   <svg id="canvas"></svg>
   <div class="hint">노드를 끌어 옮기기 · 빈 곳을 끌어 화면 이동 · 노드를 누르면 전체 이름</div>
   <div class="zoom">
@@ -329,6 +343,7 @@
     <span id="zoomLevel">100%</span>
     <button id="zoomIn" title="확대">+</button>
     <button id="zoomFit" class="wide" title="전체 보기">맞춤</button>
+    <button id="fullscreen" class="wide" title="그래프만 전체화면">전체화면</button>
   </div>
   <div id="detail" class="detail" hidden>
     <button id="detailClose" class="close">×</button>
@@ -762,8 +777,8 @@ function run(nodes, links, width, height) {
         const a = nodes[i]; const b = nodes[j];
         let dx = b.x - a.x; let dy = b.y - a.y;
         let distance = Math.hypot(dx, dy) || 0.1;
-        if (distance > 320) continue;
-        const push = (2400 / (distance * distance)) * alpha;
+        if (distance > 400) continue;
+        const push = (4000 / (distance * distance)) * alpha;
         dx /= distance; dy /= distance;
         a.vx -= dx * push; a.vy -= dy * push;
         b.vx += dx * push; b.vy += dy * push;
@@ -773,7 +788,7 @@ function run(nodes, links, width, height) {
       const a = nodes[link.source]; const b = nodes[link.target];
       const dx = b.x - a.x; const dy = b.y - a.y;
       const distance = Math.hypot(dx, dy) || 0.1;
-      const pull = ((distance - 90) / distance) * 0.035 * alpha;
+      const pull = ((distance - 115) / distance) * 0.035 * alpha;
       a.vx += dx * pull; a.vy += dy * pull;
       b.vx -= dx * pull; b.vy -= dy * pull;
     }
@@ -832,7 +847,7 @@ function render(nodes, links, width, height) {
     const top = star ? (box * STAR_INK) / 2 : radius;
     return `<g data-index="${index}" style="cursor:pointer"><title>${escapeHtml(title)}</title>
       ${mark}
-      <text font-size="${node.nodeType === 'ARTICLE' ? 13 : 10.5}" fill="#d7dfea"
+      <text font-size="${node.nodeType === 'ARTICLE' ? 18 : 15}" fill="#d7dfea"
             text-anchor="middle" dy="${-top - 6}">${escapeHtml(label)}</text>
     </g>`;
   }).join('');
@@ -1030,6 +1045,27 @@ $('showRelations').addEventListener('change', applyView);
 $('zoomIn').addEventListener('click', () => zoomBy(1.25));
 $('zoomOut').addEventListener('click', () => zoomBy(1 / 1.25));
 $('zoomFit').addEventListener('click', zoomToFit);
+$('fullscreen').addEventListener('click', () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else $('stage').requestFullscreen();
+});
+// 브라우저 기본 Esc 종료 등 다른 경로로 빠져나갔을 때도 버튼 글자를 맞춘다.
+document.addEventListener('fullscreenchange', () => {
+  $('fullscreen').textContent = document.fullscreenElement ? '전체화면 종료' : '전체화면';
+  // 전체화면 전환으로 캔버스 크기가 바뀌는데 viewport 는 이전 크기 기준이라 그대로 두면
+  // 그래프가 엉뚱한 자리에 떠 보인다. 이벤트가 뜬 시점엔 전환 레이아웃이 아직 덜 끝나 있을
+  // 수 있어(브라우저마다 다름) clientWidth/Height 가 새 값으로 자리잡을 때까지 두 프레임
+  // 기다렸다가 다시 맞춘다.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (!current.nodes.length) return;
+    zoomToFit();
+    // 전체화면일 땐 위쪽 여백만 남기지 말고 살짝 아래로 내려서 둔다.
+    if (document.fullscreenElement) {
+      viewport.y += 70;
+      applyViewport();
+    }
+  }));
+});
 $('selectAll').addEventListener('click', () => setAllTypes(true));
 $('clearAll').addEventListener('click', () => setAllTypes(false));
 $('sample').addEventListener('click', () => {
