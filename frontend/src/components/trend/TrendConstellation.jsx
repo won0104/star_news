@@ -7,7 +7,6 @@ import {
   panelCopy,
   stars,
   visitedStar,
-  trendFigmaAssets,
 } from '../../data/trend'
 import { fetchNodeArticles } from '../../api/trend'
 import { edgeLabels, nodeTypeLabels } from '../../data/graphLabels'
@@ -39,16 +38,22 @@ const NODE_STAR = {
 }
 
 
-const PREVIEW_STAR = {
-  EVENT: trendFigmaAssets.relatedLeftSticker,
-  ENTITY: trendFigmaAssets.entitySticker,
-  STATEMENT: trendFigmaAssets.statementSticker,
-}
+/*
+ * 미리보기는 다음 화면에 설 노드뿐이라 많아야 여덟(사건 3·인물 4·발언 1)이다 — 한 겹이면 든다.
+ * 겹을 늘리는 코드는 그대로 두어, 슬롯이 늘면 값만 더하면 된다.
+ *
+ * 이웃한 미리보기 별 사이는 개수와 상관없이 PREVIEW_GAP 이다. 예전에는 몇 개든 155° 를 나눠
+ * 펼쳐, 별이 적을수록 사이가 벌어져 흩어져 보였다. 노드에서의 거리(반지름)는 그대로 두고 사이만
+ * 좁혀 부채꼴을 가운데 방향으로 모은다 — 반지름을 줄이면 미리보기가 노드 제목 쪽으로 다가가
+ * 겹쳤다. 사이는 기울인 미리보기 별(폭 2.7~3.2cqw)끼리 닿지 않는 4.5cqw 로 두고, 넓어도 155° 를
+ * 넘지 않는다. 더 좁히면 오른쪽·아래 사건의 미리보기가 그 방향에 붙은 제목 위로 모인다.
+ */
+const PREVIEW_RING_CAPACITIES = [8]
+const PREVIEW_RING_RADII = [12]
+const PREVIEW_GAP = 4.5
+const PREVIEW_MAX_SPAN = Math.PI * 0.86
 
-const PREVIEW_RING_CAPACITIES = [6, 10, 14]
-const PREVIEW_RING_RADII = [10, 14, 18]
-
-/** 다음 Event들을 현재 별에서 바깥쪽으로 펼친 세 겹의 반원에 놓는다. */
+/** 다음 화면의 노드들을 현재 별에서 바깥쪽으로 펼친 반원에 놓는다. */
 function previewPoint(index, total, visual) {
   let ring = 0
   let offset = index
@@ -60,9 +65,9 @@ function previewPoint(index, total, visual) {
   const usedBefore = PREVIEW_RING_CAPACITIES.slice(0, ring).reduce((sum, count) => sum + count, 0)
   const count = Math.min(PREVIEW_RING_CAPACITIES[ring], total - usedBefore)
   const centreAngle = visual === 'relatedLeft' ? Math.PI : visual === 'relatedBottom' ? Math.PI / 2 : 0
-  const span = Math.PI * 0.86
-  const angle = count <= 1 ? centreAngle : centreAngle - span / 2 + (span * offset) / (count - 1)
   const radius = PREVIEW_RING_RADII[ring]
+  const span = Math.min(PREVIEW_MAX_SPAN, ((count - 1) * PREVIEW_GAP) / radius)
+  const angle = count <= 1 ? centreAngle : centreAngle - span / 2 + (span * offset) / (count - 1)
 
   return [Math.cos(angle) * radius, Math.sin(angle) * radius]
 }
@@ -157,11 +162,22 @@ function graphLayoutKey(graph) {
 }
 
 /**
- * 다음 중심 화면에 실제로 배치될 후보만 고른 뒤, 현재 화면에서 이미 보이는 Node는
- * 중복으로 그리지 않는다. 보이는 Node도 슬롯 수에는 포함해야 전환 뒤 구성과 어긋나지 않는다.
+ * 미리보기는 다음 화면의 예고다 — 그 별이 중심이 되었을 때 실제로 배치될 노드만 고른다.
+ * 고르는 일은 다음 화면이 쓰는 코드(graphLayoutKey → bySlotFromGraph → nodesFor)를 그대로
+ * 돌려서 해, 예고와 도착한 화면이 어긋나지 않는다. 사건만이 아니라 인물·기관·발언도 그 화면에
+ * 서므로 함께 보인다.
+ *
+ * 그 가운데 현재 화면에서 이미 보이는 Node는 중복으로 그리지 않는다. 같은 별이 제자리에도,
+ * 미리보기 반원에도 두 번 뜨면 어느 쪽이 무엇인지 읽히지 않는다. 다음 화면의 중심은 마우스를
+ * 올린 그 별 자신이라 역시 빠진다.
  */
-function previewNodesFor(graph) {
-  return (graph?.nodes ?? []).filter((node) => node.nodeType === 'EVENT')
+function previewNodesFor(graph, visibleNodeKeys, narrow) {
+  if (!graph?.centerNode) return []
+  const layout = constellationLayouts[graphLayoutKey(graph)] ?? constellationLayouts.spread
+
+  return nodesFor(bySlotFromGraph(graph), narrow, layout.slots)
+    .filter((node) => node.slot.role !== 'centre' && !visibleNodeKeys.has(node.id))
+    .map((node) => ({ nodeKey: node.id, nodeType: node.nodeType }))
 }
 
 function scrollTrailHorizontally(event) {
@@ -527,7 +543,7 @@ export function TrendConstellation({
             />
           )
           const previewGraph = role === 'related' ? previewGraphs?.[node.id] : null
-          const previewNodes = previewNodesFor(previewGraph)
+          const previewNodes = previewNodesFor(previewGraph, visibleNodeKeys, narrow)
 
           return (
             <div
@@ -570,7 +586,8 @@ export function TrendConstellation({
                             '--preview-rotate': `${previewIndex % 2 === 0 ? -6 : 7}deg`,
                           }}
                         >
-                          <img src={PREVIEW_STAR[preview.nodeType]} alt="" />
+                          {/* 다음 화면에서 그 노드가 쓸 별과 같은 그림이다 — 무엇이 커질지 그대로 읽힌다. */}
+                          <img src={NODE_STAR[preview.nodeType] ?? stars.event} alt="" />
                         </span>
                       </Fragment>
                     )

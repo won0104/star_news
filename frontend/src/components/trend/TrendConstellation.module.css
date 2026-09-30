@@ -635,6 +635,12 @@
 }
 
 .label {
+  /* 오늘의 트렌드(TrendSky)와 같은 기준으로 자른다 — 넓은 화면 다섯 줄, 좁은 화면 세 줄(아래
+     @media). 사건 제목이 한 문단이라, 자르지 않으면 중심 문장이 옆 별 위까지 흘러내렸다. */
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
   font-family: var(--font-serif-kr);
   font-weight: 700;
   font-size: 1.319cqw;
@@ -656,7 +662,9 @@
 .centreText {
   left: 13.54cqw;
   top: 0.35cqw;
-  width: 22.92cqw;
+  /* 사건·발언 제목 칸은 글자 두 개(넓은 화면)·한 개(좁은 화면)만큼 넉넉히 잡는다 — 다섯 줄에서
+     자르므로, 한 줄에 조금 더 담아야 같은 문장이 덜 잘린다. */
+  width: 26cqw;
   transform: translateX(-50%);
 }
 
@@ -667,21 +675,21 @@
 .relatedLeftText {
   left: -1.08cqw;
   top: -9.03cqw;
-  width: 21.88cqw;
+  width: 24.5cqw;
   transform: translateX(-50%);
 }
 
 .relatedRightText {
   left: 9.17cqw;
   top: -5.35cqw;
-  width: 19.86cqw;
+  width: 22.5cqw;
   transform: translateX(-50%);
 }
 
 .relatedBottomText {
   left: -8cqw;
   top: 4.4cqw;
-  width: 18cqw;
+  width: 20.6cqw;
   transform: translateX(-50%);
 }
 
@@ -724,7 +732,7 @@
 .statementText {
   left: 0;
   top: 3.5cqw;
-  width: 15.28cqw;
+  width: 17.2cqw;
   transform: translateX(-50%);
 }
 
@@ -905,27 +913,28 @@
   .centreText {
     left: 0;
     top: -112px;
-    width: 210px;
+    width: 228px;
   }
 
   .relatedLeftText,
   .relatedRightText {
     left: 0;
     top: 56px;
-    width: 126px;
+    width: 141px;
     transform: translateX(-50%);
   }
 
   .statementText {
     left: 0;
     top: 51px;
-    width: 190px;
+    width: 203px;
   }
 
   .label,
   .centreText .label {
     font-size: 15px;
     line-height: 1.45;
+    -webkit-line-clamp: 3;
   }
 
   .centreText .label {
