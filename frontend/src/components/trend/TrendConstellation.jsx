@@ -53,8 +53,22 @@ const PREVIEW_RING_RADII = [12]
 const PREVIEW_GAP = 4.5
 const PREVIEW_MAX_SPAN = Math.PI * 0.86
 
-/** 다음 화면의 노드들을 현재 별에서 바깥쪽으로 펼친 반원에 놓는다. */
-function previewPoint(index, total, visual) {
+/*
+ * 미리보기는 늘 중심 노드의 반대편으로 뻗는다 — 중심에서 그 별로 이어지는 선의 연장선이 부채꼴의
+ * 가운데다. 다른 요소와 겹치는지는 따지지 않는다: 예고는 "이 별 너머에 무엇이 있는가"라, 방향이
+ * 중심에서 멀어지는 쪽이어야 읽힌다.
+ *
+ * 노드 자리는 캔버스에 대한 % 이고 캔버스는 8:5 로 고정이라(.canvas), 세로 차이에 5/8 을 곱해야
+ * 화면에서 보이는 각도가 된다. 좁은 화면은 비율이 풀리지만 거기서는 미리보기를 숨긴다.
+ */
+const CANVAS_ASPECT = 5 / 8
+
+function awayFromCentre(from, centre) {
+  return Math.atan2((from[1] - centre[1]) * CANVAS_ASPECT, from[0] - centre[0])
+}
+
+/** 다음 화면의 노드들을 현재 별에서 `direction` 쪽으로 펼친 부채꼴에 놓는다. */
+function previewPoint(index, total, direction) {
   let ring = 0
   let offset = index
   while (ring < PREVIEW_RING_CAPACITIES.length - 1 && offset >= PREVIEW_RING_CAPACITIES[ring]) {
@@ -64,7 +78,7 @@ function previewPoint(index, total, visual) {
 
   const usedBefore = PREVIEW_RING_CAPACITIES.slice(0, ring).reduce((sum, count) => sum + count, 0)
   const count = Math.min(PREVIEW_RING_CAPACITIES[ring], total - usedBefore)
-  const centreAngle = visual === 'relatedLeft' ? Math.PI : visual === 'relatedBottom' ? Math.PI / 2 : 0
+  const centreAngle = direction
   const radius = PREVIEW_RING_RADII[ring]
   const span = Math.min(PREVIEW_MAX_SPAN, ((count - 1) * PREVIEW_GAP) / radius)
   const angle = count <= 1 ? centreAngle : centreAngle - span / 2 + (span * offset) / (count - 1)
@@ -561,7 +575,11 @@ export function TrendConstellation({
                   aria-hidden
                 >
                   {previewNodes.map((preview, previewIndex) => {
-                    const [x, y] = previewPoint(previewIndex, previewNodes.length, visual)
+                    const [x, y] = previewPoint(
+                      previewIndex,
+                      previewNodes.length,
+                      awayFromCentre(at(node), at(centre)),
+                    )
                     const lineLength = Math.hypot(x, y)
                     const lineAngle = Math.atan2(-y, -x)
 
