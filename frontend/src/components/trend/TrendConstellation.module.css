@@ -341,11 +341,16 @@
 /* Keep the authored 8:5 coordinate system fully inside the glass. `max()` used to make
    this a cover canvas, which cropped edge labels whenever the pane was taller or wider
    than 8:5. The inset contain canvas leaves enough room for wrapped Event labels too. */
+/*
+ * 위쪽 20~60px 는 탐색 경로와 전체보기·더보기 단추가 지나간다. 캔버스를 그 아래(68px)부터 유리
+ * 아래 여백(20px)까지의 칸 가운데에 두어, 위쪽 별이 경로 줄 밑으로 깔리지 않게 한다. 높이가
+ * 모자라면 8:5 를 지킨 채 폭이 줄어든다(높이 = 100cqh − 88px, 폭 = 높이 × 8/5).
+ */
 .canvas {
   position: absolute;
   left: 50%;
-  top: 50%;
-  width: min(calc(100cqw - 24px), calc(160cqh - 64px));
+  top: calc(50% + 24px);
+  width: min(calc(100cqw - 24px), calc(160cqh - 140.8px));
   max-width: 100%;
   aspect-ratio: 8 / 5;
   transform: translate(-50%, -50%);
