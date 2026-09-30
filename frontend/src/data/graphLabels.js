@@ -22,7 +22,8 @@ export const edgeLabels = {
   OCCURRED_ON: '시점',
   OCCURRED_AT: '시점',
   // 사건 ↔ 사건
-  CAUSES: '원인·결과',
+  // 인과를 단정하지 않는다 — 추출된 관계가 꼭 원인과 결과인 것은 아니어서 넓은 이름으로 둔다.
+  CAUSES: '관련 사건',
   SUBEVENT_OF: '상위 사건',
   // 사건 → Story, 시점 → 상위 시점. 사건 쪽 뜻(더 큰 흐름에 속함)에 맞춘 이름이다.
   PART_OF: '상위 흐름',
