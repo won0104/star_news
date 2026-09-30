@@ -508,48 +508,56 @@ export const ambientLayouts = {
     [11, 20],
   ],
 }
+/*
+ * 탐색 화면(주변 그래프)의 세 구도는 같은 자리를 쓴다. 제목이 모두 별 바로 아래 가운데에 붙으므로
+ * (TrendConstellation.module.css), 자리는 "별 윗변~제목 아랫변" 묶음이 서로 겹치지 않게 잡았다.
+ * 캔버스는 8:5 이고 다섯 줄 제목·글자 배율 1.2(--label-scale) 기준으로 묶음은 중심 −7.4~+34.6%,
+ * 관련 사건 −5.2~+28.6%, 발언 −4.3~+25.8%, 인물·기관 −3.6~+17.4% (별 가운데에서 잰 세로 %) 다. 좌우로 겹치는 두 묶음은
+ * 위아래로 비켜 선다. 탐색 경로 줄은 캔버스 위에 따로 자리를 잡으므로(.canvas) 여기서 비울
+ * 것이 없다. 좁은 화면(atNarrow)은 따로다.
+ */
 export const constellationLayouts = {
   spread: { label: '펼침형', slots: constellationSlots },
   graphSparse: {
     label: '희소 탐색형',
     slots: [
-      { role: 'centre', visual: 'centre', at: [50, 52], atNarrow: [50, 28] },
-      { role: 'related', visual: 'relatedLeft', at: [18, 29], atNarrow: [23, 52] },
-      { role: 'related', visual: 'relatedRight', at: [82, 31], atNarrow: [77, 52] },
-      { role: 'entity', visual: 'entityLeft', at: [17, 68], hideNarrow: true },
-      { role: 'entity', visual: 'entityTop', at: [55, 14], hideNarrow: true },
-      { role: 'statement', visual: 'statement', at: [56, 84], atNarrow: [50, 76] },
-      { role: 'related', visual: 'relatedBottom', at: [82, 76], hideNarrow: true },
-      { role: 'entity', visual: 'entityBottom', at: [34, 88], hideNarrow: true },
-      { role: 'entity', visual: 'entityRight', at: [90, 58], hideNarrow: true },
+      { role: 'centre', visual: 'centre', at: [50, 34], atNarrow: [50, 28] },
+      { role: 'related', visual: 'relatedLeft', at: [17, 14], atNarrow: [23, 52] },
+      { role: 'related', visual: 'relatedRight', at: [83, 14], atNarrow: [77, 52] },
+      { role: 'entity', visual: 'entityLeft', at: [17, 58], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [62, 9], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [46, 73], atNarrow: [50, 76] },
+      { role: 'related', visual: 'relatedBottom', at: [84, 60], hideNarrow: true },
+      { role: 'entity', visual: 'entityBottom', at: [22, 84], hideNarrow: true },
+      { role: 'entity', visual: 'entityRight', at: [65, 80], hideNarrow: true },
     ],
   },
   graphBalanced: {
     label: '균형 탐색형',
     slots: [
-      { role: 'centre', visual: 'centre', at: [48, 53], atNarrow: [50, 28] },
-      { role: 'related', visual: 'relatedLeft', at: [17, 30], atNarrow: [23, 52] },
-      { role: 'related', visual: 'relatedRight', at: [82, 35], atNarrow: [77, 52] },
-      { role: 'entity', visual: 'entityLeft', at: [17, 64], hideNarrow: true },
-      { role: 'entity', visual: 'entityTop', at: [62, 14], hideNarrow: true },
-      { role: 'statement', visual: 'statement', at: [53, 83], atNarrow: [50, 76] },
-      { role: 'related', visual: 'relatedBottom', at: [81, 77], hideNarrow: true },
-      { role: 'entity', visual: 'entityBottom', at: [29, 88], hideNarrow: true },
-      { role: 'entity', visual: 'entityRight', at: [90, 57], hideNarrow: true },
+      { role: 'centre', visual: 'centre', at: [50, 34], atNarrow: [50, 28] },
+      { role: 'related', visual: 'relatedLeft', at: [17, 14], atNarrow: [23, 52] },
+      { role: 'related', visual: 'relatedRight', at: [83, 14], atNarrow: [77, 52] },
+      { role: 'entity', visual: 'entityLeft', at: [17, 58], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [62, 9], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [46, 73], atNarrow: [50, 76] },
+      { role: 'related', visual: 'relatedBottom', at: [84, 60], hideNarrow: true },
+      { role: 'entity', visual: 'entityBottom', at: [22, 84], hideNarrow: true },
+      { role: 'entity', visual: 'entityRight', at: [65, 80], hideNarrow: true },
     ],
   },
   graphDense: {
     label: '밀집 탐색형',
     slots: [
-      { role: 'centre', visual: 'centre', at: [46, 53], atNarrow: [50, 28] },
-      { role: 'related', visual: 'relatedLeft', at: [18, 29], atNarrow: [23, 52] },
-      { role: 'related', visual: 'relatedRight', at: [77, 38], atNarrow: [77, 52] },
-      { role: 'entity', visual: 'entityLeft', at: [17, 63], hideNarrow: true },
-      { role: 'entity', visual: 'entityTop', at: [65, 14], hideNarrow: true },
-      { role: 'statement', visual: 'statement', at: [52, 82], atNarrow: [50, 76] },
-      { role: 'related', visual: 'relatedBottom', at: [82, 77], hideNarrow: true },
-      { role: 'entity', visual: 'entityBottom', at: [28, 88], hideNarrow: true },
-      { role: 'entity', visual: 'entityRight', at: [91, 57], hideNarrow: true },
+      { role: 'centre', visual: 'centre', at: [50, 34], atNarrow: [50, 28] },
+      { role: 'related', visual: 'relatedLeft', at: [17, 14], atNarrow: [23, 52] },
+      { role: 'related', visual: 'relatedRight', at: [83, 14], atNarrow: [77, 52] },
+      { role: 'entity', visual: 'entityLeft', at: [17, 58], hideNarrow: true },
+      { role: 'entity', visual: 'entityTop', at: [62, 9], hideNarrow: true },
+      { role: 'statement', visual: 'statement', at: [46, 73], atNarrow: [50, 76] },
+      { role: 'related', visual: 'relatedBottom', at: [84, 60], hideNarrow: true },
+      { role: 'entity', visual: 'entityBottom', at: [22, 84], hideNarrow: true },
+      { role: 'entity', visual: 'entityRight', at: [65, 80], hideNarrow: true },
     ],
   },
   orbit: {

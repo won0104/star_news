@@ -307,19 +307,23 @@
   word-break: keep-all;
 }
 
+/* 범례는 제목 아래 한 줄로 둔다. 분야가 일곱까지 늘자 제목 옆에 두면 제목이 두 줄로 접혔다. */
 .blockHead {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* Four series carrying meaning in two legends and one stack, so they are spaced in
-   lightness as well as hue and stay separable on cream at this size. */
+/* Series carrying meaning in two legends and one stack, so they are spaced in lightness
+   as well as hue and stay separable on cream at this size. 12주 차트는 분야마다 한 칸을
+   고정해 쓴다(어댑터의 TOPIC_TONES) — 분야가 일곱이라 일곱 칸. */
 .tone0 { background: #2e415b; }
 .tone1 { background: #8c6b3f; }
 .tone2 { background: #c79b51; }
 .tone3 { background: #d6c8ad; }
+.tone4 { background: #6f7d57; }
+.tone5 { background: #a9573f; }
+.tone6 { background: #7f9ab0; }
 
 .swatch {
   display: inline-block;
@@ -382,9 +386,9 @@
 /* ---- ① 최근 12주의 흐름 (왼쪽) ----------------------------------------------------- */
 
 .seriesLegend {
-  display: grid;
-  grid-template-columns: repeat(2, auto);
-  gap: 3px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -511,60 +515,6 @@
 .segment {
   display: block;
   width: 100%;
-}
-
-/* ---- 기타 조각의 판정 영역 ---------------------------------------------------- */
-/* 조각 위에 덮는 투명한 층. 기타는 접히고 남은 작은 값이라 어떤 주에는 1~2px 이고, 그
-   높이를 그대로 표적으로 쓰면 멈춰 있을 수가 없다. 최소 높이를 보장해 위쪽 빈 곳으로만
-   자라게 한다 — 바닥이 고정돼 있어 아래 조각을 가리지 않는다. */
-.otherHotspot {
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  left: 0;
-  min-height: 12px;
-}
-
-/* 말풍선은 조각 위로 띄운다. 12주가 좁게 붙어 있어 기둥 안에 넣으면 폭이 한 칸으로
-   묶여 글자가 세로로 쪼개진다. */
-.otherTip {
-  position: absolute;
-  z-index: 3;
-  bottom: calc(100% + 5px);
-  left: 50%;
-  display: grid;
-  gap: 1px;
-  min-width: 74px;
-  padding: 5px 7px 6px;
-  transform: translateX(-50%);
-  border: 1px solid rgba(94, 74, 51, 0.34);
-  border-radius: 3px;
-  background: rgba(252, 249, 242, 0.98);
-  box-shadow: 0 2px 7px rgba(68, 57, 47, 0.16);
-  font: clamp(8px, 0.7vw, 11px)/1.45 var(--font-sans);
-  font-variant-numeric: tabular-nums;
-  color: #6f5c47;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.otherTip b {
-  margin-bottom: 2px;
-  padding-bottom: 2px;
-  border-bottom: 1px solid rgba(94, 74, 51, 0.2);
-  color: #3a2f26;
-}
-
-/* 첫 주와 마지막 주는 말풍선이 판 밖으로 나간다. 그 둘만 안쪽으로 붙인다. */
-.column:first-child .otherTip {
-  left: 0;
-  transform: none;
-}
-
-.column:last-child .otherTip {
-  right: 0;
-  left: auto;
-  transform: none;
 }
 
 /* 기준선(.columns 의 아래 테두리) 밖, 그 아래에 단다. 기둥 칸 안에 두면 선이 글자 아래로
