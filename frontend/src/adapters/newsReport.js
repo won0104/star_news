@@ -1,5 +1,17 @@
 const SOURCE_LIMIT = 5
-const TOP_TOPIC_LIMIT = 3
+/*
+ * 분야마다 고정된 색 칸(DiaryReportPane.module.css 의 tone0~6). 순위로 색을 매기면 순위가
+ * 바뀔 때마다 같은 분야가 다른 색이 된다. 앞의 셋은 예전 상위 세 칸이 쓰던 색을 그대로 둔다.
+ */
+const TOPIC_TONES = {
+  IT_SCIENCE: 0,
+  POLITICS: 1,
+  SOCIETY: 2,
+  SPORTS: 3,
+  ECONOMY: 4,
+  CULTURE: 5,
+  INTERNATIONAL: 6,
+}
 
 export function reportFromApi(payload) {
   const sourceRows = sourceReads(payload?.sourceReads ?? [])
@@ -102,49 +114,30 @@ function weeklyTrend(weeks) {
     })
   })
 
-  // 서버는 열람이 0건인 분야도 12주 내내 0으로 채워 내려준다(DTO 계약). 그 0들을 그대로
-  // 줄 세우면 동점이 코드순으로 갈려, 읽지도 않은 분야가 상위 세 칸을 채우러 올라온다.
-  // 한 건이라도 읽은 분야만 후보로 둔다.
+  // 순위는 언제든 바뀌므로 몇 개로 자르지 않고, 서버가 내려준 분야를 0건인 것까지 전부
+  // 세운다(DTO 계약상 모든 분야가 12주 내내 채워져 온다). 많이 읽은 분야가 기둥 아래,
+  // 0건인 분야는 범례 끝에 이름만 선다.
   const rankedCodes = [...totals.keys()]
-    .filter((code) => (totals.get(code) ?? 0) > 0)
     .sort((left, right) => {
       const difference = (totals.get(right) ?? 0) - (totals.get(left) ?? 0)
       return difference || left.localeCompare(right)
     })
-  const topCodes = rankedCodes.slice(0, TOP_TOPIC_LIMIT)
-  const topSet = new Set(topCodes)
-  // 접어 넣을 게 남았을 때만 기타를 세운다. 언제나 0인 기타 칸은 범례만 차지한다.
-  const hasOther = rankedCodes.length > topCodes.length
-  const series = [
-    ...topCodes.map((code) => ({ id: code, label: labels.get(code) ?? code })),
-    ...(hasOther ? [{ id: 'OTHER', label: '기타' }] : []),
-  ]
+  const series = rankedCodes.map((code) => ({
+    id: code,
+    label: labels.get(code) ?? code,
+    tone: TOPIC_TONES[code] ?? 3,
+  }))
 
   const columns = weeks.map((week, index) => {
     const byCode = new Map(
       (week.topics ?? []).map((topic) => [topic.topicCode, topic.readArticleCount]),
     )
-    const folded = [...byCode.entries()].filter(([code]) => !topSet.has(code))
-    const other = folded.reduce((sum, [, count]) => sum + count, 0)
 
     return {
       month: monthLabel(week.weekStart, index === 0 ? null : weeks[index - 1]?.weekStart),
       weekStart: week.weekStart,
-      // series 와 언제나 같은 길이. 기타를 세우지 않았으면 그 칸도 없다.
-      values: [...topCodes.map((code) => byCode.get(code) ?? 0), ...(hasOther ? [other] : [])],
-      /*
-       * 이 주의 기타에 무엇이 들었는지. 조각에 마우스를 올렸을 때 그 자리에서 답하려고
-       * 남긴다 — 묻는 것이 "이 주의 기타"이므로 12주 합계로 답하면 딴 말이 된다.
-       *
-       * 0인 분야는 뺀다. 기타에 접히는 것은 대부분 0이라 그대로 두면 목록이 0으로 채워져
-       * 정작 읽은 분야가 묻힌다. rankedCodes 순서를 따라 많이 읽은 것부터 세운다.
-       */
-      otherParts: hasOther
-        ? rankedCodes
-          .slice(TOP_TOPIC_LIMIT)
-          .map((code) => ({ id: code, label: labels.get(code) ?? code, count: byCode.get(code) ?? 0 }))
-          .filter((part) => part.count > 0)
-        : [],
+      // series 와 언제나 같은 길이.
+      values: rankedCodes.map((code) => byCode.get(code) ?? 0),
     }
   })
 
@@ -160,7 +153,7 @@ function weeklyTrend(weeks) {
     hint: '주별 최초 열람 기사 수와 분야 구성을 보여줘요.',
     insights: weeklyInsights(weeks, labels),
     // 출처 블록의 각주와 같은 역할 — 비어 있는 이유를 빈칸 대신 말로 적는다.
-    empty: series.length === 0 ? '아직 주별로 쌓인 기록이 없어요.' : null,
+    empty: highestWeek === 0 ? '아직 주별로 쌓인 기록이 없어요.' : null,
     series,
     axisMax,
     ticks: halfway === axisMax ? [axisMax] : [halfway, axisMax],
