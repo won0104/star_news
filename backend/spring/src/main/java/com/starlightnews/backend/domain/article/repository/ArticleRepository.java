@@ -279,4 +279,48 @@ public interface ArticleRepository extends Repository<Article, Long> {
 			+ "o.id AS organizationId, o.name AS organizationName "
 			+ "FROM Article a JOIN a.organization o WHERE a.articleId = :articleId")
 	Optional<DemoArticle> findDemoArticle(@Param("articleId") Long articleId);
+
+	/** 대사에 쓰는 기사 한 건의 분석 상태와 노드 ID. */
+	interface ArticleNodeRef {
+		Long getArticleId();
+
+		String getNodeId();
+
+		AnalysisStatus getAnalysisStatus();
+	}
+
+	/**
+	 * COMPLETED 기사를 articleId 오름차순으로 {@code afterId} 다음부터 읽는다. 대사가 페이지 단위로 쓴다.
+	 *
+	 * <p>OFFSET 대신 마지막 ID 다음부터 읽어, 기사가 늘어도 뒤 페이지가 느려지지 않는다.
+	 */
+	@Query("SELECT a.articleId AS articleId, a.nodeId AS nodeId, a.analysisStatus AS analysisStatus "
+			+ "FROM Article a "
+			+ "WHERE a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.COMPLETED "
+			+ "AND a.articleId > :afterId "
+			+ "ORDER BY a.articleId ASC")
+	List<ArticleNodeRef> findCompletedNodeRefsAfter(@Param("afterId") long afterId, Limit limit);
+
+	/** 주어진 ID 의 분석 상태와 노드 ID. 행이 없는 ID 는 결과에 빠진다. */
+	@Query("SELECT a.articleId AS articleId, a.nodeId AS nodeId, a.analysisStatus AS analysisStatus "
+			+ "FROM Article a WHERE a.articleId IN :articleIds")
+	List<ArticleNodeRef> findNodeRefsByArticleIdIn(@Param("articleIds") Collection<Long> articleIds);
+
+	/**
+	 * 대사에서 찾은 기사를 분석 대기로 되돌린다.
+	 *
+	 * <p>대사가 본 상태({@code expectedStatus}) 그대로일 때만 바꾼다. 그사이 분석 배치가 상태를 바꿨으면
+	 * 그쪽이 최신이므로 덮어쓰지 않는다. 노드 ID 를 비워야 대기열({@link #findAnalysisQueue})이 가져가고,
+	 * 시도 횟수를 0 으로 되돌려야 FAILED 였던 기사가 한도에 바로 걸리지 않는다.
+	 *
+	 * @return 바뀐 행 수. 0 이면 그사이 상태가 바뀌었다
+	 */
+	@Modifying
+	@Query("UPDATE Article a "
+			+ "SET a.analysisStatus = com.starlightnews.backend.global.enums.AnalysisStatus.PROCESSING, "
+			+ "    a.nodeId = NULL, a.analysisAttempts = 0, a.analysisFailureCode = :failureCode "
+			+ "WHERE a.articleId = :articleId AND a.analysisStatus = :expectedStatus")
+	int requeueForAnalysis(@Param("articleId") Long articleId,
+			@Param("expectedStatus") AnalysisStatus expectedStatus,
+			@Param("failureCode") String failureCode);
 }
