@@ -11,6 +11,7 @@ import com.starlightnews.backend.domain.auth.dto.SignupResponse;
 import com.starlightnews.backend.domain.auth.service.AuthService;
 import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.error.ErrorResponse;
+import com.starlightnews.backend.global.request.ClientIpFilter;
 import com.starlightnews.backend.global.request.RequestIdFilter;
 import com.starlightnews.backend.global.response.ApiResponse;
 import com.starlightnews.backend.global.security.AuthenticatedUser;
@@ -115,6 +116,9 @@ public class AuthController {
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
 					description = "탈퇴한 회원 (code: USER_DELETED)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "429",
+					description = "같은 계정 연속 실패(기본 5회, 15분 잠금) 또는 같은 IP 실패 한도 초과 (code: LOGIN_ATTEMPTS_EXCEEDED)",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	@SecurityRequirements
@@ -122,9 +126,10 @@ public class AuthController {
 	public ApiResponse<LoginResponse> login(
 			@Valid @RequestBody LoginRequest request,
 			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId,
+			@Parameter(hidden = true) @RequestAttribute(ClientIpFilter.ATTRIBUTE_NAME) String clientIp,
 			@Parameter(hidden = true) HttpServletResponse response
 	) {
-		LoginResult result = authService.login(request);
+		LoginResult result = authService.login(request, clientIp);
 		response.addHeader(HttpHeaders.SET_COOKIE,
 				refreshTokenCookie(result.refreshToken(), result.refreshTokenMaxAgeSeconds()).toString());
 		return ApiResponse.success(result.response(), requestId);

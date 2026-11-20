@@ -14,6 +14,8 @@ public enum AuthErrorCode implements ErrorCode {
 	DUPLICATED_TOPIC(HttpStatus.BAD_REQUEST, "같은 관심 분야를 중복해서 선택할 수 없습니다."),
 	TOPIC_SELECTION_CONFLICT(HttpStatus.BAD_REQUEST, "관심 분야와 비관심 분야에 같은 항목을 선택할 수 없습니다."),
 	INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
+	/** 계정 또는 IP 의 로그인 실패가 한도를 넘었다. 계정이 있는지는 드러내지 않도록 같은 코드로 답한다. */
+	LOGIN_ATTEMPTS_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요."),
 	INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
 	EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 리프레시 토큰입니다."),
 	REFRESH_TOKEN_REUSED(HttpStatus.UNAUTHORIZED, "이미 사용된 리프레시 토큰입니다. 다시 로그인해 주세요."),

@@ -34,6 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -178,7 +179,7 @@ class AuthControllerTest {
 		LoginResponse body = new LoginResponse(
 				"access-token-value", "Bearer", 3600L,
 				new LoginResponse.UserSummary(1L, "starlight01", "별빛"));
-		given(authService.login(any()))
+		given(authService.login(any(), any()))
 				.willReturn(new LoginResult(body, "refresh-token-value", 1_209_600L));
 
 		mockMvc.perform(post(LOGIN_PATH)
@@ -209,12 +210,12 @@ class AuthControllerTest {
 				.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
 				.andExpect(jsonPath("$.errors[*].field").value(hasItems("loginId", "password")));
 
-		verify(authService, never()).login(any());
+		verify(authService, never()).login(any(), any());
 	}
 
 	@Test
 	void 서비스가_INVALID_CREDENTIALS를_던지면_401을_응답한다() throws Exception {
-		given(authService.login(any()))
+		given(authService.login(any(), any()))
 				.willThrow(new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
 
 		mockMvc.perform(post(LOGIN_PATH)
@@ -226,7 +227,7 @@ class AuthControllerTest {
 
 	@Test
 	void 서비스가_USER_DELETED를_던지면_403을_응답한다() throws Exception {
-		given(authService.login(any()))
+		given(authService.login(any(), any()))
 				.willThrow(new BusinessException(AuthErrorCode.USER_DELETED));
 
 		mockMvc.perform(post(LOGIN_PATH)
@@ -234,6 +235,39 @@ class AuthControllerTest {
 						.content(loginBody("starlight01", "password1234")))
 				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.code").value("USER_DELETED"));
+	}
+
+	@Test
+	void 서비스가_LOGIN_ATTEMPTS_EXCEEDED를_던지면_429를_응답한다() throws Exception {
+		given(authService.login(any(), any()))
+				.willThrow(new BusinessException(AuthErrorCode.LOGIN_ATTEMPTS_EXCEEDED));
+
+		mockMvc.perform(post(LOGIN_PATH)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(loginBody("starlight01", "password1234")))
+				.andExpect(status().isTooManyRequests())
+				.andExpect(jsonPath("$.status").value(429))
+				.andExpect(jsonPath("$.code").value("LOGIN_ATTEMPTS_EXCEEDED"));
+	}
+
+	@Test
+	void 로그인은_요청의_클라이언트_IP를_서비스에_넘긴다() throws Exception {
+		LoginResponse body = new LoginResponse(
+				"access-token-value", "Bearer", 3600L,
+				new LoginResponse.UserSummary(1L, "starlight01", "별빛"));
+		given(authService.login(any(), any()))
+				.willReturn(new LoginResult(body, "refresh-token-value", 1_209_600L));
+
+		mockMvc.perform(post(LOGIN_PATH)
+						.with(request -> {
+							request.setRemoteAddr("203.0.113.10");
+							return request;
+						})
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(loginBody("starlight01", "password1234")))
+				.andExpect(status().isOk());
+
+		verify(authService).login(any(), eq("203.0.113.10"));
 	}
 
 	@Test

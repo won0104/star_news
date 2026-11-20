@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import com.starlightnews.backend.domain.auth.config.LoginAttemptProperties;
 import com.starlightnews.backend.domain.auth.dto.LoginIdAvailabilityResponse;
 import com.starlightnews.backend.domain.auth.dto.LoginRequest;
 import com.starlightnews.backend.domain.auth.dto.LoginResult;
@@ -18,6 +19,7 @@ import com.starlightnews.backend.domain.user.repository.UserRepository;
 import com.starlightnews.backend.global.enums.InterestType;
 import com.starlightnews.backend.global.enums.TopicCode;
 import com.starlightnews.backend.global.error.BusinessException;
+import com.starlightnews.backend.global.ratelimit.InMemoryRateLimitStore;
 import com.starlightnews.backend.global.security.JwtProvider;
 import com.starlightnews.backend.global.security.JwtValidationException;
 import com.starlightnews.backend.global.security.RefreshSession;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -62,8 +65,18 @@ class AuthServiceTest {
 	@Mock
 	private TokenBlacklist tokenBlacklist;
 
+	/** 시도 제한은 실제 인메모리 저장소로 돌려 횟수·잠금 동작까지 확인한다. */
+	@Spy
+	private LoginAttemptLimiter loginAttemptLimiter = new LoginAttemptLimiter(
+			new InMemoryRateLimitStore(),
+			new LoginAttemptProperties(MAX_FAILURES, Duration.ofMinutes(15), IP_MAX_FAILURES, Duration.ofMinutes(15)));
+
 	@InjectMocks
 	private AuthService authService;
+
+	private static final int MAX_FAILURES = 5;
+	private static final int IP_MAX_FAILURES = 30;
+	private static final String CLIENT_IP = "203.0.113.10";
 
 	private SignupRequest request(List<String> interested, List<String> disliked) {
 		return new SignupRequest("starlight01", "password1234", "별빛", interested, disliked);
@@ -204,7 +217,7 @@ class AuthServiceTest {
 		given(passwordEncoder.matches("password1234", "hashed-password")).willReturn(true);
 		stubTokenIssuance();
 
-		LoginResult result = authService.login(loginRequest());
+		LoginResult result = authService.login(loginRequest(), CLIENT_IP);
 
 		assertThat(result.response().accessToken()).isEqualTo("access-token-value");
 		assertThat(result.response().tokenType()).isEqualTo("Bearer");
@@ -231,7 +244,7 @@ class AuthServiceTest {
 	void 존재하지_않는_로그인_아이디면_INVALID_CREDENTIALS_예외() {
 		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.empty());
 
-		Throwable thrown = catchThrowable(() -> authService.login(loginRequest()));
+		Throwable thrown = catchThrowable(() -> authService.login(loginRequest(), CLIENT_IP));
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.INVALID_CREDENTIALS);
 		verify(refreshSessionStore, never()).save(any(), any(), any());
@@ -242,7 +255,7 @@ class AuthServiceTest {
 		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.of(activeUser(1L)));
 		given(passwordEncoder.matches("password1234", "hashed-password")).willReturn(false);
 
-		Throwable thrown = catchThrowable(() -> authService.login(loginRequest()));
+		Throwable thrown = catchThrowable(() -> authService.login(loginRequest(), CLIENT_IP));
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.INVALID_CREDENTIALS);
 		verify(refreshSessionStore, never()).save(any(), any(), any());
@@ -254,11 +267,95 @@ class AuthServiceTest {
 		deleted.markDeleted();
 		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.of(deleted));
 
-		Throwable thrown = catchThrowable(() -> authService.login(loginRequest()));
+		Throwable thrown = catchThrowable(() -> authService.login(loginRequest(), CLIENT_IP));
 
 		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.USER_DELETED);
 		verify(passwordEncoder, never()).matches(any(), any());
 		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	private Throwable failLogin(String loginId, String clientIp) {
+		return catchThrowable(() -> authService.login(new LoginRequest(loginId, "wrong-password"), clientIp));
+	}
+
+	@Test
+	void 같은_계정을_연속으로_한도만큼_틀리면_맞는_비밀번호도_비밀번호_확인_없이_429로_막는다() {
+		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.of(activeUser(1L)));
+		given(passwordEncoder.matches("wrong-password", "hashed-password")).willReturn(false);
+		for (int i = 0; i < MAX_FAILURES; i++) {
+			assertThat(errorCodeOf(failLogin("starlight01", CLIENT_IP))).isEqualTo(AuthErrorCode.INVALID_CREDENTIALS);
+		}
+
+		Throwable thrown = catchThrowable(() -> authService.login(loginRequest(), CLIENT_IP));
+
+		assertThat(errorCodeOf(thrown)).isEqualTo(AuthErrorCode.LOGIN_ATTEMPTS_EXCEEDED);
+		assertThat(AuthErrorCode.LOGIN_ATTEMPTS_EXCEEDED.getStatus().value()).isEqualTo(429);
+		verify(passwordEncoder, never()).matches(eq("password1234"), any());
+		verify(refreshSessionStore, never()).save(any(), any(), any());
+	}
+
+	@Test
+	void 없는_아이디도_똑같이_세고_잠가서_계정_존재_여부를_드러내지_않는다() {
+		given(userRepository.findByLoginId("nobody")).willReturn(Optional.empty());
+		for (int i = 0; i < MAX_FAILURES; i++) {
+			assertThat(errorCodeOf(failLogin("nobody", CLIENT_IP))).isEqualTo(AuthErrorCode.INVALID_CREDENTIALS);
+		}
+
+		assertThat(errorCodeOf(failLogin("nobody", CLIENT_IP))).isEqualTo(AuthErrorCode.LOGIN_ATTEMPTS_EXCEEDED);
+	}
+
+	@Test
+	void 성공하면_연속_실패가_초기화된다() {
+		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.of(activeUser(1L)));
+		given(passwordEncoder.matches("wrong-password", "hashed-password")).willReturn(false);
+		given(passwordEncoder.matches("password1234", "hashed-password")).willReturn(true);
+		stubTokenIssuance();
+
+		for (int i = 0; i < MAX_FAILURES - 1; i++) {
+			failLogin("starlight01", CLIENT_IP);
+		}
+		authService.login(loginRequest(), CLIENT_IP);
+		for (int i = 0; i < MAX_FAILURES - 1; i++) {
+			assertThat(errorCodeOf(failLogin("starlight01", CLIENT_IP))).isEqualTo(AuthErrorCode.INVALID_CREDENTIALS);
+		}
+
+		assertThat(authService.login(loginRequest(), CLIENT_IP).refreshToken()).isEqualTo("refresh-token-value");
+	}
+
+	@Test
+	void 대소문자를_바꿔도_같은_계정이면_같은_횟수로_센다() {
+		// MySQL 기본 콜레이션은 대소문자를 구분하지 않아 철자를 바꿔도 같은 사용자가 조회된다.
+		given(userRepository.findByLoginId(any())).willReturn(Optional.of(activeUser(1L)));
+		given(passwordEncoder.matches("wrong-password", "hashed-password")).willReturn(false);
+		String[] variants = {"starlight01", "Starlight01", "STARLIGHT01", "sTarlight01", "starLight01"};
+		for (String variant : variants) {
+			failLogin(variant, CLIENT_IP);
+		}
+
+		assertThat(errorCodeOf(failLogin("StarLight01", CLIENT_IP))).isEqualTo(AuthErrorCode.LOGIN_ATTEMPTS_EXCEEDED);
+	}
+
+	@Test
+	void 한_IP에서_계정을_바꿔_가며_한도를_넘게_틀리면_그_IP의_로그인을_막는다() {
+		given(userRepository.findByLoginId(any())).willReturn(Optional.empty());
+		for (int i = 0; i < IP_MAX_FAILURES; i++) {
+			failLogin("spray" + i, CLIENT_IP);
+		}
+
+		assertThat(errorCodeOf(failLogin("fresh-id", CLIENT_IP))).isEqualTo(AuthErrorCode.LOGIN_ATTEMPTS_EXCEEDED);
+		assertThat(errorCodeOf(failLogin("fresh-id", "198.51.100.7"))).isEqualTo(AuthErrorCode.INVALID_CREDENTIALS);
+	}
+
+	@Test
+	void 탈퇴_회원_응답은_실패로_세지_않는다() {
+		User deleted = activeUser(1L);
+		deleted.markDeleted();
+		given(userRepository.findByLoginId("starlight01")).willReturn(Optional.of(deleted));
+
+		for (int i = 0; i < MAX_FAILURES + 1; i++) {
+			assertThat(errorCodeOf(catchThrowable(() -> authService.login(loginRequest(), CLIENT_IP))))
+					.isEqualTo(AuthErrorCode.USER_DELETED);
+		}
 	}
 
 	private static final String OLD_RT = "old-refresh-token";

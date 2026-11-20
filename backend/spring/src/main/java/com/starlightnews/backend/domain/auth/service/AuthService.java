@@ -43,6 +43,7 @@ public class AuthService {
 	private final JwtProvider jwtProvider;
 	private final RefreshSessionStore refreshSessionStore;
 	private final TokenBlacklist tokenBlacklist;
+	private final LoginAttemptLimiter loginAttemptLimiter;
 
 	@Transactional(readOnly = true)
 	public LoginIdAvailabilityResponse checkLoginIdAvailability(String loginId) {
@@ -50,17 +51,31 @@ public class AuthService {
 		return new LoginIdAvailabilityResponse(loginId, available);
 	}
 
+	/**
+	 * 로그인. 계정·IP 별 실패 횟수를 세어 한도를 넘으면 비밀번호를 확인하지 않고 막는다
+	 * ({@link LoginAttemptLimiter}).
+	 *
+	 * @param clientIp 요청한 클라이언트 IP. IP 별 실패 한도에 쓴다
+	 */
 	@Transactional(readOnly = true)
-	public LoginResult login(LoginRequest request) {
-		User user = userRepository.findByLoginId(request.loginId())
-				.orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
+	public LoginResult login(LoginRequest request, String clientIp) {
+		User user = userRepository.findByLoginId(request.loginId()).orElse(null);
+		String attemptSubject = LoginAttemptLimiter.subjectOf(
+				user != null ? user.getId() : null, request.loginId());
+		loginAttemptLimiter.checkAllowed(attemptSubject, clientIp);
 
+		if (user == null) {
+			loginAttemptLimiter.recordFailure(attemptSubject, clientIp);
+			throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
+		}
 		if (user.isDeleted()) {
 			throw new BusinessException(AuthErrorCode.USER_DELETED);
 		}
 		if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+			loginAttemptLimiter.recordFailure(attemptSubject, clientIp);
 			throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
 		}
+		loginAttemptLimiter.recordSuccess(attemptSubject);
 
 		String sessionId = UUID.randomUUID().toString();
 		String accessToken = jwtProvider.createAccessToken(user.getId());
