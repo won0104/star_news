@@ -58,6 +58,12 @@ public record ArticleAnalysisBatchResult(
 		TOO_MANY_FAILURES,
 
 		/** 시간 예산을 다 썼다. 남은 기사는 다음 회차로 넘긴다. */
-		OUT_OF_TIME
+		OUT_OF_TIME,
+
+		/**
+		 * 앞선 회차의 연속 실패로 차단이 걸려 있고 헬스체크도 실패해, 기사를 하나도 부르지 않고 건너뛰었다.
+		 * {@link ArticleAnalysisCircuitBreaker} 참고.
+		 */
+		CIRCUIT_OPEN
 	}
 }

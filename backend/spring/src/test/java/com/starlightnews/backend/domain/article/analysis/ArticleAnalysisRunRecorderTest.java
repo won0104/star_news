@@ -91,6 +91,20 @@ class ArticleAnalysisRunRecorderTest {
 	}
 
 	@Test
+	void 차단으로_건너뛴_회차는_따로_구분된다() {
+		// 상태 컬럼이 VARCHAR(32) 라 새 값이 그대로 들어가는지까지 본다.
+		Long runId = recorder.start(42, STARTED_AT);
+
+		recorder.finish(runId, ArticleAnalysisBatchResult.empty().stoppedBy(StopReason.CIRCUIT_OPEN),
+				42, 130L, FINISHED_AT);
+
+		ArticleAnalysisRun run = reload(runId);
+		assertThat(run.getStatus()).isEqualTo(ArticleAnalysisRunStatus.CIRCUIT_OPEN);
+		assertThat(run.getProcessed()).isZero();
+		assertThat(run.getRemaining()).isEqualTo(42);
+	}
+
+	@Test
 	void 대기가_없으면_최장_대기_시간은_비어_있다() {
 		Long runId = recorder.start(0, STARTED_AT);
 

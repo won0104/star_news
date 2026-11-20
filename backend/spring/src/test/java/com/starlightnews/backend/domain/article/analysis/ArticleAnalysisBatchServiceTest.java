@@ -15,6 +15,7 @@ import com.starlightnews.backend.domain.article.analysis.dto.ArticleAnalyzeReque
 import com.starlightnews.backend.domain.article.analysis.dto.ArticleAnalyzeResponse;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository.AnalysisTarget;
+import com.starlightnews.backend.global.client.FastApiClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -52,17 +54,23 @@ class ArticleAnalysisBatchServiceTest {
 	@Mock
 	private ArticleAnalysisRunRecorder runRecorder;
 
+	@Mock
+	private FastApiClient fastApiClient;
+
+	private ArticleAnalysisCircuitBreaker circuitBreaker;
+
 	private ArticleAnalysisBatchService service;
 
 	@BeforeEach
 	void setUp() {
+		circuitBreaker = new ArticleAnalysisCircuitBreaker(fastApiClient);
 		service = service(Duration.ofMinutes(30));
 	}
 
 	/** 시도 3회, 회차당 300건, 연속 실패 5건에서 중단 */
 	private ArticleAnalysisBatchService service(Duration timeBudget) {
 		return new ArticleAnalysisBatchService(articleRepository, analyzeClient, recorder, runRecorder,
-				new ArticleAnalysisProperties(Duration.ofSeconds(180), 300, 3, timeBudget, 5));
+				new ArticleAnalysisProperties(Duration.ofSeconds(180), 300, 3, timeBudget, 5), circuitBreaker);
 	}
 
 	private AnalysisTarget target(long articleId) {
@@ -334,5 +342,113 @@ class ArticleAnalysisBatchServiceTest {
 
 		verify(runRecorder).abort(eq(RUN_ID), any());
 		verify(runRecorder, never()).finish(any(), any(), anyInt(), any(), any());
+	}
+	// --- 회차를 넘는 차단 ---
+
+	/** 연속 실패로 멈춘 회차를 한 번 돌려 차단을 건다. */
+	private void openCircuit() {
+		givenQueue(20);
+		given(analyzeClient.analyze(any())).willReturn(new Retryable("INTERNAL_API_UNAVAILABLE"));
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.WILL_RETRY);
+		service.analyzePending();
+		assertThat(circuitBreaker.isOpen()).isTrue();
+		clearInvocations(analyzeClient, recorder, runRecorder, articleRepository);
+	}
+
+	@Test
+	void 연속_실패로_멈춘_회차는_차단을_건다() {
+		openCircuit();
+	}
+
+	@Test
+	void 닫혀_있으면_헬스체크를_부르지_않는다() {
+		// 닫혀 있을 때는 헬스체크를 부르지 않는다. 매시간 쓸데없는 호출을 더하지 않는다.
+		givenQueue(1);
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+
+		service.analyzePending();
+
+		verify(fastApiClient, never()).isReachable();
+	}
+
+	@Test
+	void 차단_중_헬스체크가_실패하면_기사를_건드리지_않고_건너뛴_회차로_기록한다() {
+		openCircuit();
+		given(fastApiClient.isReachable()).willReturn(false);
+		given(runRecorder.start(anyInt(), any())).willReturn(RUN_ID);
+		given(articleRepository.countAnalysisQueue(3)).willReturn(42L);
+		given(articleRepository.findOldestAnalysisWaitMinutes(3)).willReturn(130L);
+
+		ArticleAnalysisBatchResult result = service.analyzePending();
+
+		assertThat(result.stopReason()).isEqualTo(StopReason.CIRCUIT_OPEN);
+		assertThat(result.processed()).isZero();
+		verify(articleRepository, never()).findAnalysisQueue(anyInt(), any());
+		verify(analyzeClient, never()).analyze(any());
+		verify(recorder, never()).record(anyLong(), any());
+		verify(runRecorder).start(eq(42), any());
+		verify(runRecorder).finish(eq(RUN_ID), eq(result), eq(42), eq(130L), any());
+		assertThat(circuitBreaker.isOpen()).isTrue();
+	}
+
+	@Test
+	void 차단_중_헬스체크가_통과하면_시험_회차는_첫_실패에_멈춘다() {
+		// FastAPI 헬스체크는 AI 워커까지 보지 않는다. 워커가 여전히 죽어 있으면 5건이 아니라 1건만 태운다.
+		openCircuit();
+		given(fastApiClient.isReachable()).willReturn(true);
+		givenQueue(20);
+		given(analyzeClient.analyze(any())).willReturn(new Retryable("INTERNAL_API_TIMEOUT"));
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.WILL_RETRY);
+
+		ArticleAnalysisBatchResult result = service.analyzePending();
+
+		assertThat(result.stopReason()).isEqualTo(StopReason.TOO_MANY_FAILURES);
+		verify(analyzeClient, times(1)).analyze(any());
+		assertThat(circuitBreaker.isOpen()).isTrue();
+	}
+
+	@Test
+	void 시험_회차에서_워커가_응답하면_평소_한도로_돌고_차단을_푼다() {
+		openCircuit();
+		given(fastApiClient.isReachable()).willReturn(true);
+		givenQueue(6);
+		Retryable failed = new Retryable("EXTRACTION_FAILED");
+		// 첫 기사가 성공한 뒤로는 실패 한 번에 멈추지 않는다.
+		given(analyzeClient.analyze(any())).willReturn(analyzed(), failed, failed, analyzed(), failed, analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+
+		ArticleAnalysisBatchResult result = service.analyzePending();
+
+		assertThat(result.stopReason()).isNull();
+		verify(analyzeClient, times(6)).analyze(any());
+		assertThat(circuitBreaker.isOpen()).isFalse();
+	}
+
+	@Test
+	void 시험_회차에_부를_기사가_없으면_헬스체크_통과만으로_차단을_푼다() {
+		openCircuit();
+		given(fastApiClient.isReachable()).willReturn(true);
+		givenQueue(0);
+
+		service.analyzePending();
+
+		assertThat(circuitBreaker.isOpen()).isFalse();
+	}
+
+	@Test
+	void 회차가_예외로_끊기면_차단_상태를_바꾸지_않는다() {
+		// 예외로 끊긴 회차는 워커 상태를 말해 주지 않는다.
+		openCircuit();
+		given(fastApiClient.isReachable()).willReturn(true);
+		given(articleRepository.findAnalysisQueue(anyInt(), any())).willReturn(List.of(target(1L)));
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+		given(articleRepository.countAnalysisQueue(anyInt()))
+				.willReturn(1L).willThrow(new IllegalStateException("DB 연결 끊김"));
+
+		assertThatThrownBy(() -> service.analyzePending()).isInstanceOf(IllegalStateException.class);
+
+		assertThat(circuitBreaker.isOpen()).isTrue();
 	}
 }

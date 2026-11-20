@@ -23,7 +23,10 @@ public enum ArticleAnalysisRunStatus {
 	HALTED,
 
 	/** 회차가 예외로 끊겼다. */
-	ABORTED;
+	ABORTED,
+
+	/** 앞선 회차의 연속 실패로 차단이 걸려 있고 헬스체크도 실패해 기사를 부르지 않고 건너뛰었다. */
+	CIRCUIT_OPEN;
 
 	/** 끝난 회차의 상태를 정한다. 중간에 멈춘 이유가 없으면 완료다. */
 	public static ArticleAnalysisRunStatus of(StopReason stopReason) {
@@ -34,6 +37,7 @@ public enum ArticleAnalysisRunStatus {
 			case OUT_OF_TIME -> OUT_OF_TIME;
 			case TOO_MANY_FAILURES -> TOO_MANY_FAILURES;
 			case HALTED -> HALTED;
+			case CIRCUIT_OPEN -> CIRCUIT_OPEN;
 		};
 	}
 }
