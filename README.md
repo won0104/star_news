@@ -678,6 +678,8 @@ docker compose -f docker-compose.local.yml up -d --build backend-fastapi
 | `REDIS_PASSWORD` | 로컬 Redis 비밀번호 |
 | `INTERNAL_API_KEY` | FastAPI와 동일한 내부 API Key |
 
+`JWT_SECRET` 은 로컬에서 설정하지 않아도 됩니다. `local` 프로파일에만 개발용 키가 들어 있고, 운영(`prod`)은 기본값이 없어 설정하지 않으면 기동하지 않습니다. 설정한다면 32바이트 이상이어야 하며 빈 값으로 두면 안 됩니다.
+
 ```bash
 cd backend/spring
 ./gradlew bootRun
@@ -781,7 +783,7 @@ location /api/v1/ {
 | `MYSQL_DATABASE` `MYSQL_USER` `MYSQL_PASSWORD` `MYSQL_ROOT_PASSWORD` | MySQL 계정 |
 | `NEO4J_URI` `NEO4J_USERNAME` `NEO4J_PASSWORD` | Neo4j 접속 |
 | `REDIS_PASSWORD` | Redis 비밀번호 |
-| `JWT_SECRET` | 토큰 서명 키. 바뀌면 기존 로그인이 전부 풀린다 |
+| `JWT_SECRET` | 토큰 서명 키(HS256). **32바이트 이상**, 없거나 짧으면 Spring 이 기동하지 않는다. `openssl rand -base64 48` 로 만든다. 바뀌면 기존 로그인이 전부 풀린다 |
 | `INTERNAL_API_KEY` | Spring ↔ FastAPI 내부 호출 키. 양쪽이 같아야 한다 |
 | `CORS_ALLOWED_ORIGINS` | 허용 Origin |
 | `GNEWS_API_KEY` | 기사 수집 |
