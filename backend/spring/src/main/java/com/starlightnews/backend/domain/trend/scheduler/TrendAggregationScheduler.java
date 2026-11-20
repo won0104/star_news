@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +45,9 @@ public class TrendAggregationScheduler {
         this.trendClock = trendClock;
     }
 
+    // 집계 + 실패 시 1분 간격 재시도 3회. 하루 두 번이라 1시간이면 넉넉하다.
     @Scheduled(cron = "${app.trend.aggregate-cron}", zone = "Asia/Seoul")
+    @SchedulerLock(name = "trend-aggregate", lockAtMostFor = "1h", lockAtLeastFor = "5m")
     public void aggregateTrends() {
         OffsetDateTime aggregationAt = resolveLatestAggregationAt();
         int maxAttempts = trendProperties.retryCount() + 1;

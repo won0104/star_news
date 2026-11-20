@@ -29,6 +29,10 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-mysql'
+	// 여러 인스턴스가 같은 @Scheduled 배치를 동시에 돌리지 않게 MySQL 행 하나로 잠근다.
+	// 7.x 는 Spring 7(Boot 4) 기준이라 Spring 6.2 로 빌드된 6.x 마지막 판을 쓴다.
+	implementation 'net.javacrumbs.shedlock:shedlock-spring:6.10.0'
+	implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.10.0'
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'

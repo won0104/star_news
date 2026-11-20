@@ -6,6 +6,7 @@ import com.starlightnews.backend.domain.article.dto.CollectedArticle;
 import com.starlightnews.backend.domain.article.service.ArticleStoreService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,10 @@ public class ArticleCollectScheduler {
 	private final CollectedArticlePreprocessor preprocessor;
 	private final ArticleStoreService articleStoreService;
 
+	// 9개 카테고리 x (10초 타임아웃 + 429 재시도 두 번)이라 최악에도 5분 안팎이다. 넉넉히 30분을 잡되
+	// 다음 정시(1시간 뒤)보다는 짧게 둔다. 잡은 인스턴스가 죽어도 다음 회차는 돈다.
 	@Scheduled(cron = "${app.gnews.collect-cron:0 10 * * * *}", zone = "Asia/Seoul")
+	@SchedulerLock(name = "article-collect", lockAtMostFor = "30m", lockAtLeastFor = "5m")
 	public void collect() {
 		List<CollectedArticle> collected = articleCollectService.collectAll();
 		List<CollectedArticle> prepared = preprocessor.process(collected);

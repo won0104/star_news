@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.article.reconcile;
 
 import lombok.RequiredArgsConstructor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,9 @@ public class GraphReconciliationScheduler {
 	private final GraphReconciliationService reconciliationService;
 	private final GraphReconciliationProperties properties;
 
+	// 전수 비교라 기사 수에 비례해 길어진다. 하루 한 번이라 3시간을 상한으로 둔다.
 	@Scheduled(cron = "${app.graph.reconciliation.cron:0 40 3 * * *}", zone = "Asia/Seoul")
+	@SchedulerLock(name = "graph-reconciliation", lockAtMostFor = "3h", lockAtLeastFor = "5m")
 	public void reconcile() {
 		if (!properties.enabled()) {
 			return;

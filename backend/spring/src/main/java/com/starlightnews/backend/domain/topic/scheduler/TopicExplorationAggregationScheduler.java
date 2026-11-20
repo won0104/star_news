@@ -12,6 +12,7 @@ import com.starlightnews.backend.domain.topic.config.TopicExplorationProperties;
 import com.starlightnews.backend.domain.topic.service.TopicExplorationAggregationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +42,9 @@ public class TopicExplorationAggregationScheduler {
 		this.topicExplorationClock = topicExplorationClock;
 	}
 
+	// 집계 + 실패 시 1분 간격 재시도 3회. 하루 두 번이라 1시간이면 넉넉하다.
 	@Scheduled(cron = "${app.topic-exploration.aggregate-cron}", zone = "Asia/Seoul")
+	@SchedulerLock(name = "topic-exploration-aggregate", lockAtMostFor = "1h", lockAtLeastFor = "5m")
 	public void aggregateTopicExplorationEntries() {
 		OffsetDateTime aggregationAt = resolveLatestAggregationAt();
 		int maxAttempts = topicExplorationProperties.retryCount() + 1;

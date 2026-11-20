@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import lombok.RequiredArgsConstructor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,10 @@ public class RecommendationBatchScheduler {
 
 	private final RecommendationBatchService recommendationBatchService;
 
+	// 묶음 계산(30초 타임아웃, 30초 간격 최대 3회) 뒤에 Event 요약(GMS 60초 타임아웃)까지 이어져
+	// 사용자·Event 수에 따라 길어진다. 회차 간격 12시간보다 한참 짧은 3시간을 상한으로 둔다.
 	@Scheduled(cron = "${app.recommendation.generate-cron:0 30 5,17 * * *}", zone = "Asia/Seoul")
+	@SchedulerLock(name = "recommendation-generate", lockAtMostFor = "3h", lockAtLeastFor = "5m")
 	public void generate() {
 		recommendationBatchService.generate(LocalDateTime.now(SEOUL));
 	}

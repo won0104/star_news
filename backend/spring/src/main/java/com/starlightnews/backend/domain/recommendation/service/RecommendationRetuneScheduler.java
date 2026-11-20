@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import lombok.RequiredArgsConstructor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,9 @@ public class RecommendationRetuneScheduler {
 
 	private final RecommendationRetuneService retuneService;
 
+	// 그리드서치 호출 타임아웃이 5분이다. 주 1회라 넉넉히 둔다.
 	@Scheduled(cron = "${app.recommendation.retune.cron:0 0 3 * * SUN}", zone = "Asia/Seoul")
+	@SchedulerLock(name = "recommendation-retune", lockAtMostFor = "30m", lockAtLeastFor = "5m")
 	public void retune() {
 		retuneService.retune(LocalDateTime.now(SEOUL));
 	}

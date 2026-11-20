@@ -1,6 +1,7 @@
 package com.starlightnews.backend.domain.article.analysis;
 
 import lombok.RequiredArgsConstructor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,12 @@ public class ArticleAnalysisScheduler {
 
 	private final ArticleAnalysisBatchService analysisBatchService;
 
+	// 시간 예산 45분 + 마지막 기사 최대 180초 + 헬스체크 = 약 49분. 이보다 짧으면 회차가 도는 중에
+	// 잠금이 풀려 다른 인스턴스가 같은 기사를 또 부른다. 60분을 넘기면 잡은 인스턴스가 죽었을 때
+	// 다음 회차까지 막히므로 그 사이인 55분으로 둔다. 시간 예산을 바꾸면 이 값도 함께 본다.
 	@Scheduled(cron = "${app.article.analysis.cron:0 20 * * * *}", zone = "Asia/Seoul")
+	@SchedulerLock(name = "article-analysis",
+			lockAtMostFor = "${app.article.analysis.lock-at-most-for:55m}", lockAtLeastFor = "5m")
 	public void analyze() {
 		analysisBatchService.analyzePending();
 	}
