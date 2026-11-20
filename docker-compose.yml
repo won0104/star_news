@@ -76,6 +76,8 @@ services:
       # 서버에서 잠깐 당겨 돌려 보거나 처리량을 조절할 때 .env 로 덮어쓴다(재배포 없이 재시작만 하면 된다).
       ARTICLE_ANALYSIS_CRON: "${ARTICLE_ANALYSIS_CRON:-0 20 * * * *}"
       ARTICLE_ANALYSIS_TIME_BUDGET: ${ARTICLE_ANALYSIS_TIME_BUDGET:-45m}
+      # 분산 잠금 최대 시간. 시간 예산을 늘리면 함께 늘린다(시간 예산 + 180초보다 길고 60분보다 짧게).
+      ARTICLE_ANALYSIS_LOCK_AT_MOST_FOR: ${ARTICLE_ANALYSIS_LOCK_AT_MOST_FOR:-55m}
       TREND_AGGREGATE_CRON: "${TREND_AGGREGATE_CRON:-0 0 5,17 * * *}"
       TOPIC_EXPLORATION_AGGREGATE_CRON: "${TOPIC_EXPLORATION_AGGREGATE_CRON:-0 50 5,17 * * *}"
       USER_GRAPH_SYNC_CRON: "${USER_GRAPH_SYNC_CRON:-0 0 1-23/2 * * *}"
@@ -90,6 +92,8 @@ services:
       # 주소는 compose 네트워크의 서비스명으로 접근한다(컨테이너 안에서 localhost 는 자기 자신이다).
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
       FASTAPI_BASE_URL: ${FASTAPI_BASE_URL:-http://backend-fastapi:8000}
+      # 배치 운영 알림(Slack·Mattermost 수신 웹훅). 비우면 로그로만 남긴다. 주소에 토큰이 들어 있어 .env 로만 주입한다.
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
     depends_on:
       mysql:
         condition: service_healthy
