@@ -7,6 +7,7 @@ import com.starlightnews.backend.domain.article.service.ArticleDetailService;
 import com.starlightnews.backend.domain.article.service.ArticleSummaryService;
 import com.starlightnews.backend.global.constant.ApiPaths;
 import com.starlightnews.backend.global.error.ErrorResponse;
+import com.starlightnews.backend.global.request.ClientIpFilter;
 import com.starlightnews.backend.global.request.RequestIdFilter;
 import com.starlightnews.backend.global.response.ApiResponse;
 import com.starlightnews.backend.global.security.AuthenticatedUser;
@@ -71,7 +72,9 @@ public class ArticleController {
 			summary = "기사 요약 생성",
 			description = """
 					저장된 요약이 없을 때 GMS로 생성해 MySQL에 저장한다. 인증 불필요.
-					기존 요약은 재사용하고, 다른 요청이 생성 중이면 중복 호출 없이 PROCESSING을 반환한다.""")
+					기존 요약은 재사용하고, 다른 요청이 생성 중이면 중복 호출 없이 PROCESSING을 반환한다.
+					새로 생성(GMS 호출)하는 요청만 횟수를 센다. 로그인 사용자는 사용자별, 비로그인은 IP별로
+					한 시간에 정해진 수(기본 40회 / 20회)를 넘으면 429 를 반환한다.""")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
 					description = "생성 완료 또는 기존 요약 반환"),
@@ -86,6 +89,9 @@ public class ArticleController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422",
 					description = "요약할 본문 없음 (code: ARTICLE_CONTENT_UNAVAILABLE)",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "429",
+					description = "요약 생성 한도 초과 (code: SUMMARY_RATE_LIMITED)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "502",
 					description = "GMS 호출 또는 응답 처리 실패 (code: SUMMARY_GENERATION_FAILED)",
 					content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -97,9 +103,12 @@ public class ArticleController {
 	@PostMapping("/{articleId}/summary")
 	public ResponseEntity<ApiResponse<ArticleSummaryResponse>> generateArticleSummary(
 			@Parameter(description = "기사 ID", example = "101") @PathVariable Long articleId,
-			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId
+			@Parameter(hidden = true) @AuthenticationPrincipal AuthenticatedUser user,
+			@Parameter(hidden = true) @RequestAttribute(RequestIdFilter.ATTRIBUTE_NAME) String requestId,
+			@Parameter(hidden = true) @RequestAttribute(ClientIpFilter.ATTRIBUTE_NAME) String clientIp
 	) {
-		ArticleSummaryResponse response = articleSummaryService.generate(articleId);
+		Long userId = user != null ? user.userId() : null;
+		ArticleSummaryResponse response = articleSummaryService.generate(articleId, userId, clientIp);
 		HttpStatus status = response.summaryStatus() == ArticleSummaryStatus.PROCESSING
 				? HttpStatus.ACCEPTED : HttpStatus.OK;
 		return ResponseEntity.status(status).body(ApiResponse.success(response, requestId));

@@ -761,6 +761,8 @@ docker compose -f docker-compose.local.yml --profile ai up -d --build ai-worker
 
 **`/api/v1/` 의 프록시 타임아웃을 180초로 둔다.** 기본값 90초로 두면 기사 분석 요청이 중간에 504 로 끊긴다. AI 워커가 한 건에 최대 150초까지 쓰기 때문이다.
 
+**`/api/v1/` 는 `X-Real-IP` 를 `$remote_addr` 로 덮어써 넘겨야 한다.** 로그인 시도 제한과 비로그인 요약 생성 제한이 이 헤더로 클라이언트 IP 를 구분한다(prod 의 `app.client-ip.header` 기본값). 빠지면 모든 요청이 한 IP 로 묶이거나 클라이언트가 적은 값으로 제한을 피할 수 있다. `X-Forwarded-For` 는 클라이언트가 보낸 값이 앞에 남으므로 IP 판단에 쓰지 않는다.
+
 ```nginx
 location /api/v1/ {
     proxy_pass http://127.0.0.1:8081;
@@ -768,6 +770,8 @@ location /api/v1/ {
     proxy_connect_timeout 10s;
     proxy_send_timeout 180s;
     proxy_read_timeout 180s;
+
+    proxy_set_header X-Real-IP $remote_addr;
     ...
 }
 ```
@@ -805,6 +809,8 @@ location /api/v1/ {
 | `RECOMMENDATION_RETUNE_CRON` | `0 0 3 * * SUN` |
 | `GMS_BASE_URL` `GMS_MODEL` `GMS_TIMEOUT` | GMS 중계 설정 |
 | `AI_CONNECT_TIMEOUT_SECONDS` `AI_REQUEST_TIMEOUT_SECONDS` | AI 워커 호출 타임아웃 |
+
+로그인 시도 제한(`LOGIN_MAX_FAILURES` 5회, `LOGIN_LOCK_DURATION` 15m, `LOGIN_IP_MAX_FAILURES` 30회, `LOGIN_IP_WINDOW` 15m)과 요약 생성 제한(`SUMMARY_RATE_LIMIT_WINDOW` 1h, `SUMMARY_RATE_LIMIT_USER` 40회, `SUMMARY_RATE_LIMIT_GUEST` IP당 20회), `CLIENT_IP_HEADER`(prod 기본 `X-Real-IP`)는 `application.properties` 기본값을 쓰고 `docker-compose.yml` 에는 노출하지 않았다. 바꾸려면 compose 에 먼저 추가해야 한다. 횟수는 `APP_AUTH_STORE`(운영 `redis`)에 따라 Redis 에 저장된다.
 
 `TOPIC_EXPLORATION_AGGREGATE_CRON`(분야별 탐색 집계, 기본 `0 50 5,17 * * *`)은 `docker-compose.yml` 에 노출되어 있지 않아 `.env` 로 바꿀 수 없다. 바꾸려면 compose 에 먼저 추가해야 한다.
 

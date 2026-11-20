@@ -48,9 +48,18 @@ public class ArticleSummaryService {
 	private final ArticleRepository articleRepository;
 	private final ArticleSummaryWriter writer;
 	private final GmsClient gmsClient;
+	private final ArticleSummaryRateLimiter rateLimiter;
 
-	/** 저장된 요약을 재사용하고, 필요한 경우에만 GMS 로 새 요약을 만든다. */
-	public ArticleSummaryResponse generate(Long articleId) {
+	/**
+	 * 저장된 요약을 재사용하고, 필요한 경우에만 GMS 로 새 요약을 만든다.
+	 *
+	 * <p>GMS 를 실제로 부를 때만 횟수 제한을 센다({@link ArticleSummaryRateLimiter}). 저장된 요약이나
+	 * PROCESSING 응답은 비용이 들지 않으므로 막을 이유가 없다.
+	 *
+	 * @param userId   로그인 사용자 ID. 비로그인이면 null
+	 * @param clientIp 클라이언트 IP. 비로그인 요청의 횟수 제한 키로 쓴다
+	 */
+	public ArticleSummaryResponse generate(Long articleId, Long userId, String clientIp) {
 		ArticleSummaryTarget target = findTarget(articleId);
 
 		if (target.getSummaryStatus() == SummaryStatus.COMPLETED) {
@@ -63,6 +72,7 @@ public class ArticleSummaryService {
 			throw new BusinessException(ArticleErrorCode.ARTICLE_CONTENT_UNAVAILABLE);
 		}
 
+		rateLimiter.acquire(userId, clientIp);
 		if (!claim(articleId)) {
 			return responseAfterLostClaim(articleId);
 		}

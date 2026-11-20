@@ -15,6 +15,7 @@ import com.starlightnews.backend.global.error.BusinessException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -32,6 +35,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 class ArticleSummaryServiceTest {
 
 	private static final Long ARTICLE_ID = 101L;
+	private static final String CLIENT_IP = "203.0.113.10";
 	private static final String TITLE = "국방부, 한미 연합훈련 일정 발표";
 	private static final String CONTENT = "국방부가 한미 연합훈련 일정을 발표하고 세부 훈련 계획을 공개했다.";
 
@@ -44,29 +48,59 @@ class ArticleSummaryServiceTest {
 	@Mock
 	private GmsClient gmsClient;
 
+	@Mock
+	private ArticleSummaryRateLimiter rateLimiter;
+
 	@InjectMocks
 	private ArticleSummaryService articleSummaryService;
+
+	@Test
+	void 새로_만들_때는_선점_전에_횟수_제한을_센다() {
+		givenTarget(target(SummaryStatus.NOT_REQUESTED, null, CONTENT));
+		given(writer.claim(ARTICLE_ID)).willReturn(true);
+		given(gmsClient.generate(anyString(), anyString())).willReturn("생성된 기사 요약이다.");
+
+		articleSummaryService.generate(ARTICLE_ID, 7L, CLIENT_IP);
+
+		InOrder inOrder = inOrder(rateLimiter, writer, gmsClient);
+		inOrder.verify(rateLimiter).acquire(7L, CLIENT_IP);
+		inOrder.verify(writer).claim(ARTICLE_ID);
+		inOrder.verify(gmsClient).generate(anyString(), anyString());
+	}
+
+	@Test
+	void 횟수_제한에_걸리면_선점도_GMS_호출도_하지_않는다() {
+		givenTarget(target(SummaryStatus.NOT_REQUESTED, null, CONTENT));
+		willThrow(new BusinessException(ArticleErrorCode.SUMMARY_RATE_LIMITED))
+				.given(rateLimiter).acquire(null, CLIENT_IP);
+
+		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP));
+
+		assertThat(thrown).isInstanceOf(BusinessException.class);
+		assertThat(((BusinessException) thrown).getErrorCode()).isEqualTo(ArticleErrorCode.SUMMARY_RATE_LIMITED);
+		verifyNoInteractions(writer, gmsClient);
+	}
 
 	@Test
 	void COMPLETED면_GMS를_호출하지_않고_저장된_요약을_반환한다() {
 		givenTarget(target(SummaryStatus.COMPLETED, "기존 요약", CONTENT));
 
-		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
+		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP);
 
 		assertThat(response.summary()).isEqualTo("기존 요약");
 		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.COMPLETED);
-		verifyNoInteractions(writer, gmsClient);
+		verifyNoInteractions(writer, gmsClient, rateLimiter);
 	}
 
 	@Test
 	void PROCESSING이면_GMS를_호출하지_않고_현재_상태를_반환한다() {
 		givenTarget(target(SummaryStatus.PROCESSING, null, CONTENT));
 
-		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
+		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP);
 
 		assertThat(response.summary()).isNull();
 		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.PROCESSING);
-		verifyNoInteractions(writer, gmsClient);
+		verifyNoInteractions(writer, gmsClient, rateLimiter);
 	}
 
 	@Test
@@ -75,7 +109,7 @@ class ArticleSummaryServiceTest {
 		given(writer.claim(ARTICLE_ID)).willReturn(true);
 		given(gmsClient.generate(anyString(), anyString())).willReturn(" 생성된 기사 요약이다. ");
 
-		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
+		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP);
 
 		assertThat(response.summary()).isEqualTo("생성된 기사 요약이다.");
 		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.COMPLETED);
@@ -98,7 +132,7 @@ class ArticleSummaryServiceTest {
 		given(writer.claim(ARTICLE_ID)).willReturn(true);
 		given(gmsClient.generate(anyString(), anyString())).willReturn("재시도 요약이다.");
 
-		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
+		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP);
 
 		assertThat(response.summary()).isEqualTo("재시도 요약이다.");
 		verify(writer).claim(ARTICLE_ID);
@@ -114,7 +148,7 @@ class ArticleSummaryServiceTest {
 						Optional.of(target(SummaryStatus.PROCESSING, null, CONTENT)));
 		given(writer.claim(ARTICLE_ID)).willReturn(false);
 
-		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
+		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP);
 
 		assertThat(response.summaryStatus()).isEqualTo(ArticleSummaryStatus.PROCESSING);
 		verifyNoInteractions(gmsClient);
@@ -124,10 +158,10 @@ class ArticleSummaryServiceTest {
 	void 본문이_없으면_ARTICLE_CONTENT_UNAVAILABLE_예외다() {
 		givenTarget(target(SummaryStatus.NOT_REQUESTED, null, "   "));
 
-		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID));
+		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP));
 
 		assertErrorCode(thrown, ArticleErrorCode.ARTICLE_CONTENT_UNAVAILABLE);
-		verifyNoInteractions(writer, gmsClient);
+		verifyNoInteractions(writer, gmsClient, rateLimiter);
 	}
 
 	@Test
@@ -135,10 +169,10 @@ class ArticleSummaryServiceTest {
 		given(articleRepository.findSummaryTargetByArticleIdAndAnalysisStatus(
 				ARTICLE_ID, AnalysisStatus.COMPLETED)).willReturn(Optional.empty());
 
-		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID));
+		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP));
 
 		assertErrorCode(thrown, ArticleErrorCode.ARTICLE_NOT_FOUND);
-		verifyNoInteractions(writer, gmsClient);
+		verifyNoInteractions(writer, gmsClient, rateLimiter);
 	}
 
 	@Test
@@ -148,7 +182,7 @@ class ArticleSummaryServiceTest {
 		given(gmsClient.generate(anyString(), anyString()))
 				.willThrow(new BusinessException(GmsErrorCode.GMS_UNAVAILABLE));
 
-		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID));
+		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP));
 
 		assertErrorCode(thrown, ArticleErrorCode.SUMMARY_GENERATION_FAILED);
 		verify(writer).fail(ARTICLE_ID);
@@ -162,7 +196,7 @@ class ArticleSummaryServiceTest {
 		given(gmsClient.generate(anyString(), anyString()))
 				.willThrow(new IllegalStateException("unexpected response"));
 
-		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID));
+		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP));
 
 		assertErrorCode(thrown, ArticleErrorCode.SUMMARY_GENERATION_FAILED);
 		verify(writer).fail(ARTICLE_ID);
@@ -176,7 +210,7 @@ class ArticleSummaryServiceTest {
 		org.mockito.Mockito.doThrow(new DataAccessResourceFailureException("database unavailable"))
 				.when(writer).complete(ARTICLE_ID, "생성된 요약이다.");
 
-		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID));
+		Throwable thrown = catchThrowable(() -> articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP));
 
 		assertErrorCode(thrown, ArticleErrorCode.SUMMARY_SAVE_FAILED);
 		verify(writer).fail(ARTICLE_ID);
@@ -189,7 +223,7 @@ class ArticleSummaryServiceTest {
 		String tooLong = "첫 문장이다. " + "가".repeat(200);
 		given(gmsClient.generate(anyString(), anyString())).willReturn(tooLong);
 
-		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID);
+		ArticleSummaryResponse response = articleSummaryService.generate(ARTICLE_ID, null, CLIENT_IP);
 
 		assertThat(response.summary()).isEqualTo("첫 문장이다.");
 		verify(gmsClient).generate(anyString(), anyString());

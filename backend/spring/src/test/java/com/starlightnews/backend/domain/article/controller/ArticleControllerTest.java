@@ -21,9 +21,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -56,7 +58,7 @@ class ArticleControllerTest {
 
 	@Test
 	void 비회원도_기사_요약을_생성하고_200을_응답받는다() throws Exception {
-		given(articleSummaryService.generate(101L)).willReturn(new ArticleSummaryResponse(
+		given(articleSummaryService.generate(eq(101L), any(), any())).willReturn(new ArticleSummaryResponse(
 				101L, "생성된 기사 요약", ArticleSummaryStatus.COMPLETED));
 
 		mockMvc.perform(post(SUMMARY_PATH, 101L).header(RequestIdFilter.HEADER_NAME, REQUEST_ID))
@@ -70,7 +72,7 @@ class ArticleControllerTest {
 
 	@Test
 	void 이미_요약_생성중이면_202_PROCESSING을_응답한다() throws Exception {
-		given(articleSummaryService.generate(101L)).willReturn(new ArticleSummaryResponse(
+		given(articleSummaryService.generate(eq(101L), any(), any())).willReturn(new ArticleSummaryResponse(
 				101L, null, ArticleSummaryStatus.PROCESSING));
 
 		mockMvc.perform(post(SUMMARY_PATH, 101L))
@@ -80,17 +82,59 @@ class ArticleControllerTest {
 	}
 
 	@Test
+	void 비회원_요약_요청은_사용자_없이_클라이언트_IP를_넘긴다() throws Exception {
+		given(articleSummaryService.generate(eq(101L), any(), any())).willReturn(new ArticleSummaryResponse(
+				101L, "생성된 기사 요약", ArticleSummaryStatus.COMPLETED));
+
+		mockMvc.perform(post(SUMMARY_PATH, 101L).with(remoteAddr("203.0.113.10")))
+				.andExpect(status().isOk());
+
+		verify(articleSummaryService).generate(101L, null, "203.0.113.10");
+	}
+
+	@Test
+	void 회원_요약_요청은_사용자_ID를_넘긴다() throws Exception {
+		given(articleSummaryService.generate(eq(101L), any(), any())).willReturn(new ArticleSummaryResponse(
+				101L, "생성된 기사 요약", ArticleSummaryStatus.COMPLETED));
+
+		mockMvc.perform(post(SUMMARY_PATH, 101L)
+						.with(remoteAddr("203.0.113.10"))
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtProvider.createAccessToken(7L)))
+				.andExpect(status().isOk());
+
+		verify(articleSummaryService).generate(101L, 7L, "203.0.113.10");
+	}
+
+	@Test
+	void 요약_생성_한도를_넘으면_429_SUMMARY_RATE_LIMITED를_응답한다() throws Exception {
+		given(articleSummaryService.generate(eq(101L), any(), any()))
+				.willThrow(new BusinessException(ArticleErrorCode.SUMMARY_RATE_LIMITED));
+
+		mockMvc.perform(post(SUMMARY_PATH, 101L))
+				.andExpect(status().isTooManyRequests())
+				.andExpect(jsonPath("$.status").value(429))
+				.andExpect(jsonPath("$.code").value("SUMMARY_RATE_LIMITED"));
+	}
+
+	private static RequestPostProcessor remoteAddr(String address) {
+		return request -> {
+			request.setRemoteAddr(address);
+			return request;
+		};
+	}
+
+	@Test
 	void 요약_API의_articleId가_숫자가_아니면_400_TYPE_MISMATCH를_응답한다() throws Exception {
 		mockMvc.perform(post(SUMMARY_PATH, "not-a-number"))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("TYPE_MISMATCH"));
 
-		verify(articleSummaryService, never()).generate(anyLong());
+		verify(articleSummaryService, never()).generate(anyLong(), any(), any());
 	}
 
 	@Test
 	void 기사_본문이_없으면_422_ARTICLE_CONTENT_UNAVAILABLE를_응답한다() throws Exception {
-		given(articleSummaryService.generate(101L))
+		given(articleSummaryService.generate(eq(101L), any(), any()))
 				.willThrow(new BusinessException(ArticleErrorCode.ARTICLE_CONTENT_UNAVAILABLE));
 
 		mockMvc.perform(post(SUMMARY_PATH, 101L))
@@ -100,7 +144,7 @@ class ArticleControllerTest {
 
 	@Test
 	void GMS_호출이_실패하면_502_SUMMARY_GENERATION_FAILED를_응답한다() throws Exception {
-		given(articleSummaryService.generate(101L))
+		given(articleSummaryService.generate(eq(101L), any(), any()))
 				.willThrow(new BusinessException(ArticleErrorCode.SUMMARY_GENERATION_FAILED));
 
 		mockMvc.perform(post(SUMMARY_PATH, 101L))
@@ -110,7 +154,7 @@ class ArticleControllerTest {
 
 	@Test
 	void 요약_저장이_실패하면_500_SUMMARY_SAVE_FAILED를_응답한다() throws Exception {
-		given(articleSummaryService.generate(101L))
+		given(articleSummaryService.generate(eq(101L), any(), any()))
 				.willThrow(new BusinessException(ArticleErrorCode.SUMMARY_SAVE_FAILED));
 
 		mockMvc.perform(post(SUMMARY_PATH, 101L))
