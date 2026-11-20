@@ -15,7 +15,10 @@ import com.starlightnews.backend.domain.article.analysis.dto.ArticleAnalyzeReque
 import com.starlightnews.backend.domain.article.analysis.dto.ArticleAnalyzeResponse;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository.AnalysisTarget;
+import com.starlightnews.backend.global.alert.AlertNotifier;
 import com.starlightnews.backend.global.client.FastApiClient;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
@@ -57,20 +61,27 @@ class ArticleAnalysisBatchServiceTest {
 	@Mock
 	private FastApiClient fastApiClient;
 
+	@Mock
+	private AlertNotifier notifier;
+
 	private ArticleAnalysisCircuitBreaker circuitBreaker;
+
+	private MeterRegistry meters;
 
 	private ArticleAnalysisBatchService service;
 
 	@BeforeEach
 	void setUp() {
 		circuitBreaker = new ArticleAnalysisCircuitBreaker(fastApiClient);
+		meters = new SimpleMeterRegistry();
 		service = service(Duration.ofMinutes(30));
 	}
 
 	/** 시도 3회, 회차당 300건, 연속 실패 5건에서 중단 */
 	private ArticleAnalysisBatchService service(Duration timeBudget) {
 		return new ArticleAnalysisBatchService(articleRepository, analyzeClient, recorder, runRecorder,
-				new ArticleAnalysisProperties(Duration.ofSeconds(180), 300, 3, timeBudget, 5), circuitBreaker);
+				new ArticleAnalysisProperties(Duration.ofSeconds(180), 300, 3, timeBudget, 5), circuitBreaker,
+				new ArticleAnalysisMonitor(meters, notifier, circuitBreaker));
 	}
 
 	private AnalysisTarget target(long articleId) {
@@ -352,7 +363,7 @@ class ArticleAnalysisBatchServiceTest {
 		given(recorder.record(anyLong(), any())).willReturn(Recorded.WILL_RETRY);
 		service.analyzePending();
 		assertThat(circuitBreaker.isOpen()).isTrue();
-		clearInvocations(analyzeClient, recorder, runRecorder, articleRepository);
+		clearInvocations(analyzeClient, recorder, runRecorder, articleRepository, notifier);
 	}
 
 	@Test
@@ -450,5 +461,110 @@ class ArticleAnalysisBatchServiceTest {
 		assertThatThrownBy(() -> service.analyzePending()).isInstanceOf(IllegalStateException.class);
 
 		assertThat(circuitBreaker.isOpen()).isTrue();
+	}
+	// --- 지표 · 알림 ---
+
+	private double rounds(String status) {
+		return meters.counter("article.analysis.rounds", "status", status).count();
+	}
+
+	@Test
+	void 회차_결과와_남은_대기를_지표로_남긴다() {
+		givenQueue(2);
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED, Recorded.WILL_RETRY);
+		given(articleRepository.countAnalysisQueue(3)).willReturn(10L, 8L);
+		given(articleRepository.findOldestAnalysisWaitMinutes(3)).willReturn(95L);
+
+		service.analyzePending();
+
+		assertThat(rounds("COMPLETED")).isEqualTo(1);
+		assertThat(meters.counter("article.analysis.articles", "outcome", "completed").count()).isEqualTo(1);
+		assertThat(meters.counter("article.analysis.articles", "outcome", "will_retry").count()).isEqualTo(1);
+		assertThat(meters.get("article.analysis.backlog").gauge().value()).isEqualTo(8);
+		assertThat(meters.get("article.analysis.backlog.oldest.wait.minutes").gauge().value()).isEqualTo(95);
+		verify(notifier, never()).send(any());
+	}
+
+	@Test
+	void 연속_실패로_차단을_걸면_지표에_드러난다() {
+		openCircuit();
+
+		assertThat(rounds("TOO_MANY_FAILURES")).isEqualTo(1);
+		assertThat(meters.get("article.analysis.circuit.open").gauge().value()).isEqualTo(1);
+	}
+
+	@Test
+	void 차단을_걸_때의_알림에는_AI_워커_확인을_적는다() {
+		givenQueue(20);
+		given(analyzeClient.analyze(any())).willReturn(new Retryable("INTERNAL_API_UNAVAILABLE"));
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.WILL_RETRY);
+
+		service.analyzePending();
+
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(notifier, times(1)).send(message.capture());
+		assertThat(message.getValue()).contains("차단").contains("AI 워커");
+	}
+
+	@Test
+	void 차단_중_건너뛴_회차와_실패한_시험_회차는_다시_알리지_않는다() {
+		// 이미 알린 장애를 매시간 되풀이하면 알림을 무시하게 된다.
+		openCircuit();
+		given(fastApiClient.isReachable()).willReturn(false, true);
+		givenQueue(20);
+		given(analyzeClient.analyze(any())).willReturn(new Retryable("INTERNAL_API_TIMEOUT"));
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.WILL_RETRY);
+
+		service.analyzePending();
+		service.analyzePending();
+
+		assertThat(rounds("CIRCUIT_OPEN")).isEqualTo(1);
+		assertThat(rounds("TOO_MANY_FAILURES")).isEqualTo(2);
+		verify(notifier, never()).send(any());
+	}
+
+	@Test
+	void 차단을_풀면_알린다() {
+		openCircuit();
+		given(fastApiClient.isReachable()).willReturn(true);
+		givenQueue(1);
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+
+		service.analyzePending();
+
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(notifier).send(message.capture());
+		assertThat(message.getValue()).contains("풀었습니다");
+		assertThat(meters.get("article.analysis.circuit.open").gauge().value()).isZero();
+	}
+
+	@Test
+	void 설정_오류로_멈추면_알린다() {
+		givenQueue(3);
+		given(analyzeClient.analyze(any())).willReturn(new Halt("INTERNAL_API_UNAUTHORIZED"));
+
+		service.analyzePending();
+
+		assertThat(rounds("HALTED")).isEqualTo(1);
+		verify(notifier).send(contains("설정 오류"));
+	}
+
+	@Test
+	void 회차가_예외로_끊기면_예외_종류만_알린다() {
+		// 예외 메시지에는 SQL·접속 주소가 실릴 수 있다.
+		given(articleRepository.findAnalysisQueue(anyInt(), any())).willReturn(List.of(target(1L)));
+		given(analyzeClient.analyze(any())).willReturn(analyzed());
+		given(recorder.record(anyLong(), any())).willReturn(Recorded.COMPLETED);
+		given(articleRepository.countAnalysisQueue(anyInt()))
+				.willReturn(1L).willThrow(new IllegalStateException("jdbc:mysql://db-secret-host 연결 끊김"));
+
+		assertThatThrownBy(() -> service.analyzePending()).isInstanceOf(IllegalStateException.class);
+
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(notifier).send(message.capture());
+		assertThat(message.getValue()).contains("IllegalStateException").doesNotContain("db-secret-host");
+		assertThat(rounds("ABORTED")).isEqualTo(1);
 	}
 }

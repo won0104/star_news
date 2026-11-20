@@ -6,7 +6,10 @@ import java.util.List;
 import com.starlightnews.backend.domain.article.reconcile.GraphReconciliationRecorder.RecordedIssue;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository.ArticleNodeRef;
+import com.starlightnews.backend.global.alert.AlertNotifier;
 import com.starlightnews.backend.global.enums.AnalysisStatus;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -42,9 +45,15 @@ class GraphReconciliationServiceTest {
 	@Mock
 	private GraphReconciliationRecorder recorder;
 
+	@Mock
+	private AlertNotifier notifier;
+
+	private final MeterRegistry meters = new SimpleMeterRegistry();
+
 	private GraphReconciliationService service(int pageSize, boolean requeue, int maxStored) {
 		return new GraphReconciliationService(articleRepository, graphArticleRepository, repair, recorder,
-				new GraphReconciliationProperties(true, pageSize, requeue, maxStored));
+				new GraphReconciliationProperties(true, pageSize, requeue, maxStored),
+				new GraphReconciliationMonitor(meters, notifier));
 	}
 
 	private static ArticleNodeRef ref(long id, AnalysisStatus status, String nodeId) {
@@ -191,5 +200,53 @@ class GraphReconciliationServiceTest {
 		assertThat(result.issues()).isZero();
 		verify(recorder).finish(eq(RUN_ID), eq(result), any());
 		verify(articleRepository, never()).findNodeRefsByArticleIdIn(any(Collection.class));
+	}
+	// --- 지표 · 알림 ---
+
+	private double issues(ReconciliationIssueType type) {
+		return meters.get("graph.reconciliation.issues").tag("type", type.name()).gauge().value();
+	}
+
+	@Test
+	void 어긋남을_유형별_지표로_남기고_건수를_알린다() {
+		givenTwoPagesEachSide();
+
+		service(2, false, 100).reconcile();
+
+		assertThat(issues(ReconciliationIssueType.MISSING_GRAPH)).isEqualTo(1);
+		assertThat(issues(ReconciliationIssueType.NODE_ID_MISMATCH)).isEqualTo(1);
+		assertThat(issues(ReconciliationIssueType.UNREFLECTED)).isEqualTo(1);
+		assertThat(issues(ReconciliationIssueType.ORPHAN_GRAPH)).isZero();
+		assertThat(meters.counter("graph.reconciliation.runs", "status", "COMPLETED").count()).isEqualTo(1);
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(notifier).send(message.capture());
+		assertThat(message.getValue()).contains("어긋남 3건");
+	}
+
+	@Test
+	void 어긋남이_없으면_알리지_않는다() {
+		given(recorder.start(any())).willReturn(RUN_ID);
+		given(articleRepository.findCompletedNodeRefsAfter(anyLong(), any(Limit.class))).willReturn(List.of());
+		given(graphArticleRepository.findPageAfter(anyLong(), anyInt())).willReturn(List.of());
+
+		service(2, false, 100).reconcile();
+
+		verify(notifier, never()).send(any());
+	}
+
+	@Test
+	void 회차가_끊기면_예외_종류만_알린다() {
+		given(recorder.start(any())).willReturn(RUN_ID);
+		given(articleRepository.findCompletedNodeRefsAfter(anyLong(), any(Limit.class)))
+				.willReturn(List.of(ref(1, AnalysisStatus.COMPLETED, "n-1")));
+		given(graphArticleRepository.findByMysqlArticleIds(anyCollection()))
+				.willThrow(new IllegalStateException("bolt://neo4j-secret-host 연결 실패"));
+
+		assertThatThrownBy(() -> service(2, false, 100).reconcile()).isInstanceOf(IllegalStateException.class);
+
+		assertThat(meters.counter("graph.reconciliation.runs", "status", "ABORTED").count()).isEqualTo(1);
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(notifier).send(message.capture());
+		assertThat(message.getValue()).contains("IllegalStateException").doesNotContain("neo4j-secret-host");
 	}
 }

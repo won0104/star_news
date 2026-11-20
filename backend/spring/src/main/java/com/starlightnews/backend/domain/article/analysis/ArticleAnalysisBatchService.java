@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.starlightnews.backend.domain.article.analysis.ArticleAnalysisBatchResult.StopReason;
 import com.starlightnews.backend.domain.article.analysis.ArticleAnalysisCircuitBreaker.Decision;
+import com.starlightnews.backend.domain.article.analysis.ArticleAnalysisCircuitBreaker.Transition;
 import com.starlightnews.backend.domain.article.analysis.ArticleAnalysisOutcome.Halt;
 import com.starlightnews.backend.domain.article.analysis.ArticleAnalysisOutcome.Retryable;
 import com.starlightnews.backend.domain.article.analysis.dto.ArticleAnalyzeRequest;
@@ -28,6 +29,8 @@ import org.springframework.stereotype.Service;
  *
  * <p>연속 실패로 멈추면 {@link ArticleAnalysisCircuitBreaker} 가 차단을 건다. 차단 중에는 회차마다 헬스체크를
  * 먼저 보고, 실패하면 기사를 건드리지 않고 건너뛴다. 통과하면 첫 실패 한 번에 멈추는 시험 회차로 돈다.
+ *
+ * <p>회차 결과는 {@link ArticleAnalysisMonitor} 가 지표로 남기고, 사람이 손대야 하는 결과만 알린다.
  */
 @Slf4j
 @Service
@@ -42,6 +45,7 @@ public class ArticleAnalysisBatchService {
 	private final ArticleAnalysisRunRecorder runRecorder;
 	private final ArticleAnalysisProperties properties;
 	private final ArticleAnalysisCircuitBreaker circuitBreaker;
+	private final ArticleAnalysisMonitor monitor;
 
 	public ArticleAnalysisBatchResult analyzePending() {
 		Decision decision = circuitBreaker.beforeRound();
@@ -58,14 +62,15 @@ public class ArticleAnalysisBatchService {
 		if (queue.isEmpty()) {
 			// 회차가 돌았다는 사실은 남긴다. 기록이 비면 배치가 멈춘 것과 할 일이 없던 것을 못 가른다.
 			log.info("기사 분석: 대기 중인 기사가 없습니다.");
-			finish(runId, ArticleAnalysisBatchResult.empty());
+			ArticleAnalysisBatchResult empty = ArticleAnalysisBatchResult.empty();
+			ArticleAnalysisBacklog backlog = finish(runId, empty);
 			// 시험 회차였다면 헬스체크는 통과했고 부를 기사가 없을 뿐이다. 차단을 풀어 둔다.
-			circuitBreaker.afterRound(null);
-			return ArticleAnalysisBatchResult.empty();
+			monitor.roundFinished(empty, backlog, circuitBreaker.afterRound(null));
+			return empty;
 		}
 
 		ArticleAnalysisBatchResult result;
-		Backlog backlog;
+		ArticleAnalysisBacklog backlog;
 		try {
 			result = run(queue, probing);
 			backlog = finish(runId, result);
@@ -74,6 +79,7 @@ public class ArticleAnalysisBatchService {
 			// 기록을 RUNNING 으로 남기면 끝난 회차인지 도는 중인지 알 수 없다.
 			runRecorder.abort(runId, LocalDateTime.now(SEOUL));
 			log.error("기사 분석 회차 중단", failure);
+			monitor.roundAborted(failure);
 			throw failure;
 		}
 
@@ -81,7 +87,7 @@ public class ArticleAnalysisBatchService {
 				waitingBefore, result.processed(), result.completed(), result.dropped(),
 				result.willRetry(), result.gaveUp(), result.errors(), backlog.describe(),
 				result.stopReason() == null ? "" : ", 중단: " + result.stopReason());
-		circuitBreaker.afterRound(result.stopReason());
+		monitor.roundFinished(result, backlog, circuitBreaker.afterRound(result.stopReason()));
 		return result;
 	}
 
@@ -95,39 +101,26 @@ public class ArticleAnalysisBatchService {
 		int waiting = (int) articleRepository.countAnalysisQueue(properties.maxAttempts());
 		Long runId = runRecorder.start(waiting, LocalDateTime.now(SEOUL));
 		ArticleAnalysisBatchResult skipped = ArticleAnalysisBatchResult.empty().stoppedBy(StopReason.CIRCUIT_OPEN);
-		Backlog backlog = finish(runId, skipped);
+		ArticleAnalysisBacklog backlog = finish(runId, skipped);
 		log.warn("기사 분석: AI 장애로 차단 중이고 FastAPI 헬스체크도 실패해 회차를 건너뜁니다. (차단 시작 {}, {})",
 				circuitBreaker.openedAt(), backlog.describe());
+		monitor.roundFinished(skipped, backlog, Transition.NONE);
 		return skipped;
 	}
 
 	/** 회차가 끝난 뒤 남은 대기를 재서 실행 기록을 닫는다. */
-	private Backlog finish(Long runId, ArticleAnalysisBatchResult result) {
-		Backlog backlog = backlog();
+	private ArticleAnalysisBacklog finish(Long runId, ArticleAnalysisBatchResult result) {
+		ArticleAnalysisBacklog backlog = backlog();
 		runRecorder.finish(runId, result, backlog.waiting(), backlog.oldestMinutes(),
 				LocalDateTime.now(SEOUL));
 		return backlog;
 	}
 
-	private Backlog backlog() {
+	private ArticleAnalysisBacklog backlog() {
 		int waiting = (int) articleRepository.countAnalysisQueue(properties.maxAttempts());
 		Long oldestMinutes = waiting == 0
 				? null : articleRepository.findOldestAnalysisWaitMinutes(properties.maxAttempts());
-		return new Backlog(waiting, oldestMinutes);
-	}
-
-	/** 회차가 끝난 뒤 남은 대기. */
-	private record Backlog(int waiting, Long oldestMinutes) {
-
-		String describe() {
-			if (waiting == 0) {
-				return "남은 대기 없음";
-			}
-			return oldestMinutes == null
-					? "남은 대기 %d건".formatted(waiting)
-					: "남은 대기 %d건 (가장 오래 기다린 기사 %d시간 %d분)"
-							.formatted(waiting, oldestMinutes / 60, oldestMinutes % 60);
-		}
+		return new ArticleAnalysisBacklog(waiting, oldestMinutes);
 	}
 
 	/**

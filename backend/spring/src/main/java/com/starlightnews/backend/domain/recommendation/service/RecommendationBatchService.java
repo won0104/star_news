@@ -25,7 +25,8 @@ import org.springframework.stereotype.Service;
  * 나머지는 계속 처리하고, 한 바퀴를 다 돈 뒤 일시적으로 실패한 묶음만 다시 보낸다. 회차가 끝나면
  * 보관 기간이 지난 회차를 정리한다.
  *
- * <p>회차와 묶음의 결과는 {@link RecommendationRunRecorder} 로 남긴다.
+ * <p>회차와 묶음의 결과는 {@link RecommendationRunRecorder} 로 남기고, 지표와 알림은
+ * {@link RecommendationBatchMonitor} 가 맡는다.
  */
 @Slf4j
 @Service
@@ -45,6 +46,7 @@ public class RecommendationBatchService {
 	private final RecommendationRunRecorder runRecorder;
 	private final RecommendationWeightProvider weightProvider;
 	private final RecommendationProperties properties;
+	private final RecommendationBatchMonitor monitor;
 
 	/**
 	 * 회차를 실행한다.
@@ -82,6 +84,7 @@ public class RecommendationBatchService {
 			runRecorder.abort(runId, LocalDateTime.now(SEOUL));
 			log.error("추천 생성 회차 중단: 회차 {}, 공개 {}, 처리한 묶음 {}개",
 					window.cycle(), window.availableAt(), chunks.size(), failure);
+			monitor.runAborted(window, chunks.size(), failure);
 			throw failure;
 		}
 
@@ -94,6 +97,8 @@ public class RecommendationBatchService {
 		int targetUsers = chunks.stream().mapToInt(chunk -> chunk.userIds.size()).sum();
 
 		runRecorder.finish(runId, chunks.size(), failedChunks, targetUsers, total, LocalDateTime.now(SEOUL));
+		// 요약·정리보다 먼저 알린다. 뒤에서 예외가 나도 묶음 실패는 이미 확정된 사실이다.
+		monitor.runFinished(window, chunks.size(), failedChunks, recoveredChunks, total);
 
 		// 요약은 회차를 다 저장한 뒤에 만든다. 공개까지 30분이 남아 있고, Event 단위라 묶음마다
 		// 만들면 같은 Event 를 여러 번 부르게 된다.

@@ -13,8 +13,11 @@ import com.starlightnews.backend.domain.recommendation.dto.RecommendationCalcula
 import com.starlightnews.backend.domain.recommendation.repository.RecommendationTargetRepository;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationCalculateOutcome.Calculated;
 import com.starlightnews.backend.domain.recommendation.service.RecommendationCalculateOutcome.Failed;
+import com.starlightnews.backend.global.alert.AlertNotifier;
 import com.starlightnews.backend.global.client.InternalApiErrorCode;
 import com.starlightnews.backend.global.enums.RecommendationCycle;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +65,16 @@ class RecommendationBatchServiceTest {
 	@Mock
 	private RecommendationWeightProvider weightProvider;
 
+	@Mock
+	private AlertNotifier notifier;
+
+	private final MeterRegistry meters = new SimpleMeterRegistry();
+
 	private RecommendationBatchService service;
+
+	private RecommendationBatchMonitor monitor() {
+		return new RecommendationBatchMonitor(meters, notifier);
+	}
 
 	@BeforeEach
 	void setUp() {
@@ -71,7 +83,7 @@ class RecommendationBatchServiceTest {
 		// 보관 7일, 묶음 2명, 사용자별 10건, 최대 3번 시도, 재시도 대기 없음
 		service = new RecommendationBatchService(targetRepository, calculateClient, storeService,
 				summaryService, retentionService, runRecorder, weightProvider,
-				new RecommendationProperties(7, 2, 10, 3, Duration.ZERO));
+				new RecommendationProperties(7, 2, 10, 3, Duration.ZERO), monitor());
 	}
 
 	private RecommendationCalculateResponse response() {
@@ -384,7 +396,7 @@ class RecommendationBatchServiceTest {
 	void 시도_횟수가_1이면_재시도하지_않는다() {
 		RecommendationBatchService noRetry = new RecommendationBatchService(targetRepository, calculateClient,
 				storeService, summaryService, retentionService, runRecorder, weightProvider,
-				new RecommendationProperties(7, 2, 10, 1, Duration.ZERO));
+				new RecommendationProperties(7, 2, 10, 1, Duration.ZERO), monitor());
 		givenUserPages(List.of(1L, 2L));
 		given(calculateClient.calculate(any())).willReturn(unavailable());
 
@@ -476,5 +488,55 @@ class RecommendationBatchServiceTest {
 		verify(calculateClient, times(2)).calculate(captor.capture());
 		assertThat(captor.getAllValues()).allSatisfy(request ->
 				assertThat(request.cbfWeight()).isEqualByComparingTo("0.6000"));
+	}
+	// --- 지표 · 알림 ---
+
+	private double chunks(String result) {
+		return meters.counter("recommendation.chunks", "result", result).count();
+	}
+
+	@Test
+	void 재시도로_복구된_묶음은_지표로만_남기고_알리지_않는다() {
+		givenUserPages(List.of(1L, 2L), List.of(3L));
+		given(calculateClient.calculate(any())).willReturn(unavailable(), calculated(), calculated());
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(RecommendationStoreResult.empty());
+
+		service.generate(MORNING_RUN);
+
+		assertThat(chunks("total")).isEqualTo(2);
+		assertThat(chunks("recovered")).isEqualTo(1);
+		assertThat(chunks("failed")).isZero();
+		assertThat(meters.counter("recommendation.runs", "status", "COMPLETED").count()).isEqualTo(1);
+		verify(notifier, never()).send(any());
+	}
+
+	@Test
+	void 재시도까지_실패한_묶음이_남으면_알린다() {
+		givenUserPages(List.of(1L, 2L), List.of(3L));
+		given(calculateClient.calculate(any())).willReturn(failed(), calculated());
+		given(storeService.store(any(RecommendationCalculateResponse.class), any()))
+				.willReturn(new RecommendationStoreResult(1, 3, 0));
+
+		service.generate(MORNING_RUN);
+
+		assertThat(chunks("failed")).isEqualTo(1);
+		assertThat(meters.counter("recommendation.runs", "status", "PARTIAL").count()).isEqualTo(1);
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(notifier).send(message.capture());
+		assertThat(message.getValue()).contains("PARTIAL").contains("2개 중 1개").contains("2명");
+	}
+
+	@Test
+	void 회차가_예외로_끊기면_예외_종류만_알린다() {
+		given(targetRepository.findTargetUserIds(any(Pageable.class)))
+				.willThrow(new IllegalStateException("jdbc:mysql://db-secret-host 연결 끊김"));
+
+		assertThatThrownBy(() -> service.generate(MORNING_RUN)).isInstanceOf(IllegalStateException.class);
+
+		assertThat(meters.counter("recommendation.runs", "status", "ABORTED").count()).isEqualTo(1);
+		ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+		verify(notifier).send(message.capture());
+		assertThat(message.getValue()).contains("IllegalStateException").doesNotContain("db-secret-host");
 	}
 }

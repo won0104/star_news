@@ -42,6 +42,7 @@ public class GraphReconciliationService {
 	private final GraphReconciliationRepair repair;
 	private final GraphReconciliationRecorder recorder;
 	private final GraphReconciliationProperties properties;
+	private final GraphReconciliationMonitor monitor;
 
 	public GraphReconciliationResult reconcile() {
 		Long runId = recorder.start(LocalDateTime.now(SEOUL));
@@ -58,12 +59,14 @@ public class GraphReconciliationService {
 					result.mysqlChecked(), result.graphChecked(), result.issues(), result.missingGraph(),
 					result.nodeIdMismatch(), result.unreflected(), result.droppedWithGraph(), result.orphanGraph(),
 					result.requeued());
+			monitor.finished(result);
 			return result;
 		} catch (RuntimeException failure) {
 			// 기록을 RUNNING 으로 두면 끝난 회차인지 도는 중인지 알 수 없다. 기록만 닫고 예외는 올려보낸다.
 			// 삼키면 스케줄러는 성공으로 알고 아무도 알아차리지 못한다.
 			recorder.abort(runId, LocalDateTime.now(SEOUL));
 			log.error("그래프 대사 회차 중단", failure);
+			monitor.aborted(failure);
 			throw failure;
 		}
 	}
