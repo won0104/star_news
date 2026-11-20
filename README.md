@@ -754,7 +754,7 @@ docker compose -f docker-compose.local.yml --profile ai up -d --build ai-worker
 | --- | --- |
 | `/` | 127.0.0.1:3000 (frontend) |
 | `/api/v1/` | 127.0.0.1:8081 (backend-spring) |
-| `/swagger-ui/`, `/v3/api-docs` | 127.0.0.1:8081 |
+| `/swagger-ui/`, `/v3/api-docs` | 127.0.0.1:8081 (운영은 `SWAGGER_ENABLED=true` 일 때만 응답) |
 | `/jenkins/` | 127.0.0.1:8080 |
 
 **`/api/v1/` 의 프록시 타임아웃을 180초로 둔다.** 기본값 90초로 두면 기사 분석 요청이 중간에 504 로 끊긴다. AI 워커가 한 건에 최대 150초까지 쓰기 때문이다.
@@ -792,6 +792,7 @@ location /api/v1/ {
 | 이름 | 기본값 |
 | --- | --- |
 | `APP_CACHE_STORE` | `none`. 개인 그래프 집계 캐시를 켜려면 `redis` |
+| `SWAGGER_ENABLED` | `false`. 켜면 `/swagger-ui`, `/v3/api-docs` 가 외부에 열린다. 시연·점검 때만 켠다 |
 | `GNEWS_COLLECT_CRON` | `0 10 * * * *` |
 | `ARTICLE_ANALYSIS_CRON` | `0 20 * * * *` |
 | `ARTICLE_ANALYSIS_TIME_BUDGET` | `45m` |
