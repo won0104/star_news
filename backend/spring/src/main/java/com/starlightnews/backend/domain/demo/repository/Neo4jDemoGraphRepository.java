@@ -3,6 +3,7 @@ package com.starlightnews.backend.domain.demo.repository;
 import java.util.List;
 import java.util.Map;
 
+import com.starlightnews.backend.domain.demo.ConditionalOnDemoEnabled;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Repository;
  * <p>라벨도 마찬가지다. Entity 는 Person·Organization 같은 두 번째 라벨을 함께 갖는데,
  * {@code labels(n)[0]} 을 쓰면 어느 것이 나올지 보장되지 않는다. 아는 라벨만 걸러 쓴다.
  */
+@ConditionalOnDemoEnabled
 @Repository
 public class Neo4jDemoGraphRepository implements DemoGraphRepository {
 

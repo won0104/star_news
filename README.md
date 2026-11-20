@@ -794,6 +794,7 @@ location /api/v1/ {
 | 이름 | 기본값 |
 | --- | --- |
 | `APP_CACHE_STORE` | `none`. 개인 그래프 집계 캐시를 켜려면 `redis` |
+| `DEMO_ENABLED` | `false`. 켜면 시연용 기사 투입 API(`/api/v1/demo/**`, `demo-graph.html` 이 호출)가 로그인 없이 열린다. 기사를 저장하고 AI 분석을 돌리므로 발표 때만 켠다 |
 | `SWAGGER_ENABLED` | `false`. 켜면 `/swagger-ui`, `/v3/api-docs` 가 외부에 열린다. 시연·점검 때만 켠다 |
 | `GNEWS_COLLECT_CRON` | `0 10 * * * *` |
 | `ARTICLE_ANALYSIS_CRON` | `0 20 * * * *` |

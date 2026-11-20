@@ -48,6 +48,9 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       # Swagger UI / OpenAPI 문서. 운영 기본은 꺼짐이고, 시연·점검 때만 .env 에 SWAGGER_ENABLED=true 를 넣는다.
       SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
+      # 시연용 기사 투입 API(/api/v1/demo/**, public/demo-graph.html). 로그인 없이 기사를 넣고 AI 분석을 돌리므로
+      # 평소에는 끄고, 발표 때만 .env 에 DEMO_ENABLED=true 를 넣고 backend-spring 을 재시작한다.
+      DEMO_ENABLED: ${DEMO_ENABLED:-false}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
       JWT_SECRET: ${JWT_SECRET}
       DB_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?characterEncoding=UTF-8&serverTimezone=Asia/Seoul"

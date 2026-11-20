@@ -1,5 +1,6 @@
 package com.starlightnews.backend.domain.demo.controller;
 
+import com.starlightnews.backend.domain.demo.ConditionalOnDemoEnabled;
 import com.starlightnews.backend.domain.demo.dto.DemoArticleRequest;
 import com.starlightnews.backend.domain.demo.dto.DemoGraphResponse;
 import com.starlightnews.backend.domain.demo.service.DemoArticleService;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>기사를 직접 붙여넣어 저장·분석하고, 그 기사에서 만들어진 지식그래프를 바로 돌려준다.
  * 수집·분석 배치를 기다리지 않고 그 자리에서 결과를 보여 주기 위한 경로다.
  */
+@ConditionalOnDemoEnabled
 @Tag(name = "Demo", description = "시연용 기사 투입과 지식그래프 조회")
 @RestController
 @RequiredArgsConstructor

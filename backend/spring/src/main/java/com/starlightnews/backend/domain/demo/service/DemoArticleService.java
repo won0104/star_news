@@ -16,6 +16,7 @@ import com.starlightnews.backend.domain.article.dto.CollectedArticle;
 import com.starlightnews.backend.domain.article.repository.ArticleRepository;
 import com.starlightnews.backend.domain.article.service.ArticleWriter;
 import com.starlightnews.backend.domain.article.support.ArticleUrls;
+import com.starlightnews.backend.domain.demo.ConditionalOnDemoEnabled;
 import com.starlightnews.backend.domain.demo.dto.DemoArticleRequest;
 import com.starlightnews.backend.domain.demo.dto.DemoGraphResponse;
 import com.starlightnews.backend.domain.demo.exception.DemoErrorCode;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Service;
  * <p>분석은 FastAPI 가 AI 워커를 기다리므로 30~60초, 길면 150초까지 걸린다. 호출한 쪽이 그동안
  * 기다린다.
  */
+@ConditionalOnDemoEnabled
 @Slf4j
 @Service
 @RequiredArgsConstructor

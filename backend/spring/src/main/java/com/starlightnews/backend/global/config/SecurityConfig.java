@@ -10,6 +10,7 @@ import com.starlightnews.backend.global.security.JwtProvider;
 import com.starlightnews.backend.global.security.RestAccessDeniedHandler;
 import com.starlightnews.backend.global.security.RestAuthenticationEntryPoint;
 import com.starlightnews.backend.global.security.TokenBlacklist;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,13 +40,20 @@ public class SecurityConfig {
 			"/actuator/health"
 	};
 
+	/**
+	 * 시연용 경로. app.demo.enabled=true 일 때만 공개한다. 컨트롤러도 같은 프로퍼티로 켜고 끈다
+	 * (domain.demo.ConditionalOnDemoEnabled). global 이 domain 을 참조하지 않도록 이름을 직접 적는다.
+	 */
+	private static final String DEMO_PATHS = "/api/v1/demo/**";
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(
 			HttpSecurity http,
 			JwtProvider jwtProvider,
 			TokenBlacklist tokenBlacklist,
 			ObjectMapper objectMapper,
-			CorsConfigurationSource corsConfigurationSource
+			CorsConfigurationSource corsConfigurationSource,
+			@Value("${app.demo.enabled:false}") boolean demoEnabled
 	) throws Exception {
 		http
 				.csrf(AbstractHttpConfigurer::disable)
@@ -54,19 +62,26 @@ public class SecurityConfig {
 				.formLogin(AbstractHttpConfigurer::disable)
 				.sessionManagement(session ->
 						session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").authenticated()
-						.requestMatchers(HttpMethod.GET, "/api/v1/home").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/v1/topics").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/v1/topics/*/exploration").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/v1/articles/*").permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/v1/articles/*/summary").permitAll()
-						// 시연용 기사 투입. 로그인 없이 화면에서 바로 넣을 수 있어야 한다.
-						.requestMatchers("/api/v1/demo/**").permitAll()
-						.requestMatchers(PUBLIC_PATHS).permitAll()
-						.anyRequest().authenticated())
+				.authorizeHttpRequests(auth -> {
+					auth
+							.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+							.requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").authenticated()
+							.requestMatchers(HttpMethod.GET, "/api/v1/home").permitAll()
+							.requestMatchers(HttpMethod.GET, "/api/v1/topics").permitAll()
+							.requestMatchers(HttpMethod.GET, "/api/v1/topics/*/exploration").permitAll()
+							.requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
+							.requestMatchers(HttpMethod.GET, "/api/v1/articles/*").permitAll()
+							.requestMatchers(HttpMethod.POST, "/api/v1/articles/*/summary").permitAll();
+					if (demoEnabled) {
+						// 시연용 기사 투입. 로그인 없이 화면에서 바로 넣을 수 있어야 해서 시연 기능이 켜졌을 때만 연다.
+						// 꺼져 있을 때도 열어 두면 비로그인 요청이 401 대신 404 를 받아, 컨트롤러가 없다는
+						// 사실만 드러날 뿐 얻는 것이 없다.
+						auth.requestMatchers(DEMO_PATHS).permitAll();
+					}
+					auth
+							.requestMatchers(PUBLIC_PATHS).permitAll()
+							.anyRequest().authenticated();
+				})
 				.exceptionHandling(handler -> handler
 						.authenticationEntryPoint(new RestAuthenticationEntryPoint(objectMapper))
 						.accessDeniedHandler(new RestAccessDeniedHandler(objectMapper)))

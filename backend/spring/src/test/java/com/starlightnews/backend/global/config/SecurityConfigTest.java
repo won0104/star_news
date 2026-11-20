@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -23,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SecurityConfigTest {
 
 	private static final String PROTECTED_PATH = "/api/v1/secure/ping";
+	private static final String DEMO_PATH = "/api/v1/demo/articles";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -74,6 +76,14 @@ class SecurityConfigTest {
 				.andExpect(status().isOk());
 	}
 
+	@Test
+	void 시연_경로는_기본으로_공개하지_않는다() throws Exception {
+		// app.demo.enabled 가 없으면 꺼진 것으로 본다. 운영에서 로그인 없이 기사 투입·분석을 막는다.
+		mockMvc.perform(post(DEMO_PATH))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+	}
+
 	@RestController
 	static class ProtectedController {
 
@@ -85,6 +95,11 @@ class SecurityConfigTest {
 		@GetMapping(PROTECTED_PATH)
 		String ping() {
 			return "pong";
+		}
+
+		@PostMapping(DEMO_PATH)
+		String demo() {
+			return "demo";
 		}
 	}
 }
