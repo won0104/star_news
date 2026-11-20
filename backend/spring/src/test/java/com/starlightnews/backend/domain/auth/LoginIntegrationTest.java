@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -107,6 +108,28 @@ class LoginIntegrationTest {
 						.content(loginBody(LOGIN_ID, "wrong-password")))
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
+	}
+
+	@Test
+	void 같은_계정을_연속_5회_틀리면_맞는_비밀번호도_429_LOGIN_ATTEMPTS_EXCEEDED다() throws Exception {
+		signup();
+		// IP 실패 한도와 섞이지 않도록 이 테스트만의 IP 로 보낸다(인메모리 저장소는 컨텍스트 캐시 동안 유지된다).
+		RequestPostProcessor fromIp = request -> {
+			request.setRemoteAddr("192.0.2.51");
+			return request;
+		};
+		for (int i = 0; i < 5; i++) {
+			mockMvc.perform(post(LOGIN_PATH).with(fromIp)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(loginBody(LOGIN_ID, "wrong-password")))
+					.andExpect(status().isUnauthorized());
+		}
+
+		mockMvc.perform(post(LOGIN_PATH).with(fromIp)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(loginBody(LOGIN_ID, PASSWORD)))
+				.andExpect(status().isTooManyRequests())
+				.andExpect(jsonPath("$.code").value("LOGIN_ATTEMPTS_EXCEEDED"));
 	}
 
 	@Test
